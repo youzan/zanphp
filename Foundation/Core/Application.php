@@ -1,0 +1,1 @@
+<?phpclass Application {        public function init() {            }    }
