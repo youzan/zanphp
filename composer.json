@@ -1,0 +1,17 @@
+{
+    "repositories"  : [
+        {
+            "packagist": false     
+        }
+    ],    
+    "require"       : {
+    },
+    "autoload"      : {
+        "classmap"  : []    
+    },
+    "config"        : {
+        "preferred-install" : "dist"    
+    },
+    "minimum-stability" : "stable",
+    "prefer-stable"     : true
+}
