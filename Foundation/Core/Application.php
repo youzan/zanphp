@@ -1,1 +1,1 @@
-<?phpclass Application {        public function init() {            }    }
+<?phpnamespace Zanphp\Zan\Foundation\Core;class Application {        public function init() {            }    }
