@@ -1,4 +1,5 @@
 {
+    "name"          : "zanphp/zan",
     "repositories"  : [
         {
             "packagist": false     
