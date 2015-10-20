@@ -1,5 +1,5 @@
 <?php
-namespace Zanphp\Zan\Foundation\Coroutine;
+namespace Zan\Framework\Foundation\Coroutine;
 
 class Task
 {

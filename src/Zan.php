@@ -1,6 +1,9 @@
 <?php
-namespace Zanphp\Zan;
+namespace Zan\Framework;
 
+if(defined('ZANPHP')){
+    return ;
+}
 define('ZANPHP','youzan');
 
 class Zan {
