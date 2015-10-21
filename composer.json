@@ -1,18 +1,23 @@
 {
     "name"          : "zanphp/zan",
     "repositories"  : [
-        {
-            "packagist": false     
-        }
-    ],    
+    ],
     "require"       : {
     },
+    "require-dev": {
+    },
     "autoload"      : {
-        "classmap"  : []    
+        "psr-4"     : {
+            "Zan\\Framework\\"  : "src/",
+            "Zan\\Framework\\Test\\"  : "test/"
+        },
+        "classmap"  : [
+        ]
     },
     "config"        : {
         "preferred-install" : "dist"    
     },
     "minimum-stability" : "stable",
     "prefer-stable"     : true
+   
 }
