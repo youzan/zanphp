@@ -9,10 +9,11 @@ namespace Zan\Framework\Test\Foundation\Coroutine;
 
 require __DIR__ . '/../../../' . 'src/Zan.php';
 
-class TaskTest extends \UnitTest {
+use Zan\Framework\Foundation\Contract\UnitTest;
+
+class TaskTest extends UnitTest {
     public function testOk()
     {
         $this->assertEquals(1,'1','ok...');
-
     }
 }
