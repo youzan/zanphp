@@ -10,10 +10,27 @@ namespace Zan\Framework\Test\Foundation\Coroutine;
 require __DIR__ . '/../../../' . 'src/Zan.php';
 
 use Zan\Framework\Foundation\Contract\UnitTest;
+use Zan\Framework\Foundation\Coroutine\Task;
+
 
 class TaskTest extends UnitTest {
-    public function testOk()
-    {
-        $this->assertEquals(1,'1','ok...');
+    public function setUp() {
+        parent::setUp();
+    }
+
+    public function tearDown() {
+        parent::tearDown();
+    }
+
+    public function testSimpleYieldWorkFine() {
+
+    }
+
+    public function testSysCallWorkFine() {
+
+    }
+
+    public function testAsyncIoWorkFine() {
+
     }
 }
