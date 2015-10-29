@@ -1,5 +1,5 @@
 <?php
 
-class Singleton {
+trait Singleton {
     
 }

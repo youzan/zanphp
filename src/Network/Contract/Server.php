@@ -1,5 +1,5 @@
 <?php
-namespace Zan\Framework\Network\Core;
+namespace Zan\Framework\Network\Contract;
 
 interface Server {
     function onStart($server, $workerId); 
