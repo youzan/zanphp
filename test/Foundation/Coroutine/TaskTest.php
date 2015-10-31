@@ -9,11 +9,10 @@ namespace Zan\Framework\Test\Foundation\Coroutine;
 
 require __DIR__ . '/../../../' . 'src/Zan.php';
 
-use Zan\Framework\Foundation\Contract\UnitTest;
 use Zan\Framework\Foundation\Coroutine\Task;
 
 
-class TaskTest extends UnitTest {
+class TaskTest extends \UnitTest {
     public function setUp() {
         parent::setUp();
     }
@@ -23,7 +22,6 @@ class TaskTest extends UnitTest {
     }
 
     public function testSimpleYieldWorkFine() {
-
     }
 
     public function testSysCallWorkFine() {
