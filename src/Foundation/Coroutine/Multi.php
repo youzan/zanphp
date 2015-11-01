@@ -8,19 +8,36 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Multi {
-    use Singleton;
-
+    private $result = [];
+    private $request = [];
     private $response = [];
 
-    public function add($key, \Generator $coroutine) {
+    public function __construct() {
+        $this->init();
+    }
+
+    public static function newInstance() {
+        $instance = new self();
+
+        return $instance;
+    }
+
+    public function init() {
+        $this->result = [];
+        $this->request = [];
+        $this->response = [];
+    }
+
+    public function add($key, callable $callback) {
+
+
 
         return $this;
     }
 
     public function execute() {
-        return $this->response;
+        return $this->result;
     }
 }
