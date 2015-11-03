@@ -79,6 +79,33 @@ class Event {
         return false;
     }
 
+    public static function chain() {
+        $argNum = func_num_args();
+        if($argNum < 2){
+            return false;
+        }
+
+        $args = func_get_args();
+
+        $beforeEvt  = null;
+        $afterEvt   = null;
+        foreach($args as $evt) {
+            if (null === $beforeEvt) {
+                $beforeEvt = $evt;
+                continue;
+            }
+
+            if (null === $afterEvt) {
+                $afterEvt = $evt;
+            }
+
+            self::after($beforeEvt,$afterEvt);
+
+            $beforeEvt = $afterEvt;
+            $afterEvt  = null;
+        }
+    }
+
     private static function executeAfterEvent($evtName) {
         if (!isset( self::$afterMap[$evtName]) || !self::$afterMap[$evtName] ) {
             return false;    
