@@ -39,7 +39,6 @@ class Event {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -60,7 +59,6 @@ class Event {
             self::$afterMap[$beforeEvt] = [ $evtName ];
             return true;
         }  
-
         self::$afterMap[$beforeEvt][] = $evtName;
     }
 
@@ -75,7 +73,6 @@ class Event {
                 return true;
             }
         }
-
         return false;
     }
 
@@ -84,7 +81,6 @@ class Event {
         if($argNum < 2){
             return false;
         }
-
         $args = func_get_args();
 
         $beforeEvt  = null;
@@ -95,14 +91,9 @@ class Event {
                 continue;
             }
 
-            if (null === $afterEvt) {
-                $afterEvt = $evt;
-            }
-
+            $afterEvt = $evt;
             self::after($beforeEvt,$afterEvt);
-
             $beforeEvt = $afterEvt;
-            $afterEvt  = null;
         }
     }
 
@@ -115,5 +106,4 @@ class Event {
             self::fire($evtName);
         }
     }
-
 }
