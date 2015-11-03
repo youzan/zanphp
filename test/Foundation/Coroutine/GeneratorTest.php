@@ -21,6 +21,9 @@ class GeneratorTest extends \PHPUnit_Framework_TestCase {
         $this->assertNull($value, 'asynNum do not return null after send');
     }
 
+
+
+
     private function asynNum() {
         yield 1;
     }

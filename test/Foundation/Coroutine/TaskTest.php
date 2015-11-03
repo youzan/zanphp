@@ -22,6 +22,7 @@ class TaskTest extends \UnitTest {
     }
 
     public function testSimpleYieldWorkFine() {
+
     }
 
     public function testSysCallWorkFine() {
