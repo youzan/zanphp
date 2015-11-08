@@ -61,7 +61,7 @@ class Task
                     Log::error(__METHOD__ . " exception ===" . $e->getMessage(), __CLASS__);
                     return;
                 }
-                $this->setException($e);
+                //$this->setException($e);
             }
         }
     }
