@@ -29,7 +29,7 @@ class Task {
             try {
                 $this->status = $this->scheduler->schedule();
                 switch($this->status) {
-                    case Signal::TASK_DIE:
+                    case Signal::TASK_KILLED:
                         return null;
                     case Signal::TASK_SLEEP:
                         return null;
