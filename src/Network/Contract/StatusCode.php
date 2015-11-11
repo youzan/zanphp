@@ -1,5 +1,7 @@
 <?php
 
+namespace Zan\Framework\Network\Contract;
+
 class StatusCode {
     const SUCCESS   = 200;
     const NOTFOUND  = 404;

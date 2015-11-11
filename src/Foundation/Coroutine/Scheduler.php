@@ -1,40 +1,90 @@
 <?php
 namespace Zan\Framework\Foundation\Coroutine;
 
+use Zan\Framework\Network\Contract\Response;
+
 class Scheduler
 {
+    private $task = null;
 
-    protected $maxTaskId = 0;
-    protected $taskQueue;
-
-    public function __construct()
-    {
-
-        $this->taskQueue = new \SplQueue();
+    public function __construct(Task $task){
+        $this->task = $task;
     }
 
-    public function newTask(\Generator $coroutine)
-    {
+    public function schedule() {
+        $coroutine = $this->task->getCoroutine();
+        $value = $coroutine->current();
 
-        $taskId = ++$this->maxTaskId;
-        $task = new Task($taskId, $coroutine);
-        $this->taskQueue->enqueue($task);
+        $signal = $this->handleSysCall($value);
+        if($signal !== null)  return $signal;
+
+        $signal = $this->handleCoroutine($value);
+        if($signal !== null)  return $signal;
+
+        $signal = $this->handleAsyncJob($value);
+        if($signal !== null)  return $signal;
+
+        $signal = $this->handleAsyncCallback($value);
+        if($signal !== null)  return $signal;
+
+        $signal = $this->handleTaskStack($value);
+        if($signal !== null)  return $signal;
+
+        return Signal::TASK_CONTINUE;
     }
 
-    public function schedule(Task $task)
-    {
+    public function asyncCallback(Response $response) {
 
-        $this->taskQueue->enqueue($task);
     }
 
-    public function run()
-    {
-
-        while (!$this->taskQueue->isEmpty()) {
-            $task = $this->taskQueue->dequeue();
-            $task->run($task->getCoroutine());
+    private function handleSysCall($value) {
+        if ( !($value instanceof SysCall) ) {
+            return null;
         }
+
+        $signal = call_user_func($value, $this->task);
+        if(Signal::isSignal($signal)) {
+            return $signal;
+        }
+
+        return null;
     }
 
+    private function handleCoroutine($value) {
+        if ($value instanceof \Generator) {
+            return null;
+        }
 
+        $coroutine = $this->task->getCoroutine();
+        $this->task->pushStack($coroutine);
+        $this->task->setCoroutine($value);
+
+        return Signal::TASK_CONTINUE;
+    }
+
+    private function handleAsyncJob($value) {
+        if(!is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Contract\\Async')) {
+            return null;
+        }
+
+        $coroutine = $this->task->getCoroutine();
+        $this->task->pushStack($coroutine);
+        $value->execute([$this,'asyncCallback']);
+
+        return Signal::TASK_SLEEP;
+    }
+
+    private function handleAsyncCallback($value) {
+        if(Signal::TASK_SLEEP !== $this->task->getStatus()) {
+            return null;
+        }
+
+        $this->task->setStatus(Signal::TASK_RUNNING);
+
+        return null;
+    }
+
+    private function handleTaskStack($value) {
+        return null;
+    }
 }
