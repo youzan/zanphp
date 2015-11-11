@@ -3,11 +3,10 @@ namespace Zan\Framework\Foundation\Core;
 
 class Event {
     private static $evtMap  = [];
-    private static $afterMap= [];
 
     public static function clear() {
         self::$evtMap = [];
-        self::$afterMap = [];
+        EventChain::clear();
     }
 
     public static function register($evtName) {
@@ -51,59 +50,6 @@ class Event {
             call_user_func($evt);
         }
 
-        self::executeAfterEvent($evtName);
-    }
-
-    public static function after($beforeEvt, $evtName) {
-        if (!isset(self::$afterMap[$beforeEvt])) {
-            self::$afterMap[$beforeEvt] = [ $evtName ];
-            return true;
-        }  
-        self::$afterMap[$beforeEvt][] = $evtName;
-    }
-
-    public static function unafter($beforeEvt, $evtName) {
-        if (!isset( self::$afterMap[$beforeEvt]) || !self::$afterMap[$beforeEvt] ) {
-            return false;
-        }
-
-        foreach (self::$afterMap[$beforeEvt] as $key => $evt) {
-            if( $evt == $evtName ) {
-                unset(self::$afterMap[$beforeEvt][$key]);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static function chain() {
-        $argNum = func_num_args();
-        if($argNum < 2){
-            return false;
-        }
-        $args = func_get_args();
-
-        $beforeEvt  = null;
-        $afterEvt   = null;
-        foreach($args as $evt) {
-            if (null === $beforeEvt) {
-                $beforeEvt = $evt;
-                continue;
-            }
-
-            $afterEvt = $evt;
-            self::after($beforeEvt,$afterEvt);
-            $beforeEvt = $afterEvt;
-        }
-    }
-
-    private static function executeAfterEvent($evtName) {
-        if (!isset( self::$afterMap[$evtName]) || !self::$afterMap[$evtName] ) {
-            return false;    
-        } 
-        
-        foreach (self::$afterMap[$evtName] as $evtName) {
-            self::fire($evtName);
-        }
+        EventChain::fireEventChain($evtName);
     }
 }
