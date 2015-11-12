@@ -1,22 +1,14 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/11/11
- * Time: 18:47
- */
-
 namespace Zan\Framework\Foundation\Core;
-
 
 class EventChain {
     private static $beforeMap = [];
     private static $afterMap = [];
 
     public static function clear() {
-        self::$beforeMap = [];
-        self::$afterMap = [];
-    }
+    self::$beforeMap = [];
+    self::$afterMap = [];
+}
 
     public static function join() {
         $argNum = func_num_args();
@@ -40,16 +32,8 @@ class EventChain {
     }
 
     public static function crack($beforeEvt, $afterEvt) {
-        if (!isset(self::$afterMap[$beforeEvt])) {
-            return false;
-        }
-
-        if (!isset(self::$afterMap[$beforeEvt][$afterEvt])) {
-            return false;
-        }
-
-        unset(self::$afterMap[$beforeEvt][$afterEvt]);
-        return true;
+        self::crackAfterChain($beforeEvt, $afterEvt);
+        self::crackBeforeChain($beforeEvt, $afterEvt);
     }
 
     public static function after($beforeEvt, $afterEvt) {
@@ -71,23 +55,33 @@ class EventChain {
     }
 
     public static function fireEventChain($evtName) {
-        if(!isset(self::$afterMap[$evtName])){
+        if(!isset(self::$afterMap[$evtName]) || !self::$afterMap[$evtName]){
             return false;
         }
 
-        $afterEvt = self::$afterMap[$evtName];
-        self::fireEvent($evtName, $afterEvt);
+        foreach(self::$afterMap[$evtName] as $afterEvt => $count){
+            self::fireAfterEvent($evtName, $afterEvt);
+        }
 
-        if(true !== self::isBeforeEventFired($evtName)){
+        return true;
+    }
+
+    private static function fireAfterEvent($beforeEvt, $afterEvt) {
+        self::fireBeforeEvent($beforeEvt, $afterEvt);
+
+        if(true !== self::isBeforeEventFired($afterEvt)){
             return false;
         }
 
         Event::fire($afterEvt);
         self::clearBeforeEventBind($afterEvt);
-        return true;
     }
 
-    private static function fireEvent($beforeEvt, $afterEvt) {
+    private static function fireBeforeEvent($beforeEvt, $afterEvt) {
+        if(!isset(self::$beforeMap[$afterEvt])) {
+            return false;
+        }
+
         if(!isset(self::$beforeMap[$afterEvt][$beforeEvt])) {
             return false;
         }
@@ -119,4 +113,29 @@ class EventChain {
         return true;
     }
 
+    private static function crackAfterChain($beforeEvt, $afterEvt) {
+        if (!isset(self::$afterMap[$beforeEvt])) {
+            return false;
+        }
+
+        if (!isset(self::$afterMap[$beforeEvt][$afterEvt])) {
+            return false;
+        }
+
+        unset(self::$afterMap[$beforeEvt][$afterEvt]);
+        return true;
+    }
+
+    private static function crackBeforeChain($beforeEvt, $afterEvt) {
+        if(!isset(self::$beforeMap[$afterEvt])) {
+            return false;
+        }
+
+        if(!isset(self::$beforeMap[$afterEvt][$beforeEvt])) {
+            return false;
+        }
+
+        unset(self::$beforeMap[$afterEvt][$beforeEvt]);
+        return true;
+    }
 }

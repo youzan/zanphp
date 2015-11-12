@@ -11,6 +11,7 @@ namespace Zan\Framework\Test\Foundation\Core;
 require __DIR__ . '/../../../' . 'src/Zan.php';
 
 use Zan\Framework\Foundation\Core\Event;
+use Zan\Framework\Foundation\Core\EventChain;
 
 class EventTest extends \UnitTest {
     private $dataMap = [];
@@ -64,7 +65,7 @@ class EventTest extends \UnitTest {
 
         Event::bind('test_bind_evt', $bindCb);
         Event::bind('test_after_evt', $afterCb);
-        Event::after('test_bind_evt', 'test_after_evt');
+        EventChain::after('test_bind_evt', 'test_after_evt');
         Event::fire('test_bind_evt');
 
         $this->assertArrayHasKey('test_after',$this->dataMap,'event after fail');
@@ -82,8 +83,8 @@ class EventTest extends \UnitTest {
 
         Event::bind('test_bind_evt', $bindCb);
         Event::bind('test_after_evt', $afterCb);
-        Event::after('test_bind_evt', 'test_after_evt');
-        Event::unafter('test_bind_evt', 'test_after_evt');
+        EventChain::after('test_bind_evt', 'test_after_evt');
+        EventChain::crack('test_bind_evt', 'test_after_evt');
         Event::fire('test_bind_evt');
 
         $this->assertArrayNotHasKey('test_after', $this->dataMap,'event unafter fail');
@@ -109,7 +110,7 @@ class EventTest extends \UnitTest {
         Event::bind('chain3',$chain3);
         Event::bind('chain4',$chain4);
 
-        Event::chain('chain1', 'chain2', 'chain3', 'chain4');
+        EventChain::join('chain1', 'chain2', 'chain3', 'chain4');
         Event::fire('chain1');
 
         $this->assertArrayHasKey('chain1',$this->dataMap,'event chain1 fail');
