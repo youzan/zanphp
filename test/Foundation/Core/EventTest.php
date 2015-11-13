@@ -72,7 +72,7 @@ class EventTest extends \UnitTest {
         $that->assertEquals('ok',$this->dataMap['test_after'],'event after fail');
     }
 
-    public function testUnafterWorkFine() {
+    public function testBreakChainWorkFine() {
         $that = $this;
         $bindCb = function() use($that){
             $that->bindTestCb();
@@ -124,6 +124,10 @@ class EventTest extends \UnitTest {
 
         $this->assertArrayHasKey('chain4',$this->dataMap,'event chain4 fail');
         $that->assertEquals('ok',$this->dataMap['chain4'],'event chain4 fail');
+    }
+
+    public function testBeforeWorkFine() {
+        
     }
 
     private function bindTestCb() {
