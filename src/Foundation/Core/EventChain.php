@@ -6,9 +6,9 @@ class EventChain {
     private static $afterMap = [];
 
     public static function clear() {
-    self::$beforeMap = [];
-    self::$afterMap = [];
-}
+        self::$beforeMap = [];
+        self::$afterMap = [];
+    }
 
     public static function join() {
         $argNum = func_num_args();
