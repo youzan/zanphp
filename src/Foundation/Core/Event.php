@@ -28,7 +28,7 @@ class Event {
     }
 
     public static function unbind($evtName, \Closure $callback) {
-        if (!isset( self::$evtMap[$evtName]) || !self::$evtMap[$evtName] ) {
+        if ( !isset(self::$evtMap[$evtName]) || !self::$evtMap[$evtName] ) {
             return false;    
         } 
 
@@ -42,7 +42,7 @@ class Event {
     }
 
     public static function fire($evtName) {
-        if (isset( self::$evtMap[$evtName]) && self::$evtMap[$evtName] ) {
+        if ( isset(self::$evtMap[$evtName]) && self::$evtMap[$evtName] ) {
             foreach (self::$evtMap[$evtName] as $evt) {
                 call_user_func($evt);
             }

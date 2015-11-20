@@ -6,10 +6,15 @@ class EventChain {
     private static $afterMap = [];
 
     public static function clear() {
-    self::$beforeMap = [];
-    self::$afterMap = [];
-}
+        self::$beforeMap = [];
+        self::$afterMap = [];
+    }
 
+    /**
+     * 连接N个传入的事件为事件链
+     * @param args
+     * @return bool
+     */
     public static function join() {
         $argNum = func_num_args();
         if($argNum < 2){
@@ -31,6 +36,11 @@ class EventChain {
         }
     }
 
+    /**
+     * 断开两个事件链接
+     * @param $beforeEvt
+     * @param $afterEvt
+     */
     public static function crack($beforeEvt, $afterEvt) {
         self::crackAfterChain($beforeEvt, $afterEvt);
         self::crackBeforeChain($beforeEvt, $afterEvt);
