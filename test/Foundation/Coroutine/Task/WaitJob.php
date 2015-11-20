@@ -18,7 +18,6 @@ class WaitJob {
 
         $a = $data['a'];
         $b = $data['b'];
-
     }
 
     public function asyncSeviceCall1() {
