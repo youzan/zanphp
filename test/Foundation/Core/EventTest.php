@@ -127,7 +127,7 @@ class EventTest extends \UnitTest {
     }
 
     public function testBeforeWorkFine() {
-        
+
     }
 
     private function bindTestCb() {

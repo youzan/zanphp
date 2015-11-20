@@ -44,5 +44,20 @@ function getTaskStartTime($format=null) {
     });
 }
 
+function waitFor(\Generator $coroutine) {
+    return new SysCall(function(Task $task) use ($coroutine) {
+
+    });
+}
+
+function wait() {
+    return new SysCall(function(Task $task) {
+
+    });
+}
+
+
+
+
 
 

@@ -48,6 +48,10 @@ class Task {
         $this->sendValue = $sendValue;
     }
 
+    public function getSendValue() {
+        return $this->sendValue;
+    }
+
     public function getStatus() {
         return $this->status;
     }
