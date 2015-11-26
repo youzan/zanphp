@@ -6,9 +6,11 @@ use Zan\Framework\Network\Contract\Response;
 class Scheduler
 {
     private $task = null;
+    private $stack = null;
 
     public function __construct(Task $task){
         $this->task = $task;
+        $this->stack = new \SplStack();
     }
 
     public function schedule() {
@@ -56,7 +58,7 @@ class Scheduler
         }
 
         $coroutine = $this->task->getCoroutine();
-        $this->task->pushStack($coroutine);
+        $this->stack->push($coroutine);
         $this->task->setCoroutine($value);
 
         return Signal::TASK_CONTINUE;
@@ -68,7 +70,7 @@ class Scheduler
         }
 
         $coroutine = $this->task->getCoroutine();
-        $this->task->pushStack($coroutine);
+        $this->stack->push($coroutine);
         $value->execute([$this,'asyncCallback']);
 
         return Signal::TASK_SLEEP;
@@ -86,5 +88,9 @@ class Scheduler
 
     private function handleTaskStack($value) {
         return null;
+    }
+
+    private function isStackEmpty() {
+        return $this->stack->isEmpty();
     }
 }

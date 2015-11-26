@@ -10,17 +10,19 @@ namespace Zan\Framework\Foundation\Coroutine;
 
 class Task {
     protected $taskId = 0;
+    protected $parentId = 0;
     protected $coroutine = null;
-    protected $stack = null;
+    protected $context = null;
 
     protected $sendValue = null;
     protected $scheduler = null;
     protected $status = 0;
 
-    public function __construct(\Generator $coroutine, $taskId=0) {
+    public function __construct(\Generator $coroutine, $taskId=0, $parentId=0, $context=null) {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId;
-        $this->stack = new \SplStack();
+        $this->parentId = $parentId;
+        $this->context = $context;
         $this->scheduler = new Scheduler($this);
     }
 
@@ -67,18 +69,4 @@ class Task {
     public function setCoroutine(\Generator $coroutine) {
         $this->coroutine = $coroutine;
     }
-
-    public function pushStack(\Generator $coroutine) {
-        $this->stack->push($coroutine);
-    }
-
-    public function popStack() {
-        return $this->stack->pop();
-    }
-
-    public function isStackEmpty() {
-        return $this->stack->isEmpty();
-    }
-
-
 }
