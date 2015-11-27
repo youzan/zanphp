@@ -8,6 +8,8 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
+use Zan\Framework\Foundation\Core\Event;
+
 class Task {
     protected $taskId = 0;
     protected $parentId = 0;
@@ -36,6 +38,7 @@ class Task {
                     case Signal::TASK_SLEEP:
                         return null;
                     case Signal::TASK_DONE;
+                        $this->fireTaskDoneEvent();
                         return null;
                 }
             } catch (\Exception $e) {
@@ -77,5 +80,10 @@ class Task {
 
     public function setCoroutine(\Generator $coroutine) {
         $this->coroutine = $coroutine;
+    }
+
+    public function fireTaskDoneEvent() {
+        $evtName = 'task_event_' . $this->taskId;
+        Event::fire($evtName, $this->sendValue);
     }
 }
