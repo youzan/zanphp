@@ -32,6 +32,7 @@ class Scheduler
         $signal = $this->handleTaskStack($value);
         if($signal !== null)  return $signal;
 
+
         return Signal::TASK_CONTINUE;
     }
 
@@ -110,4 +111,12 @@ class Scheduler
         return Signal::TASK_CONTINUE;
     }
 
+
+    private function handleTaskDone($value) {
+        $coroutine = $this->task->getCoroutine();
+        if($coroutine->valid()){
+            return null;
+        }
+        return Signal::TASK_DONE;
+    }
 }

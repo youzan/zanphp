@@ -35,6 +35,8 @@ class Task {
                         return null;
                     case Signal::TASK_SLEEP:
                         return null;
+                    case Signal::TASK_DONE;
+                        return null;
                 }
             } catch (\Exception $e) {
                 if($this->scheduler->isStackEmpty()) {
