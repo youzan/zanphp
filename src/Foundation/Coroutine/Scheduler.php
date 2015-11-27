@@ -40,7 +40,11 @@ class Scheduler
     }
 
     public function asyncCallback(Response $response) {
+        $coroutine = $this->stack->pop();
+        $coroutine->send($response);
 
+        $this->task->setSendValue($response);
+        $this->task->run($coroutine);
     }
 
     private function handleSysCall($value) {
@@ -85,13 +89,23 @@ class Scheduler
             return null;
         }
 
-        $this->task->setStatus(Signal::TASK_RUNNING);
+        if(is_null($value) && !$this->isStackEmpty() ) {
+            $coroutine = $this->stack->pop();
+            $coroutine->send($this->task->getSendValue());
+        }
 
-        return null;
+        return Signal::TASK_CONTINUE;
     }
 
     private function handleTaskStack($value) {
-        return null;
+        if($this->isStackEmpty()) {
+            return null;
+        }
+
+        $coroutine = $this->stack->pop();
+        $coroutine->send($value);
+
+        return Signal::TASK_CONTINUE;
     }
 
 }
