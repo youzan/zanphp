@@ -18,7 +18,7 @@ class Task {
     protected $scheduler = null;
     protected $status = 0;
 
-    public function __construct(\Generator $coroutine, $taskId=0, $parentId=0, $context=null) {
+    public function __construct(\Generator $coroutine, $taskId=0, $parentId=0, Context $context=null) {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId;
         $this->parentId = $parentId;

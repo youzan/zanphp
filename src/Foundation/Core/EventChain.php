@@ -41,7 +41,7 @@ class EventChain {
      * @param $beforeEvt
      * @param $afterEvt
      */
-    public static function crack($beforeEvt, $afterEvt) {
+    public static function breakChain($beforeEvt, $afterEvt) {
         self::crackAfterChain($beforeEvt, $afterEvt);
         self::crackBeforeChain($beforeEvt, $afterEvt);
     }
