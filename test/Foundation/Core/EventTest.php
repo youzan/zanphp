@@ -32,7 +32,7 @@ class EventTest extends \UnitTest {
 
     public function testBindWorkFine() {
         $that = $this;
-        Event::bind('test_bind_evt',function() use($that){
+        Event::bind('test_bind_evt',function($args) use($that){
             $that->bindTestCb();
         });
         Event::fire('test_bind_evt');
@@ -43,7 +43,7 @@ class EventTest extends \UnitTest {
 
     public function testUnbindWorkFine() {
         $that = $this;
-        $bindCb = function() use($that){
+        $bindCb = function($args) use($that){
             $that->bindTestCb();
         };
 
@@ -56,10 +56,10 @@ class EventTest extends \UnitTest {
 
     public function testAfterWorkFine() {
         $that = $this;
-        $bindCb = function() use($that){
+        $bindCb = function($args) use($that){
             $that->bindTestCb();
         };
-        $afterCb = function() use($that){
+        $afterCb = function($args) use($that){
             $that->afterTestCb();
         };
 
@@ -74,17 +74,17 @@ class EventTest extends \UnitTest {
 
     public function testBreakChainWorkFine() {
         $that = $this;
-        $bindCb = function() use($that){
+        $bindCb = function($args) use($that){
             $that->bindTestCb();
         };
-        $afterCb = function() use($that){
+        $afterCb = function($args) use($that){
             $that->afterTestCb();
         };
 
         Event::bind('test_bind_evt', $bindCb);
         Event::bind('test_after_evt', $afterCb);
         EventChain::after('test_bind_evt', 'test_after_evt');
-        EventChain::crack('test_bind_evt', 'test_after_evt');
+        EventChain::breakChain('test_bind_evt', 'test_after_evt');
         Event::fire('test_bind_evt');
 
         $this->assertArrayNotHasKey('test_after', $this->dataMap,'event unafter fail');
@@ -92,16 +92,16 @@ class EventTest extends \UnitTest {
 
     public function testChainWorkFine() {
         $that = $this;
-        $chain1 = function() use($that){
+        $chain1 = function($args) use($that){
             $that->chain1Test();
         };
-        $chain2 = function() use($that){
+        $chain2 = function($args) use($that){
             $that->chain2Test();
         };
-        $chain3 = function() use($that){
+        $chain3 = function($args) use($that){
             $that->chain3Test();
         };
-        $chain4 = function() use($that){
+        $chain4 = function($args) use($that){
             $that->chain4Test();
         };
 

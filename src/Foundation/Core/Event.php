@@ -41,10 +41,10 @@ class Event {
         return false;
     }
 
-    public static function fire($evtName) {
+    public static function fire($evtName, $args=null) {
         if ( isset(self::$evtMap[$evtName]) && self::$evtMap[$evtName] ) {
             foreach (self::$evtMap[$evtName] as $evt) {
-                call_user_func($evt);
+                call_user_func($evt, $args);
             }
         }
         
