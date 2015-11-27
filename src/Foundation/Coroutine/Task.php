@@ -37,6 +37,9 @@ class Task {
                         return null;
                 }
             } catch (\Exception $e) {
+                if($this->scheduler->isStackEmpty()) {
+                    return ;
+                }
                 $this->coroutine->throw($e);
             }
         }

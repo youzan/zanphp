@@ -35,6 +35,10 @@ class Scheduler
         return Signal::TASK_CONTINUE;
     }
 
+    public function isStackEmpty() {
+        return $this->stack->isEmpty();
+    }
+
     public function asyncCallback(Response $response) {
 
     }
@@ -73,11 +77,11 @@ class Scheduler
         $this->stack->push($coroutine);
         $value->execute([$this,'asyncCallback']);
 
-        return Signal::TASK_SLEEP;
+        return Signal::TASK_WAIT;
     }
 
     private function handleAsyncCallback($value) {
-        if(Signal::TASK_SLEEP !== $this->task->getStatus()) {
+        if(Signal::TASK_WAIT !== $this->task->getStatus()) {
             return null;
         }
 
@@ -90,7 +94,4 @@ class Scheduler
         return null;
     }
 
-    private function isStackEmpty() {
-        return $this->stack->isEmpty();
-    }
 }

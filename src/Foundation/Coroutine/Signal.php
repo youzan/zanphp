@@ -15,6 +15,7 @@ class Signal {
     const TASK_CONTINUE     = 3;
     const TASK_KILLED       = 4;
     const TASK_RUNNING      = 5;
+    const TASK_WAIT         = 6;
 
     public static function isSignal($signal) {
         if(!$signal) {
@@ -29,7 +30,7 @@ class Signal {
             return false;
         }
 
-        if($signal > 5) {
+        if($signal > 6) {
             return false;
         }
 
