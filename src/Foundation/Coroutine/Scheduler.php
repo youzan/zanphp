@@ -43,8 +43,9 @@ class Scheduler
         $coroutine = $this->stack->pop();
         $coroutine->send($response);
 
+        $this->task->setCoroutine($coroutine);
         $this->task->setSendValue($response);
-        $this->task->run($coroutine);
+        $this->task->run();
     }
 
     private function handleSysCall($value) {
@@ -103,6 +104,7 @@ class Scheduler
         }
 
         $coroutine = $this->stack->pop();
+        $this->task->setSendValue($value);
         $coroutine->send($value);
 
         return Signal::TASK_CONTINUE;

@@ -49,6 +49,10 @@ class Task {
         return $this->taskId;
     }
 
+    public function getContext() {
+        return $this->context;
+    }
+
     public function setSendValue($sendValue) {
         $this->sendValue = $sendValue;
     }
