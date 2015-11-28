@@ -10,6 +10,7 @@ namespace Zan\Framework\Test\Foundation\Coroutine;
 require __DIR__ . '/../../../' . 'src/Zan.php';
 
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
 
 
 class TaskTest extends \UnitTest {
@@ -22,14 +23,28 @@ class TaskTest extends \UnitTest {
     }
 
     public function testSimpleYieldWorkFine() {
+        $context = new Context();
 
+        $job = new Simple($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+
+        $result = $context->show();
+        $this->assertArrayHasKey('key',$result, 'simple job failed to set context');
+        $this->assertEquals('simple value', $context->get('key'), 'simple job get wrong context value');
     }
 
     public function testSysCallWorkFine() {
 
     }
 
-    public function testAsyncIoWorkFine() {
+    public function testAsyncWorkFine() {
+
+    }
+
+    public function testExceptionWorkFine() {
 
     }
 }

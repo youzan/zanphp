@@ -22,7 +22,7 @@ class Task {
 
     public function __construct(\Generator $coroutine, $taskId=0, $parentId=0, Context $context=null) {
         $this->coroutine = $coroutine;
-        $this->taskId = $taskId;
+        $this->taskId = $taskId ? $taskId : TaskId::create();
         $this->parentId = $parentId;
         $this->context = $context;
         $this->scheduler = new Scheduler($this);
