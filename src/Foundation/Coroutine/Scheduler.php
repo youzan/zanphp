@@ -35,7 +35,7 @@ class Scheduler
         $signal = $this->handleYieldValue($value);
         if($signal !== null)  return $signal;
 
-        $signal = $this->handleTaskDone($value);
+        $signal = $this->checkTaskDone($value);
         if($signal !== null)  return $signal;
 
         return Signal::TASK_CONTINUE;
@@ -128,7 +128,7 @@ class Scheduler
         return Signal::TASK_CONTINUE;
     }
 
-    private function handleTaskDone($value) {
+    private function checkTaskDone($value) {
         $coroutine = $this->task->getCoroutine();
         if($coroutine->valid()) {
             return null;
