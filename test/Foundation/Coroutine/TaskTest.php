@@ -34,6 +34,9 @@ class TaskTest extends \UnitTest {
         $result = $context->show();
         $this->assertArrayHasKey('key',$result, 'simple job failed to set context');
         $this->assertEquals('simple value', $context->get('key'), 'simple job get wrong context value');
+
+        $taskData = $task->getSendValue();
+        $this->assertEquals('simple job done', $taskData, 'get task final output fail');
     }
 
     public function testSysCallWorkFine() {

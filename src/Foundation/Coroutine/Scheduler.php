@@ -32,9 +32,12 @@ class Scheduler
         $signal = $this->handleTaskStack($value);
         if($signal !== null)  return $signal;
 
-        //$signal = $this->handleTaskDone($value);
-        //if($signal !== null)  return $signal;
-        var_dump('signal');exit;
+        $signal = $this->handleYieldValue($value);
+        if($signal !== null)  return $signal;
+
+        $signal = $this->handleTaskDone($value);
+        if($signal !== null)  return $signal;
+
         return Signal::TASK_CONTINUE;
     }
 
@@ -103,7 +106,7 @@ class Scheduler
 
     private function handleTaskStack($value) {
         if($this->isStackEmpty()) {
-            return $this->handleTaskDone($value);
+            return null;
         }
 
         $coroutine = $this->stack->pop();
@@ -113,11 +116,21 @@ class Scheduler
         return Signal::TASK_CONTINUE;
     }
 
+    private function handleYieldValue($value) {
+        $coroutine = $this->task->getCoroutine();
+        if(!$coroutine->valid()) {
+            return null;
+        }
+
+        $this->task->setSendValue($value);
+        $coroutine->send($value);
+        return Signal::TASK_CONTINUE;
+    }
 
     private function handleTaskDone($value) {
         $coroutine = $this->task->getCoroutine();
-        while($coroutine->valid()){
-            $coroutine->send($value);
+        if($coroutine->valid()) {
+            return null;
         }
         return Signal::TASK_DONE;
     }
