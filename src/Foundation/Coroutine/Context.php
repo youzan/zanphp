@@ -11,9 +11,11 @@ namespace Zan\Framework\Foundation\Coroutine;
 
 class Context {
     private $map = [];
+    private $event = null;
 
     public function __construct() {
         $this->map = [];
+        $this->event = new Event();
     }
 
     public function get($key, $default=null) {
@@ -26,5 +28,13 @@ class Context {
 
     public function set($key, $value) {
         $this->map[$key] = $value;
+    }
+
+    public function getEvent() {
+        return $this->event;
+    }
+
+    public function getEventChain() {
+        return $this->event->getEventChain();
     }
 }

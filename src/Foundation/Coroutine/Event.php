@@ -10,6 +10,10 @@ class Event {
         $this->evtChain = new EventChain($this);
     }
 
+    public function getEventChain() {
+        return $this->evtChain;
+    }
+
     public function register($evtName) {
         if (!isset($this->evtMap[$evtName])) {
             $this->evtMap[$evtName] = []; 
