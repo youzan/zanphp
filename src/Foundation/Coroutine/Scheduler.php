@@ -45,6 +45,11 @@ class Scheduler
         return $this->stack->isEmpty();
     }
 
+    public function throwException($e) {
+        $coroutine = $this->stack->pop();
+        $coroutine->throw($e);
+    }
+
     public function asyncCallback(Response $response) {
         $coroutine = $this->stack->pop();
         $coroutine->send($response);

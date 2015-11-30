@@ -45,7 +45,7 @@ class Task {
                 if($this->scheduler->isStackEmpty()) {
                     return ;
                 }
-                $this->coroutine->throw($e);
+                $this->scheduler->throwException($e);
             }
         }
     }
