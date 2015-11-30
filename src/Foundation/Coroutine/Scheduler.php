@@ -111,8 +111,10 @@ class Scheduler
         }
 
         $coroutine = $this->stack->pop();
-        $this->task->setSendValue($value);
         $coroutine->send($value);
+
+        $this->task->setCoroutine($coroutine);
+        $this->task->setSendValue($value);
 
         return Signal::TASK_CONTINUE;
     }
@@ -133,6 +135,7 @@ class Scheduler
         if($coroutine->valid()) {
             return null;
         }
+
         return Signal::TASK_DONE;
     }
 }
