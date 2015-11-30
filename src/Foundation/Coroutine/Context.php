@@ -18,9 +18,18 @@ class Context {
         $this->event = new Event();
     }
 
-    public function get($key, $default=null) {
-        if( isset($this->map[$key]) ) {
-           return $this->map[$key];
+    public function get($key, $default=null, $class=null) {
+        if( !isset($this->map[$key]) ) {
+            return $default;
+        }
+
+        if(null === $class) {
+            return $this->map[$key];
+        }
+
+        if($this->map[$key] instanceof $class
+            || is_subclass_of($this->map[$key], $class)) {
+            return $this->map[$key];
         }
 
         return $default;
