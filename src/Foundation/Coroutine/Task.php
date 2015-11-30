@@ -37,6 +37,8 @@ class Task {
                         return null;
                     case Signal::TASK_SLEEP:
                         return null;
+                    case Signal::TASK_WAIT:
+                        return null;
                     case Signal::TASK_DONE;
                         $this->fireTaskDoneEvent();
                         return null;

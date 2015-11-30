@@ -10,6 +10,7 @@ namespace Zan\Framework\Test\Foundation\Coroutine;
 require __DIR__ . '/../../../' . 'src/Zan.php';
 
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
@@ -77,12 +78,41 @@ class TaskTest extends \UnitTest {
         $this->assertEquals('coroutine job done', $taskData, 'get coroutine task final output fail');
     }
 
-    public function testSysCallWorkFine() {
-
-    }
-
     public function testAsyncWorkFine() {
+        $context = new Context();
 
+        $job = new AsyncJob($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+
+        $job->fakeResponse();
+
+        $result = $context->show();
+
+        $this->assertArrayHasKey('call()',$result, 'async job failed to set context');
+        $this->assertEquals('call', $context->get('call()'), 'async job get wrong context value');
+
+        $this->assertArrayHasKey('response',$result, 'async job failed to set context');
+        $this->assertInstanceOf('Zan\Framework\Network\Contract\Response',$context->get('response'),'async job get response fail');
+
+        $response = $context->get('response');
+        $responseData = $response->getData();
+        $this->assertEquals(200, $response->getCode(), 'async job get wrong response');
+        $this->assertEquals('ok', $response->getMessage(), 'async job get wrong response');
+
+        $this->assertArrayHasKey('data',$responseData,'async job get wrong response');
+        $this->assertEquals('rpc', $responseData['data'], 'async job get wrong response');
+
+
+        $taskData = $task->getSendValue();
+        $taskResponse = $taskData->getData();
+        $this->assertEquals(200, $taskData->getCode(), 'async job get wrong response');
+        $this->assertEquals('ok', $taskData->getMessage(), 'async job get wrong response');
+
+        $this->assertArrayHasKey('data',$taskResponse,'async job get wrong response');
+        $this->assertEquals('rpc', $taskResponse['data'], 'async job get wrong response');
     }
 
     public function testExceptionWorkFine() {
