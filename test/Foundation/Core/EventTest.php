@@ -54,6 +54,24 @@ class EventTest extends \UnitTest {
         $this->assertArrayNotHasKey('test_bind', $this->dataMap,'event unbind fail');
     }
 
+    public function testBeforeWorkFine() {
+        $that = $this;
+        $bindCb = function() use($that){
+            $that->bindTestCb();
+        };
+        $beforeCb = function() use($that){
+            $that->beforeTestCb();
+        };
+
+        Event::bind('test_bind_evt', $bindCb);
+        Event::bind('test_before_evt', $beforeCb);
+        EventChain::before('test_bind_evt', 'test_before_evt');
+        Event::fire('test_bind_evt');
+
+        $this->assertArrayHasKey('test_before',$this->dataMap,'event before fail');
+        $that->assertEquals('ok',$this->dataMap['test_before'],'event before fail');
+    }
+
     public function testAfterWorkFine() {
         $that = $this;
         $bindCb = function($args) use($that){
@@ -126,12 +144,12 @@ class EventTest extends \UnitTest {
         $that->assertEquals('ok',$this->dataMap['chain4'],'event chain4 fail');
     }
 
-    public function testBeforeWorkFine() {
-
-    }
-
     private function bindTestCb() {
         $this->dataMap['test_bind'] = 'ok';
+    }
+
+    private function beforeTestCb() {
+        $this->dataMap['test_before'] = 'ok';
     }
 
     private function afterTestCb() {
