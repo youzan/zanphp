@@ -86,6 +86,6 @@ class Task {
 
     public function fireTaskDoneEvent() {
         $evtName = 'task_event_' . $this->taskId;
-        Event::fire($evtName, $this->sendValue);
+        $this->context->getEvent()->fire($evtName, $this->sendValue);
     }
 }
