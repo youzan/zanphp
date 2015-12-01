@@ -61,7 +61,8 @@ class Scheduler
 
     //TODO:  move handlers out of this class
     private function handleSysCall($value) {
-        if ( !($value instanceof SysCall) ) {
+        if ( !($value instanceof SysCall)
+                && !is_subclass_of($value,'\\Zan\\Framework\\Foundation\\Coroutine\\Syscall') ) {
             return null;
         }
 
