@@ -8,7 +8,8 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Core\Event;
+//load commands
+Commands::load();
 
 class Task {
     protected $taskId = 0;
