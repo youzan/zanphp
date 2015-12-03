@@ -4,13 +4,13 @@ namespace Zan\Framework\Utilities\Types;
 
 class Dir
 {
-    public static function glob($path, $pattern=null, $recursive=true)
+    public static function glob($path, $pattern=null)
     {
         if(!is_dir($path) || !$pattern) {
             return [];
         }
 
-        $files = Dir::scan($path, $recursive);
+        $files = Dir::scan($path);
         $result = [];
         foreach($files as $file) {
             if(false === self::matchPattern($pattern, $file) ) {
@@ -35,17 +35,17 @@ class Dir
 
             $fileType = filetype($path . $file);
             if('file' == $fileType) {
-                $files[] = $file;
+                $files[] = $path . $file;
             }
 
             if('dir' == $fileType) {
                 if(true === $recursive) {
-                    $innerFiles = Dir::scan($path . $file, $recursive, $excludeDir);
+                    $innerFiles = Dir::scan($path . $file . '/', $recursive, $excludeDir);
                     $files = Arr::join($files, $innerFiles);
                 }
 
                 if(false === $excludeDir) {
-                    $files[] = $file;
+                    $files[] = $path . $file . '/';
                 }
             }
         }
