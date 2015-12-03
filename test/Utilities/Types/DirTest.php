@@ -17,7 +17,26 @@ class DirTest extends \UnitTest {
     {
         $path = __DIR__ . '/dir/';
         $files = Dir::scan($path);
-        var_dump($files);exit;
+
+        $this->assertEquals(10, count($files), 'Dir::scan recusivly without dirs fail');
+        $this->assertTrue(in_array('file10', $files), 'Dir::scan recusivly without dirs fail');
+
+        $files = Dir::scan($path,false);
+        $this->assertEquals(3, count($files), 'Dir::scan without dirs fail');
+        $this->assertTrue(in_array('file2', $files), 'Dir::scan recusivly without dirs fail');
+        $this->assertNotTrue(in_array('file10', $files), 'Dir::scan recusivly without dirs fail');
+
+        $files = Dir::scan($path, false, false);
+        $this->assertEquals(5, count($files), 'Dir::scan without dirs fail');
+        $this->assertTrue(in_array('file2', $files), 'Dir::scan recusivly without dirs fail');
+        $this->assertTrue(in_array('dir2', $files), 'Dir::scan recusivly without dirs fail');
+        $this->assertNotTrue(in_array('file10', $files), 'Dir::scan recusivly without dirs fail');
+
+        $files = Dir::scan($path, true, false);
+        $this->assertEquals(14, count($files), 'Dir::scan without dirs fail');
+        $this->assertTrue(in_array('file2', $files), 'Dir::scan recusivly without dirs fail');
+        $this->assertTrue(in_array('dir2', $files), 'Dir::scan recusivly without dirs fail');
+        $this->assertTrue(in_array('dir4', $files), 'Dir::scan recusivly without dirs fail');
     }
 
     public function testPathFormatWorkFine()

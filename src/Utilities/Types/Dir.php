@@ -32,7 +32,7 @@ class Dir
 
             if('dir' == $fileType) {
                 if(true === $recursive) {
-                    $innerFiles = Dir::scan($path . $file, $excludeDir, $recursive);
+                    $innerFiles = Dir::scan($path . $file, $recursive, $excludeDir);
                     $files = Arr::join($files, $innerFiles);
                 }
 
