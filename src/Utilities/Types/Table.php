@@ -6,7 +6,7 @@ class Table {
         
     }    
 
-    public static function pluck(array $arr, $columnName) {
+    public static function cloumn(array $arr, $columnName) {
         
     }
 
