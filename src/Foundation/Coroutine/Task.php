@@ -25,7 +25,12 @@ class Task {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();
         $this->parentId = $parentId;
-        $this->context = $context;
+        if($context) {
+            $this->context = $context;
+        } else {
+            $this->context = new Context();
+        }
+
         $this->scheduler = new Scheduler($this);
     }
 
@@ -87,6 +92,6 @@ class Task {
 
     public function fireTaskDoneEvent() {
         $evtName = 'task_event_' . $this->taskId;
-        //$this->context->getEvent()->fire($evtName, $this->sendValue);
+        $this->context->getEvent()->fire($evtName, $this->sendValue);
     }
 }
