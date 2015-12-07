@@ -17,7 +17,7 @@ class Commands
         $files = Dir::glob($dir, '*.php');
 
         if(!$files) return false;
-        
+
         foreach($files as $file) {
             require $file;
         }

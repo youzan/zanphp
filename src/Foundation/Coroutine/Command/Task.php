@@ -8,6 +8,7 @@
  */
 use Zan\Framework\Foundation\Coroutine\SysCall;
 use Zan\Framework\Foundation\Coroutine\Task;
+use \Zan\Framework\Foundation\Coroutine\Signal;
 
 function taskSleep() {
     return new SysCall(function(Task $task) {
@@ -35,7 +36,10 @@ function killTask() {
 
 function getTaskId() {
     return new SysCall(function(Task $task)  {
-        $task->setSendValue($task->getTaskId());
+        $coroutine = $task->getCoroutine();
+        $coroutine->send($task->getTaskId());
+
+        return Signal::TASK_CONTINUE;
     });
 }
 
