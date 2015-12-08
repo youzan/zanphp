@@ -5,25 +5,12 @@ namespace Zan\Framework\Network\Contract;
 class Response {
     private $code = 0;
     private $message = '';
-    private $data = '';
-    private $exception = null;
+    private $data = [];
 
-    public function __construct($code=null, $msg=null, $data=null, \Exception $exception=null) {
-        if(null !== $code) {
-            $this->code = $code;
-        }
-
-        if(null !== $msg) {
-            $this->message = $msg;
-        }
-
-        if(null !== $data) {
-            $this->data = $data;
-        }
-
-        if(null !== $exception) {
-            $this->exception = $exception;
-        }
+    public function __construct($code=0, $msg='', $data=[]) {
+        $this->code = $code;
+        $this->message = $msg;
+        $this->data = $data;
     }
 
     public function setCode($code){
@@ -57,14 +44,6 @@ class Response {
             return false;
         }
         $this->data = $data;
-    }
-
-    public function getException(){
-        return $this->exception;
-    }
-
-    public function setException(\Exception $e){
-        $this->exception = $e;
     }
 
 }
