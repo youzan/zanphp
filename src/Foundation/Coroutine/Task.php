@@ -25,6 +25,7 @@ class Task {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();
         $this->parentId = $parentId;
+
         if($context) {
             $this->context = $context;
         } else {
@@ -58,16 +59,17 @@ class Task {
         }
     }
 
+    public function send($value) {
+        $this->coroutine->send($value);
+        $this->sendValue = $value;
+    }
+
     public function getTaskId() {
         return $this->taskId;
     }
 
     public function getContext() {
         return $this->context;
-    }
-
-    public function setSendValue($sendValue) {
-        $this->sendValue = $sendValue;
     }
 
     public function getSendValue() {

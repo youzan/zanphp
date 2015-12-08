@@ -141,6 +141,6 @@ class TaskTest extends \UnitTest {
         $this->assertArrayNotHasKey('work_response',$result, 'exception job failed to set context');
 
         $taskData = $task->getSendValue();
-        $this->assertEquals('step1', $taskData, 'get exception task final output fail');
+        $this->assertEquals('Error.catch.exception', $taskData, 'get exception task final output fail');
     }
 }

@@ -17,6 +17,8 @@ class Error extends Job {
             $this->context->set('exception_code', $e->getCode());
             $this->context->set('exception_msg', $e->getMessage());
             $this->context->set('exception', get_class($e));
+
+            yield 'Error.catch.exception';
         }
     }
 

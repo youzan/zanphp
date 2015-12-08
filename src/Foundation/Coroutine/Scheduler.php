@@ -48,14 +48,14 @@ class Scheduler
     public function throwException($e) {
         $coroutine = $this->stack->pop();
         $coroutine->throw($e);
+
+        $this->task->setCoroutine($coroutine);
     }
 
     public function asyncCallback(Response $response) {
         $coroutine = $this->stack->pop();
-        $coroutine->send($response);
-
         $this->task->setCoroutine($coroutine);
-        $this->task->setSendValue($response);
+        $this->task->send($response);
         $this->task->run();
     }
 
@@ -117,10 +117,8 @@ class Scheduler
         }
 
         $coroutine = $this->stack->pop();
-        $coroutine->send($value);
-
         $this->task->setCoroutine($coroutine);
-        $this->task->setSendValue($value);
+        $this->task->send($value);
 
         return Signal::TASK_CONTINUE;
     }
@@ -131,8 +129,7 @@ class Scheduler
             return null;
         }
 
-        $this->task->setSendValue($value);
-        $coroutine->send($value);
+        $this->task->send($value);
         return Signal::TASK_CONTINUE;
     }
 

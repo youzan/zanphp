@@ -12,8 +12,7 @@ use \Zan\Framework\Foundation\Coroutine\Signal;
 
 function taskSleep() {
     return new SysCall(function(Task $task) {
-        $coroutine = $task->getCoroutine();
-        $coroutine->send(null);
+        $task->send(null);
 
         return Signal::TASK_SLEEP;
     });
@@ -21,8 +20,7 @@ function taskSleep() {
 
 function newTask(\Generator $gen=null) {
     return new SysCall(function(Task $task) use ($gen) {
-        $coroutine = $task->getCoroutine();
-        $coroutine->send(null);
+        $task->send(null);
 
         return Signal::TASK_CONTINUE;
     });
@@ -36,8 +34,15 @@ function killTask() {
 
 function getTaskId() {
     return new SysCall(function(Task $task)  {
-        $coroutine = $task->getCoroutine();
-        $coroutine->send($task->getTaskId());
+        $task->send($task->getTaskId());
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function getTaskResult() {
+    return new SysCall(function(Task $task)  {
+        $task->send($task->getSendValue());
 
         return Signal::TASK_CONTINUE;
     });
