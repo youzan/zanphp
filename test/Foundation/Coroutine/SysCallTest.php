@@ -28,7 +28,7 @@ class SysCallTest extends \UnitTest
         $this->assertArrayHasKey('taskId',$result, 'GetTaskId job failed to set context');
         $this->assertEquals(8, $context->get('taskId'), 'GetTaskId job get wrong context value');
 
-        $taskData = $task->getSendValue();
+        $taskData = $task->getResult();
         $this->assertEquals('SysCall.GetTastId', $taskData, 'get GetTaskId task final output fail');
     }
 
@@ -47,7 +47,7 @@ class SysCallTest extends \UnitTest
         $this->assertArrayNotHasKey('step2',$result, 'KillTask job failed to set context');
         $this->assertEquals('before task killed', $context->get('step1'), 'KillTask job get wrong context value');
 
-        $taskData = $task->getSendValue();
+        $taskData = $task->getResult();
         $this->assertEquals('SysCall.KillTask.calling', $taskData, 'get KillTask task final output fail');
     }
 }

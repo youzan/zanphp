@@ -76,6 +76,10 @@ class Task {
         return $this->sendValue;
     }
 
+    public function getResult() {
+        return $this->sendValue;
+    }
+
     public function getStatus() {
         return $this->status;
     }

@@ -38,7 +38,7 @@ class TaskTest extends \UnitTest {
         $this->assertArrayHasKey('key',$result, 'simple job failed to set context');
         $this->assertEquals('simple value', $context->get('key'), 'simple job get wrong context value');
 
-        $taskData = $task->getSendValue();
+        $taskData = $task->getResult();
         $this->assertEquals('simple job done', $taskData, 'get simple task final output fail');
     }
 
@@ -74,7 +74,7 @@ class TaskTest extends \UnitTest {
         $this->assertArrayHasKey('work_response',$result, 'coroutine job failed to set context');
         $this->assertEquals('coroutine.work()', $context->get('work_response'), 'coroutine job get wrong context value');
 
-        $taskData = $task->getSendValue();
+        $taskData = $task->getResult();
         $this->assertEquals('coroutine job done', $taskData, 'get coroutine task final output fail');
     }
 
@@ -106,7 +106,7 @@ class TaskTest extends \UnitTest {
         $this->assertEquals('rpc', $responseData['data'], 'async job get wrong response');
 
 
-        $taskData = $task->getSendValue();
+        $taskData = $task->getResult();
         $taskResponse = $taskData->getData();
         $this->assertEquals(200, $taskData->getCode(), 'async job get wrong response');
         $this->assertEquals('ok', $taskData->getMessage(), 'async job get wrong response');
@@ -140,7 +140,7 @@ class TaskTest extends \UnitTest {
 
         $this->assertArrayNotHasKey('work_response',$result, 'exception job failed to set context');
 
-        $taskData = $task->getSendValue();
+        $taskData = $task->getResult();
         $this->assertEquals('Error.catch.exception', $taskData, 'get exception task final output fail');
     }
 }
