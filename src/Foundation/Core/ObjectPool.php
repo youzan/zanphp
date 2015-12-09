@@ -10,12 +10,12 @@ abstract class ObjectPool {
     protected $maxDynamicNum = 0;
 
     protected $pool = [];
-    protected $usedObjectMap = [];
+    protected $usedObjectMap = null;
 
     use Singleton;
     private function __construct() {
         $this->pool = [];
-        $this->usedObjectMap = [];
+        $this->usedObjectMap = new \SplObjectStorage();
     }
 
     abstract protected function createObject();
