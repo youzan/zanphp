@@ -1,32 +1,35 @@
 <?php
 namespace Zan\Framework\Foundation\Core;
 
+use Zan\Framework\Foundation\Contract\PooledObject;
+use Zan\Framework\Foundation\Contract\PooledObjectFactory;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 abstract class ObjectPool {
     protected $initialNum = 1;
     protected $maxNum = 10;
-    protected $maxDynamicNum = 0;
+    protected $factory = null;
 
     protected $pool = [];
     protected $usedObjectMap = null;
 
     use Singleton;
     private function __construct() {
+        $this->initialNum = 1;
+        $this->maxNum = 10;
+
         $this->pool = [];
         $this->usedObjectMap = new \SplObjectStorage();
     }
 
-    abstract protected function createObject();
-    abstract public function get($timeout=0);
-    abstract public function release($object);
-    abstract public function refresh($object);
+    abstract public function get();
+    abstract public function release(PooledObject $object);
 
-    public function init($maxNum, $initalNum=0, $maxDynamicNum=0) {
+    public function init(PooledObjectFactory $factory, $maxNum, $initalNum=0) {
+        $this->factory = $factory;
         $this->setMaxNum($maxNum);
         $this->setInitalNum($initalNum);
-        $this->setMaxDynamicNum($maxDynamicNum);
         $this->initPool();
 
         return $this;
@@ -56,25 +59,13 @@ abstract class ObjectPool {
         $this->maxNum = $num;
     }
 
-    protected function setMaxDynamicNum($num) {
-        if ( !is_int($num) ) {
-            throw new InvalidArgument('invalid maxDynamicNum (not int) for ObjectPool');
-        }
-
-        if ($num < 0) {
-            throw new InvalidArgument('invalid maxDynamicNum (less than 1) for ObjectPool');
-        }
-
-        $this->maxDynamicNum = $num;
-    }
-
     protected function initPool() {
         if ($this->initialNum < 1) {
             return false;
         }
 
         for($i=0; $i<$this->initialNum; $i++) {
-            $this->pool[] = $this->createObject();
+            $this->pool[] = $this->factory->create();
         }
     }
 }

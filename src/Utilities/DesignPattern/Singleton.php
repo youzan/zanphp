@@ -5,14 +5,14 @@ trait Singleton {
     private static $_instance = null;
 
     public static function instance() {
-        if (null === self::$_instance) {
-            self::$_instance = new self();
+        if (null === static::$_instance) {
+            static::$_instance = new static();
         }
 
-        return self::$_instance;
+        return static::$_instance;
     }
 
     public static function getInstance() {
-        return self::getInstance();
+        return static::instance();
     }
 }

@@ -3,6 +3,6 @@ namespace Zan\Framework\Utilities\DesignPattern;
 
 trait Instance {
     public static function newInstance() {
-        return self::instance(); 
+        return new static();
     }
 }
