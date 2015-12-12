@@ -10,6 +10,6 @@ namespace Zan\Framework\Utilities\DesignPattern;
 
 
 interface Registry {
-    public function get();
-    public function set();
+    public function get($key, $default=null);
+    public function set($key, $value);
 }
