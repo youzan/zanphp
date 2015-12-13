@@ -9,21 +9,25 @@
 namespace Zan\Framework\Network\Server;
 
 
-class Registry implements \Zan\Framework\Utilities\DesignPattern\Registry {
-    private $data = [];
+class Registry  {
+    private static $data = [];
 
-    public function __construct()
+    public static function get($key, $default=null)
     {
-        $this->data = [];
+        if(!isset(self::$data[$key])) {
+            return $default;
+        }
+
+        return self::$data[$key];
     }
 
-    public function get($key, $default=null)
+    public static function set($key, $value)
     {
-
+        self::$data[$key] = $value;
     }
 
-    public function set($key, $value)
+    public static function contain($key)
     {
-
+        return isset(self::$data[$key]);
     }
 }
