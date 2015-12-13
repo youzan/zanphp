@@ -14,6 +14,7 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 class Time {
     private $ts = 0;
     private $ms = 0.00;
+    private $timeUsed = false;
 
     public function __construct()
     {
@@ -22,11 +23,17 @@ class Time {
 
     public function current($format='U', $useCache=true)
     {
+        $this->timeUsed = true;
         if (false === $useCache) {
             $this->getCurrentTimeStamp();
         }
 
         return $this->format($format, $this->ts, $this->ms);
+    }
+
+    public function unique($errorRange=100, $withMs=true)
+    {
+
     }
 
     public function format($format='U', $ts=null, $ms=null)
@@ -41,6 +48,8 @@ class Time {
     {
         $timeString = microtime();
         list($this->ms, $this->ts) = explode(" ", $timeString);
+
+        $this->timeUsed = false;
     }
 
 
