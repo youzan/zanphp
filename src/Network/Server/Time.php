@@ -10,15 +10,26 @@ namespace Zan\Framework\Network\Server;
 
 
 class Time {
-    public function getCurrent()
-    {
+    private $ts = 0;
+    private $ms = 0.00;
 
+    public function __construct()
+    {
+        $this->getCurrentTimeStamp();
     }
 
-    public function setCurrent($ts)
+    public function current($format=null, $useCache=true)
     {
-
+        if (false === $useCache) {
+            $this->getCurrentTimeStamp();
+        }
     }
 
+
+    private function getCurrentTimeStamp()
+    {
+        $timeString = microtime();
+        list($this->ms, $this->ts) = explode(" ", $timeString);
+    }
 
 }
