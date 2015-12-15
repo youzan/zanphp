@@ -30,6 +30,30 @@ class EventTest extends \UnitTest {
         $this->dataMap = [];
     }
 
+    public function testOnceBindWorkFine() {
+        $that = $this;
+        Event::bind('test_once_bind_evt',function($args) use($that){
+            $that->onceBindCb();
+        });
+        Event::fire('test_once_bind_evt');
+        Event::fire('test_once_bind_evt');
+
+        $this->assertEquals(2, count($this->dataMap), 'fire twice event work fail');
+        $this->assertTrue(in_array('bind', $this->dataMap), 'fire twice event work fail');
+    }
+
+    public function testOnceWorkFine() {
+        $that = $this;
+        Event::once('test_once_evt',function($args) use($that){
+            $that->onceTestCb();
+        });
+        Event::fire('test_once_evt');
+        Event::fire('test_once_evt');
+
+        $this->assertEquals(1, count($this->dataMap), 'fire twice event work fail');
+        $this->assertTrue(in_array('once', $this->dataMap), 'fire twice event work fail');
+    }
+
     public function testBindWorkFine() {
         $that = $this;
         Event::bind('test_bind_evt',function($args) use($that){
@@ -142,6 +166,14 @@ class EventTest extends \UnitTest {
 
         $this->assertArrayHasKey('chain4',$this->dataMap,'event chain4 fail');
         $that->assertEquals('ok',$this->dataMap['chain4'],'event chain4 fail');
+    }
+
+    private function onceTestCb() {
+        $this->dataMap[] = 'once';
+    }
+
+    private function onceBindCb() {
+        $this->dataMap[] = 'bind';
     }
 
     private function bindTestCb() {

@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Server;
 
 
+use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 class Time {
@@ -29,6 +30,12 @@ class Time {
         }
 
         return $this->format($format, $this->ts, $this->ms);
+    }
+
+    public function tick()
+    {
+        $this->getCurrentTimeStamp();
+        Event::fire('clock_tick');
     }
 
     public function unique($errorRange=100, $withMs=true)

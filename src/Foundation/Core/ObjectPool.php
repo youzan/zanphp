@@ -6,7 +6,7 @@ use Zan\Framework\Foundation\Contract\PooledObjectFactory;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-abstract class ObjectPool {
+class ObjectPool {
     protected $initialNum = 1;
     protected $maxNum = 10;
     protected $factory = null;
@@ -23,8 +23,25 @@ abstract class ObjectPool {
         $this->usedObjectMap = new \SplObjectStorage();
     }
 
-    abstract public function get();
-    abstract public function release(PooledObject $object);
+    public function get()
+    {
+
+    }
+
+    public function release(PooledObject $object)
+    {
+
+    }
+
+    public function getUsedObjects()
+    {
+
+    }
+
+    public function getFreeObjects()
+    {
+
+    }
 
     public function init(PooledObjectFactory $factory, $maxNum, $initalNum=0) {
         $this->factory = $factory;
