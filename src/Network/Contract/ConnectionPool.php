@@ -8,31 +8,16 @@
 
 namespace Zan\Framework\Network\Contract;
 
+use Zan\Framework\Foundation\Core\ObjectPool;
 
-use Zan\Framework\Foundation\Contract\PooledObject;
-use Zan\Framework\Network\Contract\ConnectionPool as Pool;
+class ConnectionPool extends ObjectPool{
 
-class ConnectionPool {
-    private static $poolMap = [];
-
-    public static function init()
+    public function get() /* Connection */
     {
-        self::$poolMap = [];
+
     }
 
-    public static function registerPool($key, Pool $pool)
-    {
-        self::$poolMap[$key] = $pool;
-    }
-
-    public static function get($key)
-    {
-        if(!isset(self::$poolMap[$key])) {
-            return null;
-        }
-    }
-
-    public static function release(PooledObject $obj)
+    public function release(Connection $conn)
     {
 
     }

@@ -9,6 +9,8 @@
 namespace Zan\Framework\Foundation\Contract;
 
 interface Resource {
-    public function register(PooledObject $obj);
-    public function release(PooledObject $obj);
+    const AUTO_RELEASE = 1;
+    const RLEASE_TO_POOL = 2;
+    const RLEASE_AND_DESTROY = 3;
+    public function release($stradegy=Resource::AUTO_RELEASE);
 }

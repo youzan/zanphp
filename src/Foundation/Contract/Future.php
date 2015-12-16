@@ -2,13 +2,13 @@
 /**
  * Created by IntelliJ IDEA.
  * User: winglechen
- * Date: 15/10/23
- * Time: 13:57
+ * Date: 15/12/15
+ * Time: 19:07
  */
 
 namespace Zan\Framework\Foundation\Contract;
 
 
-interface Async{
-    public function execute(callable $callback);
+interface Future {
+
 }

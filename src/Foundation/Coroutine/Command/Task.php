@@ -8,7 +8,8 @@
  */
 use Zan\Framework\Foundation\Coroutine\SysCall;
 use Zan\Framework\Foundation\Coroutine\Task;
-use \Zan\Framework\Foundation\Coroutine\Signal;
+use Zan\Framework\Foundation\Coroutine\Signal;
+use Zan\Framework\Foundation\Contract\Resource;
 
 function taskSleep() {
     return new SysCall(function(Task $task) {
@@ -64,6 +65,23 @@ function wait() {
 
     });
 }
+
+function defer(callable $callback)
+{
+
+}
+
+function deferRelease(Resource $res, $stradegy=Resource::AUTO_RELEASE)
+{
+
+}
+
+function release(Resource $res, $stradegy=Resource::AUTO_RELEASE)
+{
+
+}
+
+
 
 
 

@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Network\Contract\Response;
+use Zan\Framework\Foundation\Contract\Future;
 
 class Scheduler
 {
@@ -52,7 +52,7 @@ class Scheduler
         $this->task->setCoroutine($coroutine);
     }
 
-    public function asyncCallback(Response $response) {
+    public function asyncCallback(Future $response) {
         $coroutine = $this->stack->pop();
         $this->task->setCoroutine($coroutine);
         $this->task->send($response);
