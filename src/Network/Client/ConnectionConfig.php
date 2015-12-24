@@ -1,17 +1,23 @@
 <?php
-namespace Zan\Framework\Foundation\Core;
+/**
+ * Created by IntelliJ IDEA.
+ * User: winglechen
+ * Date: 15/12/18
+ * Time: 17:07
+ */
+
+namespace Zan\Framework\Network\Client;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Utilities\Types\Dir;
 
-class Config
-{
+class ConnectionConfig {
     private static $configPath = '';
     private static $data = [];
     public static function setConfigPath($path)
     {
         if(!$path || !is_dir($path)) {
-            throw new InvalidArgument('invalid path for Config ' . $path);
+            throw new InvalidArgument('invalid path for ConnectionConfig ' . $path);
         }
         $path = Dir::formatPath($path);
         self::$configPath = $path;
@@ -19,7 +25,6 @@ class Config
 
     public static function get($key)
     {
-
     }
 
     public static function clear()
@@ -27,16 +32,8 @@ class Config
         self::$data = [];
     }
 
-    private static function getConfigFile($key)
+    private static function getConfigFile()
     {
-        $file = self::$configPath . $key . '.php';
-        if(!file_exists($file)) {
-            throw new InvalidArgument('No such config file ' . $file);
-        }
 
-        $config = require $file;
-        self::$data[$key] = $config;
-
-        return $config;
     }
 }
