@@ -7,6 +7,5 @@ return [
 //    'Kv'            => '',
 //    'Queue'         => '',
 //    'HttpClient'    => '',
-      'UnitTest'      => 'PHPUnit_Framework_TestCase',
-
+      'Zan'           => 'Zan\\Framework\\Zan',
 ];
