@@ -1,8 +1,35 @@
 <?php
 namespace Zan\Framework\Foundation\Exception;
 
+use Zan\Framework\Foundation\Core\Config;
+
 class Handler {
-    public function handle() {
+
+    public static function initErrorHandler() {
+        ini_set('display_errors', false);
+
+        if (Config::get('debug'))
+            set_exception_handler(['Handler', 'handleException']);
+        else
+            set_exception_handler(['Handler', 'handleExceptionProduct']);
+
+        set_error_handler(['Handler', 'handleError']);
+        register_shutdown_function(['Handler', 'handleFatalError']);
+    }
+
+    public static function handleException(\Exception $exception) {
+
+    }
+
+    public static function handleExceptionProduct(\Exception $exception) {
+
+    }
+
+    public static function handleError($code, $message, $file, $line) {
+
+    }
+
+    public static function handleFatalError() {
 
     }
 }

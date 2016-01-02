@@ -51,4 +51,9 @@ abstract class Application {
 
     }
 
+    protected function createObject()
+    {
+
+    }
+
 }
