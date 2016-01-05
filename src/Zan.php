@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework;
 
-//use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\Handler;
 
 defined('ZANPHP') or define('ZANPHP', 'youzan');
@@ -21,8 +21,6 @@ class Zan {
     }
 
     public static function init() {
-        var_dump(class_exists(''));exit;
-       // new AAAA();exit;
         self::initClassAlias();
         self::initConfig();
         self::initErrorHandler();
