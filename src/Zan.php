@@ -18,7 +18,7 @@ class Zan {
         (new \HttpApplication())->run();
     }
 
-    public static function createSocketApplication($config)
+    public static function createSocketApplication()
     {
 
     }
@@ -29,11 +29,13 @@ class Zan {
         self::initErrorHandler();
     }
 
-    private static function initErrorHandler() {
+    private static function initErrorHandler()
+    {
         Handler::initErrorHandler();
     }
 
-    private static function initClassAlias() {
+    private static function initClassAlias()
+    {
         $classAliasMap = require (__DIR__.'/ClassAlias.php');
         if (!$classAliasMap) return true;
         foreach($classAliasMap as $alias => $original) {
