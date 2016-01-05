@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Http;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\ExitException;
 
+
 class Server implements \Zan\Framework\Network\Contract\Server {
 
     public $server = null;
@@ -36,14 +37,13 @@ class Server implements \Zan\Framework\Network\Contract\Server {
             $request->setGlobalVar();
 
             list($routes, $params) = (new Router($request))->parse();
-
-            $result = (new \Application())->run($routes, $params);
-            $resp->write($result);
+            $response = (new \Application())->run($routes, $params);
+            $resp->write($response->getData());
             $resp->end();
         }
         catch (\Exception $e) {
             $resp->status(500);
-            $resp->end($e->getMessage() . "<hr />" . nl2br($e->getTraceAsString()));
+            $resp->end($e->getMessage().nl2br($e->getTraceAsString()));
         }
     }
 

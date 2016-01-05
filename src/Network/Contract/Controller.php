@@ -16,7 +16,16 @@ class Controller {
         if ($action === null) {
             throw new InvalidRoute('Unable to resolve the request: '.$id);
         }
-        return $action->runWithParams($params);
+        $result = $action->runWithParams($params);
+
+        if ($result instanceof Response) {
+            return $result;
+        }
+        $response = new Response();
+        if ($result !== null) {
+            $response->setData($result);
+        }
+        return $response;
     }
 
     public function createAction($id)

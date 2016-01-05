@@ -1,5 +1,7 @@
 <?php
 
+namespace Zan\Framework\Network\Http;
+
 class Response {
 
     public $charset;
