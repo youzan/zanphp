@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-class Response {
+class Response extends \Zan\Framework\Network\Contract\Response {
 
     public $charset;
     public $content;

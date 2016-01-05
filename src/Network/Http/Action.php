@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Network\Contract\Controller;
+use Zan\Framework\Network\Exception\BadRequestHttp;
 
 class Action extends \Zan\Framework\Network\Contract\Action{
 
@@ -17,11 +17,38 @@ class Action extends \Zan\Framework\Network\Contract\Action{
     public function runWithParams($params)
     {
         $args = $this->controller->bindActionParams($this, $params);
-        $this->controller->beforeAction();
         $result = call_user_func_array([$this->controller, $this->actionMethod], $args);
-        $result = $this->controller->afterAction($result);
 
         return $result;
+    }
+
+    public function bindActionParams($action, $params)
+    {
+        $method = new \ReflectionMethod($this, $action->actionMethod);
+        $args = $missing = $actionParams = [];
+        foreach ($method->getParameters() as $param) {
+            $funcName = $param->getName();
+            if (array_key_exists($funcName, $params)) {
+                if ($param->isArray()) {
+                    $args[] = $actionParams[$funcName] = (array) $params[$funcName];
+                } elseif (!is_array($params[$funcName])) {
+                    $args[] = $actionParams[$funcName] = $params[$funcName];
+                } else {
+                    throw new BadRequestHttp('Invalid data received for parameter: '. implode(', ', $missing));
+                }
+                unset($params[$funcName]);
+            } elseif ($param->isDefaultValueAvailable()) {
+                $args[] = $actionParams[$funcName] = $param->getDefaultValue();
+            } else {
+                $missing[] = $funcName;
+            }
+        }
+        if (!empty($missing))
+            throw new BadRequestHttp('Missing required parameters: '. implode(', ', $missing));
+
+        $this->actionParams = $actionParams;
+
+        return $args;
     }
 
 

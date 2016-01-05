@@ -59,6 +59,7 @@ class Config
     public static function get($key)
     {
         $keys = explode('.',$key);
+        $config = [];
         do {
             $key = array_shift($keys);
             if (!isset(self::$configMap[$key])) {

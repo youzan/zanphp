@@ -2,16 +2,24 @@
 
 namespace Zan\Framework\Foundation\Core;
 
+use Zan\Framework\Utilities\Types\Dir;
+
 class FilterChain {
 
-    public static $filters = [];
+    public static $preFilters  = [];
+    public static $postFilters = [];
 
-    public function addFilter()
+    public static function loadPreFilters($preFilterPath)
     {
-
+        $preFilters = Dir::glob($preFilterPath, '*.php');
     }
 
-    public function doFilter($request, $response)
+    public static function loadPostFilters($preFilterPath)
+    {
+        $postFilters = Dir::glob($preFilterPath, '*.php');
+    }
+
+    public static function doFilter($request, $response)
     {
 
     }

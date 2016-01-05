@@ -10,11 +10,11 @@ class Controller {
     public $action;
     public $defaultAction = 'index';
 
-    public function runAction($id, $params = [])
+    public function runAction($actionName, $params = [])
     {
-        $action = $this->createAction($id);
+        $action = $this->createAction($actionName);
         if ($action === null) {
-            throw new InvalidRoute('Unable to resolve the request: '.$id);
+            throw new InvalidRoute('Unable to resolve the request: '.$actionName);
         }
         $result = $action->runWithParams($params);
 
@@ -28,37 +28,22 @@ class Controller {
         return $response;
     }
 
-    public function createAction($id)
+    public function createAction($actionName)
     {
-        $id = !$id ? $this->defaultAction : $id;
+        $actionName = !$actionName ? $this->defaultAction : $actionName;
 
-        if (!preg_match('/^[a-z][a-z0-9]+$/', $id)) {
+        if (!preg_match('/^[a-z][a-z0-9]+$/', $actionName)) {
             return null;
         }
-        $methodName = 'action' . str_replace(' ', '', ucwords($id));
-
+        $methodName = str_replace(' ', '', ucwords($actionName));
         if (!method_exists($this, $methodName)) {
             return null;
         }
         $method = new \ReflectionMethod($this, $methodName);
         if ($method->isPublic() && $method->getName() === $methodName)
-            return new Action($id, $this, $methodName);
+            return new Action($actionName, $this, $methodName);
 
         return null;
     }
 
-    public function bindActionParams($action, $params)
-    {
-        return [];
-    }
-
-    public function beforeAction()
-    {
-        return true;
-    }
-
-    public function afterAction()
-    {
-        return true;
-    }
 }

@@ -11,14 +11,14 @@ class Router extends \Zan\Framework\Network\Contract\Router {
     protected $url;
     protected $routes = [];
 
-    public function __construct(Request $request)
+    public function __construct()
     {
-        $this->request = $request;
         $this->config  = Config::get('route');
     }
 
-    public function parse()
+    public function parse($request)
     {
+        $this->request = $request;
         if (!($uri = $this->request->getRequestUri())) {
             $this->setDefaultRoute();
             return $this->routes;

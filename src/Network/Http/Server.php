@@ -2,49 +2,43 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Exception\System\ExitException;
-
+use Zan\Framework\Foundation\Core\FilterChain;
 
 class Server implements \Zan\Framework\Network\Contract\Server {
 
     public $server = null;
 
-    public function __construct()
+    public function __construct($config=[])
     {
-        $httpConf = Config::get('http_server');
-        $this->server = new \swoole_http_server($httpConf['host'], $httpConf['port']);
-        $this->server->set($httpConf);
-        $this->server->on('Request', [$this, 'onRequest']);
+        $this->server = new \swoole_http_server($config['host'], $config['port']);
+        $this->setServerConfig($config);
+        $this->bindRequestEvents();
     }
 
-    public function run($command)
+    public function init()
     {
-        if (!$command) {
-            $this->start();
-        }
-        $func = strtolower($command);
-        if (!method_exists($this, $func))
-            throw new ExitException("Http server command not found: $func");
-
-        $this->{$func}();
+        $this->initPreFilter();
+        $this->initPostFilter();
     }
 
-    public function onRequest(\swoole_http_request $req, \swoole_http_response $resp)
+    private function initPreFilter()
     {
-        try {
-            $request = (new Request($req));
-            $request->setGlobalVar();
+        FilterChain::loadPreFilters(FILTER_PATH.'/preFilter');
+    }
 
-            list($routes, $params) = (new Router($request))->parse();
-            $response = (new \Application())->run($routes, $params);
-            $resp->write($response->getData());
-            $resp->end();
-        }
-        catch (\Exception $e) {
-            $resp->status(500);
-            $resp->end($e->getMessage().nl2br($e->getTraceAsString()));
-        }
+    private function initPostFilter()
+    {
+        FilterChain::loadPostFilters(FILTER_PATH.'/postFilter');
+    }
+
+    private function bindRequestEvents()
+    {
+        $this->server->on('Request', [new RequestHandler(), 'onRequest']);
+    }
+
+    private function setServerConfig($config)
+    {
+        $this->server->set($config);
     }
 
     public function start()
@@ -54,11 +48,11 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     public function stop()
     {
-        // TODO: Implement stop() method.
+
     }
 
     public function reload()
     {
-        // TODO: Implement reload() method.
+
     }
 }

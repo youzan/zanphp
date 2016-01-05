@@ -6,46 +6,51 @@
  * Time: 23:55
  */
 
-use Zan\Framework\Network\Contract\Controller;
-use Zan\Framework\Network\Exception\InvalidRoute;
+namespace Zan\Framework\Network\Http;
+
+use Zan\Framework\Foundation\Core\Config;
 
 class Application extends \Zan\Framework\Network\Contract\Application {
 
-    private $controllerNamespace = 'app\\controllers';
+    /**
+     * @var \HttpServer
+     */
+    private $server;
+    private $config;
 
-
-    public function run($route, $params = [])
+    public function __construct()
     {
-        /* @var Controller */
-        $controller = $this->createController($route, $params);
-
-        if (!($controller instanceof Controller)) {
-            throw new InvalidRoute('Invalid controller!');
-        }
-        return $controller->runAction($route['action'], $params);
+        parent::__construct();
+        $this->init();
     }
 
-    public function createController($route, $params)
+    public function init()
     {
-        $module    = $route['module'];
-        $className = $route['controller'];
-
-        if (!preg_match('%^[a-z][a-z0-9]*$%', $className)) {
-            return null;
-        }
-        $className = $module.'_'.str_replace(' ', '', ucwords($className)).'Controller';
-        $className = ltrim($this->controllerNamespace . '\\' . $className, '\\');
-
-        if (!class_exists($className)) {
-            return null;
-        }
-        return new $className();
+        $this->getHttpConfig();
+        $this->initConfig();
+        $this->initHttpServer();
     }
 
-
-    public function init() {
-        //parent::init();
+    public function initHttpServer()
+    {
+        $this->server = new \HttpServer($this->config);
+        $this->server->init();
     }
 
+    private function initConfig()
+    {
+        Config::init();
+        Config::setConfigPath(CONFIG_PATH);
+    }
+
+    private function getHttpConfig()
+    {
+        $this->config = Config::get('http');
+    }
+
+    public function run()
+    {
+        $this->server->start();
+    }
 
 }
