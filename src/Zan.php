@@ -15,7 +15,7 @@ class Zan {
 
     public static function createHttpApplication()
     {
-        (new \HttpApplication())->run();
+        return new \HttpApplication();
     }
 
     public static function createSocketApplication()
