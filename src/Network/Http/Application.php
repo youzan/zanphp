@@ -6,30 +6,23 @@
  * Time: 23:55
  */
 
+use Zan\Framework\Network\Contract\Controller;
+use Zan\Framework\Network\Exception\InvalidRoute;
+
 class Application extends \Zan\Framework\Network\Contract\Application {
 
     private $controllerNamespace = 'app\\controllers';
 
 
-    public function runAction($route, $params = [])
+    public function run($route, $params = [])
     {
+        /* @var Controller */
         $controller = $this->createController($route, $params);
-        $action = $route['action'];
 
-        $controller->beforAction();
-
-        if (!method_exists($controller, $action)) {
-            throw new \Exception('....');
+        if (!($controller instanceof Controller)) {
+            throw new InvalidRoute('Invalid controller!');
         }
-        ////todo load PreFilter
-
-        $result = $controller->$action();
-
-        //todo load PostFilter
-
-        $controller->afterAction();
-
-        return $result;
+        return $controller->runAction($route['action'], $params);
     }
 
     public function createController($route, $params)
@@ -37,27 +30,22 @@ class Application extends \Zan\Framework\Network\Contract\Application {
         $module    = $route['module'];
         $className = $route['controller'];
 
-        if (!preg_match('%^[a-z][a-z0-9\\-_]*$%', $className)) {
+        if (!preg_match('%^[a-z][a-z0-9]*$%', $className)) {
             return null;
         }
-        $className = $module.'_'.str_replace(' ', '', ucwords(str_replace('-', ' ', $className))).'Controller';
+        $className = $module.'_'.str_replace(' ', '', ucwords($className)).'Controller';
         $className = ltrim($this->controllerNamespace . '\\' . $className, '\\');
 
         if (!class_exists($className)) {
-            throw new Exception('....');
+            return null;
         }
-        if (!($className instanceof BaseController)) {
-            throw new Exception('....');
-        }
-        return new $className;
-
+        return new $className();
     }
+
 
     public function init() {
         //parent::init();
     }
-
-
 
 
 }

@@ -17,11 +17,15 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $this->config  = Config::get('route');
     }
 
-    public function parse() {
+    public function parse()
+    {
         if (!($uri = $this->request->getRequestUri())) {
             $this->setDefaultRoute();
             return $this->routes;
         }
+        $this->parseRegexRoute();
+        $this->parseStringRoute();
+
         return [
             $this->routes,
             $this->request->getQueryParams()
@@ -34,6 +38,21 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $this->setDefaultController();
         $this->setDefaultAction();
         $this->setDefaultFormat();
+    }
+
+    private function parseRegexRoute()
+    {
+
+    }
+
+    private function completeResult()
+    {
+
+    }
+
+    protected function parseStringRoute()
+    {
+
     }
 
     private function setDefaultModule()

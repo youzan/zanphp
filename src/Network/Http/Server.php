@@ -3,16 +3,11 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Coroutine\Scheduler;
-use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\ExitException;
-use Zan\Framework\Foundation\Exception\System\FileNotFound;
 
 class Server implements \Zan\Framework\Network\Contract\Server {
 
     public $server = null;
-
-    private $scheduler;
 
     public function __construct()
     {
@@ -42,38 +37,14 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
             list($routes, $params) = (new Router($request))->parse();
 
-            $result = (new \Application())->runAction($routes, $params);
-
-            $html = new task($this->runAction($routes, $params));
-            $resp->write($html);
+            $result = (new \Application())->run($routes, $params);
+            $resp->write($result);
+            $resp->end();
         }
         catch (\Exception $e) {
+            $resp->status(500);
+            $resp->end($e->getMessage() . "<hr />" . nl2br($e->getTraceAsString()));
         }
-        $resp->end();
-    }
-
-    private function runAction($routes, $params)
-    {
-        $controller = $routes['module'].'_'.$routes['controller'].'Controller';
-        $action = $routes['action'];
-
-        if (!class_exists($controller) || !($controller instanceof BaseController)) {
-            throw new FileNotFound('Class not found!');
-        }
-        if (!method_exists($controller, $action)) {
-            throw new FileNotFound('function not found!');
-        }
-        $class = new $controller();
-
-        if (method_exists($class, 'beforeAction')) {
-            $class->beforeAction();
-        }
-        $result = $class->{$action}();
-
-        if (method_exists($class, 'afterAction')) {
-            $class->afterAction();
-        }
-        return $result;
     }
 
     public function start()

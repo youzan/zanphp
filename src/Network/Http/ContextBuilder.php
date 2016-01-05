@@ -30,7 +30,7 @@ class ContextBuilder {
     }
 
 
-    private function dobuilding() {
+    private function doBuilding() {
 
     }
 }
