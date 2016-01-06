@@ -16,7 +16,7 @@ class Request extends \Zan\Framework\Network\Contract\Request{
 
     public function getRequestUri()
     {
-        $requestUri = $this->request->server['REQUEST_URI'];
+        $requestUri = $this->request->server['request_uri'];
 
         if ($requestUri !== '' && $requestUri[0] !== '/') {
             $requestUri = preg_replace('/^(http|https):\/\/[^\/]+/i', '', $requestUri);

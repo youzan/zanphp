@@ -2,8 +2,6 @@
 
 namespace Zan\Framework;
 
-use Zan\Framework\Foundation\Exception\Handler;
-
 require (__DIR__ . '/vendor/autoload.php');
 
 class Zan {

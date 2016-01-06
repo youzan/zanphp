@@ -15,7 +15,7 @@ class Response extends \Zan\Framework\Network\Contract\Response {
     public function __construct(\swoole_http_response $response)
     {
         $this->response = $response;
-        $this->httpStatuses = \StatusCode::$httpStatuses;
+        $this->httpStatuses = StatusCode::$httpStatuses;
     }
 
     public function send()

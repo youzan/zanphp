@@ -15,8 +15,8 @@ class Config
         if (self::$inited) return true;
 
         self::$inited = true;
-        self::setRunMode();
         self::clear();
+        self::setRunMode();
     }
 
     public static function isInited()
@@ -84,10 +84,19 @@ class Config
     {
         $envRunMode = self::$configMap['run_mode'] == 'online' ? 'online' : 'test';
         $configFile = self::$configPath . $envRunMode.'/'. $key . '.php';
+        $commonConfigFile = self::$configPath . 'common'.'/'. $key . '.php';
 
-        if(!file_exists($configFile)) {
+        if (!($isExistsEnv = file_exists($configFile)) && !($isExistsCommon = file_exists($commonConfigFile))) {
             throw new InvalidArgument('No such config file ' . $configFile);
         }
-        return self::$configMap[$key] = require $configFile;
+        $envConfig = [];
+        if ($isExistsEnv) {
+            $envConfig = require $configFile;
+        }
+        $commonConfig = [];
+        if ($isExistsCommon) {
+            $commonConfig = require $commonConfigFile;
+        }
+        return self::$configMap[$key] = array_merge($envConfig, $commonConfig);
     }
 }

@@ -26,9 +26,8 @@ class RequestHandler {
     public function buildRequest($request)
     {
         $requestBuilder = new RequestBuilder($request);
-        $requestBuilder->build();
 
-        return $requestBuilder;
+        return $requestBuilder->build();
     }
 
 }

@@ -19,7 +19,7 @@ class Router extends \Zan\Framework\Network\Contract\Router {
     public function parse(Request $request)
     {
         $this->request = $request;
-        if (!($uri = $this->request->getRequestUri())) {
+        if (!$this->request->getQueryParams()) {
             $this->setDefaultRoute();
             return $this->routes;
         }

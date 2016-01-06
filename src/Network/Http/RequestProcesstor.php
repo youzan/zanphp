@@ -11,7 +11,7 @@ class RequestProcessor {
     private $request;
     private $response;
 
-    private $controllerNamespace = 'app\\controllers';
+    private $controllerNamespace = 'Zanhttp';
 
     public function __construct(Request $request, Response $response)
     {
@@ -36,14 +36,14 @@ class RequestProcessor {
 
     private function createController($route)
     {
-        $module    = $route['module'];
-        $className = $route['controller'];
+        $module    = ucwords($route['module']);
+        $className = ucwords($route['controller']);
 
         if (!preg_match('%^[a-z][a-z0-9]*$%', $className)) {
             return null;
         }
-        $className = $module.'_'.str_replace(' ', '', ucwords($className)).'Controller';
-        $className = ltrim($this->controllerNamespace . '\\' . $className, '\\');
+        $className = str_replace(' ', '', $className);
+        $className = ltrim($this->controllerNamespace . '\\' . $module . '\\Controller\\'. $className);
 
         if (!class_exists($className)) {
             return null;

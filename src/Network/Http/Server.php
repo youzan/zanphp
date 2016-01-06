@@ -22,8 +22,8 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     private function validServerConfig($config)
     {
-        if (!isset($config['host']) ||
-            !filter_var($config['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+        //todo IPv4 v6 valid tools
+        if (!isset($config['host']) || !filter_var($config['host'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             throw new InvalidArgument('Invalid IP address!');
         }
         if (!isset($config['port']) || !$config['port']) {

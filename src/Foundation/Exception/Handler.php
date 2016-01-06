@@ -5,7 +5,8 @@ use Zan\Framework\Foundation\Core\Config;
 
 class Handler {
 
-    public static function initErrorHandler() {
+    public static function initErrorHandler()
+    {
         ini_set('display_errors', false);
 
         if (Config::get('debug')) {
@@ -18,11 +19,13 @@ class Handler {
         register_shutdown_function(['Handler', 'handleFatalError']);
     }
 
-    public static function handleException(\Exception $exception) {
-
+    public static function handleException(\Exception $e)
+    {
+        throw new \Exception($e->getMessage());
     }
 
-    public static function handleExceptionProduct(\Exception $exception) {
+    public static function handleExceptionProduct(\Exception $e)
+    {
 
     }
 
