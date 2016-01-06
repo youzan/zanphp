@@ -42,13 +42,13 @@ class RequestProcessor {
         if (!preg_match('%^[A-Z][a-zA-Z][a-z0-9]*$%', $className)) {
             return null;
         }
-        $className = str_replace(' ', '', $className);
-        $className = ltrim($this->controllerNamespace . '\\' . $module . '\\Controller\\'. $className);
+        $className  = str_replace(' ', '', $className);
+        $controller = ltrim($this->controllerNamespace . '\\' . $module . '\\Controller\\'. $className);
 
-        if (!class_exists($className)) {
+        if (!class_exists($controller)) {
             return null;
         }
-        return new $className();
+        return new $controller($this->request, $this->response);
     }
 
 }
