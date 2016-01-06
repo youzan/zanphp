@@ -65,6 +65,8 @@ class Config
             if (!isset(self::$configMap[$key])) {
                 $config = self::getConfigFile($key);
             }
+            return self::$configMap[$key];
+
         } while (!empty($keys));
 
         return $config;

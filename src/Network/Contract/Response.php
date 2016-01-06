@@ -46,6 +46,9 @@ class Response implements Future {
         if(!$data) {
             return false;
         }
+        if (is_array($data)) {
+            $data = json_encode($data);
+        }
         $this->data = $data;
     }
 
