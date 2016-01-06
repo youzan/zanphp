@@ -6,11 +6,13 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 abstract class Application {
 
+    protected $config;
     protected $appName;
     protected $rootPath;
 
-    public function __construct($appName=null)
+    public function __construct($config =[], $appName=null)
     {
+        $this->config = $config;
         if (null !== $appName ) {
             $this->setAppName($appName);
         }

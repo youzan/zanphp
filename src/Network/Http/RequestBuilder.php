@@ -6,16 +6,21 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 class RequestBuilder {
 
+    /**
+     * @var Request
+     */
     private $request;
 
-    public function __construct(\swoole_http_request $request) {
+    public function __construct(\swoole_http_request $request)
+    {
         if (!$request) {
-            throw new InvalidArgument('invalid request for RequestBuilder');
+            throw new InvalidArgument('invalid request');
         }
-        $this->request = $request;
+        $this->request = new Request($request);
     }
 
-    public function build() {
+    public function build()
+    {
         return $this->request;
     }
 }

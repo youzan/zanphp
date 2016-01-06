@@ -16,7 +16,7 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $this->config  = Config::get('route');
     }
 
-    public function parse($request)
+    public function parse(Request $request)
     {
         $this->request = $request;
         if (!($uri = $this->request->getRequestUri())) {
@@ -26,10 +26,7 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $this->parseRegexRoute();
         $this->parseStringRoute();
 
-        return [
-            $this->routes,
-            $this->request->getQueryParams()
-        ];
+        return $this->routes;
     }
 
     private function setDefaultRoute()
@@ -62,9 +59,6 @@ class Router extends \Zan\Framework\Network\Contract\Router {
 
     private function setDefaultController()
     {
-        if (!$this->config['default_controller']) {
-            throw new \Exception;
-        }
         $this->routes['controller'] = $this->config['default_controller'];
     }
 

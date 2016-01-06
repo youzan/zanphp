@@ -2,8 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Core\FilterChain;
-use Zan\Framework\Network\Server\Registry;
+use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 class Server implements \Zan\Framework\Network\Contract\Server {
 
@@ -11,27 +10,25 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     public function __construct($config=[])
     {
-        //TODO valid config
+        $this->validServerConfig($config);
         $this->server = new \swoole_http_server($config['host'], $config['port']);
         $this->setServerConfig($config);
-        $this->bindRequestEvents();
     }
 
     public function init()
     {
-        $this->initPreFilter();
-        $this->initPostFilter();
+        $this->bindRequestEvents();
     }
 
-    private function initPreFilter()
+    private function validServerConfig($config)
     {
-        $preFilterChain = FilterChain::loadPreFilters(FILTER_PATH.'/preFilter');
-        Registry::set('preFilterChain', $preFilterChain);
-    }
-
-    private function initPostFilter()
-    {
-        FilterChain::loadPostFilters(FILTER_PATH.'/postFilter');
+        if (!isset($config['host']) ||
+            !filter_var($config['host'], FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+            throw new InvalidArgument('Invalid IP address!');
+        }
+        if (!isset($config['port']) || !$config['port']) {
+            throw new InvalidArgument('Invalid port!');
+        }
     }
 
     private function bindRequestEvents()

@@ -4,11 +4,6 @@ namespace Zan\Framework;
 
 use Zan\Framework\Foundation\Exception\Handler;
 
-defined('ZANPHP') or define('ZANPHP', 'youzan');
-defined('RESOURCE_PATH') or define('RESOURCE_PATH', APP_PATH.'/resource');
-defined('CONFIG_PATH') or define('CONFIG_PATH', RESOURCE_PATH.'/config');
-defined('FILTER_PATH') or define('FILTER_PATH', APP_PATH.'/init');
-
 require (__DIR__ . '/../vendor/autoload.php');
 
 class Zan {

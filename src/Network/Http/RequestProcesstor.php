@@ -19,9 +19,9 @@ class RequestProcessor {
         $this->response = $response;
     }
 
-    public function run($route, $params=[])
+    public function run($route)
     {
-        $controller = $this->createController($route, $params);
+        $controller = $this->createController($route);
 
         if (!($controller instanceof Controller)) {
             throw new InvalidRoute('Not found controller:'.$controller);
@@ -31,22 +31,7 @@ class RequestProcessor {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
         }
         $task = new Task($controller->$action());
-        $result = $task->run();
-
-
-        // move output to controller
-        $this->send($result);
-    }
-
-    private function send($result)
-    {
-        if ($result instanceof Response) {
-            $this->response->send();
-        }
-        if ($result !== null) {
-            $this->response->setData($result);
-        }
-        $this->response->send();
+        $task->run();
     }
 
     private function createController($route)

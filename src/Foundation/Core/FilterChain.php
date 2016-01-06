@@ -12,11 +12,15 @@ class FilterChain {
     public static function loadPreFilters($preFilterPath)
     {
         $preFilters = Dir::glob($preFilterPath, '*.php');
+
+        return true;
     }
 
     public static function loadPostFilters($preFilterPath)
     {
         $postFilters = Dir::glob($preFilterPath, '*.php');
+
+        return true;
     }
 
     public static function doFilter($request, $response)

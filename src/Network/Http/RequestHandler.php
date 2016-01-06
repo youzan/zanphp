@@ -17,11 +17,10 @@ class RequestHandler {
         $request  = $this->buildRequest($req);
         $response = new Response($resp);
 
-        // 1 $params merge to $request
-        // 2 $routers 对象化
-        list($routes, $params) = $this->route->parse($request);
+        // todo $routes 对象化
+        $routes = $this->route->parse($request);
 
-        (new RequestProcessor($request, $response))->run($routes, $params);
+        (new RequestProcessor($request, $response))->run($routes);
     }
 
     public function buildRequest($request)
