@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation\Domain;
 
 class Controller {
+
     public function display()
     {
 

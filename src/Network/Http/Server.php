@@ -25,7 +25,7 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     private function initPreFilter()
     {
-        $preFilterChain =FilterChain::loadPreFilters(FILTER_PATH.'/preFilter');
+        $preFilterChain = FilterChain::loadPreFilters(FILTER_PATH.'/preFilter');
         Registry::set('preFilterChain', $preFilterChain);
     }
 
