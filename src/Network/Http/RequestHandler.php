@@ -14,11 +14,12 @@ class RequestHandler {
 
     public function onRequest(\swoole_http_request $req, \swoole_http_response $resp)
     {
-        $request = $this->requestBuilder($req);
+        $request  = $this->requestBuilder($req);
+        $response = new Response($resp);
 
         list($routes, $params) = $this->route->parse($request);
 
-        (new RequestProcessor())->run($routes, $params);
+        (new RequestProcessor($request, $response))->run($routes, $params);
     }
 
     public function requestBuilder($request)

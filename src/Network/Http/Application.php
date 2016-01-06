@@ -26,6 +26,7 @@ class Application extends \Zan\Framework\Network\Contract\Application {
 
     public function init()
     {
+        parent::init();
         $this->getHttpConfig();
         $this->initConfig();
         $this->initHttpServer();

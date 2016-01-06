@@ -79,6 +79,21 @@ class Response extends \Zan\Framework\Network\Contract\Response {
 
     private $statusCode = 200;
 
+    /**
+     * @var \swoole_http_response
+     */
+    private $response;
+
+    public function __construct($response)
+    {
+        $this->response = $response;
+    }
+
+    public function send()
+    {
+        $this->response->end($this->getData());
+    }
+
     public function getStatusCode()
     {
         return $this->statusCode;

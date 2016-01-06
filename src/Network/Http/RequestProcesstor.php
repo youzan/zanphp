@@ -8,7 +8,16 @@ use Zan\Framework\Foundation\Domain\Controller;
 
 class RequestProcessor {
 
+    private $request;
+    private $response;
+
     private $controllerNamespace = 'app\\controllers';
+
+    public function __construct(RequestBuilder $request, Response $response)
+    {
+        $this->request  = $request;
+        $this->response = $response;
+    }
 
     public function run($route, $params=[])
     {
@@ -22,7 +31,20 @@ class RequestProcessor {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
         }
         $task = new Task($controller->$action());
-        $task->run();
+        $result = $task->run();
+
+        $this->send($result);
+    }
+
+    private function send($result)
+    {
+        if ($result instanceof Response) {
+            $this->response->send();
+        }
+        if ($result !== null) {
+            $this->response->setData($result);
+        }
+        $this->response->send();
     }
 
     private function createController($route)
