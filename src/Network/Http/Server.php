@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Core\FilterChain;
+use Zan\Framework\Network\Server\Registry;
 
 class Server implements \Zan\Framework\Network\Contract\Server {
 
@@ -10,6 +11,7 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     public function __construct($config=[])
     {
+        //TODO valid config
         $this->server = new \swoole_http_server($config['host'], $config['port']);
         $this->setServerConfig($config);
         $this->bindRequestEvents();
@@ -23,7 +25,8 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     private function initPreFilter()
     {
-        FilterChain::loadPreFilters(FILTER_PATH.'/preFilter');
+        $preFilterChain =FilterChain::loadPreFilters(FILTER_PATH.'/preFilter');
+        Registry::set('preFilterChain', $preFilterChain);
     }
 
     private function initPostFilter()
@@ -33,11 +36,12 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     private function bindRequestEvents()
     {
-        $this->server->on('Request', [new RequestHandler(), 'onRequest']);
+        $this->server->on('Request', [new RequestHandler(), 'handle']);
     }
 
     private function setServerConfig($config)
     {
+        $acceptKeys = [];
         $this->server->set($config);
     }
 

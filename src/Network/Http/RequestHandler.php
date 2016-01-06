@@ -12,17 +12,19 @@ class RequestHandler {
         $this->route = new Router();
     }
 
-    public function onRequest(\swoole_http_request $req, \swoole_http_response $resp)
+    public function handle(\swoole_http_request $req, \swoole_http_response $resp)
     {
-        $request  = $this->requestBuilder($req);
+        $request  = $this->buildRequest($req);
         $response = new Response($resp);
 
+        // 1 $params merge to $request
+        // 2 $routers 对象化
         list($routes, $params) = $this->route->parse($request);
 
         (new RequestProcessor($request, $response))->run($routes, $params);
     }
 
-    public function requestBuilder($request)
+    public function buildRequest($request)
     {
         $requestBuilder = new RequestBuilder($request);
         $requestBuilder->build();

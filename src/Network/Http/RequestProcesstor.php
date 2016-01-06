@@ -13,7 +13,7 @@ class RequestProcessor {
 
     private $controllerNamespace = 'app\\controllers';
 
-    public function __construct(RequestBuilder $request, Response $response)
+    public function __construct(Request $request, Response $response)
     {
         $this->request  = $request;
         $this->response = $response;
@@ -33,6 +33,8 @@ class RequestProcessor {
         $task = new Task($controller->$action());
         $result = $task->run();
 
+
+        // move output to controller
         $this->send($result);
     }
 

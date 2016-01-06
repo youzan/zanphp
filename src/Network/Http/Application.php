@@ -16,7 +16,6 @@ class Application extends \Zan\Framework\Network\Contract\Application {
      * @var \HttpServer
      */
     private $server;
-    private $config;
 
     public function __construct()
     {
@@ -27,14 +26,14 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     public function init()
     {
         parent::init();
-        $this->getHttpConfig();
         $this->initConfig();
         $this->initHttpServer();
     }
 
     public function initHttpServer()
     {
-        $this->server = new \HttpServer($this->config);
+        $config = Config::get('http');
+        $this->server = new \HttpServer($config);
         $this->server->init();
     }
 
@@ -42,11 +41,6 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     {
         Config::init();
         Config::setConfigPath(CONFIG_PATH);
-    }
-
-    private function getHttpConfig()
-    {
-        $this->config = Config::get('http');
     }
 
     public function run()

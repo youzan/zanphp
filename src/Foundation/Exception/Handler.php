@@ -8,10 +8,11 @@ class Handler {
     public static function initErrorHandler() {
         ini_set('display_errors', false);
 
-        if (Config::get('debug'))
+        if (Config::get('debug')) {
             set_exception_handler(['Handler', 'handleException']);
-        else
+        } else {
             set_exception_handler(['Handler', 'handleExceptionProduct']);
+        }
 
         set_error_handler(['Handler', 'handleError']);
         register_shutdown_function(['Handler', 'handleFatalError']);

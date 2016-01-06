@@ -13,9 +13,9 @@ require (__DIR__ . '/../vendor/autoload.php');
 
 class Zan {
 
-    public static function createHttpApplication()
+    public static function createHttpApplication($config)
     {
-        return new \HttpApplication();
+        return new \HttpApplication($config);
     }
 
     public static function createSocketApplication()
@@ -38,6 +38,7 @@ class Zan {
     {
         $classAliasMap = require (__DIR__.'/ClassAlias.php');
         if (!$classAliasMap) return true;
+
         foreach($classAliasMap as $alias => $original) {
             class_alias($original, $alias);
         }
