@@ -39,7 +39,7 @@ class RequestProcessor {
         $module    = ucwords($route['module']);
         $className = ucwords($route['controller']);
 
-        if (!preg_match('%^[a-z][a-z0-9]*$%', $className)) {
+        if (!preg_match('%^[A-Z][a-zA-Z][a-z0-9]*$%', $className)) {
             return null;
         }
         $className = str_replace(' ', '', $className);
