@@ -83,7 +83,7 @@ class Config
     private static function getConfigFile($key)
     {
         $envRunMode = self::$configMap['run_mode'] == 'online' ? 'online' : 'test';
-        $configFile = self::$configPath . '/' .$envRunMode.'/'. $key . '.php';
+        $configFile = self::$configPath . $envRunMode.'/'. $key . '.php';
 
         if(!file_exists($configFile)) {
             throw new InvalidArgument('No such config file ' . $configFile);

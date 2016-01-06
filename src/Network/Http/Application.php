@@ -23,7 +23,6 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     public function init()
     {
         parent::init();
-        $this->initConfig();
         $this->initErrorHandler();
         $this->initHttpServer();
         $this->initPreFilter();
@@ -52,12 +51,6 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     {
         $postFilterChain = FilterChain::loadPostFilters($this->config['PostFilter']);
         Registry::set('postFilterChain', $postFilterChain);
-    }
-
-    private function initConfig()
-    {
-        Config::init();
-        Config::setConfigPath($this->config['config_path']);
     }
 
     public function run()

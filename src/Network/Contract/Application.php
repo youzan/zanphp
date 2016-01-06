@@ -43,7 +43,7 @@ abstract class Application {
     protected function initProjectConfig()
     {
         Config::init();
-        Config::setConfigPath(CONFIG_PATH);
+        Config::setConfigPath($this->config['config_path']);
     }
 
     protected function initFramework() {
