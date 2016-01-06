@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\FilterChain;
+use Zan\Framework\Foundation\Exception\Handler;
 use Zan\Framework\Network\Server\Registry;
 
 class Application extends \Zan\Framework\Network\Contract\Application {
@@ -23,6 +24,7 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     {
         parent::init();
         $this->initConfig();
+        $this->initErrorHandler();
         $this->initHttpServer();
         $this->initPreFilter();
         $this->initPostFilter();
@@ -33,6 +35,11 @@ class Application extends \Zan\Framework\Network\Contract\Application {
         $config = Config::get('http');
         $this->server = new \HttpServer($config);
         $this->server->init();
+    }
+
+    private function initErrorHandler()
+    {
+        Handler::initErrorHandler();
     }
 
     private function initPreFilter()

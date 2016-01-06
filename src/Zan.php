@@ -4,7 +4,7 @@ namespace Zan\Framework;
 
 use Zan\Framework\Foundation\Exception\Handler;
 
-require (__DIR__ . '/../vendor/autoload.php');
+require (__DIR__ . '/vendor/autoload.php');
 
 class Zan {
 
@@ -21,12 +21,6 @@ class Zan {
     public static function init()
     {
         self::initClassAlias();
-        self::initErrorHandler();
-    }
-
-    private static function initErrorHandler()
-    {
-        Handler::initErrorHandler();
     }
 
     private static function initClassAlias()
