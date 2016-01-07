@@ -6,7 +6,7 @@
  * Time: 00:10
  */
 
-namespace Zan\Framework\Network\Exception;
+namespace Zan\Framework\Network\Http\Exception;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
