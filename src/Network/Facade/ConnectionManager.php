@@ -11,7 +11,7 @@ namespace Zan\Framework\Network\Facade;
 use Zan\Framework\Network\Contract\ConnectionPool as Pool;
 
 
-class ConnectionPool {
+class ConnectionFacade {
     private static $poolMap = [];
 
     public static function init()
@@ -33,7 +33,7 @@ class ConnectionPool {
         $conn = (yield $pool->get());
 
         defer(function() use($conn, $key){
-            ConnectionPool::release($conn, $key);
+            ConnectionManager::release($conn, $key);
         });
     }
 
