@@ -2,7 +2,8 @@
 namespace Zan\Framework\Network\Contract;
 
 interface Server {
-    function start();
-    function stop();
-    function reload();
+
+    public function start();
+    public function stop();
+    public function reload();
 }

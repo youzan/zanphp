@@ -12,6 +12,7 @@ use Zan\Framework\Foundation\Coroutine\Context;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 class ContextBuilder {
+    
     private $context = null;
 
     public function __construct(Context $context) {
@@ -29,7 +30,7 @@ class ContextBuilder {
     }
 
 
-    private function dobuilding() {
+    private function doBuilding() {
 
     }
 }

@@ -1,19 +1,39 @@
 <?php
 
+namespace Zan\Framework\Foundation\Domain;
+
+use Zan\Framework\Network\Http\Request;
+use Zan\Framework\Network\Http\Response;
+
 class Controller {
-    protected $server;
+
     protected $request;
     protected $response;
 
-    protected $fd;
-    protected $from_fd;
-
-
-    public function __construct($server, $request, $response, $fd=0, $from_fd=0) {
-        $this->server = $server;
+    public function __construct(Request $request, Response $response)
+    {
         $this->request = $request;
-        $this->response = $response;
-        $this->fd = $fd;
-        $this->from_fd = $from_fd;
+        $this->respones = $response;
     }
+
+    public function display()
+    {
+
+    }
+
+    public function assign()
+    {
+
+    }
+
+    public function r($code, $msg, $data)
+    {
+    }
+
+    public function output($data)
+    {
+        $this->respones->setData($data);
+        $this->respones->send();
+    }
+
 }

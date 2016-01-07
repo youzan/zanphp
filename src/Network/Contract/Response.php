@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Contract;
 use Zan\Framework\Foundation\Contract\Future;
 
 class Response implements Future {
+
     private $code = 0;
     private $message = '';
     private $data = [];
@@ -44,6 +45,9 @@ class Response implements Future {
     public function setData($data){
         if(!$data) {
             return false;
+        }
+        if (is_array($data)) {
+            $data = json_encode($data);
         }
         $this->data = $data;
     }
