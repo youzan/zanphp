@@ -2,8 +2,6 @@
 
 namespace Zan\Framework;
 
-require (__DIR__ . '/vendor/autoload.php');
-
 class Zan {
 
     public static function createHttpApplication($config)
