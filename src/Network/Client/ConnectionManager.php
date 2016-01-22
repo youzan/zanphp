@@ -11,7 +11,7 @@ namespace Zan\Framework\Network\Facade;
 use Zan\Framework\Network\Contract\ConnectionPool as Pool;
 
 
-class ConnectionFacade {
+class ConnectionManager {
     private static $poolMap = [];
 
     public static function init()
