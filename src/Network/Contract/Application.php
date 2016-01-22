@@ -1,53 +1,57 @@
 <?php
 namespace Zan\Framework\Network\Contract;
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 abstract class Application {
-    protected $appName = "";
-    protected $rootPath = "";
 
-    public function __construct($appName=null) {
+    protected $config;
+    protected $appName;
+    protected $rootPath;
+
+    public function __construct($config =[], $appName=null)
+    {
+        $this->config = $config;
         if (null !== $appName ) {
             $this->setAppName($appName);
         }
     }
 
-    public function setRootPath($dir=null) {
-        if(!$dir || !is_dir($dir) ) {
+    public function setRootPath($dir=null)
+    {
+        if (!$dir || !is_dir($dir) ) {
             throw new InvalidArgument('Application root path ({$dir}) is invalid!');
         }
-
         $this->rootPath = $dir;
     }
 
-    public function setAppName($appName=null) {
+    public function setAppName($appName=null)
+    {
         if (null === $appName ) {
             return false;
         }
         $this->appName = $appName;
     }
 
-    public function init() {
+    public function init()
+    {
         $this->initProjectConfig();
         $this->initFramework();
-        $this->initRuntimeEnv();
-        $this->initExceptionHandler();
+    }
+
+    protected function initProjectConfig()
+    {
+        Config::init();
+        Config::setConfigPath($this->config['config_path']);
     }
 
     protected function initFramework() {
 
     }
 
-    protected function initRuntimeEnv() {
-
-    }
-
-    protected function initProjectConfig() {
-
-    }
-
-    protected function initExceptionHandler() {
+    protected function createObject()
+    {
 
     }
 
