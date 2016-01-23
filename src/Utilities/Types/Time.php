@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework\Utilities\Types;
 
-class Date
+class Time
 {
     private $timeStamp = null;
     public function __construct($timeStamp=null)
@@ -14,12 +14,7 @@ class Date
         $this->timeStamp = time();
     }
 
-    public function isToday()
-    {
-
-    }
-
-    public function isYestoday()
+    public static function current()
     {
 
     }
