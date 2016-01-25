@@ -2,17 +2,18 @@
 
 namespace Zan\Framework\Network\Http;
 
+use \HttpServer;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Core\FilterChain;
-use Zan\Framework\Foundation\Exception\Handler;
-use Zan\Framework\Network\Server\Registry;
+use Zan\Framework\Network\Http\Filter\FilterLoader;
 
 class Application extends \Zan\Framework\Network\Contract\Application {
 
     /**
-     * @var \HttpServer
+     * @var HttpServer
      */
     private $server;
+
+    private $serverConfKey = 'http.server';
 
     public function __construct($config)
     {
@@ -23,34 +24,21 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     public function init()
     {
         parent::init();
-        $this->initErrorHandler();
         $this->initHttpServer();
-        $this->initPreFilter();
-        $this->initPostFilter();
+        $this->initFilter();
     }
 
     public function initHttpServer()
     {
-        $config = Config::get('http');
-        $this->server = new \HttpServer($config);
+        $config = Config::get($this->serverConfKey);
+        $this->server = new HttpServer($config);
         $this->server->init();
     }
 
-    private function initErrorHandler()
+    private function initFilter()
     {
-        Handler::initErrorHandler();
-    }
-
-    private function initPreFilter()
-    {
-        $preFilterChain = FilterChain::loadPreFilters($this->config['PreFilter']);
-        Registry::set('preFilterChain', $preFilterChain);
-    }
-
-    private function initPostFilter()
-    {
-        $postFilterChain = FilterChain::loadPostFilters($this->config['PostFilter']);
-        Registry::set('postFilterChain', $postFilterChain);
+        FilterLoader::loadFilter($this->config['pre_filter_path']);
+        FilterLoader::loadFilter($this->config['post_filter_path']);
     }
 
     public function run()

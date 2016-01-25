@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Network\Exception\BadRequestHttp;
+use Zan\Framework\Network\Http\Exception\BadRequestHttp;
 
 class Action extends \Zan\Framework\Network\Contract\Action{
 

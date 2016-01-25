@@ -9,6 +9,11 @@ class Zan {
         return new \HttpApplication($config);
     }
 
+    public static function createTcpApplication($config)
+    {
+        return new \TcpApplication($config);
+    }
+
     public static function createSocketApplication()
     {
 
