@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Http\Filter;
 
+use Zan\Framework\Foundation\Domain\Filter;
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
@@ -25,10 +26,11 @@ class FilterChain {
 
         if (empty($filterChain)) return true;
 
+        /** @var  $filter Filter*/
         foreach ($filterChain as $filter) {
-            $filter.init();
-            $filter.doFilter($request, $response);
-            $filter.destruct();
+            $filter->init();
+            $filter->doFilter($request, $response);
+            $filter->destruct();
         }
         return true;
     }
