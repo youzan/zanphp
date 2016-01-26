@@ -15,6 +15,8 @@ class Application extends \Zan\Framework\Network\Contract\Application {
 
     private $serverConfKey = 'http.server';
 
+    private $filterConfKey = 'filter';
+
     public function __construct($config)
     {
         parent::__construct($config);
@@ -37,8 +39,10 @@ class Application extends \Zan\Framework\Network\Contract\Application {
 
     private function initFilter()
     {
-        FilterLoader::loadFilter($this->config['pre_filter_path']);
-        FilterLoader::loadFilter($this->config['post_filter_path']);
+        $filters = Config::get($this->filterConfKey);
+
+        FilterLoader::init();
+        FilterLoader::loadFilter($filters);
     }
 
     public function run()

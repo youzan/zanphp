@@ -4,54 +4,63 @@ namespace Zan\Framework\Network\Http\Filter;
 
 use Zan\Framework\Foundation\Domain\Filter;
 use Zan\Framework\Foundation\Exception\System\FilterException;
-use Zan\Framework\Utilities\Types\Dir;
 
 class FilterLoader {
 
-    private static $filterList;
-    private static $filterKey = 'filter';
+    /**
+     * @var FilterChain
+     */
+    private static $filterChain;
 
-    private static $preFilterKey = 'pre';
+    private static $filterContainer;
+    private static $preFilterKey  = 'pre';
     private static $postFilterKey = 'post';
 
-    public static function loadFilter($filerPath='')
+    public static function init()
     {
-        if (empty($filerPath)) return;
+        self::$filterChain = new FilterChain();
+    }
 
-        Dir::
+    public static function loadFilter(array $filterConfig)
+    {
+        if (empty($filterConfig)) return;
 
         self::loadFilterClass(self::$preFilterKey, $filterConfig);
         self::loadFilterClass(self::$postFilterKey, $filterConfig);
     }
 
-    private static function loadFilterClass($type, & $filterConfig)
+    private static function loadFilterClass($filterType, & $filterConfig)
     {
-        if (empty(($filterList = $filterConfig[$type]))) return;
+        if (empty(($filterList = $filterConfig[$filterType]))) return;
 
         foreach ($filterList as $filter) {
-            $filterName = $filter['filer_name'];
-            if (isset(self::$filterList[$type][$filterName])) {
+
+            if (isset(self::$filterContainer[$filterType][$filter])) {
                 continue;
             }
-            if (!$filterName || !class_exists($filterName)) {
-                throw new FilterException('Not found filter:'.$filterName);
+            if (!$filter || !class_exists($filter)) {
+                throw new FilterException('Not found filter:'.$filter);
             }
-            $filterObj = new $filter['filter_name']();
+            $filterObj = new $filter();
+
             if (!($filterObj instanceof Filter)) {
-                throw new FilterException('Is not an effective filter:'.$filterName);
+                throw new FilterException('Is not an effective filter:'.$filter);
             }
-            self::$filterList[$type] = $filterObj;
+            self::$filterContainer[$filterType] = $filterObj;
+
+            self::addToFilterChain($filterType, $filterObj);
         }
     }
 
-    public static function getPreFilters()
+    private static function addToFilterChain($filterType, $filter)
     {
-        return self::$filterList[self::$preFilterKey];
+        if ($filterType == self::$preFilterKey) {
+            self::$filterChain->addPreFilter($filter);
+        }else {
+            self::$filterChain->addPostFilter($filter);
+        }
     }
 
-    public static function getPostFilters()
-    {
-        return self::$filterList[self::$postFilterKey];
-    }
+
 
 }

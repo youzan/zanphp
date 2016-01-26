@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
-use Zan\Framework\Network\Contract\FilterChain;
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
 

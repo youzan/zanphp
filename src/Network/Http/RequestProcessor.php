@@ -32,19 +32,19 @@ class RequestProcessor {
         if (!method_exists($controller, $action)) {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
         }
-        $this->runPreFilter();
+        $this->doPreFilter();
         $task = new Task($controller->$action());
         $task->run();
-        $this->runPostFilter();
+        $this->doPostFilter();
     }
 
-    private function runPreFilter()
+    private function doPreFilter()
     {
         $preFilterTask = new Task($this->filterChain->doFilter($this->request, $this->response));
         $preFilterTask->run();
     }
 
-    private function runPostFilter()
+    private function doPostFilter()
     {
         $this->filterChain->setStepToPost();
         $postFilterTask = new Task($this->filterChain->doFilter($this->request, $this->response));

@@ -23,7 +23,9 @@ class FilterChain {
         if (empty($filterChain)) return true;
 
         foreach ($filterChain as $filter) {
+            $filter.init();
             $filter.doFilter($request, $response);
+            $filter.destruct();
         }
         return true;
     }
