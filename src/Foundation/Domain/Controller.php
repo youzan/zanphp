@@ -4,14 +4,17 @@ namespace Zan\Framework\Foundation\Domain;
 
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
+use Zan\Framework\Test\Foundation\Coroutine\Context;
 
 class Controller {
 
+    protected $context;
     protected $request;
     protected $response;
 
-    public function __construct(Request $request, Response $response)
+    public function __construct(Request $request, Response $response, Context $context)
     {
+        $this->context = $context;
         $this->request = $request;
         $this->respones = $response;
     }

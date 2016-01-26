@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Http\Filter;
 
+use Zan\Framework\Foundation\Coroutine\Context;
 use Zan\Framework\Foundation\Domain\Filter;
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
@@ -20,7 +21,7 @@ class FilterChain {
         $this->setStepToPre();
     }
 
-    public function doFilter(Request $request, Response $response)
+    public function doFilter(Request $request, Response $response, Context $context)
     {
         $filterChain = $this->step == 'pre' ? $this->preFilterChain : $this->postFilterChain;
 
@@ -29,7 +30,7 @@ class FilterChain {
         /** @var  $filter Filter*/
         foreach ($filterChain as $filter) {
             $filter->init();
-            $filter->doFilter($request, $response);
+            $filter->doFilter($request, $response, $context);
             $filter->destruct();
         }
         return true;

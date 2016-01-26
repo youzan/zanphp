@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Zan\Framework\Foundation\Coroutine\Context;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Domain\Controller;
 use Zan\Framework\Network\Http\Exception\InvalidRoute;
@@ -9,6 +10,7 @@ use Zan\Framework\Network\Http\Filter\FilterChain;
 
 class RequestProcessor {
 
+    private $context;
     private $request;
     private $response;
     private $filterChain;
@@ -18,11 +20,14 @@ class RequestProcessor {
     {
         $this->request  = $request;
         $this->response = $response;
+        $this->context  = new Context();
         $this->filterChain = FilterChain::instance();
     }
 
     public function run($route)
     {
+        $this->doPreFilter();
+
         $controller = $this->createController($route);
 
         if (!($controller instanceof Controller)) {
@@ -33,7 +38,6 @@ class RequestProcessor {
         if (!method_exists($controller, $action)) {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
         }
-        $this->doPreFilter();
         $task = new Task($controller->$action());
         $task->run();
         $this->doPostFilter();
@@ -41,13 +45,13 @@ class RequestProcessor {
 
     private function doPreFilter()
     {
-        $this->filterChain->doFilter($this->request, $this->response);
+        $this->filterChain->doFilter($this->request, $this->response, $this->context);
     }
 
     private function doPostFilter()
     {
         $this->filterChain->setStepToPost();
-        $this->filterChain->doFilter($this->request, $this->response);
+        $this->filterChain->doFilter($this->request, $this->response, $this->context);
     }
 
     private function createController($route)

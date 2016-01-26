@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
+use Zan\Framework\Foundation\Coroutine\Context;
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
 
@@ -14,7 +15,7 @@ abstract class Filter implements \Zan\Framework\Foundation\Contract\Filter{
 
     abstract function init();
 
-    abstract function doFilter(Request $request, Response $response);
+    abstract function doFilter(Request $request, Response $response, Context $context);
 
     abstract function destruct();
 
