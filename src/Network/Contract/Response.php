@@ -52,4 +52,9 @@ class Response implements Future {
         $this->data = $data;
     }
 
+    public function send()
+    {
+        return true;
+    }
+
 }

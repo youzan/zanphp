@@ -5,18 +5,20 @@ namespace Zan\Framework\Network\Http;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Domain\Controller;
 use Zan\Framework\Network\Http\Exception\InvalidRoute;
+use Zan\Framework\Network\Http\Filter\FilterChain;
 
 class RequestProcessor {
 
     private $request;
     private $response;
-
+    private $filterChain;
     private $controllerNamespace = 'Zanhttp';
 
     public function __construct(Request $request, Response $response)
     {
         $this->request  = $request;
         $this->response = $response;
+        $this->filterChain = FilterChain::instance();
     }
 
     public function run($route)
@@ -27,11 +29,25 @@ class RequestProcessor {
             throw new InvalidRoute('Not found controller:'.$controller);
         }
         $action = $route['action'];
+
         if (!method_exists($controller, $action)) {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
         }
+        $this->doPreFilter();
         $task = new Task($controller->$action());
         $task->run();
+        $this->doPostFilter();
+    }
+
+    private function doPreFilter()
+    {
+        $this->filterChain->doFilter($this->request, $this->response);
+    }
+
+    private function doPostFilter()
+    {
+        $this->filterChain->setStepToPost();
+        $this->filterChain->doFilter($this->request, $this->response);
     }
 
     private function createController($route)
