@@ -4,8 +4,11 @@ namespace Zan\Framework\Network\Http\Filter;
 
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class FilterChain {
+
+    use Singleton;
 
     private $step;
     private $preFilterChain;

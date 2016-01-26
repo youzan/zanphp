@@ -7,19 +7,9 @@ use Zan\Framework\Foundation\Exception\System\FilterException;
 
 class FilterLoader {
 
-    /**
-     * @var FilterChain
-     */
-    private static $filterChain;
-
     private static $filterContainer;
     private static $preFilterKey  = 'pre';
     private static $postFilterKey = 'post';
-
-    public static function init()
-    {
-        self::$filterChain = new FilterChain();
-    }
 
     public static function loadFilter(array $filterConfig)
     {
@@ -55,9 +45,9 @@ class FilterLoader {
     private static function addToFilterChain($filterType, $filter)
     {
         if ($filterType == self::$preFilterKey) {
-            self::$filterChain->addPreFilter($filter);
+            FilterChain::getInstance()->addPreFilter($filter);
         }else {
-            self::$filterChain->addPostFilter($filter);
+            FilterChain::getInstance()->addPostFilter($filter);
         }
     }
 
