@@ -45,9 +45,9 @@ class FilterLoader {
     private static function addToFilterChain($filterType, $filter)
     {
         if ($filterType == self::$preFilterKey) {
-            FilterChain::getInstance()->addPreFilter($filter);
+            FilterChain::instance()->addPreFilter($filter);
         }else {
-            FilterChain::getInstance()->addPostFilter($filter);
+            FilterChain::instance()->addPostFilter($filter);
         }
     }
 

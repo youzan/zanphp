@@ -18,7 +18,7 @@ class RequestProcessor {
     {
         $this->request  = $request;
         $this->response = $response;
-        $this->filterChain = new FilterChain();
+        $this->filterChain = FilterChain::instance();
     }
 
     public function run($route)
