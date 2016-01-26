@@ -24,7 +24,7 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     private function bindRequestEvents()
     {
-        $this->server->on('receive', [new RequestHandler(), 'handle']);
+        $this->server->on('receive', [new ReceiveHandler(), 'handle']);
     }
 
     private function setServerConfig(array $serverOption)
