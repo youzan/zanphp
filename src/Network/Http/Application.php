@@ -40,8 +40,6 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     private function initFilter()
     {
         $filters = Config::get($this->filterConfKey);
-
-        FilterLoader::init();
         FilterLoader::loadFilter($filters);
     }
 
