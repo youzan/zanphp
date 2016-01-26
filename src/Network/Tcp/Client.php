@@ -17,7 +17,7 @@ class Client implements \Zan\Framework\Network\Contract\Client{
 
     public function __construct($config=[])
     {
-        $this->client = new TcpClient($config['keep_alive'] ? SWOOLE_SOCK_TCP | SWOOLE_KEEP : SWOOLE_TCP);
+        $this->client = new TcpClient($config['persistent'] ? SWOOLE_SOCK_TCP | SWOOLE_KEEP : SWOOLE_TCP);
         $this->connect($config);
     }
 

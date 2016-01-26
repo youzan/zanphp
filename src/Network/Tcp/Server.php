@@ -34,7 +34,7 @@ class Server implements \Zan\Framework\Network\Contract\Server {
 
     public function start()
     {
-
+        $this->server->start();
     }
 
     public function stop()

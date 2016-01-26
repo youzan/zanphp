@@ -4,7 +4,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use \swoole_server as TcpServer;
 
-class RequestHandler {
+class ReceiveHandler {
 
     public function __construct()
     {
@@ -13,7 +13,7 @@ class RequestHandler {
 
     public function handle(TcpServer $server, $fd, $from_id, $data)
     {
-
+        $server->send($fd, $data);
     }
 
 
