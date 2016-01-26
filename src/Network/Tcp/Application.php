@@ -1,21 +1,18 @@
 <?php
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Tcp;
 
-use \HttpServer;
+use \TcpServer;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Filter\FilterLoader;
 
 class Application extends \Zan\Framework\Network\Contract\Application {
 
     /**
-     * @var HttpServer
+     * @var TcpServer
      */
     private $server;
 
-    private $serverConfKey = 'http.server';
-
-    private $filterConfKey = 'filter';
+    private $serverConfKey = 'tcp.server';
 
     public function __construct($config)
     {
@@ -26,21 +23,14 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     public function init()
     {
         parent::init();
-        $this->initHttpServer();
-        $this->initFilter();
+        $this->initTcpServer();
     }
 
-    public function initHttpServer()
+    public function initTcpServer()
     {
         $config = Config::get($this->serverConfKey);
-        $this->server = new HttpServer($config);
+        $this->server = new TcpServer($config);
         $this->server->init();
-    }
-
-    private function initFilter()
-    {
-        $filters = Config::get($this->filterConfKey);
-        FilterLoader::loadFilter($filters);
     }
 
     public function run()
