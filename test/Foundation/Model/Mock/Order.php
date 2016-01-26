@@ -13,7 +13,9 @@ return [
         'orderNo' => [
             'name' => '订单号',
             'dataType' => 'string',
-            'errorMessage' => '非法的#name#',
+            //default
+            //'errorMessage' => '#name#',
+
             'rules' => [
                 //[ matchMethod, matchParameters, errorMsg],
                 ['minLength', 5],
