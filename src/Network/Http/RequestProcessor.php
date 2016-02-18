@@ -2,6 +2,8 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Generator;
+use Zan\Framework\Foundation\Coroutine\Context;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Domain\Controller;
 use Zan\Framework\Network\Http\Exception\InvalidRoute;
@@ -9,15 +11,17 @@ use Zan\Framework\Network\Http\Filter\FilterChain;
 
 class RequestProcessor {
 
+    private $context;
     private $request;
     private $response;
     private $filterChain;
-    private $controllerNamespace = 'Zanhttp';
+    private $appNamespace = 'Zanhttp';
 
     public function __construct(Request $request, Response $response)
     {
         $this->request  = $request;
         $this->response = $response;
+        $this->context  = new context();
         $this->filterChain = FilterChain::instance();
     }
 
@@ -34,20 +38,23 @@ class RequestProcessor {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
         }
         $this->doPreFilter();
-        $task = new Task($controller->$action());
-        $task->run();
+        $result = $controller->$action();
+        if ($result instanceof Generator) {
+            $task = new Task($result);
+            $task->run();
+        }
         $this->doPostFilter();
     }
 
     private function doPreFilter()
     {
-        $this->filterChain->doFilter($this->request, $this->response);
+        $this->filterChain->doFilter($this->request, $this->response, $this->context);
     }
 
     private function doPostFilter()
     {
         $this->filterChain->setStepToPost();
-        $this->filterChain->doFilter($this->request, $this->response);
+        $this->filterChain->doFilter($this->request, $this->response, $this->context);
     }
 
     private function createController($route)
@@ -59,7 +66,7 @@ class RequestProcessor {
             return null;
         }
         $className  = str_replace(' ', '', $className);
-        $controller = ltrim($this->controllerNamespace . '\\' . $module . '\\Controller\\'. $className);
+        $controller = ltrim($this->appNamespace . '\\' . $module . '\\Controller\\'. $className);
 
         if (!class_exists($controller)) {
             return null;

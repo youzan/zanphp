@@ -8,8 +8,7 @@
 
 namespace Zan\Framework\Utilities\Types;
 
-
-class Direction {
+class Direction extends Enum {
     const UP = 1;
     const DOWN = 2;
     const LEFT = 3;
