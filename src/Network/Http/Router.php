@@ -97,7 +97,7 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $path = explode('/', ltrim($url, '/'));
         $len  = count($path);
 
-        if($len > 0){
+        if($len > 0 && strpos($path[0], '.') === false){
             $this->routes['module'] = $path[0];
         }
         if($len > 1){
