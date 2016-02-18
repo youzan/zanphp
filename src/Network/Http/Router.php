@@ -20,10 +20,10 @@ class Router extends \Zan\Framework\Network\Contract\Router {
     public function parse(Request $request)
     {
         $this->request = $request;
-        $this->setUrl($this->request->getQueryParams());
+        $this->setUrl($this->request->getRequestUri());
+        $this->setDefaultRoute();
 
         if (!$this->url) {
-            $this->setDefaultRoute();
             return $this->routes;
         }
         $this->parseRegexRoute();
@@ -91,34 +91,26 @@ class Router extends \Zan\Framework\Network\Contract\Router {
 
     protected function parseStringRoute($url=null)
     {
-        if(null === $url){
-            $url    = $this->url;
+        if (null === $url){
+            $url = $this->url;
         }
-        $path   = explode('/',$url);
-        $len    = count($path);
+        $path = explode('/', ltrim($url, '/'));
+        $len  = count($path);
+
         if($len > 0){
-            $this->routes['module']      = $path[0];
+            $this->routes['module'] = $path[0];
         }
         if($len > 1){
-            $this->routes['controller']  = ucfirst($this->routes['module']) . '_';
-            $this->routes['controller'] .= ucfirst($path[1]);
-        }else{
-            $this->setDefaultController();
+            $this->routes['controller'] = ucfirst($path[1]);
         }
-
         if($len > 2){
             $this->parseAction($path[2]);
-        }else{
-            $this->setDefaultAction();
-            $this->setDefaultFormat();
         }
-
-        return true;
     }
 
     private function setDefaultModule()
     {
-        $this->routes['module'] = $this->config['default_module'];
+        $this->routes['module'][] = $this->config['default_module'];
     }
 
     private function setDefaultController()
