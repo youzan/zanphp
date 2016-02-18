@@ -110,7 +110,7 @@ class Router extends \Zan\Framework\Network\Contract\Router {
 
     private function setDefaultModule()
     {
-        $this->routes['module'][] = $this->config['default_module'];
+        $this->routes['module'] = $this->config['default_module'];
     }
 
     private function setDefaultController()
