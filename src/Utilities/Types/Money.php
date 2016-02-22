@@ -9,12 +9,12 @@ class Money {
         $this->num = $num;
     }
 
-    public function Rmb()
+    public function toRmb()
     {
 
     }
 
-    public function Dollar()
+    public function toDollar()
     {
 
     }
