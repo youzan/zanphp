@@ -2,6 +2,7 @@
 namespace Zan\Framework\Network\Contract;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\Handler;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 abstract class Application {
@@ -13,6 +14,7 @@ abstract class Application {
     public function __construct($config =[], $appName=null)
     {
         $this->config = $config;
+
         if (null !== $appName ) {
             $this->setAppName($appName);
         }
@@ -38,12 +40,18 @@ abstract class Application {
     {
         $this->initProjectConfig();
         $this->initFramework();
+        $this->initErrorHandler();
     }
 
     protected function initProjectConfig()
     {
         Config::init();
         Config::setConfigPath($this->config['config_path']);
+    }
+
+    private function initErrorHandler()
+    {
+        Handler::initErrorHandler();
     }
 
     protected function initFramework() {

@@ -12,4 +12,6 @@ return [
       'Handler'         => 'Zan\\Framework\\Foundation\\Exception\\Handler',
       'HttpServer'      => 'Zan\\Framework\\Network\\Http\\Server',
       'HttpApplication' => 'Zan\\Framework\\Network\\Http\\Application',
+      'TcpServer'       => 'Zan\\Framework\\Network\\Tcp\\Server',
+      'TcpApplication'  => 'Zan\\Framework\\Network\\Tcp\\Application',
 ];

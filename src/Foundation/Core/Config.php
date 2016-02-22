@@ -56,20 +56,33 @@ class Config
         return get_cfg_var('kdt.'.$key);
     }
 
-    public static function get($key)
+    public static function get($key, $default=null)
     {
         $keys = explode('.',$key);
-        $config = [];
-        do {
+        $map  = & self::$configMap;
+        do{
             $key = array_shift($keys);
-            if (!isset(self::$configMap[$key])) {
-                $config = self::getConfigFile($key);
+            if(!isset($map[$key])){
+                self::getConfigFile($key);
             }
-            return self::$configMap[$key];
+            if(!isset($map[$key])){
+                return $default;
+            }
+            $map = &$map[$key];
 
-        } while (!empty($keys));
+            $run_mode   = self::$configMap['run_mode'];
+            if(isset($map[$run_mode]) ){
+                $map = &$map[$run_mode];
+            }elseif('unittest' == $run_mode && isset($map['test'])){
+                $map = &$map['test'];
+            }elseif (('readonly' == $run_mode) && isset($map['online'])){
+                $map = &$map['online'];
+            }elseif (('pre' == $run_mode) && !isset($map['pre']) && isset($map['online'])){
+                $map = &$map['online'];
+            }
+        }while(!empty($keys));
 
-        return $config;
+        return $map;
     }
 
     public static function set($key,$value)

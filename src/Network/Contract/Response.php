@@ -49,7 +49,15 @@ class Response implements Future {
         if (is_array($data)) {
             $data = json_encode($data);
         }
+        if (is_object($data)) {
+            $data = serialize($data);
+        }
         $this->data = $data;
+    }
+
+    public function send()
+    {
+        return true;
     }
 
 }
