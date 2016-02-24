@@ -28,16 +28,16 @@ class Config
     {
         switch (self::env('RUN_MODE')) {
             case 'test':
-                self::set('run_mode','test');
+                self::set('run_mode', 'test');
                 break;
             case 'unittest':
-                self::set('run_mode','unittest');
+                self::set('run_mode', 'unittest');
                 break;
             case 'readonly':
-                self::set('run_mode','readonly');
+                self::set('run_mode', 'readonly');
                 break;
             default:
-                self::set('run_mode','online');
+                self::set('run_mode', 'online');
                 break;
         }
         self::set('debug', Config::env('DEBUG') ? true : false);
@@ -45,7 +45,7 @@ class Config
 
     public static function setConfigPath($path)
     {
-        if(!$path || !is_dir($path)) {
+        if (!$path || !is_dir($path)) {
             throw new InvalidArgument('invalid path for Config ' . $path);
         }
         self::$configPath = Dir::formatPath($path);
@@ -53,41 +53,41 @@ class Config
 
     public static function env($key)
     {
-        return get_cfg_var('kdt.'.$key);
+        return get_cfg_var('kdt.' . $key);
     }
 
-    public static function get($key, $default=null)
+    public static function get($key, $default = null)
     {
-        $keys = explode('.',$key);
-        $map  = & self::$configMap;
-        do{
+        $keys = explode('.', $key);
+        $map = &self::$configMap;
+        do {
             $key = array_shift($keys);
-            if(!isset($map[$key])){
+            if (!isset($map[$key])) {
                 self::getConfigFile($key);
             }
-            if(!isset($map[$key])){
+            if (!isset($map[$key])) {
                 return $default;
             }
             $map = &$map[$key];
 
-            $run_mode   = self::$configMap['run_mode'];
-            if(isset($map[$run_mode]) ){
+            $run_mode = self::$configMap['run_mode'];
+            if (isset($map[$run_mode])) {
                 $map = &$map[$run_mode];
-            }elseif('unittest' == $run_mode && isset($map['test'])){
+            } elseif ('unittest' == $run_mode && isset($map['test'])) {
                 $map = &$map['test'];
-            }elseif (('readonly' == $run_mode) && isset($map['online'])){
+            } elseif (('readonly' == $run_mode) && isset($map['online'])) {
                 $map = &$map['online'];
-            }elseif (('pre' == $run_mode) && !isset($map['pre']) && isset($map['online'])){
+            } elseif (('pre' == $run_mode) && !isset($map['pre']) && isset($map['online'])) {
                 $map = &$map['online'];
             }
-        }while(!empty($keys));
+        } while (!empty($keys));
 
         return $map;
     }
 
-    public static function set($key,$value)
+    public static function set($key, $value)
     {
-        self::$configMap[$key]   = $value;
+        self::$configMap[$key] = $value;
     }
 
     public static function clear()
@@ -98,8 +98,8 @@ class Config
     private static function getConfigFile($key)
     {
         $envRunMode = self::$configMap['run_mode'] == 'online' ? 'online' : 'test';
-        $configFile = self::$configPath . $envRunMode.'/'. $key . '.php';
-        $commonConfigFile = self::$configPath . 'common'.'/'. $key . '.php';
+        $configFile = self::$configPath . $envRunMode . '/' . $key . '.php';
+        $commonConfigFile = self::$configPath . 'common' . '/' . $key . '.php';
 
         if (!($isExistsEnv = file_exists($configFile)) && !($isExistsCommon = file_exists($commonConfigFile))) {
             throw new InvalidArgument('No such config file ' . $configFile);

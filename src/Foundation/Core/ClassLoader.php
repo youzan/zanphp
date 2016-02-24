@@ -6,14 +6,15 @@ use Zan\Framework\Foundation\Exception\System\FileNotFound;
 class ClassLoader
 {
     private static $loadedMap = [];
+
     public static function load($file)
     {
         $fileHash = md5($file);
-        if(isset(self::$loadedMap[$fileHash])){
+        if (isset(self::$loadedMap[$fileHash])) {
             return true;
         }
 
-        if(!file_exists($file)) {
+        if (!file_exists($file)) {
             throw new FileNotFound('No such file:' . $file);
         }
 
@@ -23,9 +24,9 @@ class ClassLoader
 
     public static function loadFiles(array $files)
     {
-        if(!$files) return false;
+        if (!$files) return false;
 
-        foreach($files as $file){
+        foreach ($files as $file) {
             self::load($file);
         }
 

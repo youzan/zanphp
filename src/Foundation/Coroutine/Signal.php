@@ -9,7 +9,8 @@
 namespace Zan\Framework\Foundation\Coroutine;
 
 
-class Signal {
+class Signal
+{
     const TASK_SLEEP        = 1;
     const TASK_AWAKE        = 2;
     const TASK_CONTINUE     = 3;

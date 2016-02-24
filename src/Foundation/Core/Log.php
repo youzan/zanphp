@@ -9,24 +9,29 @@
 namespace Zan\Framework\Foundation\Core;
 
 
-class Log {
+class Log
+{
     /**
-     * @param mixed  $log       [string,array,object]
+     * @param mixed $log [string,array,object]
      * @param string $logName
      * @return bool
      */
-    public static function info($log, $logName='') {
+    public static function info($log, $logName = '')
+    {
         return true;
     }
 
-    public static function warning($log, $logName='') {
+    public static function warning($log, $logName = '')
+    {
 
     }
 
-    public static function notice($log, $logName='') {
+    public static function notice($log, $logName = '')
+    {
 
     }
 
-    public static function error($log, $logName='') {
+    public static function error($log, $logName = '')
+    {
     }
 }
