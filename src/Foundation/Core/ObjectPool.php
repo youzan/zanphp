@@ -6,7 +6,8 @@ use Zan\Framework\Foundation\Contract\PooledObjectFactory;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-class ObjectPool {
+class ObjectPool
+{
     protected $initialNum = 1;
     protected $maxNum = 10;
     protected $factory = null;
@@ -15,7 +16,9 @@ class ObjectPool {
     protected $usedObjectMap = null;
 
     use Singleton;
-    private function __construct() {
+
+    private function __construct()
+    {
         $this->initialNum = 1;
         $this->maxNum = 10;
 
@@ -43,7 +46,8 @@ class ObjectPool {
 
     }
 
-    public function init(PooledObjectFactory $factory, $maxNum, $initalNum=0) {
+    public function init(PooledObjectFactory $factory, $maxNum, $initalNum = 0)
+    {
         $this->factory = $factory;
         $this->setMaxNum($maxNum);
         $this->setInitalNum($initalNum);
@@ -52,8 +56,9 @@ class ObjectPool {
         return $this;
     }
 
-    protected function setInitalNum($num) {
-        if ( !is_int($num) ) {
+    protected function setInitalNum($num)
+    {
+        if (!is_int($num)) {
             throw new InvalidArgument('invalid initialNum (not int) for ObjectPool');
         }
 
@@ -64,8 +69,9 @@ class ObjectPool {
         $this->initialNum = $num;
     }
 
-    protected function setMaxNum($num) {
-        if ( !is_int($num) ) {
+    protected function setMaxNum($num)
+    {
+        if (!is_int($num)) {
             throw new InvalidArgument('invalid maxNum (not int) for ObjectPool');
         }
 
@@ -76,12 +82,13 @@ class ObjectPool {
         $this->maxNum = $num;
     }
 
-    protected function initPool() {
+    protected function initPool()
+    {
         if ($this->initialNum < 1) {
             return false;
         }
 
-        for($i=0; $i<$this->initialNum; $i++) {
+        for ($i = 0; $i < $this->initialNum; $i++) {
             $this->pool[] = $this->factory->create();
         }
     }

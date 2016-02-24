@@ -9,6 +9,7 @@
 namespace Zan\Framework\Foundation\Contract;
 
 
-interface Async{
+interface Async
+{
     public function execute(callable $callback);
 }

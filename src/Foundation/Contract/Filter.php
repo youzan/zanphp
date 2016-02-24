@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation\Contract;
 
 
-interface Filter {
+interface Filter
+{
 
 }
