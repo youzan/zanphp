@@ -57,7 +57,6 @@ class EventTest extends \UnitTest {
         $that = $this;
         $event = new Event();
         $eventChain = $event->getEventChain();
-        $eventChain = $event->getEventChain();
         $bindCb = function() use($that){
             $that->bindTestCb();
         };
