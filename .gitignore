@@ -35,3 +35,4 @@ iron.iml
 .vagrant
 composer.lock
 /vendor
+*.iml
