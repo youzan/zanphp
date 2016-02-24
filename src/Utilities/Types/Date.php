@@ -19,7 +19,7 @@ class Date
 
     }
 
-    public function isYestoday()
+    public function isYesterday()
     {
 
     }
