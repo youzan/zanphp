@@ -9,41 +9,48 @@
 namespace Zan\Framework\Foundation\Coroutine;
 
 
-class Context {
+class Context
+{
     private $map = [];
     private $event = null;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->map = [];
         $this->event = new Event();
     }
 
-    public function get($key, $default=null, $class=null) {
-        if( !isset($this->map[$key]) ) {
+    public function get($key, $default = null, $class = null)
+    {
+        if (!isset($this->map[$key])) {
             return $default;
         }
 
-        if(null === $class) {
+        if (null === $class) {
             return $this->map[$key];
         }
 
-        if($this->map[$key] instanceof $class
-            || is_subclass_of($this->map[$key], $class)) {
+        if ($this->map[$key] instanceof $class
+            || is_subclass_of($this->map[$key], $class)
+        ) {
             return $this->map[$key];
         }
 
         return $default;
     }
 
-    public function set($key, $value) {
+    public function set($key, $value)
+    {
         $this->map[$key] = $value;
     }
 
-    public function getEvent() {
+    public function getEvent()
+    {
         return $this->event;
     }
 
-    public function getEventChain() {
+    public function getEventChain()
+    {
         return $this->event->getEventChain();
     }
 }

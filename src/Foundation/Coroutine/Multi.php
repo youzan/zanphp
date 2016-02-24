@@ -9,35 +9,40 @@
 namespace Zan\Framework\Foundation\Coroutine;
 
 
-class Multi {
+class Multi
+{
     private $result = [];
     private $request = [];
     private $response = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->init();
     }
 
-    public static function newInstance() {
+    public static function newInstance()
+    {
         $instance = new self();
 
         return $instance;
     }
 
-    public function init() {
+    public function init()
+    {
         $this->result = [];
         $this->request = [];
         $this->response = [];
     }
 
-    public function add($key, callable $callback) {
-
+    public function add($key, callable $callback)
+    {
 
 
         return $this;
     }
 
-    public function execute() {
+    public function execute()
+    {
         return $this->result;
     }
 }

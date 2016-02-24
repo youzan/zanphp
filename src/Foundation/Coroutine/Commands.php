@@ -17,7 +17,7 @@ class Commands
         $dir = __DIR__ . '/Command/';
         $files = Dir::glob($dir, '*.php');
 
-        if(!$files) return false;
+        if (!$files) return false;
 
         ClassLoader::loadFiles($files);
         return true;

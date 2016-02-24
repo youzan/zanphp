@@ -9,6 +9,7 @@
 namespace Zan\Framework\Foundation\Contract;
 
 
-interface Future {
+interface Future
+{
 
 }
