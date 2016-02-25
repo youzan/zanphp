@@ -1,5 +1,4 @@
 <?php
-
 namespace Zan\Framework;
 
 class Zan {
