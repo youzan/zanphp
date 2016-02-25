@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Test\Network\Server;
 
-require __DIR__ . '/../../../' . 'src/Zan.php';
+require __DIR__ . '/../../../' . 'src/Test.php';
 
 use Zan\Framework\Network\Server\Time;
 

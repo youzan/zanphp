@@ -10,7 +10,7 @@ namespace Zan\Framework\Test\Foundation\Core;
 
 use Zan\Framework\Foundation\Core\Config;
 
-require __DIR__ . '/../../../' . 'src/Zan.php';
+require __DIR__ . '/../../../' . 'src/Test.php';
 
 class ConfigTest extends \UnitTest {
     public function setUp()

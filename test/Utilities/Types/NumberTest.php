@@ -10,7 +10,7 @@ namespace Zan\Framework\Test\Utilities\Types;
 
 use Zan\Framework\Utilities\Types\Number;
 
-require __DIR__ . '/../../../' . 'src/Zan.php';
+require __DIR__ . '/../../../' . 'src/Test.php';
 
 class NumberTest extends \UnitTest {
     public function testFloatToStingWork()

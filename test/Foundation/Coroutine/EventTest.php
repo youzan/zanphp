@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Test\Foundation\Core;
 
-require __DIR__ . '/../../../' . 'src/Zan.php';
+require __DIR__ . '/../../../' . 'src/Test.php';
 
 use Zan\Framework\Foundation\Coroutine\Event;
 

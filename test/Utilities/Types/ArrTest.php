@@ -10,7 +10,7 @@ namespace Zan\Framework\Test\Utilities\Types;
 
 use Zan\Framework\Utilities\Types\Arr;
 
-require __DIR__ . '/../../../' . 'src/Zan.php';
+require __DIR__ . '/../../../' . 'src/Test.php';
 
 
 class ArrTest extends \UnitTest {
