@@ -1,9 +1,6 @@
 {
     "name"          : "zanphp/zan",
     "repositories"  : [
-        {
-                  
-        }
     ],
     "require"       : {
     },
