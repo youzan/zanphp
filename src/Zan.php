@@ -25,12 +25,31 @@ class Zan {
 
     private static function initClassAlias()
     {
-        $classAliasMap = require (__DIR__.'/ClassAlias.php');
-        if (!$classAliasMap) return true;
+        if(!file_exists(__DIR__ . '/ClassAlias.php')){
+            return null;
+        }
 
+        require __DIR__ . '/ClassAlias.php';
+
+        if (isset($classAliasMap) && $classAliasMap ){
+            self::initClassAliasMap($classAliasMap);
+        }
+
+        if (isset($classAliasPathes) && $classAliasPathes ){
+            self::initClassAliasPathes($classAliasPathes);
+        }
+    }
+
+    private static function initClassAliasMap($classAliasMap)
+    {
         foreach($classAliasMap as $alias => $original) {
             class_alias($original, $alias);
         }
+    }
+
+    private static function initClassAliasPathes($classAliasPathes)
+    {
+
     }
 }
 Zan::init();

@@ -1,6 +1,9 @@
 {
     "name"          : "zanphp/zan",
     "repositories"  : [
+        {
+                  
+        }
     ],
     "require"       : {
     },
@@ -22,7 +25,7 @@
       ]
     },
     "config"        : {
-        "preferred-install" : "dist"    
+        "preferred-install" : "dist"
     },
     "minimum-stability" : "stable",
     "prefer-stable"     : true

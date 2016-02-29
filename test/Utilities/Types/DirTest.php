@@ -71,4 +71,9 @@ class DirTest extends \UnitTest {
 
         $this->assertEquals('/tmp/', $formatedPath, 'Dir::formatPath faild');
     }
+
+    public function testBasenameWorkFine()
+    {
+        
+    }
 }

@@ -11,7 +11,6 @@ return [
             AND category_id = #{category_id}
             GROUP BY id
             ORDER BY ID DESC
-
             //#GROUP# #ORDER# #LIMIT#
         ",
     ],
