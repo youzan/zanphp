@@ -77,6 +77,12 @@ class DirTest extends \UnitTest {
         $path = __DIR__ . '/dir/';
         $files = Dir::glob($path, '*.php', false);
 
-        var_dump($files);exit;
+        $results = Dir::basename($files, '.php');
+        $this->assertContains('file1',$results, 'Dir::basename with suffix faild');
+        $this->assertContains('file3',$results, 'Dir::basename with suffix faild');
+
+        $results = Dir::basename($files);
+        $this->assertContains('file1.php',$results, 'Dir::basename with suffix faild');
+        $this->assertContains('file3.php',$results, 'Dir::basename with suffix faild');
     }
 }

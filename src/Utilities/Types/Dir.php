@@ -80,13 +80,13 @@ class Dir
         return false;
     }
 
-    public function basename($pathes)
+    public function basename($pathes, $suffix='')
     {
         if(!$pathes) return [];
 
         $ret = [];
         foreach($pathes as $path){
-            $ret[] = basename($path);
+            $ret[] = basename($path, $suffix);
         }
 
         return $ret;
