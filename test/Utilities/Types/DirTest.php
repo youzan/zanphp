@@ -74,6 +74,9 @@ class DirTest extends \UnitTest {
 
     public function testBasenameWorkFine()
     {
-        
+        $path = __DIR__ . '/dir/';
+        $files = Dir::glob($path, '*.php', false);
+
+        var_dump($files);exit;
     }
 }
