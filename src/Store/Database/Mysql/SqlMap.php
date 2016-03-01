@@ -10,6 +10,16 @@ namespace Zan\Framework\Store\Database\Mysql;
 class SqlMap
 {
 
+    public function getSql()
+    {
+
+    }
+
+
+
+
+
+
     private function localFile()
     {
 

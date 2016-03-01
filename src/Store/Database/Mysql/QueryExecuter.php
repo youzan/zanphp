@@ -11,6 +11,8 @@ class QueryExecuter
 {
     private $db;
 
+    private $sqlMap;
+
     public function __construct()
     {
         $this->init();
@@ -60,6 +62,19 @@ class QueryExecuter
 
     }
 
+    private function getSqlMap()
+    {
+        if (null == $this->sqlMap) {
+            $this->createSqlMap();
+        }
+        return $this->sqlMap;
+    }
+
+    private function createSqlMap()
+    {
+        $this->sqlMap = new SqlMap();
+        return $this;
+    }
 
 
 
