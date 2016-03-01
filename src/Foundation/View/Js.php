@@ -10,5 +10,13 @@ namespace Zan\Framework\Foundation\View;
 
 
 class Js {
+    public function load()
+    {
 
+    }
+
+    public function minify()
+    {
+
+    }
 }
