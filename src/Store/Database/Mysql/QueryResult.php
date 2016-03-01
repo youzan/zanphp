@@ -7,7 +7,31 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
-class DbResult
+class QueryResult
 {
 
+    public function one()
+    {
+
+    }
+
+    public function all()
+    {
+
+    }
+
+    public function value()
+    {
+
+    }
+
+    public function count()
+    {
+
+    }
+
+    public function exits()
+    {
+
+    }
 }
