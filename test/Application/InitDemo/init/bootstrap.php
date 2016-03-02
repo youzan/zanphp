@@ -9,7 +9,7 @@
 $appConfig = [
     'appName'           => 'initDemo',
 
-    'appPath'           => __DIR__ . '/../',
+    'rootPath'          => __DIR__ . '/../',
 
 ];
 

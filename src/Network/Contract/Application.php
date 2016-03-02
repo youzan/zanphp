@@ -11,13 +11,9 @@ abstract class Application {
     protected $appName;
     protected $rootPath;
 
-    public function __construct($config =[], $appName=null)
+    public function __construct($config = [])
     {
         $this->config = $config;
-
-        if (null !== $appName ) {
-            $this->setAppName($appName);
-        }
     }
 
     public function setRootPath($dir=null)
@@ -58,9 +54,5 @@ abstract class Application {
 
     }
 
-    protected function createObject()
-    {
-
-    }
 
 }
