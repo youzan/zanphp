@@ -64,7 +64,7 @@ class Event
         return false;
     }
 
-    public static function fire($evtName, $args = null)
+    public static function fire($evtName, $args=null, $loop=true)
     {
         if (isset(self::$evtMap[$evtName]) && self::$evtMap[$evtName]) {
             foreach (self::$evtMap[$evtName] as $key => $evt) {
@@ -75,9 +75,15 @@ class Event
                 if (Event::ONCE_EVENT === $evtType) {
                     unset(self::$evtMap[$evtName][$key]);
                 }
+
+                if(false === $loop){
+                    break;
+                }
             }
         }
-
-        EventChain::fireEventChain($evtName);
+        if(!isset(self::$evtMap[$evtName])
+                || (isset(self::$evtMap[$evtName]) && empty(self::$evtMap[$evtName])) ) {
+            EventChain::fireEventChain($evtName);
+        }
     }
 }
