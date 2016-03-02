@@ -2,6 +2,7 @@
 namespace Zan\Framework\Network\Contract;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Exception\Handler;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
@@ -20,9 +21,12 @@ abstract class Application {
 
     protected function init()
     {
-        Zan::init();
+        $this->initFramwork();
+        $this->initPath();
+        $this->initRunMode();
+        $this->initDebug();
+        $this->initConfig();
         $this->initErrorHandler();
-        Path::init($this->config);
     }
 
     protected function setAppName($config)
@@ -33,6 +37,16 @@ abstract class Application {
         Config::set('appName',$config['appName']);
     }
 
+    protected function initFramwork()
+    {
+        Zan::init();
+    }
+
+    protected function initPath()
+    {
+        Path::init($this->config);
+    }
+
     protected function initRunMode()
     {
         $cli = Registry::get('cli');
@@ -41,6 +55,16 @@ abstract class Application {
             RunMode::setCliInput($runMode);
         }
         RunMode::detect();
+    }
+
+    protected function initDebug()
+    {
+        $cli = Registry::get('cli');
+        $debug = $cli->arguments->get('debug');
+        if($debug){
+            Debug::setCliInput($debug);
+        }
+        Debug::detect();
     }
 
     protected function initConfig()
