@@ -49,4 +49,28 @@ class Arr {
             'notExist' => $notExist
         ];
     }
+
+    public static function merge()
+    {
+        $total = func_num_args();
+
+        $result = array();
+        for ($i = 0; $i < $total; $i++) {
+            foreach (func_get_arg($i) as $key => $val) {
+                if (isset($result[$key])) {
+                    if (is_array($val)) {
+                        $result[$key] = Arr::merge($result[$key], $val);
+                    } elseif (is_int($key)){
+                        $result[$key] = $val;
+                    } else {
+                        $result[$key] = $val;
+                    }
+                } else {
+                    $result[$key] = $val;
+                }
+            }
+        }
+
+        return $result;
+    }
 }

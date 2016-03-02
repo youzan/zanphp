@@ -69,7 +69,6 @@ abstract class Application {
 
     protected function initConfig()
     {
-        Config::setConfigPath(Path::getConfigPath());
     }
 
     protected function initErrorHandler()

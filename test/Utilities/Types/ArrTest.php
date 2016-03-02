@@ -56,4 +56,45 @@ class ArrTest extends \UnitTest {
         $this->assertArrayHasKey(0, $ret['notExist'], 'Arr::sortByArray failed');
         $this->assertEquals(12, $ret['notExist'][0], 'Arr::sortByArray failed');
     }
+
+    public function testMerge()
+    {
+        $arr1 = [
+            'c1'	=> [
+                'd1'	=> '1',
+                'd2'	=> '2',
+            ],
+            'c2'	=> [
+                'f1'	=> '3',
+                'f2'	=> '4',
+                'f3'	=> [1,2,3],
+            ],
+        ];
+
+        $arr2 = [
+            'c2'	=> [
+                'f2'	=> '100',
+                'f3'	=> [100, 200, 300],
+                'f4'	=> '200',
+            ],
+            'c3'	=> [
+                'h1'	=> 500,
+                'h2'	=> 600,
+            ],
+        ];
+
+        $arr = Arr::merge($arr1, $arr2);
+
+        $this->assertArrayHasKey('c1', $arr, 'Arr::merge fail');
+        $this->assertArrayHasKey('c2', $arr, 'Arr::merge fail');
+        $this->assertArrayHasKey('c3', $arr, 'Arr::merge fail');
+
+        $this->assertArrayHasKey('f1', $arr['c2'], 'Arr::merge fail');
+        $this->assertArrayHasKey('f2', $arr['c2'], 'Arr::merge fail');
+        $this->assertArrayHasKey('f3', $arr['c2'], 'Arr::merge fail');
+        $this->assertArrayHasKey('f4', $arr['c2'], 'Arr::merge fail');
+
+        $this->assertContains(100, $arr['c2']['f3'], 'Arr::merge fail');
+        $this->assertNotContains(1, $arr['c2']['f3'], 'Arr::merge fail');
+    }
 }
