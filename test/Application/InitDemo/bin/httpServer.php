@@ -14,7 +14,7 @@ require __DIR__ . '/../init/bootstrap.php';
 $cli = new \League\CLImate\CLImate();
 $cli->arguments->add($arguments);
 $cli->arguments->parse();
-\Zan\Framework\Network\Server\Registry::set('cli', $cli);
+\Zan\Framework\Utilities\DesignPattern\Registry::set('cli', $cli);
 
 var_dump($cli->arguments->get('verbose'));exit;
 
