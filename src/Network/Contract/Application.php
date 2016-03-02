@@ -2,57 +2,55 @@
 namespace Zan\Framework\Network\Contract;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Exception\Handler;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Utilities\DesignPattern\Registry;
+use \Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Zan;
 
 abstract class Application {
-
-    protected $config;
-    protected $appName;
-    protected $rootPath;
-
+    private $config = [];
     public function __construct($config = [])
     {
         $this->config = $config;
+        $this->setAppName($config);
+        $this->init();
     }
 
-    public function setRootPath($dir=null)
+    protected function init()
     {
-        if (!$dir || !is_dir($dir) ) {
-            throw new InvalidArgument('Application root path ({$dir}) is invalid!');
-        }
-        $this->rootPath = $dir;
-    }
-
-    public function setAppName($appName=null)
-    {
-        if (null === $appName ) {
-            return false;
-        }
-        $this->appName = $appName;
-    }
-
-    public function init()
-    {
-        $this->initProjectConfig();
-        $this->initFramework();
+        Zan::init();
         $this->initErrorHandler();
+        Path::init($this->config);
     }
 
-    protected function initProjectConfig()
+    protected function setAppName($config)
     {
-        Config::init();
-        Config::setConfigPath($this->config['config_path']);
+        if(!isset($config['appName'])){
+            throw new InvalidArgument('appName not defined in init.bootstrap file');
+        }
+        Config::set('appName',$config['appName']);
     }
 
-    private function initErrorHandler()
+    protected function initRunMode()
+    {
+        $cli = Registry::get('cli');
+        $runMode = $cli->arguments->get('runMode');
+        if($runMode){
+            RunMode::setCliInput($runMode);
+        }
+        RunMode::detect();
+    }
+
+    protected function initConfig()
+    {
+        Config::setConfigPath(Path::getConfigPath());
+    }
+
+    protected function initErrorHandler()
     {
         Handler::initErrorHandler();
     }
-
-    protected function initFramework() {
-
-    }
-
 
 }

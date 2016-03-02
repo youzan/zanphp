@@ -6,21 +6,20 @@
  * Time: 20:45
  */
 
+use \Zan\Framework\Utilities\DesignPattern\Registry;
+use \Zan\Framework\Zan;
+
+
 require __DIR__ . '/../../../../' . 'vendor/autoload.php';
-require __DIR__ . '/../../../../' . 'src/Zan.php';
 require __DIR__ . '/config/httpArguments.php';
 require __DIR__ . '/../init/bootstrap.php';
 
 $cli = new \League\CLImate\CLImate();
 $cli->arguments->add($arguments);
 $cli->arguments->parse();
-\Zan\Framework\Utilities\DesignPattern\Registry::set('cli', $cli);
+Registry::set('cli', $cli);
 
-var_dump($cli->arguments->get('verbose'));exit;
-
-Zan\Framework\Zan::createHttpApplication($appConfig)
-        ->init()
-        ->run();
+Zan::createHttpApplication($appConfig)->run();
 
 
 

@@ -4,7 +4,7 @@ namespace Zan\Framework\Foundation\Core;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Utilities\Types\Dir;
 
-class Config
+class Configbak
 {
     private static $configMap = [];
     private static $inited = false;

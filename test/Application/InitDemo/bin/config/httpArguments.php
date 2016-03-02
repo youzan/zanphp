@@ -16,7 +16,7 @@ $arguments = [
         'description'   => 'Verbose output',
         'noValue'       => true,
     ],
-    'runmode'           => [
+    'runMode'           => [
         'prefix'        => 'r',
         'longPrefix'    => 'run-mode',
         'description'   => 'application run mode',
