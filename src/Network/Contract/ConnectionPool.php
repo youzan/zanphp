@@ -8,30 +8,69 @@
 
 namespace Zan\Framework\Network\Contract;
 
+use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Core\ObjectPool;
+use Zan\Framework\Network\Facade\ConnectionManager;
+use Zan\Framework\Utilities\Types\ObjectArray;
 
 class ConnectionPool extends ObjectPool{
 
+    private $_freeConnection = null;
+
+    private $_activeConnection = null;
+
+    private $_config=null;
+
+
+
+    public function __construct($config) {
+        $this->_config = $config;
+        init();
+    }
+
+    public function init() {
+        //todo 读取配置文件
+        $initConnection = $this->_config['init-connection'];
+
+        $this->_freeConnection = new ObjectArray();
+        $this->_activeConnection = new ObjectArray();
+        for ($i=0; $i<$initConnection; $i++) {
+            //todo 创建链接,存入数组
+            $conn = new ConnBeanTest();
+            $this->_freeConnection->push($conn);
+        }
+
+    }
+
+    /**
+     * @return
+     * 获取链接
+     */
     public function get() /* Connection */
     {
-
+        if (count($this->_activeConnection) < $this->_config['maximum-connection-count']) {
+            if (count($this->_freeConnection) > 0) {
+                $conn = $this->_freeConnection->pop();
+            }
+        } else {
+            return null;
+        }
+        if ($conn) {
+            $this->_activeConnection->push($conn);
+        }
+        deferRelease($conn);
+        return $conn;
     }
 
     public function release(Connection $conn)
     {
-
+        $this->_freeConnection->push($conn);
+        $this->_activeConnection->remove($conn);
+        if (count($this->_freeConnection) == 1) {
+            //唤醒等待事件
+            $evtName = '' . '_free';
+            Event::fire($evtName, [], false);
+        }
     }
 
-    public function configDemo() {
-        $config = new Config();
-        $config->set('host', '192.168.66.202:3306');
-        $config->set('user', 'test_koudaitong');
-        $config->set('pool_name', 'p_zan');
-        $config->set('maximum-connection-count', '100');
-        $config->set('minimum-connection-count', '10');
-        $config->set('keeping-sleep-time', '90000');
-        $config->set('maximum-new-connections', '5');
-        $config->set('prototype-count', '5');
-
-    }
 }
