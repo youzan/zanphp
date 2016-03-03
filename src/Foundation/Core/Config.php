@@ -14,7 +14,6 @@ class Config
 
     public static function reload()
     {
-        self::clear();
     }
 
     public static function get($key, $default = null)
