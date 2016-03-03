@@ -54,7 +54,7 @@ class Arr {
     {
         $total = func_num_args();
 
-        $result = array();
+        $result = [];
         for ($i = 0; $i < $total; $i++) {
             foreach (func_get_arg($i) as $key => $val) {
                 if (isset($result[$key])) {
