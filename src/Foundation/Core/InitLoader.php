@@ -9,6 +9,7 @@
 namespace Zan\Framework\Foundation\Core;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Dir;
 
 class InitLoader {
