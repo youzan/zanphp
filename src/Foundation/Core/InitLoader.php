@@ -42,7 +42,7 @@ class InitLoader {
 
     private function loadFiles($path)
     {
-        $files = Dir::glob($path, '*.php', false);
+        $files = Dir::glob($path, '*.php', Dir::SCAN_CURRENT_DIR);
 
         foreach($files as $file){
             require $file;
