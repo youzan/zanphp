@@ -1,7 +1,6 @@
 <?php
-namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Contract\Future;
+namespace Zan\Framework\Foundation\Coroutine;
 
 class Scheduler
 {

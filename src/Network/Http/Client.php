@@ -1,15 +1,15 @@
 <?php
 
+/**
+ * @author hupp
+ * create date: 16/03/02
+ */
+
 namespace Zan\Framework\Network\Http;
 
 class Client
 {
-    /**
-     * @var HttpClient
-     */
-    private static $httpClient;
-
-    public static function call($path, $parameter = [], callable $callback = null, $method = 'POST')
+    public static function call($path, $parameter = [], $method = 'POST')
     {
         yield (new HttpClient($path, $parameter, $method));
     }

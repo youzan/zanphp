@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author hupp
+ * create date: 16/03/02
+ */
 
 namespace Zan\Framework\Network\Http;
 
@@ -13,15 +17,13 @@ class HttpClient implements Async{
     /**
      * @var swoole_client
      */
-    private $client;
-
+    private $client = null;
     private $callback = null;
 
     protected $host;
     protected $port = 80;
     protected $path;
     protected $method;
-
     protected $request;
     protected $timeout;
     protected $post_data = '';
@@ -44,12 +46,12 @@ class HttpClient implements Async{
 
     public function execute(callable $callback)
     {
-        var_dump('execute....');
         $this->callback = $callback;
+
         $this->call();
     }
 
-    public function call(callable $callback = null)
+    public function call()
     {
         $this->client = new swoole_client(SWOOLE_TCP, SWOOLE_SOCK_ASYNC);
 
@@ -109,15 +111,12 @@ class HttpClient implements Async{
     {
         list($header, $body) = Parser::parseResponseData($data);
 
-        var_dump('receive:',$header, $body);
-
-
         call_user_func($this->callback, $body);
     }
 
     public function OnError()
     {
-        echo "Connect to server failed.\n";
+        call_user_func($this->callback, "Connect to server failed.");
     }
 
     public function onClose()
