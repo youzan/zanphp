@@ -7,16 +7,13 @@
  */
 namespace Zan\Framework\Test\Foundation\Coroutine;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
-
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
 
-
-class TaskTest extends \UnitTest {
+class TaskTest extends \TestCase {
     public function setUp() {
         parent::setUp();
     }

@@ -8,12 +8,9 @@
 
 namespace Zan\Framework\Test\Network\Server;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
-
 use Zan\Framework\Network\Server\Time;
 
-
-class TimeTest extends \UnitTest {
+class TimeTest extends \TestCase {
     public function testTimeFormatWorkFine()
     {
         $time = new Time();

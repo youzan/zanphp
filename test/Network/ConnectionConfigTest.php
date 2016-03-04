@@ -10,9 +10,7 @@ namespace Zan\Framework\Test\Network;
 
 use Zan\Framework\Network\Client\ConnectionConfig;
 
-require __DIR__ . '/../../' . 'src/Test.php';
-
-class ConnectionConfigTest extends \UnitTest {
+class ConnectionConfigTest extends \TestCase {
     public function setUp()
     {
         $path = __DIR__ . '/connection/';
