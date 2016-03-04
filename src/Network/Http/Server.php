@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author hupp
+ * create date: 16/01/05
+ */
 
 namespace Zan\Framework\Network\Http;
 
