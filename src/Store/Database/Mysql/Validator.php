@@ -9,8 +9,13 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 class Validator
 {
-    public function validate()
+    public static function validate($value)
     {
+        return addslashes($value);
+    }
 
+    private function injectCheck($value)
+    {
+        return preg_grep('/select|insert|and|or|update|delete|\'|\/\*|\*|\.\.\/|\.\/|union|into|load_file|outfile/i', $value);
     }
 }

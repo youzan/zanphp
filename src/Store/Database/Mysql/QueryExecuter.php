@@ -7,31 +7,34 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
+use Zan\Framework\Store\Database\Mysql\SqlMap;
+
 class QueryExecuter
 {
+    /**
+     * @var \mysqli
+     */
     private $db;
 
     private $sqlMap;
 
-    public function __construct()
+    public function __construct(\mysqli $db)
     {
-        $this->init();
-    }
-
-    private function init()
-    {
-        $this->setDb();
+        $this->setDb($db);
     }
 
     private function setDb()
     {
         if (null == $this->db) {
             //todo
-            $this->db = new object;
+//            $this->db = new object;
         }
         return $this->db;
     }
 
+    /**
+     * @return \mysqli
+     */
     public function getDb()
     {
         return $this->db;
@@ -39,6 +42,7 @@ class QueryExecuter
 
     public function insert()
     {
+//        $sql = $this->getSqlMap()->getSql();
 
     }
 
@@ -52,10 +56,33 @@ class QueryExecuter
 
     }
 
-    public function query()
+    public function query($sql)
     {
-
+//        $link1 = mysqli_connect();
+        $this->getDb()->query("$sql", MYSQLI_ASYNC);
+        $allLinks = [$this->db];
+        $processed = 0;
+        do {
+            $links = $errors = $reject = [];
+            foreach ($allLinks as $link) {
+                $links[] = $errors[] = $reject[] = $link;
+            }
+            if (!$this->getDb()->poll($links, $errors, $reject, 1)) {
+                continue;
+            }
+            foreach ($links as $link) {
+                if ($result = $link->reap_async_query()) {
+                    print_r($result->fetch_row());
+                    if (is_object($result))
+                        mysqli_free_result($result);
+                } else die(sprintf("MySQLi Error: %s", mysqli_error($link)));
+                $processed++;
+            }
+        } while ($processed < count($allLinks));
     }
+
+
+
 
     private function validate()
     {
@@ -65,15 +92,14 @@ class QueryExecuter
     private function getSqlMap()
     {
         if (null == $this->sqlMap) {
-            $this->createSqlMap();
+            $this->sqlMap = $this->createSqlMap();
         }
         return $this->sqlMap;
     }
 
     private function createSqlMap()
     {
-        $this->sqlMap = new SqlMap();
-        return $this;
+        return new SqlMap();
     }
 
 
