@@ -2,6 +2,8 @@
 
 namespace Zan\Framework\Utilities\Types;
 
+use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+
 class Dir
 {
 
@@ -9,13 +11,13 @@ class Dir
     const SCAN_BFS = 'bfs';
     const SCAN_DFS = 'dfs';
 
-    public static function glob($path, $pattern=null, $recursive=self::SCAN_DFS)
+    public static function glob($path, $pattern=null, $strategy=self::SCAN_DFS)
     {
         if(!is_dir($path) || !$pattern) {
-            return [];
+            throw new InvalidArgument('invalid $path or $pattern for Dir::glob');
         }
 
-        $files = Dir::scan($path, $recursive);
+        $files = Dir::scan($path, $strategy);
         $result = [];
         foreach($files as $file) {
             if(false === self::matchPattern($pattern, $file) ) {
@@ -26,33 +28,40 @@ class Dir
         return $result;
     }
 
-    public static function scan($path, $recursive=self::SCAN_CURRENT_DIR, $excludeDir=true)
+    public static function scan($path, $strategy=self::SCAN_CURRENT_DIR, $excludeDir=true)
     {
-        $files = [];
-        switch($recursive){
+        if(!is_dir($path)){
+            throw new InvalidArgument('invalid $path for Dir::scan');
+        }
+
+        switch($strategy){
             case self::SCAN_CURRENT_DIR:
-                $files = self::getFilesCurrent($path,$excludeDir);
+                $files = self::scanCurrentDir($path,$excludeDir);
                 break;
             case self::SCAN_BFS:
-                $files = self::getFilesBfs($path,$excludeDir);;
+                $files = self::scanBfs($path,$excludeDir);;
                 break;
             case self::SCAN_DFS:
-                $files = self::getFilesDfs($path,$excludeDir);
+                $files = self::scanDfs($path,$excludeDir);
                 break;
+            default:
+                throw new InvalidArgument('invalid $strategy for Dir::glob');
         }
+
         return $files;
     }
 
-    private static function getFilesCurrent($path,$excludeDir=true){
+    private static function scanCurrentDir($path,$excludeDir=true){
         $path = self::formatPath($path);
         $dh = opendir($path);
         if(!$dh) return [];
+
         $files = [];
         while( false !== ($file=readdir($dh)) ) {
             if ($file == '.' || $file == '..') {
                 continue;
             }
-            $fileType = filetype($path.$file);
+            $fileType = filetype($path. $file);
             if('dir' == $fileType && false === $excludeDir) {
                 $files[] = $path . $file . '/';
             }
@@ -64,15 +73,16 @@ class Dir
         return $files;
     }
 
-    private static function getFilesBfs($path,$excludeDir=true){
+    private static function scanBfs($path,$excludeDir=true){
         $files = [];
         $queue = new \SplQueue();
         $queue->enqueue($path);
+
         while(!$queue->isEmpty()){
             $file = $queue->dequeue();
             $fileType = filetype($file);
             if('dir' == $fileType) {
-                $subFiles = self::getFilesCurrent($file,false);
+                $subFiles = self::scanCurrentDir($file,false);
                 foreach($subFiles as $subFile){
                     $queue->enqueue($subFile);
                 }
@@ -87,13 +97,14 @@ class Dir
         return $files;
     }
 
-    private static function getFilesDfs($path,$excludeDir=true){
+    private static function scanDfs($path,$excludeDir=true){
         $files = [];
-        $subFiles = self::getFilesCurrent($path,false);
+        $subFiles = self::scanCurrentDir($path,false);
+
         foreach($subFiles as $subFile){
             $fileType = filetype($subFile);
             if('dir' == $fileType) {
-                $innerFiles = self::getFilesDfs($subFile,$excludeDir);
+                $innerFiles = self::scanDfs($subFile,$excludeDir);
                 $files = Arr::join($files,$innerFiles);
                 if(false === $excludeDir){
                     $files[] = $subFile;

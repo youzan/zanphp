@@ -28,6 +28,14 @@ class RunMode {
         return self::$runMode;
     }
 
+    public static function set($runMode)
+    {
+        if(!isset(self::$modeMap[$runMode])){
+            throw new InvalidArgument('invalid $runMode in RunMode::set');
+        }
+        self::$runMode = $runMode;
+    }
+
     public static function setCliInput($mode)
     {
         if(!$mode){

@@ -57,14 +57,13 @@ class Arr {
         $result = [];
         for ($i = 0; $i < $total; $i++) {
             foreach (func_get_arg($i) as $key => $val) {
-                if (isset($result[$key])) {
-                    if (is_array($val)) {
-                        $result[$key] = Arr::merge($result[$key], $val);
-                    } elseif (is_int($key)){
-                        $result[$key] = $val;
-                    } else {
-                        $result[$key] = $val;
-                    }
+                if (!isset($result[$key])) {
+                    $result[$key] = $val;
+                    continue;
+                }
+
+                if (is_array($val) && is_array($result[$key])) {
+                    $result[$key] = Arr::merge($result[$key], $val);
                 } else {
                     $result[$key] = $val;
                 }
@@ -72,5 +71,17 @@ class Arr {
         }
 
         return $result;
+    }
+
+    public static function createMap($routes,$value){
+        $map = [];
+        if(!is_array($map) || empty($routes)){
+            $map = [];
+        }elseif(1 == count($routes)){
+            $map[$routes[0]] = $value;
+        }else {
+            $map[$routes[0]] = self::createMap(array_slice($routes, 1, count($routes) - 1), $value);
+        }
+        return $map;
     }
 }
