@@ -10,7 +10,7 @@ namespace Zan\Framework\Network\Facade;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Client\FutureConnection;
-use Zan\Framework\Network\Contract\ConnectionPool as Pool;
+use Zan\Framework\Network\Common\ConnectionPool as Pool;
 
 
 class ConnectionManager {

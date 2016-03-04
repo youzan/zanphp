@@ -6,7 +6,7 @@
  * Time: 21:49
  */
 
-namespace Zan\Framework\Network\Contract;
+namespace Zan\Framework\Network\Common;
 
 
 class ConnBeanTest {
