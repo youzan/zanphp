@@ -53,9 +53,12 @@ class Arr {
     public static function merge()
     {
         $total = func_num_args();
+        if(0 === $total){
+            return [];
+        }
 
-        $result = [];
-        for ($i = 0; $i < $total; $i++) {
+        $result = func_get_arg(0);
+        for ($i = 1; $i < $total; $i++) {
             foreach (func_get_arg($i) as $key => $val) {
                 if (!isset($result[$key])) {
                     $result[$key] = $val;
@@ -72,16 +75,16 @@ class Arr {
 
         return $result;
     }
-
-    public static function createMap($routes,$value){
-        $map = [];
-        if(!is_array($map) || empty($routes)){
-            $map = [];
-        }elseif(1 == count($routes)){
-            $map[$routes[0]] = $value;
-        }else {
-            $map[$routes[0]] = self::createMap(array_slice($routes, 1, count($routes) - 1), $value);
+    
+    public static function createTreeByList(array $list, $value){
+        if(empty($list)){
+            return $value;
         }
+
+        $map = [];
+        $first = array_shift($list);
+        $map[$first] = self::createTreeByList($list, $value);
+
         return $map;
     }
 }

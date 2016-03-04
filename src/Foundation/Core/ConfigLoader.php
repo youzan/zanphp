@@ -15,20 +15,23 @@ class ConfigLoader
         if(!is_dir($path)){
             throw new InvalidArgument('Invalid path for ConfigLoader');
         }
-        $configFiles = Dir::glob($path,'*.php',Dir::SCAN_BFS);
+
+        $path = Dir::formatPath($path);
+        $configFiles = Dir::glob($path, '*.php', Dir::SCAN_BFS);
+
         $configMap = [];
         foreach($configFiles as $configFile){
-            $newConfigs = require $configFile;
-            if(!is_array($newConfigs)){
-                throw new InvalidArgument("config set error:".$configFile);
+            $loadedConfig = require $configFile;
+            if(!is_array($loadedConfig)){
+                throw new InvalidArgument("syntax error find in config file: " . $configFile);
             }
 
-            $relativePath = substr($configFile,strlen($path), -4);
-            $relativePath = trim($relativePath,'/');
-            $newConfigMap = Arr::createMap(explode('/',$relativePath),$newConfigs);
+            $keyString = substr($configFile, strlen($path), -4);
+            $loadedConfig = Arr::createTreeByList(explode('/',$keyString),$loadedConfig);
 
-            $configMap = Arr::merge($configMap,$newConfigMap);
+            $configMap = Arr::merge($configMap,$loadedConfig);
         }
+
         return $configMap;
     }
 
