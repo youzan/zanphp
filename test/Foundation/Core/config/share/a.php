@@ -7,7 +7,6 @@
  */
 
 return [
-    'b' => [
-        'c' => 1,
-    ],
+    'config' => 'share',
+    'share' => 'share'
 ];

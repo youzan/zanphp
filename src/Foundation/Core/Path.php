@@ -40,6 +40,10 @@ class Path {
         return self::$configPath;
     }
 
+    public static function setConfigPath($configPath){
+        self::$configPath = $configPath;
+    }
+
     public static function getSqlPath()
     {
         return self::$sqlPath;

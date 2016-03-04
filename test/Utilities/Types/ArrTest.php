@@ -95,4 +95,16 @@ class ArrTest extends \TestCase {
         $this->assertContains(100, $arr['c2']['f3'], 'Arr::merge fail');
         $this->assertNotContains(1, $arr['c2']['f3'], 'Arr::merge fail');
     }
+
+    public function testCreateTreeByList(){
+        $list = ['a',0,'c'];
+        $arr = Arr::createTreeByList($list,'abc');
+        $this->assertArrayHasKey('a', $arr, 'Arr::createTreeByList fail');
+        $this->assertArrayHasKey(0, $arr['a'], 'Arr::createTreeByList fail');
+        $this->assertArrayHasKey('c', $arr['a']['0'], 'Arr::createTreeByList fail');
+
+        $this->assertEquals('abc', $arr['a'][0]['c'], 'Arr::sortByArray failed');
+
+    }
+
 }

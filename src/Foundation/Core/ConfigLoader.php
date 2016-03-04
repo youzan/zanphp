@@ -4,12 +4,12 @@ namespace Zan\Framework\Foundation\Core;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Utilities\Types\Dir;
+use Zan\Framework\Utilities\Types\Arr;
 
 class ConfigLoader
 {
     use Singleton;
 
-    //TODO: file load order
     public function load($path)
     {
         if(!is_dir($path)){
@@ -17,17 +17,22 @@ class ConfigLoader
         }
 
         $path = Dir::formatPath($path);
-        $files = Dir::glob($path, '*.php');
-        $fileMap = $this->parseFilesToMap($files, $path);
+        $configFiles = Dir::glob($path, '*.php', Dir::SCAN_BFS);
+
+        $configMap = [];
+        foreach($configFiles as $configFile){
+            $loadedConfig = require $configFile;
+            if(!is_array($loadedConfig)){
+                throw new InvalidArgument("syntax error find in config file: " . $configFile);
+            }
+
+            $keyString = substr($configFile, strlen($path), -4);
+            $loadedConfig = Arr::createTreeByList(explode('/',$keyString),$loadedConfig);
+
+            $configMap = Arr::merge($configMap,$loadedConfig);
+        }
+
+        return $configMap;
     }
 
-    private function parseFilesToMap($files, $path)
-    {
-
-    }
-
-    private function formateFilePath($file, $path, $suffix='.php')
-    {
-
-    }
 }
