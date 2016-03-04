@@ -1,7 +1,6 @@
 <?php
-namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Contract\Future;
+namespace Zan\Framework\Foundation\Coroutine;
 
 class Scheduler
 {
@@ -31,10 +30,10 @@ class Scheduler
         $signal = $this->handleAsyncCallback($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleTaskStack($value);
+        $signal = $this->handleYieldValue($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleYieldValue($value);
+        $signal = $this->handleTaskStack($value);
         if ($signal !== null) return $signal;
 
         $signal = $this->checkTaskDone($value);
@@ -56,7 +55,7 @@ class Scheduler
         $this->task->setCoroutine($coroutine);
     }
 
-    public function asyncCallback(Future $response)
+    public function asyncCallback($response)
     {
         $coroutine = $this->stack->pop();
         $this->task->setCoroutine($coroutine);
@@ -129,6 +128,8 @@ class Scheduler
 
         $coroutine = $this->stack->pop();
         $this->task->setCoroutine($coroutine);
+
+        $value = $this->task->getSendValue();
         $this->task->send($value);
 
         return Signal::TASK_CONTINUE;

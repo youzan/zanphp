@@ -12,6 +12,7 @@ use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
+use Zan\Framework\Test\Foundation\Coroutine\Task\Steps;
 
 class TaskTest extends \TestCase {
     public function setUp() {
@@ -139,5 +140,25 @@ class TaskTest extends \TestCase {
 
         $taskData = $task->getResult();
         $this->assertEquals('Error.catch.exception', $taskData, 'get exception task final output fail');
+    }
+
+    public function testStepsWorkFine()
+    {
+        $context = new Context();
+
+        $job = new Steps($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+
+        $result = $context->show();
+
+        $this->assertArrayHasKey('result',$result, 'steps job failed to set context');
+        $this->assertEquals('stepN', $context->get('result'), 'steps job get wrong context value');
+
+        $taskData = $task->getResult();
+        $this->assertEquals('stepN', $taskData, 'get steps task final output fail');
+
     }
 }

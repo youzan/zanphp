@@ -2,8 +2,8 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
-use Zan\Framework\Network\Http\Request;
-use Zan\Framework\Network\Http\Response;
+use Zan\Framework\Network\Contract\Request;
+use Zan\Framework\Network\Contract\Response;
 
 class Controller {
 
