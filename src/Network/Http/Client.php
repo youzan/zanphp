@@ -9,11 +9,9 @@ class Client
      */
     private static $httpClient;
 
-    public static function call($path, $parameter = [], callable $callback = null, $method = 'GET')
+    public static function call($path, $parameter = [], callable $callback = null, $method = 'POST')
     {
-        self::$httpClient = new HttpClient($path, $parameter, $method);
-
-        return self::$httpClient->call($callback);
+        yield (new HttpClient($path, $parameter, $method));
     }
 
 }

@@ -56,7 +56,7 @@ class Scheduler
         $this->task->setCoroutine($coroutine);
     }
 
-    public function asyncCallback(Future $response)
+    public function asyncCallback($response)
     {
         $coroutine = $this->stack->pop();
         $this->task->setCoroutine($coroutine);
