@@ -10,13 +10,12 @@ namespace Zan\Framework\Test\Foundation\Core;
 
 use Zan\Framework\Foundation\Core\Config;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
-
-class ConfigTest extends \UnitTest {
+class ConfigTest extends \TestCase
+{
     public function setUp()
     {
         $path = __DIR__ . '/config/';
-        Config::setConfigPath($path);
+        //Config::setConfigPath($path);
     }
 
     public function tearDown()

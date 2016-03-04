@@ -8,11 +8,10 @@
 
 namespace Zan\Framework\Test\Utilities\Types;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
 
 use Zan\Framework\Utilities\Types\Dir;
 
-class DirTest extends \UnitTest {
+class DirTest extends \TestCase {
 
     public function testScanWorkFine()
     {
