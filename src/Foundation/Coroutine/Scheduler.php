@@ -31,10 +31,10 @@ class Scheduler
         $signal = $this->handleAsyncCallback($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleTaskStack($value);
+        $signal = $this->handleYieldValue($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleYieldValue($value);
+        $signal = $this->handleTaskStack($value);
         if ($signal !== null) return $signal;
 
         $signal = $this->checkTaskDone($value);
@@ -129,6 +129,8 @@ class Scheduler
 
         $coroutine = $this->stack->pop();
         $this->task->setCoroutine($coroutine);
+
+        $value = $this->task->getSendValue();
         $this->task->send($value);
 
         return Signal::TASK_CONTINUE;
