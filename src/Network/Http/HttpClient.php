@@ -10,7 +10,7 @@ use \swoole_client;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
 
-class HttpClient implements Async{
+class HttpClient implements Async {
 
     const EOF = "\r\n";
 
