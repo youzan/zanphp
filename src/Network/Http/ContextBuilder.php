@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Coroutine\Context;
+use Zan\Framework\Foundation\Domain\Context;
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 
 class ContextBuilder {

@@ -5,7 +5,7 @@ namespace Zan\Framework\Foundation\Domain;
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
 
-abstract class Filter implements \Zan\Framework\Foundation\Contract\Filter{
+abstract class Filter{
 
     public static function className()
     {
