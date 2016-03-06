@@ -5,7 +5,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Exception\Handler;
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\DesignPattern\Registry;
 use \Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Zan;
@@ -32,7 +32,7 @@ abstract class Application {
     protected function setAppName($config)
     {
         if(!isset($config['appName'])){
-            throw new InvalidArgument('appName not defined in init.bootstrap file');
+            throw new InvalidArgumentException('appName not defined in init.bootstrap file');
         }
         Config::set('appName',$config['appName']);
     }

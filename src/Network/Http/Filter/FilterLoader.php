@@ -3,7 +3,8 @@
 namespace Zan\Framework\Network\Http\Filter;
 
 use Zan\Framework\Foundation\Domain\Filter;
-use Zan\Framework\Foundation\Exception\System\FilterException;
+use Zan\Framework\Foundation\Exception\System\ClassNotFoundException;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class FilterLoader {
 
@@ -29,12 +30,12 @@ class FilterLoader {
                 continue;
             }
             if (!$filter || !class_exists($filter)) {
-                throw new FilterException('Not found filter:'.$filter);
+                throw new ClassNotFoundException('filter class not found:'.$filter);
             }
             $filterObj = new $filter();
 
             if (!($filterObj instanceof Filter)) {
-                throw new FilterException('Is not an effective filter:'.$filter);
+                throw new InvalidArgumentException('Invalid filter for FilterLoader::loadFilterClass');
             }
             self::$filterContainer[$filterType] = $filterObj;
 

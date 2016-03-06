@@ -9,7 +9,7 @@
 namespace Zan\Framework\Store\Facade;
 
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Contract\Connection;
 
 class Db {
@@ -20,7 +20,7 @@ class Db {
     public function __construct(/*String*/$connName)
     {
         if(!$connName || !is_string($connName)) {
-            throw new InvalidArgument('invalid connection name for Db.__construct()');
+            throw new InvalidArgumentException('invalid connection name for Db.__construct()');
         }
 
         $this->connName = $connName;

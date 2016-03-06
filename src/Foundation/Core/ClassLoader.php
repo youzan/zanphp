@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework\Foundation\Core;
 
-use Zan\Framework\Foundation\Exception\System\FileNotFound;
+use Zan\Framework\Foundation\Exception\System\FileNotFoundException;
 
 class ClassLoader
 {
@@ -15,7 +15,7 @@ class ClassLoader
         }
 
         if (!file_exists($file)) {
-            throw new FileNotFound('No such file:' . $file);
+            throw new FileNotFoundException('No such file:' . $file);
         }
 
         self::$loadedMap[$fileHash] = 1;

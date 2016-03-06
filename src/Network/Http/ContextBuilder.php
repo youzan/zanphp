@@ -9,7 +9,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Domain\Context;
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class ContextBuilder {
     
@@ -17,7 +17,7 @@ class ContextBuilder {
 
     public function __construct(Context $context) {
         if(!$context) {
-            throw new InvalidArgument('invalid context for ContextBuilder');
+            throw new InvalidArgumentException('invalid context for ContextBuilder');
         }
 
         $this->context = $context;
