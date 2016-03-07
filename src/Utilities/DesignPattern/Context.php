@@ -6,7 +6,7 @@
  * Time: 19:51
  */
 
-namespace Zan\Framework\Foundation\Domain;
+namespace Zan\Framework\Utilities\DesignPattern;
 
 use Zan\Framework\Foundation\Coroutine\Event;
 
