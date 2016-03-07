@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
+use Zan\Framework\Foundation\Coroutine\Event;
 
 class Context
 {
