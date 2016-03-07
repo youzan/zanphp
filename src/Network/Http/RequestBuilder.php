@@ -6,7 +6,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class RequestBuilder {
 
@@ -18,7 +18,7 @@ class RequestBuilder {
     public function __construct(\swoole_http_request $request)
     {
         if (!$request) {
-            throw new InvalidArgument('invalid request');
+            throw new InvalidArgumentException('invalid request');
         }
         $this->request = new Request($request);
     }

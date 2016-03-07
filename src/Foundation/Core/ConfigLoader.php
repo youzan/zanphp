@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework\Foundation\Core;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Utilities\Types\Dir;
 use Zan\Framework\Utilities\Types\Arr;
@@ -13,7 +13,7 @@ class ConfigLoader
     public function load($path)
     {
         if(!is_dir($path)){
-            throw new InvalidArgument('Invalid path for ConfigLoader');
+            throw new InvalidArgumentException('Invalid path for ConfigLoader');
         }
 
         $path = Dir::formatPath($path);
@@ -23,7 +23,7 @@ class ConfigLoader
         foreach($configFiles as $configFile){
             $loadedConfig = require $configFile;
             if(!is_array($loadedConfig)){
-                throw new InvalidArgument("syntax error find in config file: " . $configFile);
+                throw new InvalidArgumentException("syntax error find in config file: " . $configFile);
             }
 
             $keyString = substr($configFile, strlen($path), -4);

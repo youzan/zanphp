@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Utilities\Types;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Dir
 {
@@ -14,7 +14,7 @@ class Dir
     public static function glob($path, $pattern=null, $strategy=self::SCAN_DFS)
     {
         if(!is_dir($path) || !$pattern) {
-            throw new InvalidArgument('invalid $path or $pattern for Dir::glob');
+            throw new InvalidArgumentException('invalid $path or $pattern for Dir::glob');
         }
 
         $files = Dir::scan($path, $strategy);
@@ -31,7 +31,7 @@ class Dir
     public static function scan($path, $strategy=self::SCAN_CURRENT_DIR, $excludeDir=true)
     {
         if(!is_dir($path)){
-            throw new InvalidArgument('invalid $path for Dir::scan');
+            throw new InvalidArgumentException('invalid $path for Dir::scan');
         }
 
         switch($strategy){
@@ -45,7 +45,7 @@ class Dir
                 $files = self::scanDfs($path,$excludeDir);
                 break;
             default:
-                throw new InvalidArgument('invalid $strategy for Dir::glob');
+                throw new InvalidArgumentException('invalid $strategy for Dir::glob');
         }
 
         return $files;

@@ -6,7 +6,7 @@
  * Time: 19:51
  */
 
-namespace Zan\Framework\Foundation\Coroutine;
+namespace Zan\Framework\Foundation\Domain;
 
 
 class Context

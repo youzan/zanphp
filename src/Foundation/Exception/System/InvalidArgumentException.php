@@ -10,6 +10,6 @@ namespace Zan\Framework\Foundation\Exception\System;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class InvalidArgument extends ZanException {
+class InvalidArgumentException extends ZanException {
 
 }

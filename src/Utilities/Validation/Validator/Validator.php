@@ -9,7 +9,7 @@
 namespace Zan\Framework\Utilities\Validation\Validator;
 
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Validator {
     protected $object = null;
@@ -21,7 +21,7 @@ class Validator {
     public function validate(array $rules)
     {
         if(!$rules) {
-            throw new InvalidArgument('empty rules for Validator.validate()');
+            throw new InvalidArgumentException('empty rules for Validator.validate()');
         }
 
         foreach($rules as $rule) {
@@ -43,7 +43,7 @@ class Validator {
         $parameter = isset($rule[1]) ? $rule[1] : null;
 
         if(!method_exists($this, $method)) {
-            throw new InvalidArgument('class '. __CLASS__ .' has no such method:' . $method);
+            throw new InvalidArgumentException('class '. __CLASS__ .' has no such method:' . $method);
         }
 
         return call_user_func_array([$this, $method], $parameter);
@@ -52,7 +52,7 @@ class Validator {
     protected function validateRule($rule)
     {
         if(!is_array($rule) || empty($rule)) {
-            throw new InvalidArgument('invalid rule for Validator.validateRule()');
+            throw new InvalidArgumentException('invalid rule for Validator.validateRule()');
         }
 
         return true;
@@ -61,7 +61,7 @@ class Validator {
     protected function validateNumber($num)
     {
         if(!is_int($num)) {
-            throw new InvalidArgument('Invalid Validator parameter:' . $num);
+            throw new InvalidArgumentException('Invalid Validator parameter:' . $num);
         }
     }
 }

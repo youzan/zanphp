@@ -9,7 +9,7 @@
 namespace Zan\Framework\Foundation\Core;
 
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class RunMode {
     private static $modeMap  = [
@@ -31,7 +31,7 @@ class RunMode {
     public static function set($runMode)
     {
         if(!isset(self::$modeMap[$runMode])){
-            throw new InvalidArgument('invalid $runMode in RunMode::set');
+            throw new InvalidArgumentException('invalid $runMode in RunMode::set');
         }
         self::$runMode = $runMode;
     }
@@ -43,7 +43,7 @@ class RunMode {
         }
 
         if(!isset(self::$modeMap[$mode])){
-            throw new InvalidArgument('invlid runMode from cli');
+            throw new InvalidArgumentException('invlid runMode from cli');
         }
         self::$cliInput = $mode;
     }

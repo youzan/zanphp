@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Foundation\Core;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Path {
     const DEFAULT_CONFIG_PATH   = 'resource/config/';
@@ -67,11 +67,11 @@ class Path {
     private static function setRootPath($config)
     {
         if(!isset($config['rootPath'])){
-            throw new InvalidArgument('rootPath not defined in init.bootstrap file');
+            throw new InvalidArgumentException('rootPath not defined in init.bootstrap file');
         }
 
         if (!is_dir($config['rootPath']) ) {
-            throw new InvalidArgument('Application root path ({$dir}) is invalid!');
+            throw new InvalidArgumentException('Application root path ({$dir}) is invalid!');
         }
         self::$rootPath = Dir::formatPath($config['rootPath']);
     }
