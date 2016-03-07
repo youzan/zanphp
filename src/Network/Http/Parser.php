@@ -21,6 +21,10 @@ class Parser
         else {
             $body = self::parseBody($body, $header['Content-Type']);
         }
+        if ($body) {
+            $decode = json_decode($body, true);
+            if ($decode) $body = $decode;
+        }
         return [$header, $body];
     }
 
