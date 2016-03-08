@@ -11,25 +11,26 @@ namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Network\Contract\Connection;
+use Zan\Framework\Store\Database\Mysql\QueryExecuter;
 
 class Db {
     private $connName = '';
     private $engine = null;
     private $autoHandleException = false;
 
-    public function __construct(/*String*/$connName)
-    {
-        if(!$connName || !is_string($connName)) {
-            throw new InvalidArgument('invalid connection name for Db.__construct()');
-        }
+//    public function __construct(/*String*/$connName)
+//    {
+//        if(!$connName || !is_string($connName)) {
+//            throw new InvalidArgument('invalid connection name for Db.__construct()');
+//        }
+//
+//        $this->connName = $connName;
+//        $this->initEngine($connName);
+//    }
 
-        $this->connName = $connName;
-        $this->initEngine($connName);
-    }
-
-    public function query($sql, $config)
+    public function query($sql)
     {
-        return $this->engine->query($sql);
+        return (new QueryExecuter())->query($sql);
     }
 
     public function beginTransaction($autoHandleException=false)

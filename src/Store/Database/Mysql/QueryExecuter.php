@@ -8,8 +8,7 @@
 namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Store\Database\Mysql\SqlMap;
-use Zan\Framework\Foundation\Core\Event;
-
+use Zan\Framework\Store\Database\Mysql\FutureQuery;
 class QueryExecuter
 {
     /**
@@ -17,18 +16,30 @@ class QueryExecuter
      */
     private $db;
 
-    private $sqlMap;
+    private $sql;
 
-    public function __construct(\mysqli $db)
+    private $callback;
+
+    public function __construct()
     {
-        $this->setDb($db);
+        $this->setDb();
     }
 
     private function setDb()
     {
         if (null == $this->db) {
             //todo connectionManage
-//            $this->db = new object;
+            $db = new \mysqli();
+            $config = array(
+                'host' => '127.0.0.1',
+                'user' => 'root',
+                'password' => '',
+                'database' => 'test',
+                'port' => '3306',
+            );
+            $db->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
+
+            $this->db = $db;
         }
         return $this->db;
     }
@@ -46,20 +57,37 @@ class QueryExecuter
 
     }
 
+    public function query($sql)
+    {
+        $this->sql = $sql;
+        $db_sock = swoole_get_mysqli_sock($this->db);
+        swoole_event_add($db_sock, [$this, 'onSqlReady']);
+        $this->doQuery($sql);
+    }
+
     private function doQuery($sql)
     {
-        $mysqli = $this->getDb();
-        $result = $mysqli->query($sql, MYSQLI_ASYNC);
+        $result = $this->db->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
             //todo throw error
         }
-        
-        yield $this->queryResult($mysqli, $sql);
     }
 
+    public function onSqlReady()
+    {
+        if ($result = $this->db->reap_async_query()) {
+            call_user_func($this->callback, $result->fetch_all());
+            if (is_object($result)) {
+                mysqli_free_result($result);
+            }
+        } else {
+            //todo throw error
+        }
+    }
 
     private function queryResult()
     {
+
 
     }
 
@@ -75,10 +103,6 @@ class QueryExecuter
     {
         return new SqlMap();
     }
-
-    
-
-
 
 
 }
