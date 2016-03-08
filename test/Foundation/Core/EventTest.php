@@ -8,12 +8,10 @@
 
 namespace Zan\Framework\Test\Foundation\Core;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
-
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Core\EventChain;
 
-class EventTest extends \UnitTest {
+class EventTest extends \TestCase {
     private $dataMap = [];
 
     public function setUp() {

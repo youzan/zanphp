@@ -6,13 +6,11 @@
  * Time: 20:59
  */
 
-namespace Zan\Framework\Test\Foundation\Core;
-
-require __DIR__ . '/../../../' . 'src/Test.php';
+namespace Zan\Framework\Test\Foundation\Coroutine;
 
 use Zan\Framework\Foundation\Coroutine\Event;
 
-class EventTest extends \UnitTest {
+class EventTest extends \TestCase {
     private $dataMap = [];
 
     public function setUp() {

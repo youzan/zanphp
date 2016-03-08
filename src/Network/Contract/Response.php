@@ -2,9 +2,7 @@
 
 namespace Zan\Framework\Network\Contract;
 
-use Zan\Framework\Foundation\Contract\Future;
-
-class Response implements Future {
+class Response {
 
     private $code = 0;
     private $message = '';

@@ -9,7 +9,7 @@
 namespace Zan\Framework\Store\Facade;
 
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Contract\Connection;
 use Zan\Framework\Store\Database\Mysql\FutureQuery;
 use Zan\Framework\Store\Database\Mysql\QueryExecuter;
@@ -19,15 +19,15 @@ class Db {
     private $engine = null;
     private $autoHandleException = false;
 
-//    public function __construct(/*String*/$connName)
-//    {
-//        if(!$connName || !is_string($connName)) {
-//            throw new InvalidArgument('invalid connection name for Db.__construct()');
-//        }
-//
-//        $this->connName = $connName;
-//        $this->initEngine($connName);
-//    }
+    public function __construct(/*String*/$connName)
+    {
+        if(!$connName || !is_string($connName)) {
+            throw new InvalidArgumentException('invalid connection name for Db.__construct()');
+        }
+
+        $this->connName = $connName;
+        $this->initEngine($connName);
+    }
 
     public function query($sql)
     {

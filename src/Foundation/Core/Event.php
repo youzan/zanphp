@@ -64,20 +64,29 @@ class Event
         return false;
     }
 
-    public static function fire($evtName, $args = null)
+    public static function fire($evtName, $args=null, $loop=true)
     {
         if (isset(self::$evtMap[$evtName]) && self::$evtMap[$evtName]) {
-            foreach (self::$evtMap[$evtName] as $key => $evt) {
-                $callback = $evt['callback'];
-                $evtType = $evt['evtType'];
-                call_user_func($callback, $args);
-
-                if (Event::ONCE_EVENT === $evtType) {
-                    unset(self::$evtMap[$evtName][$key]);
-                }
-            }
+            self::fireEvents($evtName, $args, $loop);
         }
 
         EventChain::fireEventChain($evtName);
+    }
+
+    private static function fireEvents($evtName, $args=null, $loop=true)
+    {
+        foreach (self::$evtMap[$evtName] as $key => $evt) {
+            $callback = $evt['callback'];
+            $evtType = $evt['evtType'];
+            call_user_func($callback, $args);
+
+            if (Event::ONCE_EVENT === $evtType) {
+                unset(self::$evtMap[$evtName][$key]);
+            }
+
+            if(false === $loop){
+                break;
+            }
+        }
     }
 }

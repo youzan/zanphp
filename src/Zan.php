@@ -52,4 +52,4 @@ class Zan {
 
     }
 }
-Zan::init();
+

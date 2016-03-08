@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework\Foundation\Exception;
 
-use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 
 class Handler {
 
@@ -9,7 +9,7 @@ class Handler {
     {
         ini_set('display_errors', false);
 
-        if (Config::get('debug')) {
+        if (Debug::get()) {
             set_exception_handler(['Handler', 'handleException']);
         } else {
             set_exception_handler(['Handler', 'handleExceptionProduct']);

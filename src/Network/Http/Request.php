@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Request extends \Zan\Framework\Network\Contract\Request{
 
@@ -22,7 +22,7 @@ class Request extends \Zan\Framework\Network\Contract\Request{
             $requestUri = preg_replace('/^(http|https):\/\/[^\/]+/i', '', $requestUri);
         }
         if (!$requestUri)
-            throw new InvalidArgument('Unable to determine the request URI.');
+            throw new InvalidArgumentException('Unable to determine the request URI.');
 
         return $requestUri;
     }
