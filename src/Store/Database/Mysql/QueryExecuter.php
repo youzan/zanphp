@@ -20,6 +20,8 @@ class QueryExecuter
 
     private $callback;
 
+    private $data;
+
     public function __construct()
     {
         $this->setDb();
@@ -63,12 +65,12 @@ class QueryExecuter
         return $this;
     }
 
-    public function send($callback)
+    public function send()
     {
-        $this->callback = $callback;
-        $db_sock = swoole_get_mysqli_sock($this->db);
-        swoole_event_add($db_sock, [$this, 'onSqlReady']);
+//        $db_sock = swoole_get_mysqli_sock($this->db);
+//        swoole_event_add($db_sock, [$this, 'onSqlReady']);
         $this->doQuery($this->sql);
+        return $this->onSqlReady();
     }
 
     private function doQuery($sql)
@@ -82,10 +84,10 @@ class QueryExecuter
     public function onSqlReady()
     {
         if ($result = $this->db->reap_async_query()) {
-            call_user_func($this->callback, $result->fetch_all());
-            if (is_object($result)) {
-                mysqli_free_result($result);
-            }
+            return $result->fetch_all();
+//            if (is_object($result)) {
+//                mysqli_free_result($result);
+//            }
         } else {
             //todo throw error
         }

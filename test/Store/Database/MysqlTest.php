@@ -6,20 +6,27 @@
  * Time: 17:20
  */
 
-namespace Zan\Framework\Test\Network;
 
-use Zan\Framework\Network\Client\ConnectionConfig;
-
+namespace Zan\Framework\Test\Store\Database;
 require __DIR__ . '/../../../' . 'src/Test.php';
-use Zan\Framework\Store\Database\Mysql\QueryExecuter;
-use Zan\Framework\Store\Facade\Db;
-class MysqlTest extends \UnitTest {
-    public function testA()
-    {
 
-        $a = new Db();
+use Zan\Framework\Foundation\Test\UnitTest;
 
-       $result = $a->query("show tables");
+use Zan\Framework\Test\Foundation\Coroutine\Context;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Test\Store\Database\Sql\Task\QueryJob;
 
+class MysqlTest extends UnitTest {
+    public function testSimpleYieldWorkFine() {
+        $context = new Context();
+
+        $job = new QueryJob($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+
+        $result = $context->show();
+        var_dump($result);exit;
     }
 }
