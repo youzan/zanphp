@@ -60,9 +60,15 @@ class QueryExecuter
     public function query($sql)
     {
         $this->sql = $sql;
+        return $this;
+    }
+
+    public function send($callback)
+    {
+        $this->callback = $callback;
         $db_sock = swoole_get_mysqli_sock($this->db);
         swoole_event_add($db_sock, [$this, 'onSqlReady']);
-        $this->doQuery($sql);
+        $this->doQuery($this->sql);
     }
 
     private function doQuery($sql)

@@ -11,6 +11,7 @@ namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgument;
 use Zan\Framework\Network\Contract\Connection;
+use Zan\Framework\Store\Database\Mysql\FutureQuery;
 use Zan\Framework\Store\Database\Mysql\QueryExecuter;
 
 class Db {
@@ -30,7 +31,9 @@ class Db {
 
     public function query($sql)
     {
-        return (new QueryExecuter())->query($sql);
+        $executer = new QueryExecuter();
+        $executer->query($sql);
+        yield (new FutureQuery($executer));
     }
 
     public function beginTransaction($autoHandleException=false)

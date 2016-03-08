@@ -12,11 +12,12 @@ use Zan\Framework\Network\Client\ConnectionConfig;
 
 require __DIR__ . '/../../../' . 'src/Test.php';
 use Zan\Framework\Store\Database\Mysql\QueryExecuter;
+use Zan\Framework\Store\Facade\Db;
 class MysqlTest extends \UnitTest {
     public function testA()
     {
 
-        $a = new QueryExecuter($db);
+        $a = new Db();
 
        $result = $a->query("show tables");
 
