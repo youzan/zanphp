@@ -5,17 +5,19 @@ class Zan {
 
     public static function createHttpApplication($config)
     {
+        self::init();
         return new \HttpApplication($config);
     }
 
     public static function createTcpApplication($config)
     {
+        self::init();
         return new \TcpApplication($config);
     }
 
-    public static function createSocketApplication()
+    public static function createApplication($config)
     {
-
+        self::init();
     }
 
     public static function init()
