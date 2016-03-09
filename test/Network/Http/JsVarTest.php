@@ -9,55 +9,34 @@
 namespace Zan\Framework\Test\Network\Http;
 
 use Zan\Framework\Network\Http\JsVar;
-use Zan\Framework\Network\Http\DataTraffic;
 
 class JsVarTest extends \TestCase
 {
-    private $_dataTraffic = null;
     private $_jsVar = null;
-    private $_jsVarMapping = null;
 
     public function setUp()
     {
-        $this->_dataTraffic = new DataTraffic();
-        $this->_dataTraffic->setKdtId(1);
-        $this->_dataTraffic->setRunMode('online');
-        $this->_dataTraffic->setPlatform('ios');
-        $this->_dataTraffic->setQueryPath('showcase/goods/index');
-
-        $this->_jsVarMapping = [
-            '_session' => [
-                'kdt_id' => 'kdtId',
-            ],
-            '_config' => [
-                'run_mode' => 'runMode',
-            ],
-            '_env' => [
-                'platform' => 'platform',
-            ],
-            '_query' => [
-                'query_path' => 'queryPath',
-            ],
-        ];
-        $this->_jsVar = new JsVar($this->_dataTraffic);
+        $this->_jsVar = new JsVar();
+        $this->_jsVar->setSession('kdt_id', 1);
+        $this->_jsVar->setConfig('run_mode', 'online');
+        $this->_jsVar->setQuery('query_path', 'showcase/goods/index');
+        $this->_jsVar->setEnv('platform', 'ios');
     }
 
     public function tearDown()
     {
-        $this->_dataTraffic = null;
         $this->_jsVar = null;
-        $this->_jsVarMapping = null;
     }
 
-    public function testGetData(){
+    public function testGet(){
         $excepted = [
-            '_session' => ['kdt_id' => 1],
-            '_config' => ['run_mode' => 'online'],
-            '_env' => ['platform' => 'ios'],
-            '_query' => ['query_path' => 'showcase/goods/index'],
+            'session' => ['kdt_id' => 1],
+            'query' => ['query_path' => 'showcase/goods/index'],
+            'config' => ['run_mode' => 'online'],
+            'env' => ['platform' => 'ios'],
         ];
         $excepted = json_encode($excepted);
-        $jsVarData = $this->_jsVar->getData($this->_jsVarMapping);
+        $jsVarData = $this->_jsVar->get();
         $jsVarData = json_encode($jsVarData);
         $this->assertEquals($excepted, $jsVarData, 'JsVarTest::getData fail');
     }

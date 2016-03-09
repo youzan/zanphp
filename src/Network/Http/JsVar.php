@@ -13,30 +13,38 @@ use Zan\Framework\Foundation\Core\Config;
 
 class JsVar
 {
-    private $_mappingConfig;
+    private $_session = [];
+    private $_query   = [];
+    private $_config  = [];
+    private $_env     = [];
 
-    private $_dataTraffic;
-
-    public function __construct(DataTraffic $dataTraffic, $jsDataMappingConfig = 'common.jsDataMapping.default')
+    public function setSession($key, $value)
     {
-        $this->_mappingConfig = $jsDataMappingConfig;
-        $this->_dataTraffic = $dataTraffic;
+        $this->_session[$key] = $value;
     }
 
-    /**
-     * @param array $jsDataMapping 仅仅开给测试的口子，日常开发不要传
-     * @return array
-     */
-    public function getData(array $jsDataMapping = [])
+    public function setQuery($key, $value)
     {
-        $return = [];
-        $dataSet = get_object_vars($this->_dataTraffic);
-        $config = empty($jsDataMapping) ? Config::get($this->_mappingConfig) : $jsDataMapping;
-        foreach($config as $parentJsVarKey => $mapping) {
-            foreach($mapping as $childJsVarKey => $dataTrafficKey) {
-                $return[$parentJsVarKey][$childJsVarKey] = isset($dataSet[$dataTrafficKey]) ? $dataSet[$dataTrafficKey] : null;
-            }
-        }
-        return $return;
+        $this->_query[$key] = $value;
     }
-} 
+
+    public function setConfig($key, $value)
+    {
+        $this->_config[$key] = $value;
+    }
+
+    public function setEnv($key, $value)
+    {
+        $this->_env[$key] = $value;
+    }
+
+    public function get()
+    {
+        return [
+            'session' => $this->_session,
+            'query' => $this->_query,
+            'config' => $this->_config,
+            'env' => $this->_env
+        ];
+    }
+}
