@@ -85,6 +85,21 @@ class DataTraffic
         $this->kdtId = (int)$kdtId;
     }
 
+    public function setRunMode($runMode)
+    {
+        $this->runMode = trim($runMode);
+    }
+
+    public function setPlatform($platform)
+    {
+        $this->platform = trim($platform);
+    }
+
+    public function setQueryPath($queryPath)
+    {
+        $this->queryPath = trim($queryPath);
+    }
+
     public function setUrls(array $urls)
     {
         $this->urls = array_filter($urls);

@@ -23,13 +23,19 @@ class JsVar
         $this->_dataTraffic = $dataTraffic;
     }
 
-    public function getData()
+    /**
+     * @param array $jsDataMapping 仅仅开给测试的口子，日常开发不要传
+     * @return array
+     */
+    public function getData(array $jsDataMapping = [])
     {
         $return = [];
-        $datas = get_class_vars($this->_dataTraffic);
-        $config = Config::get($this->_mappingConfig);
-        foreach($config as $jsVarKey => $dataTrafficKey) {
-            $return[$jsVarKey] = isset($datas[$dataTrafficKey]) ? $datas[$dataTrafficKey] : null;
+        $dataSet = get_object_vars($this->_dataTraffic);
+        $config = empty($jsDataMapping) ? Config::get($this->_mappingConfig) : $jsDataMapping;
+        foreach($config as $parentJsVarKey => $mapping) {
+            foreach($mapping as $childJsVarKey => $dataTrafficKey) {
+                $return[$parentJsVarKey][$childJsVarKey] = isset($dataSet[$dataTrafficKey]) ? $dataSet[$dataTrafficKey] : null;
+            }
         }
         return $return;
     }
