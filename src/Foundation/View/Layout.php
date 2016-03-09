@@ -45,6 +45,13 @@ class Layout
         return $html;
     }
 
+    public static function display($tpl,$data)
+    {
+        $html = new self($tpl,$data);
+
+        return trim($html->render(), " \r\n");
+    }
+
     public function block($blockName)
     {
         $blockName  = strtoupper($blockName);
@@ -83,6 +90,25 @@ class Layout
 
         $this->addBlockToLevelMap($curBlock,$this->curLevel);
         echo $this->blockPre . $curBlock . $this->blockSuf;
+    }
+
+    public function place($blockName,$content='')
+    {
+        $blockName  = strtoupper($blockName);
+
+        $parentBlock = $this->getCurrentBlock();
+        if($parentBlock == $blockName){
+            throw new InvalidArgumentException('子block与父block不允许重名,block名称：'. $blockName);
+        }
+
+        if(isset($this->blocks[$blockName])){
+            $this->blocks[$blockName] = $content;
+            return true;
+        }
+
+        $this->blocks[$blockName] = $content;
+        $this->addBlockToLevelMap($blockName,$this->curLevel);
+        echo $this->blockPre . $blockName . $this->blockSuf;
     }
 
 
