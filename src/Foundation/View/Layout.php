@@ -45,6 +45,13 @@ class Layout
         return $html;
     }
 
+    public static function display($tpl,$data)
+    {
+        $html = new self($tpl,$data);
+
+        return trim($html->render(), " \r\n");
+    }
+
     public function block($blockName)
     {
         $blockName  = strtoupper($blockName);
