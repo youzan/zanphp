@@ -193,5 +193,4 @@ class Layout
         return str_replace(array_keys($blocks),array_values($blocks),$tpl);
     }
 
-
 }
