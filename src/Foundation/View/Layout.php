@@ -85,6 +85,25 @@ class Layout
         echo $this->blockPre . $curBlock . $this->blockSuf;
     }
 
+    public function place($blockName,$content='')
+    {
+        $blockName  = strtoupper($blockName);
+
+        $parentBlock = $this->getCurrentBlock();
+        if($parentBlock == $blockName){
+            throw new InvalidArgumentException('子block与父block不允许重名,block名称：'. $blockName);
+        }
+
+        if(isset($this->blocks[$blockName])){
+            $this->blocks[$blockName] = $content;
+            return true;
+        }
+
+        $this->blocks[$blockName] = $content;
+        $this->addBlockToLevelMap($blockName,$this->curLevel);
+        echo $this->blockPre . $blockName . $this->blockSuf;
+    }
+
 
     public function super($blockName=null)
     {
