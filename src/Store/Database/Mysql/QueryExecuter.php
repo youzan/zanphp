@@ -18,6 +18,8 @@ class QueryExecuter
 
     private $sql;
 
+    private $sqlMap;
+
     private $callback;
 
     private $data;
@@ -40,7 +42,7 @@ class QueryExecuter
                 'port' => '3306',
             );
             $db->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
-
+            $db->autocommit(true);
             $this->db = $db;
         }
         return $this->db;
@@ -54,22 +56,27 @@ class QueryExecuter
         return $this->db;
     }
 
-    public function execute($sid)
+    public function execute($sid, $data, $options)
     {
-
+        $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
+        $this->sql = $sqlMap['sql'];
+        $this->doQuery($this->sql);
+        return $this;
     }
 
-    public function query($sql)
+    private function insert()
     {
-        $this->sql = $sql;
-        return $this;
+        new \mysqli_stmt($this->db, $this->sql);
+    }
+
+    private function query($sql)
+    {
+
     }
 
     public function send()
     {
-//        $db_sock = swoole_get_mysqli_sock($this->db);
-//        swoole_event_add($db_sock, [$this, 'onSqlReady']);
-        $this->doQuery($this->sql);
+//        $this->doQuery($this->sql);
         return $this->onSqlReady();
     }
 
@@ -78,12 +85,14 @@ class QueryExecuter
         $result = $this->db->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
             //todo throw error
+
         }
     }
 
     public function onSqlReady()
     {
         if ($result = $this->db->reap_async_query()) {
+
             return $result->fetch_all();
 //            if (is_object($result)) {
 //                mysqli_free_result($result);

@@ -29,10 +29,10 @@ class SqlMap
     public function getSql($sid, $data = [], $options = [])
     {
         $this->sqlMap = $this->getSqlMapBySid($sid);
-        $type = strtolower($this->getSqlType($this->sqlMap));
+        $type = strtolower($this->getSqlType());
         switch ($type) {
             case 'insert' :
-                $this->sqlMap = $this->insert($this->sqlMap, $data, $options);
+                $this->insert($data, $options);
                 break;
             case 'update' :
                 $this->sqlMap = $this->update($this->sqlMap, $data, $options);
@@ -44,44 +44,44 @@ class SqlMap
                 $this->sqlMap = $this->select($this->sqlMap, $data, $options);
                 break;
         }
-        return Validator::validate($this->sqlMap);
+        $this->sqlMap['sql'] = Validator::validate($this->sqlMap['sql']);
+        return $this->sqlMap;
     }
 
-    private function getSqlType($sqlMap)
+    private function getSqlType()
     {
-        preg_match('/^\s*(INSERT|SELECT|UPDATE|DELETE)/is', $sqlMap['sql'], $match);
+        preg_match('/^\s*(INSERT|SELECT|UPDATE|DELETE)/is', $this->sqlMap['sql'], $match);
         if (!$match) {
             //todo throw type error
         }
         return $match[0];
     }
 
-    private function insert($sqlMap, $data, $options)
+    private function insert($data, $options)
     {
         $insertData = (isset($data['insert'])) ? $data['insert'] : [];
         if (!is_array($insertData) || count($insertData) == 0) {
-            $sqlMap['sql'] = $this->replaceSqlLabel($sqlMap['sql'], 'insert', '');
-            return $sqlMap;
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
+            return $this;
         }
         $columns = [];
         $values = [];
         foreach ($insertData as $column => $value) {
             $fCol = $this->formatColumn($column);
-            $sqlMap['bind'][$fCol] = $value;
+            $this->sqlMap['bind'][$fCol] = $value;
             $columns[] = $this->quotaColumn($column);
             $values[] = $fCol;
         }
-
         $insert  = '(' . implode(',', $columns) . ') values(';
         $insert .= implode(',', $values) . ')';
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $insert);
 
-        $sqlMap['sql'] = $this->replaceSqlLabel($sqlMap['sql'], 'insert', $insert);
-
-        $sqlMap = $this->formatSql($sqlMap);
-        $sqlMap = $this->getTable($sqlMap, $data);
 //        $this->splitTable($sqlMap, $data);
-        $sqlMap = $this->addSqlLint($sqlMap, $options);
-        return $sqlMap;
+        $this->getTable($data)
+            ->addSqlLint($options);
+        $this->formatSql();
+        $this->sqlMap['sql_type'] = 'INSERT';
+        return $this;
     }
 
     private function delete($sqlMap, $data, $options)
@@ -254,11 +254,10 @@ class SqlMap
     private function parseSqlMap($sqlMap, $base, $filePath)
     {
         foreach ($sqlMap as $key => $row) {
-            if ('common' === $key) {
+            if ('table' === $key) {
                 continue;
             }
             $sqlMap[$key]['key']  = $base . '.' . $key;
-
             if (!isset($row['require'])) {
                 $sqlMap[$key]['require'] = [];
             }
@@ -516,7 +515,7 @@ class SqlMap
         return $sqlMap;
     }
 
-    private static function parseBind($sqlMap, $data)
+    private function parseBind($sqlMap, $data)
     {
         if (!isset($data['bind'])) {
             return $sqlMap;
@@ -529,18 +528,7 @@ class SqlMap
         return $sqlMap;
     }
 
-    private static function formatSql($sqlMap)
-    {
-        $sql = trim($sqlMap['sql']);
-        $sql = str_replace("\n", NULL, $sql);
-        $sql = str_replace("\r", NULL, $sql);
-        $sql = preg_replace('/\s+/', " ", $sql);
-
-        $sqlMap['sql'] = $sql;
-        return $sqlMap;
-    }
-
-    private function getTable($sqlMap, $data)
+    private function getTable($data)
     {
         $tablePregMap = [     //正则匹配数据表名，表名中不能有空格
             'INSERT' => '/(?<=\sINTO\s)\S*/i',
@@ -553,7 +541,7 @@ class SqlMap
         if (isset($data['table']) && '' !== $data['table']) {
             $table = trim($data['table']);
         } else {
-            $sql = $sqlMap['sql'];
+            $sql = $this->sqlMap['sql'];
             $type = strtoupper(substr($sql, 0, strpos($sql, ' ')));
             $matches = null;
 
@@ -575,8 +563,8 @@ class SqlMap
         if ('' == $table || !strlen($table)) {
             //todo throw Can not get table name
         }
-        $sqlMap['table'] = $table;
-        return $sqlMap;
+        $this->sqlMap['table'] = $table;
+        return $this;
     }
 
     //判断该表是否需要分表
@@ -585,14 +573,38 @@ class SqlMap
         //todo
     }
 
-    private static function addSqlLint($sqlMap, $options)
+    private function addSqlLint($options)
     {
-        $sqlMap = array_merge($sqlMap, $options);
+        $this->sqlMap = array_merge($this->sqlMap, $options);
 
-        if (isset($sqlMap['use_master']) && $sqlMap['use_master']) {
-            $sqlMap['sql'] = "/*master*/" . $sqlMap['sql'];
+        if (isset($this->sqlMap['use_master']) && $this->sqlMap['use_master']) {
+            $this->sqlMap['sql'] = "/*master*/" . $this->sqlMap['sql'];
         }
-        return $sqlMap;
+        return $this;
+    }
+
+
+    private function formatSql()
+    {
+        $sql = trim($this->sqlMap['sql']);
+        $sql = str_replace("\n", NULL, $sql);
+        $sql = str_replace("\r", NULL, $sql);
+        $sql = preg_replace('/\s+/', " ", $sql);
+
+        $this->sqlMap['sql'] = $sql;
+        $this->bindValue();
+        return $this;
+    }
+
+    private function bindValue()
+    {
+        if (!isset($this->sqlMap['bind']) || !is_array($this->sqlMap['bind']) || count($this->sqlMap['bind']) == 0) {
+            return false;
+        }
+        foreach ($this->sqlMap['bind'] as $bind => $value) {
+            $this->sqlMap['sql'] = str_replace($bind, (string)$value, $this->sqlMap['sql']);
+        }
+        return true;
     }
 
 }

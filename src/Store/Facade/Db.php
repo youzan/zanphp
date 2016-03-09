@@ -29,10 +29,10 @@ class Db {
 //        $this->initEngine($connName);
 //    }
 
-    public function query($sql)
+    public function executer($sid, $data, $options)
     {
         $executer = new QueryExecuter();
-        $executer->query($sql);
+        $executer->execute($sid, $data, $options);
         yield (new FutureQuery($executer));
     }
 

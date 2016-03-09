@@ -1,7 +1,12 @@
 <?php
 return [
-    'table'             => 'goods',
+    'table'             => 'test',
     //'validateByModel'   => true,
+    'insert'=>[
+        'require' => [],
+        'limit'   => [],
+        'sql'     => 'INSERT INTO test #INSERT#',
+    ],
 
     'demo_sql_id1'      => [
         'sql'           => "

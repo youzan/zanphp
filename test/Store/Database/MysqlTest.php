@@ -14,19 +14,20 @@ use Zan\Framework\Foundation\Test\UnitTest;
 
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Test\Store\Database\Sql\Task\InsertJob;
 use Zan\Framework\Test\Store\Database\Sql\Task\QueryJob;
 
 class MysqlTest extends UnitTest {
-    public function testSimpleYieldWorkFine() {
-        $context = new Context();
 
-        $job = new QueryJob($context);
+    public function testInsert()
+    {
+        $context = new Context();
+        $job = new InsertJob($context);
         $coroutine = $job->run();
 
         $task = new Task($coroutine);
         $task->run();
-
         $result = $context->show();
-        var_dump($result);exit;
+        print_r($result);exit;
     }
 }
