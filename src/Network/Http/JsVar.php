@@ -8,9 +8,6 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Network\Http\DataTraffic;
-use Zan\Framework\Foundation\Core\Config;
-
 class JsVar
 {
     private $_session = [];
