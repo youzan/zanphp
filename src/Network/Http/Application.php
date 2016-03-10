@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Http;
 use \HttpServer;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Filter\FilterLoader;
+use Zan\Framework\Network\Http\Router\UrlRule;
 
 class Application extends \Zan\Framework\Network\Contract\Application {
 
@@ -20,13 +21,15 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     public function __construct($config)
     {
         parent::__construct($config);
+        $this->init();
     }
 
     public function init()
     {
         parent::init();
         $this->initHttpServer();
-        $this->initFilter();
+        $this->loadFilter();
+        $this->loadUrlRules();
     }
 
     public function initHttpServer()
@@ -36,7 +39,12 @@ class Application extends \Zan\Framework\Network\Contract\Application {
         $this->server->init();
     }
 
-    private function initFilter()
+    private function loadUrlRules()
+    {
+        UrlRule::loadRules($this->config['routing_path']);
+    }
+
+    private function loadFilter()
     {
         $filters = Config::get($this->filterConfKey);
         FilterLoader::loadFilter($filters);

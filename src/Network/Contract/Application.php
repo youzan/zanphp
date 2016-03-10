@@ -11,7 +11,7 @@ use \Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Zan;
 
 abstract class Application {
-    private $config = [];
+    protected $config = [];
     public function __construct($config = [])
     {
         $this->config = $config;

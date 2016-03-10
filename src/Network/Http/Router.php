@@ -1,35 +1,75 @@
 <?php
-
+/**
+ * @author hupp
+ * create date: 16/01/15
+ */
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Router\Regex;
+use Zan\Framework\Network\Http\Router\UrlRegex;
+use Zan\Framework\Network\Http\Router\UrlRule;
 
 class Router extends \Zan\Framework\Network\Contract\Router {
 
-    protected $request;
-    protected $config;
-    protected $url;
-    protected $routes = [];
+    const BASIC_LEVEL = 3;
+
+    private $config;
+    private $url;
+    private $rules  = [];
+    private $routes = [];
+    private $routeConKey = 'route';
 
     public function __construct()
     {
-        $this->config  = Config::get('route');
+        $this->config = Config::get($this->routeConKey);
+        $this->rules  = UrlRule::getRules();
     }
 
     public function parse(Request $request)
     {
-        $this->request = $request;
-        $this->setUrl($this->request->getRequestUri());
-        $this->setDefaultRoute();
+        $this->url = ltrim($request->getUrl(), '/');
+        $this->setMethod($request->getMethod());
 
         if (!$this->url) {
-            return $this->routes;
+            $this->setDefaultRoute();
+            goto quit;
         }
-        $this->parseRegexRoute();
-        $this->parseStringRoute();
+        $routes = $this->parseRegexRoute();
+        $this->setRoutes($routes['url']);
 
-        return $this->routes;
+        quit:
+        return [
+            $this->routes,
+            isset($routes['params']) ? $routes['params'] : []
+        ];
+    }
+
+    private function parseRegexRoute()
+    {
+        $rules = UrlRegex::formatRules($this->rules);
+        $route = UrlRegex::decode($this->url, $rules);
+
+        return [
+            'url'    => isset($route['url']) ? $route['url'] : $this->url,
+            'params' => isset($route['parameter']) ? $route['parameter'] : [],
+        ];
+    }
+
+    private function setRoutes($url)
+    {
+        $pathInfo = explode('/', ltrim($url, '/'));
+        $pathInfo = array_filter($pathInfo);
+        $levelLen = count($pathInfo);
+
+        if ($levelLen >= self::BASIC_LEVEL) {
+            $action = end($pathInfo);
+            if (strpos($action,'.') === false) {
+                $this->setAction($action);
+                $this->setDefaultFormat();
+            }
+            $this->setController($pathInfo[$levelLen-2]);
+            $this->setModule(array_slice($pathInfo, 0, $levelLen - 2));
+        }
     }
 
     private function setDefaultRoute()
@@ -40,77 +80,29 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $this->setDefaultFormat();
     }
 
-    private function parseRegexRoute()
+    private function setModule($module = [])
     {
-        $route  = (new Regex())->decode($this->url);
-        if ($route) {
-            $this->completeResult($route);
-            if (!isset($route['url'])){
-                return true;
-            }
-            $this->url = ltrim($route['url'],'/');
-        }
-        return false;
+        $this->routes['module'] = $module;
     }
 
-    private function setUrl($url)
+    private function setAction($action)
     {
-        $this->url = $url;
+        $this->routes['action'] = $action;
     }
 
-    private function completeResult($data)
+    private function setController($controller)
     {
-        $keys = ['module','controller','action','format'];
-        foreach($keys as $key){
-            if(isset($data[$key])){
-                $this->routes[$key] = $data[$key];
-            }else{
-                $action = 'setDefault' . ucfirst($key);
-                $this->$action();
-            }
-        }
-        if(isset($data['parameter']) && !empty($data['parameter'])){
-            foreach($data['parameter'] as $k => $v){
-                $_GET[$k] = $v;
-                $_REQUEST[$k] = $v;
-            }
-        }
+        $this->routes['controller'] = $controller;
     }
 
-    private function parseAction($action)
+    private function setMethod($method)
     {
-        $pos = strpos($action,'.');
-        if(false === $pos){
-            $this->routes['action']  = $action;
-            $this->setDefaultFormat();
-        }else{
-            $this->routes['action']  = substr($action, 0, $pos);
-            $this->routes['format']  = substr($action, $pos + 1);
-        }
-    }
-
-    protected function parseStringRoute($url=null)
-    {
-        if (null === $url){
-            $url = $this->url;
-        }
-        $path = explode('/', ltrim($url, '/'));
-        $len  = count($path);
-
-        if($len > 0 && strpos($path[0], '.') === false){
-            $this->routes['module'] = $path[0];
-        }
-        if($len > 1){
-            $this->routes['controller'] = ucfirst($path[1]);
-        }
-        if($len > 2){
-            $this->parseAction($path[2]);
-        }
+        $this->routes['method'] = strtolower($method);
     }
 
     private function setDefaultModule()
     {
-        $this->routes['module'] = $this->config['default_module'];
+        $this->routes['module'] = [$this->config['default_module']];
     }
 
     private function setDefaultController()

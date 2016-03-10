@@ -26,8 +26,8 @@ class HttpClient implements Async {
     protected $method;
     protected $request;
     protected $timeout;
-    protected $post_data = '';
-    protected $user_agent = 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36';
+    protected $postData = '';
+    protected $userAgent = 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36';
 
     private $clientConfKey = 'http.client';
 
@@ -70,12 +70,12 @@ class HttpClient implements Async {
     private function buildParams($parameter)
     {
         if (is_string($parameter)) {
-            $this->post_data = $parameter;
+            $this->postData = $parameter;
         }
         else if (is_array($parameter) || is_object($parameter)) {
-            $this->post_data = http_build_query($parameter);
+            $this->postData = http_build_query($parameter);
         }
-        $this->post_data .= '&debug=json';
+        $this->postData .= '&debug=json';
     }
 
     private function buildHeader()
@@ -85,11 +85,11 @@ class HttpClient implements Async {
         $header .= 'Accept-Encoding: gzip,deflate' . self::EOF;
         $header .= 'Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2' . self::EOF;
         $header .= 'Host: '. $this->host . self::EOF;
-        $header .= $this->user_agent . self::EOF;
+        $header .= $this->userAgent . self::EOF;
 
-        if ($this->post_data) {
+        if ($this->postData) {
             $header .= 'Content-Type: application/x-www-form-urlencoded' . self::EOF;
-            $header .= 'Content-Length: ' . strlen($this->post_data) . self::EOF;
+            $header .= 'Content-Length: ' . strlen($this->postData) . self::EOF;
         }
         return $header;
     }
@@ -104,7 +104,7 @@ class HttpClient implements Async {
 
     public function onConnect()
     {
-        $this->client->send($this->buildHeader() . self::EOF . $this->post_data);
+        $this->client->send($this->buildHeader() . self::EOF . $this->postData);
     }
 
     public function onReceive($cli, $data)
