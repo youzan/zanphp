@@ -3,11 +3,10 @@
  * @author hupp
  * create date: 16/01/15
  */
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Router\UrlRegex;
-use Zan\Framework\Network\Http\Router\UrlRule;
+use Zan\Framework\Network\Contract\Request;
 
 class Router extends \Zan\Framework\Network\Contract\Router {
 

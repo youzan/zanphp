@@ -3,7 +3,7 @@
  * @author hupp
  * create date: 16/03/10
  */
-namespace Zan\Framework\Network\Http\Router;
+namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Utilities\Types\Dir;
 

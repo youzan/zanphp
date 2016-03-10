@@ -6,6 +6,8 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Zan\Framework\Network\Http\Routing\Router;
+
 class RequestHandler {
 
     private $route;
