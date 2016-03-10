@@ -7,6 +7,7 @@
  */
 namespace Zan\Framework\Sdk;
 
+
 class ShortUrl{
 
     public static function get($url,$failReturnPre=false)
@@ -21,7 +22,8 @@ class ShortUrl{
             CURLOPT_TIMEOUT => 1
         ];
 
-        $data        = Remote::get($request_url, [], $option);
+        $data = null;
+        //$data = HttpClient::get($request_url, [], $option);
 
         if(!$data){
             return self::returnFailUrl($url,$failReturnPre);

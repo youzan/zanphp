@@ -8,18 +8,16 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Sdk\Qiniu\Qiniu;
+use Zan\Framework\Sdk\Cdn\Qiniu;
 
 class Url{
 
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTPS = 'https';
-    const SCHEME_FTP = 'ftp';
 
     private static $schemes = array(
         self::SCHEME_HTTP,
         self::SCHEME_HTTPS,
-        self::SCHEME_FTP
     );
 
     private static $config;
@@ -83,21 +81,13 @@ class Url{
         }
 
         $urlAnalysis = parse_url($url);
+        $host = isset($urlAnalysis['host'])?$urlAnalysis['host']:'';
+        $path =  isset($urlAnalysis['path'])?trim($urlAnalysis['path'], '/'):'';
+        $query = isset($urlAnalysis['query'])?'?'.$urlAnalysis['query']:'';
+        $fragment = isset($urlAnalysis['fragment'])?'#'.$urlAnalysis['fragment']:'';
 
-        $path = trim($urlAnalysis['path'], '/');
-
-        if ($query = $urlAnalysis['query'])
-        {
-            $query = '?'.$query;
-        }
-
-        if ($fragment = $urlAnalysis['fragment'])
-        {
-            $fragment =  '#'.$fragment;
-        }
-
-        if($host = $urlAnalysis['host']){
-            $scheme = $urlAnalysis['scheme'];
+        if(!empty($host)){
+            $scheme = isset($urlAnalysis['scheme'])?$urlAnalysis['scheme']:'';
             if(!self::_checkScheme($scheme)){
                 throw new InvalidArgumentException('Invalid url for Url::site');
             }
@@ -131,11 +121,10 @@ class Url{
             $url = substr($url, 0, $pos);
         }
 
-        //todo 设置配置文件
-        $url = self::site((strlen($url) ? $url . $imgExt : 'upload_files/no_pic.png!280x280.jpg'), '', $scheme);
+        //todo imgqn 配置化
+        $url = self::site((strlen($url) ? $url . $imgExt : 'upload_files/no_pic.png!280x280.jpg'), 'imgqn', $scheme);
 
         if (!preg_match('~^(https?://static\.|static\.|dn-kdt-static\.qbox\.me|https?://dn-kdt-static\.qbox\.me)~s', $url)) {
-            //如果是资源文件，则使用七牛生成地址
             $url = Qiniu::site($url);
         }
 
