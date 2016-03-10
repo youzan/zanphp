@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-use \HttpServer;
+use Zan\Framework\Network\Http\Server as HttpServer;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Filter\FilterLoader;
 use Zan\Framework\Network\Http\Router\UrlRule;

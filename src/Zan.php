@@ -1,16 +1,19 @@
 <?php
 namespace Zan\Framework;
 
+use Zan\Framework\Network\Http\Application as HttpApplication;
+use Zan\Framework\Network\Tcp\Application as TcpApplication;
+
 class Zan {
 
     public static function createHttpApplication($config)
     {
-        return new \HttpApplication($config);
+        return new HttpApplication($config);
     }
 
     public static function createTcpApplication($config)
     {
-        return new \TcpApplication($config);
+        return new TcpApplication($config);
     }
 
     public static function createSocketApplication()
