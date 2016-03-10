@@ -3,6 +3,7 @@ namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\Types\Dir;
+use Zan\Framework\Foundation\Core\Config;
 
 class Layout
 {
@@ -191,6 +192,17 @@ class Layout
         if(empty($blocks)) return $tpl;
 
         return str_replace(array_keys($blocks),array_values($blocks),$tpl);
+    }
+
+    private function getCdnType()
+    {
+        $cdnMap = Config::get('cdn_whitelist');
+        $pageKey = (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '') . $this->query_path;
+        if (isset($cdnMap[$pageKey])) {
+            return 'new_cdn_static';
+        } else {
+            return 'up_cdn_static';
+        }
     }
 
 }
