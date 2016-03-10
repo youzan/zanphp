@@ -9,6 +9,7 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\FutureQuery;
+use Zan\Framework\Store\Database\Mysql\QueryResult;
 class QueryExecuter
 {
     /**
@@ -59,53 +60,80 @@ class QueryExecuter
     public function execute($sid, $data, $options)
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
+        $this->sqlMap = $sqlMap;
         $this->sql = $sqlMap['sql'];
-        $this->doQuery($this->sql);
+        $this->doQuery();
         return $this;
     }
 
-    private function insert()
-    {
-        new \mysqli_stmt($this->db, $this->sql);
-    }
-
-    private function query($sql)
-    {
-
-    }
-
-    public function send()
-    {
-//        $this->doQuery($this->sql);
-        return $this->onSqlReady();
-    }
-
-    private function doQuery($sql)
+    private function doQuery()
     {
         $result = $this->db->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
             //todo throw error
-
         }
     }
 
-    public function onSqlReady()
+    public function onQueryReady()
+    {
+        if (null === $this->sqlMap) {
+            return false;
+        }
+        switch ($this->sqlMap['sql_type']) {
+            case 'INSERT' :
+                return $this->insert();
+                break;
+            case 'UPDATE' :
+                return $this->update();
+                break;
+            case 'DELETE' :
+                return $this->delete();
+                break;
+            case 'SELECT' :
+                return $this->select();
+                break;
+        }
+    }
+
+    private function select()
     {
         if ($result = $this->db->reap_async_query()) {
-
-            return $result->fetch_all();
-//            if (is_object($result)) {
-//                mysqli_free_result($result);
-//            }
+            $return = [];
+            while ($data = $result->fetch_assoc()) {
+                $return[] = $data;
+            }
+            if (is_object($result)) {
+                mysqli_free_result($result);
+            }
+            return $this->queryResult($return);
         } else {
             //todo throw error
         }
     }
 
-    private function queryResult()
+    private function insert()
     {
+        if ($this->db->reap_async_query()) {
+            return $this->db->insert_id;
+        } else {
+            //todo throw error
+        }
+    }
 
 
+    private function update()
+    {
+        return $this->db->reap_async_query();
+    }
+
+    private function delete()
+    {
+        return $this->db->reap_async_query();
+    }
+
+    private function queryResult($result)
+    {
+        return new QueryResult($result);
     }
 
     private function getSqlMap()

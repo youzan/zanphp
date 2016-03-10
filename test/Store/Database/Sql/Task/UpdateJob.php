@@ -9,11 +9,11 @@ namespace Zan\Framework\Test\Store\Database\Sql\Task;
 use Zan\Framework\Store\Facade\Db;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Job;
 
-class InsertJob extends Job
+class UpdateJob extends Job
 {
     private $sid = '';
 
-    private $insert = [];
+    private $data = [];
 
     private $options = [];
 
@@ -23,9 +23,9 @@ class InsertJob extends Job
         return $this;
     }
 
-    public function setInsert($insert)
+    public function setData($data)
     {
-        $this->insert = $insert;
+        $this->data = $data;
         return $this;
     }
 
@@ -38,7 +38,7 @@ class InsertJob extends Job
     public function run()
     {
         $db = new Db();
-        $response = (yield $db->executer($this->sid, $this->insert, $this->options));
+        $response = (yield $db->executer($this->sid, $this->data, $this->options));
         $this->context->set('response', $response);
         yield $response;
     }

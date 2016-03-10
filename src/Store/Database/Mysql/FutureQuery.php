@@ -26,7 +26,7 @@ class FutureQuery implements Async
 
     private function call()
     {
-        $data = $this->executer->send();
+        $data = $this->executer->onQueryReady();
         call_user_func($this->callback, $data);
     }
 
