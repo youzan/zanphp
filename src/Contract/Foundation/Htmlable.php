@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Foundation\Contract;
+namespace Zan\Framework\Contract\Foundation;
 
 interface Htmlable
 {
