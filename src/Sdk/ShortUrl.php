@@ -7,8 +7,15 @@
  */
 namespace Zan\Framework\Sdk;
 
+use Zan\Framework\Network\Http\HttpClient;
 
 class ShortUrl{
+
+    private static $config;
+
+    public static function setConfig(array $config){
+        self::$config = $config;
+    }
 
     public static function get($url,$failReturnPre=false)
     {
@@ -22,8 +29,8 @@ class ShortUrl{
             CURLOPT_TIMEOUT => 1
         ];
 
-        $data = null;
-        //$data = HttpClient::get($request_url, [], $option);
+        $httpClinet = new HttpClient($request_url,$option);
+        $httpClinet->execute($callBack);
 
         if(!$data){
             return self::returnFailUrl($url,$failReturnPre);
