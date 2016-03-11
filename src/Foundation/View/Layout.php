@@ -113,22 +113,15 @@ class Layout
     }
 
 
-    public function super($blockName=null)
+    public function super($blockName = null)
     {
-        if(null === $blockName){
-            $blockName = $this->getCurrentBlock();
-        }else{
-            $blockName = strtoupper($blockName);
+        $blockName = is_null($blockName) ? $this->getCurrentBlock() : strtoupper($blockName);
+        if(is_null($blockName)) {
+            throw new InvalidArgumentException("no super block exists");
         }
-
-        if(null === $blockName){
-            throw new InvalidArgumentException("no super block exists ");
+        if(!isset($this->blocks[$blockName])) {
+            throw new InvalidArgumentException('no such super block:' . $blockName);
         }
-
-        if(!isset($this->blocks[$blockName])){
-            throw new InvalidArgumentException('no such super block:'.$blockName);
-        }
-
         echo $this->blocks[$blockName];
     }
 
@@ -137,7 +130,7 @@ class Layout
         $this->tpl($filename);
     }
 
-    public function tpl($filename,$data=[])
+    public function tpl($filename, array $data = [])
     {
         $vars = $this->data;
         if($data){
@@ -204,5 +197,4 @@ class Layout
             return 'up_cdn_static';
         }
     }
-
 }
