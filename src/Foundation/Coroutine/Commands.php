@@ -19,8 +19,7 @@ class Commands
 
         if (!$files) return false;
 
-        ClassLoader::loadFiles($files);
-        return true;
+        require_once($files);
     }
 }
 

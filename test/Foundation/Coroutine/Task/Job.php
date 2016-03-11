@@ -9,7 +9,7 @@
 namespace Zan\Framework\Test\Foundation\Coroutine\Task;
 
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 
 abstract class Job {
@@ -17,7 +17,7 @@ abstract class Job {
 
     public function __construct(Context $context) {
         if(!$context) {
-            throw new InvalidArgument('invlid context for Job __construct');
+            throw new InvalidArgumentException('invlid context for Job __construct');
         }
         $this->context = $context;
     }

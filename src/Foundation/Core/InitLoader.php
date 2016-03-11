@@ -9,6 +9,7 @@
 namespace Zan\Framework\Foundation\Core;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Dir;
 
 class InitLoader {
@@ -41,7 +42,7 @@ class InitLoader {
 
     private function loadFiles($path)
     {
-        $files = Dir::glob($path, '*.php', false);
+        $files = Dir::glob($path, '*.php', Dir::SCAN_CURRENT_DIR);
 
         foreach($files as $file){
             require $file;

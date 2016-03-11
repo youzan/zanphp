@@ -3,7 +3,7 @@ namespace Zan\Framework\Foundation\Core;
 
 use Zan\Framework\Foundation\Contract\PooledObject;
 use Zan\Framework\Foundation\Contract\PooledObjectFactory;
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class ObjectPool
@@ -59,11 +59,11 @@ class ObjectPool
     protected function setInitalNum($num)
     {
         if (!is_int($num)) {
-            throw new InvalidArgument('invalid initialNum (not int) for ObjectPool');
+            throw new InvalidArgumentException('invalid initialNum (not int) for ObjectPool');
         }
 
         if ($num < 0) {
-            throw new InvalidArgument('invalid initialNum (less than 0) for ObjectPool');
+            throw new InvalidArgumentException('invalid initialNum (less than 0) for ObjectPool');
         }
 
         $this->initialNum = $num;
@@ -72,11 +72,11 @@ class ObjectPool
     protected function setMaxNum($num)
     {
         if (!is_int($num)) {
-            throw new InvalidArgument('invalid maxNum (not int) for ObjectPool');
+            throw new InvalidArgumentException('invalid maxNum (not int) for ObjectPool');
         }
 
         if ($num < 1) {
-            throw new InvalidArgument('invalid maxNum (less than 1) for ObjectPool');
+            throw new InvalidArgumentException('invalid maxNum (less than 1) for ObjectPool');
         }
 
         $this->maxNum = $num;

@@ -1,10 +1,14 @@
 <?php
+/**
+ * @author hupp
+ * create date: 16/01/05
+ */
 
 namespace Zan\Framework\Network\Http;
 
 use \swoole_http_server as HttpServer;
 
-class Server implements \Zan\Framework\Network\Contract\Server {
+class Server implements \Zan\Framework\Contract\Network\Server {
 
     /**
      * @var HttpServer

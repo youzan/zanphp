@@ -16,5 +16,5 @@ class Test {
 
     }
 }
-
+Zan::init();
 Test::init();

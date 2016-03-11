@@ -6,13 +6,12 @@
  * Time: 20:04
  */
 namespace Zan\Framework\Test\Foundation\Coroutine;
-require __DIR__ . '/../../../' . 'src/Test.php';
 
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\SysCall\GetTaskId;
 use Zan\Framework\Test\Foundation\Coroutine\SysCall\KillTask;
 
-class SysCallTest extends \UnitTest
+class SysCallTest extends \TestCase
 {
     public function testGetTaskId()
     {
