@@ -19,7 +19,9 @@ class Commands
 
         if (!$files) return false;
 
-        require_once($files);
+        foreach($files as $file){
+            require_once($file);
+        }
     }
 }
 
