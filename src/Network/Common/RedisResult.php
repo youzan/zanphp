@@ -16,14 +16,11 @@ class RedisResult implements  Async{
     private $callback = null;
 
     public function execute(callable $callback){
-        var_dump('execute:');
         $this->callback = $callback;
     }
 
-    public function response($data)
+    public function response($data, $status)
     {
-
-        var_dump('respons' ,$data);
         call_user_func($this->callback, $data);
     }
 }
