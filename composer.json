@@ -16,6 +16,10 @@
             "Zan\\Framework\\": "src/"
         },
         "classmap": [
+        ],
+        "files": [
+            "src/Foundation/Coroutine/Command/Task.php",
+            "src/Utilities/helpers.php"
         ]
     },
     "autoload-dev": {
