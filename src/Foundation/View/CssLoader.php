@@ -9,9 +9,10 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\View\BaseLoader;
 
-class CssLoader extends Layout{
-
+class CssLoader extends BaseLoader
+{
     public function loadCSS($index, $vendor = false)
     {
         $url = $this->getCssUrl($index, $vendor);
@@ -43,4 +44,14 @@ class CssLoader extends Layout{
         $this->loadCSS($file, $vendor = false);
     }
 
+
+    public function loadByUrl()
+    {
+
+    }
+
+    public function load($path)
+    {
+        echo 'load css';
+    }
 }

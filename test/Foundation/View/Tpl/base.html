@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html class="<?php $layout->place('html_class'); ?>" lang="zh-CN" >
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="cleartype" content="on">
+
+    <?php $layout->block('meta_block'); ?>
+    <meta name="keywords" content="有赞批发,批发,选货,进货,每天上线 ,档口直供 ,男装,女装,童装, 价格低,赚钱">
+    <?php $layout->endBlock(); ?>
+
+    <title>
+        <?php $layout->place('title'); ?>
+    </title>
+
+    <?php $css->load('page'); ?>
+</head>
+
+<body>
+    <div class="container <?php $layout->place('page-special-class'); ?>">
+        <?php $layout->place('content'); ?>
+    </div>
+
+    <?php $layout->block('footer'); ?>
+        <a style="display:none;" href="http://pf.koudaitong.com/page/index/mobile" class="ft-copyright"></a>
+    <?php $layout->endBlock();?>
+
+    <?php $js->load('common_js');?>
+</body>
+</html>

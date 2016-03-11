@@ -9,11 +9,11 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\View\BaseLoader;
 
 
-
-class JsLoader extends Layout {
-
+class JsLoader extends BaseLoader
+{
     public function loadJS($index, $vendor=false, $async=false, $crossorigin=false)
     {
         $url = $this->getJsUrl($index,$vendor);
@@ -52,5 +52,8 @@ class JsLoader extends Layout {
         return $url;
     }
 
-
+    public function load($path)
+    {
+        echo 'load js';
+    }
 }

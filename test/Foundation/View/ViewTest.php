@@ -9,6 +9,7 @@
 namespace Zan\Framework\Test\Foundation\View;
 
 use Zan\Framework\Foundation\View\View;
+use Zan\Framework\Foundation\View\Tpl;
 
 class ViewTest extends \TestCase
 {
@@ -22,8 +23,19 @@ class ViewTest extends \TestCase
 
     }
 
-    public function testGet()
+    public function testDisplay()
     {
+        $html = View::display(__DIR__ . '/Tpl/Content.html', ['title' => '商品标题', 'content' => '商品详情']);
 
+        ob_start();
+        trim(Tpl::load(__DIR__ . '/Tpl/view_render_excepted.html'), " \r\n");
+        $htmlExcepted = ob_get_clean();
+
+        $find = ["\r\n", "\n", "\r", " "];
+        $replace = '';
+        $html = str_replace($find, $replace, $html);
+        $htmlExcepted = str_replace($find, $replace, $htmlExcepted);
+
+        $this->assertEquals($htmlExcepted, $html, 'ViewTest::testDisplay fail');
     }
 } 

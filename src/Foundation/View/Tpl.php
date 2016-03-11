@@ -11,19 +11,19 @@ namespace Zan\Framework\Foundation\View;
 
 class Tpl
 {
-    public static function load($path, $data = null, $assignTplBasePathForTest = '')
+    public static function load($path, $data = null)
     {
-        $path = self::getTplFullPath($path, $assignTplBasePathForTest);
+        $path = self::getTplFullPath($path);
         if(null !== $data) {
             extract($data);
         }
         require $path;
     }
 
-    public static function getTplFullPath($path, $assignTplBasePathForTest)
+    public static function getTplFullPath($path)
     {
-        if($assignTplBasePathForTest) {
-            return $assignTplBasePathForTest . '/' . $path . '.html';
+        if(false !== strpos($path, '.html')) {
+            return $path;
         }
         if(!preg_match('/^static./i', $path)){
             $path = explode('/', $path);

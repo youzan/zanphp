@@ -27,10 +27,10 @@ class TplTest extends \TestCase
     public function testLoad()
     {
         ob_start();
-        $this->tpl->load('testTpl', ['a' => 1, 'b' => 2], __DIR__ . '/Tpl');
+        $this->tpl->load(__DIR__ . '/Tpl/testTpl.html', ['a' => 1, 'b' => 2]);
         $content = ob_get_clean();
 
         $contentExcepted = 'content';
-        $this->assertEquals($contentExcepted, $content, 'LayoutTest::curLevel fail');
+        $this->assertEquals($contentExcepted, $content, 'LayoutTest::testLoad fail');
     }
 } 
