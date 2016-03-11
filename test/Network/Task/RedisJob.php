@@ -16,9 +16,13 @@ class RedisJob extends Job {
     {
         $redis = new RedisManager('127.0.0.1');
 
-        $setRet = (yield $redis->set('abc', 'retValue'));
+        $setRet = (yield $redis->set('abc','wdlsdklsieoieowkdlowdjowi'));
         $getRet = (yield $redis->get('abc'));
+        $setRet1 = (yield $redis->set('def','wdlsdklsieoieowkdlowdjowi'));
+        $getRet1 = (yield $redis->get('def'));
 
-        $this->context->set('getRet', $getRet);
+        swoole_event_exit();
+
+        yield 'RedisJob finish';
     }
 }

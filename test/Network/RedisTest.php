@@ -24,11 +24,13 @@ class RedisTest extends \UnitTest {
         $job = new RedisJob($context);
         $coroutine = $job->run();
 
+
         $task = new Task($coroutine);
         $task->run();
 
+
         $result = $context->show();
-        var_dump($result);
+        var_dump($result);exit;
 
     }
 
