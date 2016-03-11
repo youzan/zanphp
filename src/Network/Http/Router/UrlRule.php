@@ -9,20 +9,30 @@ use Zan\Framework\Utilities\Types\Dir;
 
 class UrlRule {
 
-    public static $default = [];
-    public static $rules = [];
+    const ROUTE_KEY = 'rewrite';
+
+    private static $rules = [];
 
     public static function loadRules($routingPath)
     {
-        //todo set default
+        $routeFiles = Dir::glob($routingPath, '*.php');
 
-        $routes = Dir::glob($routingPath, '*.php');
+        if (!$routeFiles) return false;
 
-        //todo get routing
+        foreach ($routeFiles as $file)
+        {
+            $route = include $file;
+
+            if (!isset($route[self::ROUTE_KEY]))  continue;
+            if (!is_array($route[self::ROUTE_KEY])) continue;
+
+            self::$rules = array_merge(self::$rules, $route[self::ROUTE_KEY]);
+        }
     }
 
     public static function getRules()
     {
         return self::$rules;
     }
+
 }

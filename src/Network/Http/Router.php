@@ -34,13 +34,13 @@ class Router extends \Zan\Framework\Network\Contract\Router {
             $this->setDefaultRoute();
             goto quit;
         }
-        $routes = $this->parseRegexRoute();
-        $this->setRoutes($routes['url']);
+        list($url, $params) = $this->parseRegexRoute();
+        $this->setRoutes($url);
 
         quit:
         return [
             $this->routes,
-            isset($routes['params']) ? $routes['params'] : []
+            isset($params) ? $params : []
         ];
     }
 
@@ -50,8 +50,8 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $route = UrlRegex::decode($this->url, $rules);
 
         return [
-            'url'    => isset($route['url']) ? $route['url'] : $this->url,
-            'params' => isset($route['parameter']) ? $route['parameter'] : [],
+            isset($route['url']) ? $route['url'] : $this->url,
+            isset($route['parameter']) ? $route['parameter'] : [],
         ];
     }
 
@@ -63,9 +63,13 @@ class Router extends \Zan\Framework\Network\Contract\Router {
 
         if ($levelLen >= self::BASIC_LEVEL) {
             $action = end($pathInfo);
-            if (strpos($action,'.') === false) {
+            $pos    = strpos($action, '.');
+            if ($pos === false) {
                 $this->setAction($action);
                 $this->setDefaultFormat();
+            }else {
+                $this->setAction(substr($action, 0, $pos));
+                $this->setFormat(substr($action, $pos + 1));
             }
             $this->setController($pathInfo[$levelLen-2]);
             $this->setModule(array_slice($pathInfo, 0, $levelLen - 2));
@@ -93,6 +97,11 @@ class Router extends \Zan\Framework\Network\Contract\Router {
     private function setController($controller)
     {
         $this->routes['controller'] = $controller;
+    }
+
+    private function setFormat($format)
+    {
+        $this->routes['format'] = $format;
     }
 
     private function setMethod($method)
