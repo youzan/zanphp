@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Domain\Context;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Task
 {

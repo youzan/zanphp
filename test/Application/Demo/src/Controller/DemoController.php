@@ -12,5 +12,8 @@ use Zan\Framework\Foundation\Domain\Controller;
 
 class DemoController extends Controller
 {
-
+    public function getIndexHtml($request, $context)
+    {
+        return $this->display('aaa');
+    }
 }

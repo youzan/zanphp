@@ -1,5 +1,5 @@
 <?php
-namespace Zan\Framework\Network\Contract;
+namespace Zan\Framework\Contract\Network;
 
 interface Server {
 

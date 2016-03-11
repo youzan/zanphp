@@ -10,5 +10,8 @@ namespace Zan\Framework\Foundation\Exception;
 
 
 class ZanException extends \Exception {
+    public function handle()
+    {
 
+    }
 }
