@@ -7,3 +7,7 @@
 <?php $layout->block('content'); ?>
 <?php echo $content;?>
 <?php $layout->endBlock();?>
+
+<?php $layout->block('tpl_load'); ?>
+<?php $tpl->load('/Users/chenfan/workspace/zan/test/Foundation/View/Tpl/tpl_load.html', ['tplData' => '这是传给tpl的变量输出的']);?>
+<?php $layout->endBlock();?>

@@ -23,6 +23,10 @@
         <?php $layout->place('content'); ?>
     </div>
 
+    <?php $layout->block('tpl_load');?>
+    <?php $tpl->load('/Users/chenfan/workspace/zan/test/Foundation/View/Tpl/common.html');?>
+    <?php $layout->endBlock();?>
+
     <?php $layout->block('footer'); ?>
         <a style="display:none;" href="http://pf.koudaitong.com/page/index/mobile" class="ft-copyright"></a>
     <?php $layout->endBlock();?>

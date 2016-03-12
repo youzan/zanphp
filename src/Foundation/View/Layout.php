@@ -2,16 +2,13 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Utilities\Types\Dir;
-use Zan\Framework\Foundation\View\JsLoader;
-use Zan\Framework\Foundation\View\CssLoader;
-use Zan\Framework\Foundation\View\Tpl;
+
+use Zan\Framework\Foundation\View\TplLoader;
 
 class Layout
 {
+    private $tplLoader      = null;
     private $tpl            = '';
-    private $tplPath        = '';
-    private $data           = [];
     private $blocks         = [];
 
     private $curLevel           = 0;
@@ -21,34 +18,23 @@ class Layout
     private $blockPre           = '%%BLOCK__';
     private $blockSuf           = '__BLOCK%%';
 
-    public function __construct($tpl, $data)
+    public function __construct(TplLoader $tplLoader, $tpl)
     {
+        $this->tplLoader = $tplLoader;
         $this->tpl = $tpl;
-        $this->data = $data;
-        $this->data['layout'] = $this;
-    }
-
-    public function setTplPath($dir)
-    {
-        if(!is_dir($dir)){
-            throw new InvalidArgumentException('Invalid tplPath for Layout');
-        }
-        $dir = Dir::formatPath($dir);
-        $this->tplPath = $dir;
     }
 
     public function render()
     {
         ob_start();
-        $this->tpl($this->tpl);
+        $this->tplLoader->load($this->tpl);
         $html = ob_get_clean();
         return $this->replaceBlocksLevelByLevel($html);
     }
 
-    public static function display($tpl, $data)
+    public function extend($tpl)
     {
-        $html = new self($tpl,$data);
-        return trim($html->render(), " \r\n");
+        $this->tplLoader->load($tpl);
     }
 
     public function block($blockName)
@@ -112,20 +98,6 @@ class Layout
         echo $this->blocks[$blockName];
     }
 
-    public function extend($filename)
-    {
-        $this->tpl($filename);
-    }
-
-    public function tpl($filename, array $data = [])
-    {
-        $vars = $this->data;
-        if($data){
-            $vars = array_merge($vars, $data);
-        }
-        Tpl::load($filename, $vars);
-    }
-
     private function getCurrentBlock()
     {
         if(!$this->blockQueue) return null;
@@ -148,7 +120,7 @@ class Layout
         $len = count($this->blockLevelMap);
         for($i=0; $i<$len; $i++){
             if(!isset($this->blockLevelMap[$i])) continue;
-            $tpl = $this->replaceBlocksOfOneLevel($tpl,$this->blockLevelMap[$i]);
+            $tpl = $this->replaceBlocksOfOneLevel($tpl, $this->blockLevelMap[$i]);
         }
         return $tpl;
     }
