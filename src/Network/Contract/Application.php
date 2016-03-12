@@ -16,7 +16,6 @@ abstract class Application {
     {
         $this->config = $config;
         $this->setAppName($config);
-        $this->init();
     }
 
     protected function init()
@@ -39,7 +38,6 @@ abstract class Application {
 
     protected function initFramwork()
     {
-        Zan::init();
     }
 
     protected function initPath()

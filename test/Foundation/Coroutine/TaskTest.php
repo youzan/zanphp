@@ -8,13 +8,14 @@
 namespace Zan\Framework\Test\Foundation\Coroutine;
 
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Foundation\Test\UnitTest;
 use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Steps;
 
-class TaskTest extends \TestCase {
+class TaskTest extends UnitTest {
     public function setUp() {
         parent::setUp();
     }

@@ -10,7 +10,6 @@ namespace Zan\Framework\Foundation\Test;
 
 class UnitTest extends \PHPUnit_Framework_TestCase
 {
-
     protected function invoke(&$object, $methodName, array $parameters = [])
     {
         $reflection = new \ReflectionClass(get_class($object));

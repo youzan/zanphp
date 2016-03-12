@@ -8,10 +8,7 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Domain\Context;
-
-//load commands
-Commands::load();
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Task
 {

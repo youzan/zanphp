@@ -4,6 +4,7 @@ namespace Zan\Framework\Foundation\Domain;
 
 use Zan\Framework\Network\Http\Request;
 use Zan\Framework\Network\Http\Response;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Controller {
 
@@ -59,6 +60,7 @@ class Controller {
         }
         $this->output($result);
     }
+
 
     public function output($data)
     {

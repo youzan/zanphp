@@ -7,15 +7,16 @@
  */
 
 return [
-    'extends'           => '',
-
     'prefix'            => 'urlPrefix',
+    'domain'            => [
+        'shop{:kdt_id}.youzan.com'  => '',
+    ],
+
     'rewrite'           => [
+        '/:module/xxx/yyy'  => '/:module/index/index'
     ],
 
-    'tiny_url_switch'   => true,
-    'tiny_url_rule'     => [
 
-    ],
 
 ];
+

@@ -19,8 +19,9 @@ class Commands
 
         if (!$files) return false;
 
-        ClassLoader::loadFiles($files);
-        return true;
+        foreach($files as $file){
+            require_once($file);
+        }
     }
 }
 
