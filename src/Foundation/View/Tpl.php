@@ -9,11 +9,22 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Utilities\Types\Dir;
+use Zan\Framework\Foundation\Coroutine\Event;
 
-class TplLoader
+class Tpl
 {
     private $_data = [];
     private $_tplPath = '';
+    private $_event = '';
+
+    public function __construct(Event $event)
+    {
+        $that = $this;
+        $this->_event = $event;
+        $this->_event->bind('set_view_vars', function($args) use ($that) {
+            $this->setViewVars($args);
+        });
+    }
 
     public function load($tpl, array $data = [])
     {
@@ -31,7 +42,7 @@ class TplLoader
         $this->_tplPath = $dir;
     }
 
-    public function setData(array $data)
+    public function setViewVars(array $data)
     {
         $this->_data = array_merge($this->_data, $data);
     }

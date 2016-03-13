@@ -2,46 +2,52 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\View\Layout;
-use Zan\Framework\Foundation\View\TplLoader;
+use Zan\Framework\Foundation\View\Tpl;
+use Zan\Framework\Foundation\View\Js;
+use Zan\Framework\Foundation\View\Css;
+use Zan\Framework\Foundation\Coroutine\Event;
 
 class View
 {
     private $_data = [];
-    private $_tpl = '';
+    private $_tplPath = '';
 
-    private $_jsLoader = null;
-    private $_cssLoader = null;
-    private $_tplLoader = null;
+    private $_js = null;
+    private $_css = null;
+    private $_tpl = null;
     private $_layout = null;
 
-    public function __construct($tpl, array $data = [])
+    private $_event = null;
+
+    public function __construct($tplPath, array $data = [])
     {
-        $this->_tpl = $tpl;
+        $this->_tplPath = $tplPath;
         $this->_data = $data;
-        $this->_jsLoader = new JsLoader();
-        $this->_cssLoader = new CssLoader();
-        $this->_tplLoader = new TplLoader();
+        $this->_event = new Event();
+        $this->_js = new Js($this->_event);
+        $this->_css = new Css($this->_event);
+        $this->_tpl = new Tpl($this->_event);
     }
 
-    public static function display($tpl, array $data = [])
+    public static function display($tplPath, array $data = [])
     {
-        $view = new self($tpl, $data);
+        $view = new self($tplPath, $data);
         return trim($view->render(), " \r\n");
     }
 
     public function render()
     {
-        $this->_layout = new Layout($this->_tplLoader, $this->_tpl);
-        $this->_tplLoader->setData($this->_getViewVars());
-        return $this->_layout->render();
+        $this->_layout = new Layout($this->_tpl, $this->_event, $this->_tplPath);
+        $this->_tpl->setViewVars($this->_getViewVars());
+        return $this->_js->replaceJS($this->_layout->render());
     }
 
     private function _getViewVars()
     {
         $loaders = [
-            'js' => $this->_jsLoader,
-            'css' => $this->_cssLoader,
-            'tpl' => $this->_tplLoader,
+            'js' => $this->_js,
+            'css' => $this->_css,
+            'tpl' => $this->_tpl,
             'layout' => $this->_layout,
         ];
         return array_merge($loaders, $this->_data);

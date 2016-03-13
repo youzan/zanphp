@@ -8,10 +8,41 @@
 
 namespace Zan\Framework\Foundation\View;
 
+use Zan\Framework\Foundation\Coroutine\Event;
 
 class BaseLoader
 {
-    private $_files = [];
+    public $blockResQueue = [];
+    public $noBlockResQueue = [];
+    public $curBlock = '';
+    public $event = null;
+
+    public function __construct(Event $event)
+    {
+        $that = $this;
+        $this->event = $event;
+        $this->event->bind('start_block', function($args) use($that) {
+            $that->setCurrentBlock($args);
+        });
+        $this->event->bind('end_block', function ($args) use($that) {
+            $this->setCurrentEndBlock($args);
+        });
+    }
+
+    public function setCurrentBlock($blockName)
+    {
+        if(isset($this->blockResQueue[$blockName])) {
+            $this->blockResQueue[$blockName] = [];
+        }
+        $this->curBlock = $blockName;
+    }
+
+    public function setCurrentEndBlock($blockName)
+    {
+        if($blockName === $this->curBlock) {
+            $this->curBlock = '';
+        }
+    }
 
     public function getCdnType()
     {
@@ -23,9 +54,4 @@ class BaseLoader
             return 'up_cdn_static';
         }
     }
-
-    public function load($resource)
-    {
-        if($resource) array_push($this->_files, $resource);
-    }
-} 
+}

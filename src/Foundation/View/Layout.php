@@ -3,38 +3,42 @@ namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
-use Zan\Framework\Foundation\View\TplLoader;
+use Zan\Framework\Foundation\View\Tpl;
+use Zan\Framework\Foundation\Coroutine\Event;
 
 class Layout
 {
-    private $tplLoader      = null;
-    private $tpl            = '';
-    private $blocks         = [];
+    private $tpl           = null;
+    private $tplPath       = '';
+    private $blocks        = [];
 
-    private $curLevel           = 0;
-    private $blockQueue         = [];
-    private $blockLevelMap      = [];
+    private $event         = null;
 
-    private $blockPre           = '%%BLOCK__';
-    private $blockSuf           = '__BLOCK%%';
+    private $curLevel      = 0;
+    private $blockQueue    = [];
+    private $blockLevelMap = [];
 
-    public function __construct(TplLoader $tplLoader, $tpl)
+    private $blockPre      = '%%BLOCK__';
+    private $blockSuf      = '__BLOCK%%';
+
+    public function __construct(Tpl $tpl, Event $event, $tplPath)
     {
-        $this->tplLoader = $tplLoader;
         $this->tpl = $tpl;
+        $this->event = $event;
+        $this->tplPath = $tplPath;
     }
 
     public function render()
     {
         ob_start();
-        $this->tplLoader->load($this->tpl);
+        $this->tpl->load($this->tplPath);
         $html = ob_get_clean();
         return $this->replaceBlocksLevelByLevel($html);
     }
 
-    public function extend($tpl)
+    public function extend($tplPath)
     {
-        $this->tplLoader->load($tpl);
+        $this->tpl->load($tplPath);
     }
 
     public function block($blockName)
@@ -47,6 +51,7 @@ class Layout
         $this->curLevel++;
         array_push($this->blockQueue,$blockName);
         ob_start();
+        $this->event->fire('start_block', $blockName);
         return true;
     }
 
@@ -68,6 +73,7 @@ class Layout
         $this->blocks[$curBlock] = $content;
         $this->addBlockToLevelMap($curBlock,$this->curLevel);
         echo $this->blockPre . $curBlock . $this->blockSuf;
+        $this->event->fire('end_block', $curBlock);
     }
 
     public function place($blockName, $content = '')
@@ -98,7 +104,7 @@ class Layout
         echo $this->blocks[$blockName];
     }
 
-    private function getCurrentBlock()
+    public function getCurrentBlock()
     {
         if(!$this->blockQueue) return null;
         $lastIdx = count($this->blockQueue) - 1;

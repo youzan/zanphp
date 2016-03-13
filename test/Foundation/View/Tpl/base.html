@@ -7,19 +7,25 @@
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="cleartype" content="on">
 
-    <?php $layout->block('load_css');?>
-    <?php $css->load('aaaa');?>
+    <?php $layout->block('load_js');?>
+    <?php $js->asyncLoad('async_a.js');?>
+    <?php $js->asyncLoad('async_b.js');?>
     <?php $layout->endBlock();?>
 
     <?php $layout->block('meta_block'); ?>
     <meta name="keywords" content="有赞批发,批发,选货,进货,每天上线 ,档口直供 ,男装,女装,童装, 价格低,赚钱">
     <?php $layout->endBlock(); ?>
 
+    <?php $js->syncLoad('sync_a.js');?>
+    <?php $js->syncLoad('sync_b.js');?>
+
+
+    <?php $js->asyncLoad('async_c.js');?>
+
     <title>
         <?php $layout->place('title'); ?>
     </title>
 
-    <?php $css->load('page'); ?>
 </head>
 
 <body>
@@ -35,6 +41,6 @@
         <a style="display:none;" href="http://pf.koudaitong.com/page/index/mobile" class="ft-copyright"></a>
     <?php $layout->endBlock();?>
 
-    <?php $js->load('common_js');?>
+    <?php $js->syncLoad('common_js');?>
 </body>
 </html>

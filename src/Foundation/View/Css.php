@@ -11,9 +11,9 @@ namespace Zan\Framework\Foundation\View;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\View\BaseLoader;
 
-class CssLoader extends BaseLoader
+class Css extends BaseLoader
 {
-    public function loadCSS($index, $vendor = false)
+    public function load($index, $vendor = false)
     {
         $url = $this->getCssUrl($index, $vendor);
         echo '<link rel="stylesheet" href="' . $url. '" onerror="_cdnFallback(this)">';
@@ -23,7 +23,6 @@ class CssLoader extends BaseLoader
     {
         $isUseCdn = Config::get('js.use_css_cdn');
         $url = '';
-
         if ($vendor !== false) {
             $url = URL::site($index, $isUseCdn ? $this->getCdnType() : 'static');
         } else {
@@ -35,18 +34,6 @@ class CssLoader extends BaseLoader
                 $url = URL::site('local_css/' . $arr[1] . '.css?t=' . Time::current(TRUE), 'static');
             }
         }
-
         return $url;
-    }
-
-    public function loadCssByVersion($file, $vendor = false)
-    {
-        $this->loadCSS($file, $vendor = false);
-    }
-
-
-    public function loadByUrl()
-    {
-
     }
 }
