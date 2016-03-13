@@ -20,6 +20,7 @@ class Application extends \Zan\Framework\Network\Contract\Application {
     public function __construct($config)
     {
         parent::__construct($config);
+        self::init();
     }
 
     public function init()

@@ -4,6 +4,7 @@ namespace Zan\Framework\Foundation\Domain;
 
 use Zan\Framework\Network\Contract\Request;
 use Zan\Framework\Network\Contract\Response;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Controller {
 
@@ -16,20 +17,6 @@ class Controller {
         $this->request = $request;
         $this->respones = $response;
         $this->context = $context;
-    }
-
-    public function display()
-    {
-
-    }
-
-    public function assign()
-    {
-
-    }
-
-    public function r($code, $msg, $data)
-    {
     }
 
     public function output($data)
