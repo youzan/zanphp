@@ -8,7 +8,7 @@ namespace Zan\Framework\Network\Http\Routing;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request;
 
-class Router extends \Zan\Framework\Network\Contract\Router {
+class Router {
 
     const BASIC_LEVEL = 3;
 
@@ -18,9 +18,13 @@ class Router extends \Zan\Framework\Network\Contract\Router {
     private $routes = [];
     private $routeConKey = 'route';
 
-    public function __construct()
+    public function __construct($config = [])
     {
-        $this->config = Config::get($this->routeConKey);
+        $this->config = $config;
+
+        if (!$this->config) {
+            $this->config = Config::get($this->routeConKey);
+        }
         $this->rules  = UrlRule::getRules();
     }
 
