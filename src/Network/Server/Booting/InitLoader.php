@@ -6,7 +6,7 @@
  * Time: 22:30
  */
 
-namespace Zan\Framework\Foundation\Core;
+namespace Zan\Framework\Network\Server\Booting;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Utilities\Types\Arr;
