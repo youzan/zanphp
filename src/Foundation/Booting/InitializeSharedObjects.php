@@ -21,7 +21,7 @@ class InitializeSharedObjects
     {
         $this->app = $app;
 
-        $this->initializeValidator();
+        //$this->initializeValidator();
     }
 
     private function initializeValidator()

@@ -13,7 +13,7 @@ interface Factory
      * @param  array  $customAttributes
      * @return \Zan\Framework\Contract\Utilities\Validation\Validator
      */
-    public function make(array $data, array $rules, array $messages = [], array $customAttributes = []);
+    public static function make(array $data, array $rules, array $messages = [], array $customAttributes = []);
 
     /**
      * Register a custom validator extension.

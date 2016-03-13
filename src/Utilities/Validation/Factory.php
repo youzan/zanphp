@@ -5,9 +5,12 @@ namespace Zan\Framework\Utilities\Validation;
 use Closure;
 use Zan\Framework\Utilities\Types\Str;
 use Zan\Framework\Contract\Utilities\Validation\Factory as FactoryContract;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Factory implements FactoryContract
 {
+    use Singleton;
+
     /**
      * All of the custom validator extensions.
      *
@@ -52,11 +55,13 @@ class Factory implements FactoryContract
      * @param  array  $customAttributes
      * @return \Zan\Framework\Utilities\Validation\Validator
      */
-    public function make(array $data, array $rules, array $messages = [], array $customAttributes = [])
+    public static function make(array $data, array $rules, array $messages = [], array $customAttributes = [])
     {
-        $validator = $this->resolve($data, $rules, $messages, $customAttributes);
+        $instance = static::getInstance();
 
-        $this->addExtensions($validator);
+        $validator = $instance->resolve($data, $rules, $messages, $customAttributes);
+
+        $instance->addExtensions($validator);
 
         return $validator;
     }
