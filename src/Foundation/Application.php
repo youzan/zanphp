@@ -2,10 +2,12 @@
 
 namespace Zan\Framework\Foundation;
 
+use RuntimeException;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
 use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
+use Zan\Framework\Utilities\Types\Arr;
 
 class Application
 {
@@ -15,6 +17,20 @@ class Application
      * @var string
      */
     const VERSION = '1.0';
+
+    /**
+     * The current globally available container (if any).
+     *
+     * @var static
+     */
+    protected static $instance;
+
+    /**
+     * The name for the App.
+     *
+     * @var string
+     */
+    protected $appName;
 
     /**
      * The base path for the App installation.
@@ -30,7 +46,6 @@ class Application
      */
     protected $namespace = null;
 
-
     /**
      * @var \Zan\Framework\Foundation\Container\Di
      */
@@ -39,15 +54,18 @@ class Application
     /**
      * Create a new Zan application instance.
      *
-     * @param  string|null  $basePath
+     * @param string $appName
+     * @param  string $basePath
      */
-    public function __construct($basePath = null)
+    public function __construct($appName, $basePath)
     {
-        if ($basePath) {
-            $this->setBasePath($basePath);
-        }
+        $this->appName = $appName;
+
+        $this->setBasePath($basePath);
 
         $this->bootstrap();
+
+        static::setInstance($this);
     }
 
     protected function bootstrap()
@@ -81,7 +99,17 @@ class Application
     }
 
     /**
-     * Get the base path of the Laravel installation.
+     * Get the app name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->appName;
+    }
+
+    /**
+     * Get the base path of the App installation.
      *
      * @return string
      */
@@ -104,6 +132,16 @@ class Application
     }
 
     /**
+     * Get the app path.
+     *
+     * @return string
+     */
+    public function getAppPath()
+    {
+        return $this->basePath . '/' . 'src';
+    }
+
+    /**
      * Get the di
      *
      * @return \Zan\Framework\Foundation\Container\Di
@@ -123,5 +161,55 @@ class Application
         $this->di = Di::getInstance();
 
         return $this;
+    }
+
+    /**
+     * Set the globally available instance of the container.
+     *
+     * @return static
+     */
+    public static function getInstance()
+    {
+        return static::$instance;
+    }
+
+    /**
+     * Set the shared instance of the container.
+     *
+     * @param  \Zan\Framework\Foundation\Application  $app
+     * @return void
+     */
+    public static function setInstance($app)
+    {
+        static::$instance = $app;
+    }
+
+    /**
+     * Get the application namespace.
+     *
+     * @return string
+     *
+     * @throws \RuntimeException
+     */
+    public function getNamespace()
+    {
+        if (! is_null($this->namespace)) {
+            return $this->namespace;
+        }
+
+        $composer = json_decode(
+            file_get_contents($this->getBasePath().'/'.'composer.json'),
+            true
+        );
+
+        foreach ((array) Arr::get($composer, 'autoload.psr-4') as $namespace => $path) {
+            foreach ((array) $path as $pathChoice) {
+                if (realpath($this->getAppPath()) == realpath($this->getBasePath().'/'.$pathChoice)) {
+                    return $this->namespace = $namespace;
+                }
+            }
+        }
+
+        throw new RuntimeException('Unable to detect application namespace.');
     }
 }
