@@ -79,7 +79,15 @@ class Arr {
 
         return $result;
     }
-    
+
+    /**
+     * @param array $list
+     * @param $value
+     * @return array
+     *
+     * @example Arr::createTreeByList(['a','b','c'],1);
+     * @output  ['a' => [ 'b' => [ 'c' => 1 ] ] ]
+     */
     public static function createTreeByList(array $list, $value){
         if(empty($list)){
             return $value;
