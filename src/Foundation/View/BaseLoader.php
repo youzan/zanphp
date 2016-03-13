@@ -11,6 +11,8 @@ namespace Zan\Framework\Foundation\View;
 
 class BaseLoader
 {
+    private $_files = [];
+
     public function getCdnType()
     {
         $cdnMap = Config::get('cdn_whitelist');
@@ -20,5 +22,10 @@ class BaseLoader
         } else {
             return 'up_cdn_static';
         }
+    }
+
+    public function load($resource)
+    {
+        if($resource) array_push($this->_files, $resource);
     }
 } 
