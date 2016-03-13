@@ -4,7 +4,7 @@
  * create date: 16/03/02
  */
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Response;
 
 class Parser
 {

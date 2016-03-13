@@ -5,7 +5,7 @@
  * Date: 16/3/8
  * Time: 上午11:11
  */
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Utilities\Types;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Sdk\Cdn\Qiniu;
@@ -27,14 +27,10 @@ class Url{
     }
 
     /**
-     * This method returns the base URI for your application, if the first
-     * function argument is omitted the index.php will not be included in the
-     * return value. If the second function argument is provided with
-     * a string it will be prefixed to the return value as the scheme
-     *
-     * @param                $index
-     * @param   string	     $scheme   url scheme
-     * @return  string
+     * @param bool $index
+     * @param bool $scheme
+     * @return string
+     * @throws InvalidArgumentException
      */
     public static function base($index = FALSE, $scheme = false)
     {
@@ -63,15 +59,10 @@ class Url{
     }
 
     /**
-     * This method returns the absolute root URI of a given URI or, by
-     * default, of your application's URI route.
-     *
-     * If url have scheme and host, the method will use itself's scheme and host.
-     * else , the method where create scheme and host by the params -- index and scheme
-     *
      * @param string $url
      * @param bool $index
-     * @param string $scheme
+     * @param bool $scheme
+     * @return string
      * @throws InvalidArgumentException
      */
     public static function site($url = '', $index = TRUE, $scheme = false)

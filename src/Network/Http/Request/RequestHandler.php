@@ -2,23 +2,27 @@
 
 namespace Zan\Framework\Network\Http;
 
-class RequestHandler {
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Http\Routing\Router;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
-    private $route;
+class RequestHandler {
+    private $response = null;
+    private $context  = null;
 
     public function __construct()
     {
-        $this->route = new Router();
+        $this->context = new Context();
     }
 
     public function handle(\swoole_http_request $req, \swoole_http_response $resp)
     {
         $request  = $this->buildRequest($req);
-        $response = $this->buildResponse($resp);
+        $this->response = $this->buildResponse($resp);
 
-        $routes = $this->route->parse($request);
+        Router::getInstance()->route($this->request);
 
-        (new RequestProcessor($request, $response))->run($routes);
+
     }
 
     private function buildRequest($request)

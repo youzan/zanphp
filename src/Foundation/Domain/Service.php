@@ -3,10 +3,10 @@
  * Created by IntelliJ IDEA.
  * User: winglechen
  * Date: 16/3/13
- * Time: 18:27
+ * Time: 20:30
  */
+namespace Zan\Framework\Foundation\Domain;
 
-return [
-    'a.b.c' => 'xxx',
-    'a.b'   => [],
-];
+class Service {
+
+}
