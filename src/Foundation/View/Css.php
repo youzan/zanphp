@@ -21,6 +21,7 @@ class Css extends BaseLoader
 
     public function getCssUrl($index,$vendor=false)
     {
+        return 'static.youzan.com/' . $index;
         $isUseCdn = Config::get('js.use_css_cdn');
         $url = '';
         if ($vendor !== false) {
