@@ -1,3 +1,5 @@
+#!/usr/bin/env php
+
 <?php
 /**
  * Created by IntelliJ IDEA.
@@ -10,7 +12,7 @@ use \Zan\Framework\Utilities\DesignPattern\Registry;
 use \Zan\Framework\Zan;
 
 
-require __DIR__ . '/../../../../' . 'vendor/autoload.php';
+
 require __DIR__ . '/config/httpArguments.php';
 require __DIR__ . '/../init/bootstrap.php';
 

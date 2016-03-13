@@ -1,11 +1,13 @@
 <?php
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Router\Regex;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-class Router extends \Zan\Framework\Network\Contract\Router {
+class Router {
+    use Singleton;
 
     protected $request;
     protected $config;
@@ -17,7 +19,7 @@ class Router extends \Zan\Framework\Network\Contract\Router {
         $this->config  = Config::get('route');
     }
 
-    public function parse(Request $request)
+    public function route(Request $request)
     {
         $this->request = $request;
         $this->setUrl($this->request->getRequestUri());

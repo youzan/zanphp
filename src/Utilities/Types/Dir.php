@@ -51,6 +51,44 @@ class Dir
         return $files;
     }
 
+    public static function formatPath($path) {
+        if('/' == substr($path,-1) ) {
+            return $path;
+        }
+
+        return $path . '/';
+    }
+
+    public static function matchPattern($pattern, $file)
+    {
+        $replaceMap = [
+            '*'     => '.*',
+            '.'     => '\.',
+            '+'     => '.+',
+        ];
+
+        $pattern = str_replace(array_keys($replaceMap), array_values($replaceMap), $pattern);
+        $pattern = '/' . $pattern . '/i';
+
+        if(preg_match($pattern, $file)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function basename($pathes, $suffix='')
+    {
+        if(!$pathes) return [];
+
+        $ret = [];
+        foreach($pathes as $path){
+            $ret[] = basename($path, $suffix);
+        }
+
+        return $ret;
+    }
+
     private static function scanCurrentDir($path,$excludeDir=true){
         $path = self::formatPath($path);
         $dh = opendir($path);
@@ -115,44 +153,5 @@ class Dir
             }
         }
         return $files;
-    }
-
-
-    public static function formatPath($path) {
-        if('/' == substr($path,-1) ) {
-            return $path;
-        }
-
-        return $path . '/';
-    }
-
-    public static function matchPattern($pattern, $file)
-    {
-        $replaceMap = [
-            '*'     => '.*',
-            '.'     => '\.',
-            '+'     => '.+',
-        ];
-
-        $pattern = str_replace(array_keys($replaceMap), array_values($replaceMap), $pattern);
-        $pattern = '/' . $pattern . '/i';
-
-        if(preg_match($pattern, $file)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static function basename($pathes, $suffix='')
-    {
-        if(!$pathes) return [];
-
-        $ret = [];
-        foreach($pathes as $path){
-            $ret[] = basename($path, $suffix);
-        }
-
-        return $ret;
     }
 }

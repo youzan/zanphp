@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Request;
 
 use Generator;
 use Zan\Framework\Utilities\DesignPattern\Context;
