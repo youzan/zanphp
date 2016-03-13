@@ -8,26 +8,26 @@
 
 namespace Zan\Framework\Test\Foundation\View;
 
-use Zan\Framework\Foundation\View\Tpl;
+use Zan\Framework\Foundation\View\TplLoader;
 
-class TplTest extends \TestCase
+class TplLoaderTest extends \TestCase
 {
-    public $tpl = null;
+    public $tplLoader = null;
 
     public function setUp()
     {
-        $this->tpl = new Tpl();
+        $this->tplLoader = new TplLoader();
     }
 
     public function tearDown()
     {
-        $this->tpl = null;
+        $this->tplLoader = null;
     }
 
     public function testLoad()
     {
         ob_start();
-        $this->tpl->load(__DIR__ . '/Tpl/testTpl.html', ['a' => 1, 'b' => 2]);
+        $this->tplLoader->load(__DIR__ . '/Tpl/testTpl.html', ['a' => 1, 'b' => 2]);
         $content = ob_get_clean();
 
         $contentExcepted = 'content';

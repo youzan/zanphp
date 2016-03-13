@@ -49,9 +49,4 @@ class CssLoader extends BaseLoader
     {
 
     }
-
-    public function load($path)
-    {
-        echo 'load css';
-    }
 }
