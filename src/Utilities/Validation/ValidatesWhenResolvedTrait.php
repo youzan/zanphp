@@ -38,13 +38,10 @@ trait ValidatesWhenResolvedTrait
 
     /**
      * Handle a failed validation attempt.
-
-*
-*@param  \Zan\Framework\Utilities\Validation\Validator  $validator
-
-*
-*@return mixed
-
+     *
+     * @param  \Zan\Framework\Utilities\Validation\Validator $validator
+     *
+     * @return mixed
      * @throws \Zan\Framework\Contract\Utilities\Validation\ValidationException
      */
     protected function failedValidation(Validator $validator)
@@ -68,9 +65,8 @@ trait ValidatesWhenResolvedTrait
 
     /**
      * Handle a failed authorization attempt.
-
-*
-*@throws \Zan\Framework\Contract\Utilities\Validation\UnauthorizedException
+     *
+     * @throws \Zan\Framework\Contract\Utilities\Validation\UnauthorizedException
      */
     protected function failedAuthorization()
     {
