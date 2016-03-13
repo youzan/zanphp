@@ -10,9 +10,6 @@ namespace Zan\Framework\Foundation\Coroutine;
 
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-//load commands
-Commands::load();
-
 class Task
 {
     protected $taskId = 0;
