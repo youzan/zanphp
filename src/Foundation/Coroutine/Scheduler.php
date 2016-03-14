@@ -27,8 +27,8 @@ class Scheduler
         $signal = $this->handleAsyncJob($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleAsyncCallback($value);
-        if ($signal !== null) return $signal;
+//        $signal = $this->handleAsyncCallback($value);
+//        if ($signal !== null) return $signal;
 
         $signal = $this->handleYieldValue($value);
         if ($signal !== null) return $signal;
