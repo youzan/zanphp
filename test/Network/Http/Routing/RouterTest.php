@@ -19,19 +19,19 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $router  = new Router($defaultRouteConf);
         $request = new Request();
         $request->setUrl('http://127.0.0.1:5601');
-        list($route, $params) = $router->parse($request);
+        list($route, $params) = $router->route($request);
 
         $this->assertEquals('order/homePage/index', $this->formatRoute($route), 'Routing parse error!');
         $this->assertEquals([], $params, 'Error in routing parameter analysis!');
 
         $request->setUrl('http://127.0.0.1:5601/detail/E123/1');
-        list($route, $params) = $router->parse($request);
+        list($route, $params) = $router->route($request);
 
         $this->assertEquals('order/book/detail', $this->formatRoute($route), 'Routing parse error!');
         $this->assertEquals(['order_no'=>'E123', 'kdt_id'=>1], $params, 'Error in routing parameter analysis!');
 
         $request->setUrl('http://127.0.0.1:5601/order/book');
-        list($route, $params) = $router->parse($request);
+        list($route, $params) = $router->route($request);
 
         $this->assertEquals('order/book/index', $this->formatRoute($route), 'Routing parse error!');
         $this->assertEquals([], $params, 'Error in routing parameter analysis!');

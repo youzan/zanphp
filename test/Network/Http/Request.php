@@ -5,7 +5,7 @@
  */
 namespace Zan\Framework\Test\Network\Http;
 
-Class Request extends \Zan\Framework\Network\Http\Request{
+Class Request extends \Zan\Framework\Network\Http\Request\Request{
 
     private $url;
 

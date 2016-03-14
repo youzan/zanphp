@@ -6,9 +6,12 @@
 namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Request;
+use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Router {
+
+    use Singleton;
 
     const BASIC_LEVEL = 3;
 
@@ -28,7 +31,7 @@ class Router {
         $this->rules  = UrlRule::getRules();
     }
 
-    public function parse(Request $request)
+    public function route(Request $request)
     {
         $this->url = ltrim($request->getUrl(), '/');
         $this->setMethod($request->getMethod());
