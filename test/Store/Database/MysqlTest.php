@@ -20,7 +20,6 @@ use Zan\Framework\Test\Store\Database\Sql\Task\UpdateJob;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 class MysqlTest extends UnitTest
 {
-    /*
     public function testInsert()
     {
         $context = new Context();
@@ -126,8 +125,6 @@ class MysqlTest extends UnitTest
         $this->assertTrue($result['response'] instanceof QueryResult);
         $this->assertArrayHasKey('name', $result['response']->one());
     }
-    */
-
     public function testSelectRequireLimit()
     {
 
