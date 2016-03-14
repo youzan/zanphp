@@ -10,7 +10,7 @@ namespace Zan\Framework\Network\Http;
 
 
 class Dispatcher {
-    public function dispatch($route, Request $request, Context $context)
+    public function dispatch(Request $request, Context $context)
     {
         yield null;
     }
