@@ -20,6 +20,7 @@ use Zan\Framework\Test\Store\Database\Sql\Task\UpdateJob;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 class MysqlTest extends UnitTest
 {
+    /*
     public function testInsert()
     {
         $context = new Context();
@@ -74,7 +75,7 @@ class MysqlTest extends UnitTest
         $this->assertTrue($result['response']);
     }
 
-    public function testSelect()
+    public function testSelectOne()
     {
         $context = new Context();
         $job = new SelectJob($context);
@@ -99,6 +100,40 @@ class MysqlTest extends UnitTest
         $this->assertTrue($result['response'] instanceof QueryResult);
         $this->assertArrayHasKey('name', $result['response']->one());
     }
+
+
+    public function testSelectByWhere()
+    {
+        $context = new Context();
+        $job = new SelectJob($context);
+        $sid = 'demo.demo_sql_id2';
+        $data = [
+            'where' => [
+                ['name', '=', 'a'], ['nick_name', '=', 'b']
+            ],
+            'order' => 'id desc',
+            'group' => 'name',
+            'limit' => 1,
+
+        ];
+        $options = [];
+        $job->setSid($sid)->setData($data)->setOptions($options);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+        $result = $context->show();
+        $this->assertTrue($result['response'] instanceof QueryResult);
+        $this->assertArrayHasKey('name', $result['response']->one());
+    }
+    */
+
+    public function testSelectRequireLimit()
+    {
+
+    }
+
+
 
 
 }

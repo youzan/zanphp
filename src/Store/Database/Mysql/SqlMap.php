@@ -91,8 +91,8 @@ class SqlMap
         $this->parseWhere($data);
         $this->parseAnds($data);
         $this->parseOr($data);
-        $this->parseOrderBy($data);
         $this->parseGroupBy($data);
+        $this->parseOrderBy($data);
         $this->parseLimit($data);
         $this->formatSql();
         $this->getTable($data);
@@ -111,8 +111,8 @@ class SqlMap
         $this->parseAnds($data);
         $this->parseOr($data);
         $this->parseData($data);
-        $this->parseOrderBy($data);
         $this->parseGroupBy($data);
+        $this->parseOrderBy($data);
         $this->parseLimit($data);
         $this->getTable($data);
 //        $this->splitTable($data);
@@ -175,8 +175,8 @@ class SqlMap
         $this->parseWhere($data);
         $this->parseAnds($data);
         $this->parseOr($data);
-        $this->parseOrderBy($data);
         $this->parseGroupBy($data);
+        $this->parseOrderBy($data);
         $this->parseLimit($data);
         $this->formatSql();
         $this->getTable($data);

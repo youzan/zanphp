@@ -33,7 +33,7 @@ return [
         'sql'           => "
             SELECT * FROM test
             WHERE 1
-            #WHERE# #ORDER# #GROUP# #LIMIT# #VARS#
+            #WHERE# #GROUP# #ORDER# #LIMIT#
         ",
     ],
 
