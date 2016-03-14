@@ -16,10 +16,6 @@ class Scheduler
     public function schedule()
     {
         $coroutine = $this->task->getCoroutine();
-
-        $signal = $this->checkTaskDone($coroutine);
-        if ($signal !== null) return $signal;
-
         $value = $coroutine->current();
 
         $signal = $this->handleSysCall($value);
@@ -35,6 +31,9 @@ class Scheduler
         if ($signal !== null) return $signal;
 
         $signal = $this->handleTaskStack($value);
+        if ($signal !== null) return $signal;
+
+        $signal = $this->checkTaskDone($value);
         if ($signal !== null) return $signal;
 
         return Signal::TASK_CONTINUE;
@@ -130,8 +129,9 @@ class Scheduler
         return Signal::TASK_CONTINUE;
     }
 
-    private function checkTaskDone($coroutine)
+    private function checkTaskDone($value)
     {
+        $coroutine = $this->task->getCoroutine();
         if ($coroutine->valid()) {
             return null;
         }
