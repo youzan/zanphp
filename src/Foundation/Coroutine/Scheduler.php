@@ -27,9 +27,12 @@ class Scheduler
         $signal = $this->handleAsyncJob($value);
         if ($signal !== null) return $signal;
 
+<<<<<<< HEAD
 //        $signal = $this->handleAsyncCallback($value);
 //        if ($signal !== null) return $signal;
 
+=======
+>>>>>>> 3cc7409db32fe2cda96e595bb42c620806301ec2
         $signal = $this->handleYieldValue($value);
         if ($signal !== null) return $signal;
 
@@ -104,20 +107,6 @@ class Scheduler
         $value->execute([$this, 'asyncCallback']);
 
         return Signal::TASK_WAIT;
-    }
-
-    private function handleAsyncCallback($value)
-    {
-        if (Signal::TASK_WAIT !== $this->task->getStatus()) {
-            return null;
-        }
-
-        if (is_null($value) && !$this->isStackEmpty()) {
-            $coroutine = $this->stack->pop();
-            $coroutine->send($this->task->getSendValue());
-        }
-
-        return Signal::TASK_CONTINUE;
     }
 
     private function handleTaskStack($value)
