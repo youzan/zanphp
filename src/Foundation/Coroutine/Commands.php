@@ -18,11 +18,10 @@ class Commands
         $files = Dir::glob($dir, '*.php');
 
         if (!$files) return false;
-        foreach($files as $file) {
-            require_once $file;
+
+        foreach($files as $file){
+            require_once($file);
         }
-//        ClassLoader::loadFiles($files);
-        return true;
     }
 }
 

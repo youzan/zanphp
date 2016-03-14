@@ -1,9 +1,29 @@
 {
     "name": "zanphp/zan",
     "repositories": [
+        {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/qiniu-php-sdk.git"
+        },
+        {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/league-climate.git"
+        },
+        {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/seld-cli-prompt.git"
+        },
+        {
+            "packagist": false
+        },
+        {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
+        }
     ],
     "require": {
-        "league/climate": "^3.2"
+        "league/climate": "3.2.0",
+        "qiniu/php-sdk": "7.0.0"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
@@ -14,6 +34,10 @@
             "Zan\\Framework\\": "src/"
         },
         "classmap": [
+        ],
+        "files": [
+            "src/Foundation/Coroutine/Command/Task.php",
+            "src/Utilities/helpers.php"
         ]
     },
     "autoload-dev": {
