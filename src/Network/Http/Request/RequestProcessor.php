@@ -3,6 +3,8 @@
 namespace Zan\Framework\Network\Http\Request;
 
 use Generator;
+use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Network\Contract\Response;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Domain\Controller;

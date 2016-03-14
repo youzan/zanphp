@@ -21,7 +21,19 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public function __construct(\Generator $coroutine, $taskId = 0, $parentId = 0, Context $context = null)
+    public static function create($coroutine, $taskId=0, $parentId=0, Context $context=null)
+    {
+        if($coroutine instanceof \Generator) {
+            $task = new Task($coroutine, $context, $taskId, $parentId);
+            $task->run();
+
+            return null;
+        }
+
+        return $coroutine;
+    }
+
+    public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, $parentId=0)
     {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();

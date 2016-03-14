@@ -20,7 +20,7 @@ class SysCallTest extends \TestCase
         $job = new GetTaskId($context);
         $coroutine = $job->run();
 
-        $task = new Task($coroutine, 8);
+        $task = new Task($coroutine, null, 8);
         $task->run();
 
         $result = $context->show();
@@ -38,7 +38,7 @@ class SysCallTest extends \TestCase
         $job = new KillTask($context);
         $coroutine = $job->run();
 
-        $task = new Task($coroutine, 8);
+        $task = new Task($coroutine, null, 8);
         $task->run();
 
         $result = $context->show();
