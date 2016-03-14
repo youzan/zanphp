@@ -7,13 +7,114 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
-class QueryResult
+use Zan\Framework\Foundation\Contract\Async;
+
+class QueryResult implements Async
 {
+    /**
+     * @var \mysqli
+     */
+    private $connection;
+
+    private $sqlMap = [];
+
+    private $callback;
+
     private $rows = [];
 
-    public function __construct($rows = [])
+    private $insertId;
+
+    public function __construct($connection, $sqlMap)
     {
-        $this->setRows($rows);
+        $this->init($connection, $sqlMap);
+    }
+
+    private function init($connection, $sqlMap)
+    {
+        $this->connection = $connection;
+        $this->sqlMap = $sqlMap;
+        return $this;
+    }
+
+    public function execute(callable $callback)
+    {
+        $this->callback = $callback;
+        $dbSock = swoole_get_mysqli_sock($this->connection);
+        swoole_event_add($dbSock, [$this, 'onQueryReady']);
+    }
+
+    public function onQueryReady()
+    {
+        if (null === $this->sqlMap) {
+            return false;
+        }
+        $result = [];
+        switch ($this->sqlMap['sql_type']) {
+            case 'INSERT' :
+                $result =  $this->insert();
+                break;
+            case 'UPDATE' :
+                $result = $this->update();
+                break;
+            case 'DELETE' :
+                $result = $this->delete();
+                break;
+            case 'SELECT' :
+                $result = $this->select();
+                break;
+        }
+        call_user_func($this->callback, $result);
+    }
+
+    private function select()
+    {
+        if ($result = $this->connection->reap_async_query()) {
+            $return = [];
+            while ($data = $result->fetch_assoc()) {
+                $return[] = $data;
+            }
+            if (is_object($result)) {
+                mysqli_free_result($result);
+            }
+            $dbSock = swoole_get_mysqli_sock($this->connection);
+            swoole_event_del($dbSock);
+            return $return;
+        } else {
+            $dbSock = swoole_get_mysqli_sock($this->connection);
+            swoole_event_del($dbSock);
+            return [];
+            //todo throw error
+        }
+    }
+
+    private function insert()
+    {
+        if ($this->connection->reap_async_query()) {
+            return $this->setInsertId($this->connection->insert_id);
+        } else {
+            //todo throw error
+        }
+    }
+
+    private function setInsertId($insertId)
+    {
+        $this->insertId = $insertId;
+        return $this;
+    }
+
+    public function getInsertId()
+    {
+        return $this->insertId;
+    }
+
+    private function update()
+    {
+        return $this->connection->reap_async_query();
+    }
+
+    private function delete()
+    {
+        return $this->connection->reap_async_query();
     }
 
     private function setRows($rows)
@@ -53,4 +154,6 @@ class QueryResult
         }
         return true;
     }
+
+
 }

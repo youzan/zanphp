@@ -93,11 +93,11 @@ class MysqlTest extends UnitTest
         $options = [];
         $job->setSid($sid)->setData($data)->setOptions($options);
         $coroutine = $job->run();
-
         $task = new Task($coroutine);
         $task->run();
-        //$result = $context->show();
-        //var_dump($result);
+        exit;
+        $result = $context->show();
+        var_dump($result);exit;
         //exit;
         //$this->assertTrue($result['response'] instanceof QueryResult);
         //$this->assertArrayHasKey('name', $result['response']->one());

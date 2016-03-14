@@ -63,8 +63,8 @@ class Task
 
     public function send($value)
     {
-        $this->coroutine->send($value);
         $this->sendValue = $value;
+        return $this->coroutine->send($value);
     }
 
     public function getTaskId()

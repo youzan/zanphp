@@ -27,11 +27,12 @@ class Scheduler
         $signal = $this->handleAsyncJob($value);
         if ($signal !== null) return $signal;
 
-//        $signal = $this->handleAsyncCallback($value);
+//        $signal = $this->handleYieldValue($value);
 //        if ($signal !== null) return $signal;
 
         $signal = $this->handleTaskStack($value);
         if ($signal !== null) return $signal;
+
 
         $signal = $this->checkTaskDone($value);
         if ($signal !== null) return $signal;
@@ -54,9 +55,21 @@ class Scheduler
 
     public function asyncCallback($response)
     {
-        $coroutine = $this->stack->pop();
-        $this->task->setCoroutine($coroutine);
-        $this->task->send($response);
+        $output = $this->task->send($response);
+//        var_dump('output:',$output);
+//
+//        $coroutine = $this->task->getCoroutine();
+//        var_dump('current:', $coroutine->current());
+//
+//
+//        var_dump('valid:',$coroutine->valid());
+//
+//        $lastSend = $coroutine->send('xxx');
+//
+//        var_dump('last send:', $lastSend);
+//        exit;
+
+
         $this->task->run();
     }
 
@@ -96,8 +109,8 @@ class Scheduler
             return null;
         }
 
-        $coroutine = $this->task->getCoroutine();
-        $this->stack->push($coroutine);
+        //$coroutine = $this->task->getCoroutine();
+        //$this->stack->push($coroutine);
         $value->execute([$this, 'asyncCallback']);
 
         return Signal::TASK_WAIT;
@@ -125,7 +138,7 @@ class Scheduler
             return null;
         }
 
-        $this->task->send($value);
+        $status = $this->task->send($value);
         return Signal::TASK_CONTINUE;
     }
 

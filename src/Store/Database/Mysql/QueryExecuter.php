@@ -15,24 +15,20 @@ class QueryExecuter
     /**
      * @var \mysqli
      */
-    private $db;
+    private $connection;
 
     private $sql;
 
     private $sqlMap;
 
-    private $callback;
-
-    private $data;
-
     public function __construct()
     {
-        $this->setDb();
+        $this->setConnection();
     }
 
-    private function setDb()
+    private function setConnection()
     {
-        if (null == $this->db) {
+        if (null == $this->connection) {
             //todo connectionManage
             $db = new \mysqli();
             $config = array(
@@ -44,96 +40,35 @@ class QueryExecuter
             );
             $db->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
             $db->autocommit(true);
-            $this->db = $db;
+            $this->connection = $db;
         }
-        return $this->db;
+        return $this->connection;
     }
 
     /**
      * @return \mysqli
      */
-    public function getDb()
+    public function getConnection()
     {
-        return $this->db;
+        return $this->connection;
     }
 
     public function execute($sid, $data, $options)
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
-        $this->sqlMap = $sqlMap;
         $this->sql = $sqlMap['sql'];
         $this->doQuery();
-        return $this;
+        $queryResult = $this->queryResult($sqlMap);
+        $response = (yield $queryResult);
+        yield $response;
     }
 
     private function doQuery()
     {
-        $result = $this->db->query($this->sql, MYSQLI_ASYNC);
+        $result = $this->connection->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
             //todo throw error
         }
-    }
-
-    public function onQueryReady()
-    {
-        if (null === $this->sqlMap) {
-            return false;
-        }
-        switch ($this->sqlMap['sql_type']) {
-            case 'INSERT' :
-                return $this->insert();
-                break;
-            case 'UPDATE' :
-                return $this->update();
-                break;
-            case 'DELETE' :
-                return $this->delete();
-                break;
-            case 'SELECT' :
-                return $this->select();
-                break;
-        }
-    }
-
-    private function select()
-    {
-        if ($result = $this->db->reap_async_query()) {
-            $return = [];
-            while ($data = $result->fetch_assoc()) {
-                $return[] = $data;
-            }
-            if (is_object($result)) {
-                mysqli_free_result($result);
-            }
-            return $this->queryResult($return);
-        } else {
-            //todo throw error
-        }
-    }
-
-    private function insert()
-    {
-        if ($this->db->reap_async_query()) {
-            return $this->db->insert_id;
-        } else {
-            //todo throw error
-        }
-    }
-
-
-    private function update()
-    {
-        return $this->db->reap_async_query();
-    }
-
-    private function delete()
-    {
-        return $this->db->reap_async_query();
-    }
-
-    private function queryResult($result)
-    {
-        return new QueryResult($result);
     }
 
     private function getSqlMap()
@@ -149,5 +84,8 @@ class QueryExecuter
         return new SqlMap();
     }
 
-
+    private function queryResult($sqlMap)
+    {
+        return new QueryResult($this->connection, $sqlMap);
+    }
 }

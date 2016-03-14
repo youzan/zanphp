@@ -15,52 +15,12 @@ use Zan\Framework\Store\Database\Mysql\FutureQuery;
 use Zan\Framework\Store\Database\Mysql\QueryExecuter;
 
 class Db {
-    private $connName = '';
-    private $engine = null;
-    private $autoHandleException = false;
-
-//    public function __construct(/*String*/$connName)
-////    {
-//        if(!$connName || !is_string($connName)) {
-//            throw new InvalidArgumentException('invalid connection name for Db.__construct()');
-//        }
-//
-//        $this->connName = $connName;
-//        $this->initEngine($connName);
-//    }
-
-    public function executer($sid, $data, $options)
+    public static function executer($sid, $data, $options)
     {
         $executer = new QueryExecuter();
-        $executer->execute($sid, $data, $options);
-        yield (new FutureQuery($executer));
-    }
+        $response = (yield $executer->execute($sid, $data, $options));
 
-    public function beginTransaction($autoHandleException=false)
-    {
-        $stradegy = (false === $autoHandleException) ? false : true;
-        $this->autoHandleException = $stradegy;
+        yield $response;
 
-        return $this->beginTransaction($stradegy);
-    }
-
-    public function commit()
-    {
-        return $this->engine->commit();
-    }
-
-    public function rollback()
-    {
-        return $this->engine->roolback();
-    }
-
-    public function close()
-    {
-        return $this->engine->close();
-    }
-
-    private function initEngine()
-    {
-        $this->engine = null;
     }
 }
