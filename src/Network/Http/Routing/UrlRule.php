@@ -5,6 +5,7 @@
  */
 namespace Zan\Framework\Network\Http\Routing;
 
+use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Dir;
 
 class UrlRule {
@@ -26,7 +27,7 @@ class UrlRule {
             if (!isset($route[self::ROUTE_KEY]))  continue;
             if (!is_array($route[self::ROUTE_KEY])) continue;
 
-            self::$rules = array_merge(self::$rules, $route[self::ROUTE_KEY]);
+            self::$rules = Arr::merge(self::$rules, $route[self::ROUTE_KEY]);
         }
     }
 

@@ -16,6 +16,7 @@ class Scheduler
     public function schedule()
     {
         $coroutine = $this->task->getCoroutine();
+
         $value = $coroutine->current();
 
         $signal = $this->handleSysCall($value);
