@@ -1,37 +1,85 @@
 <?php
-
+/**
+ * @author hupp
+ * create date: 16/01/15
+ */
 namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Router\Regex;
+use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Router {
+
     use Singleton;
 
-    protected $request;
-    protected $config;
-    protected $url;
-    protected $routes = [];
+    const BASIC_LEVEL = 3;
 
-    public function __construct()
+    private $config;
+    private $url;
+    private $rules  = [];
+    private $routes = [];
+    private $routeConKey = 'route';
+
+    public function __construct($config = [])
     {
-        $this->config  = Config::get('route');
+        $this->config = $config;
+
+        if (!$this->config) {
+            $this->config = Config::get($this->routeConKey);
+        }
+        $this->rules  = UrlRule::getRules();
     }
 
     public function route(Request $request)
     {
-        $this->request = $request;
-        $this->setUrl($this->request->getRequestUri());
-        $this->setDefaultRoute();
+        $this->url = ltrim($request->getUrl(), '/');
+        $this->setMethod($request->getMethod());
 
         if (!$this->url) {
-            return $this->routes;
+            $this->setDefaultRoute();
+            goto quit;
         }
-        $this->parseRegexRoute();
-        $this->parseStringRoute();
+        list($url, $params) = $this->parseRegexRoute();
+        $this->setRoutes($url);
 
-        return $this->routes;
+        quit:
+        return [
+            $this->routes,
+            isset($params) ? $params : []
+        ];
+    }
+
+    private function parseRegexRoute()
+    {
+        $rules = UrlRegex::formatRules($this->rules);
+        $route = UrlRegex::decode($this->url, $rules);
+
+        return [
+            isset($route['url']) ? $route['url'] : $this->url,
+            isset($route['parameter']) ? $route['parameter'] : [],
+        ];
+    }
+
+    private function setRoutes($url)
+    {
+        $pathInfo = explode('/', ltrim($url, '/'));
+        $pathInfo = array_filter($pathInfo);
+        $levelLen = count($pathInfo);
+
+        if ($levelLen >= self::BASIC_LEVEL) {
+            $action = end($pathInfo);
+            $pos    = strpos($action, '.');
+            if ($pos === false) {
+                $this->setAction($action);
+                $this->setDefaultFormat();
+            }else {
+                $this->setAction(substr($action, 0, $pos));
+                $this->setFormat(substr($action, $pos + 1));
+            }
+            $this->setController($pathInfo[$levelLen-2]);
+            $this->setModule(array_slice($pathInfo, 0, $levelLen - 2));
+        }
     }
 
     private function setDefaultRoute()
@@ -42,77 +90,34 @@ class Router {
         $this->setDefaultFormat();
     }
 
-    private function parseRegexRoute()
+    private function setModule($module = [])
     {
-        $route  = (new Regex())->decode($this->url);
-        if ($route) {
-            $this->completeResult($route);
-            if (!isset($route['url'])){
-                return true;
-            }
-            $this->url = ltrim($route['url'],'/');
-        }
-        return false;
+        $this->routes['module'] = $module;
     }
 
-    private function setUrl($url)
+    private function setAction($action)
     {
-        $this->url = $url;
+        $this->routes['action'] = $action;
     }
 
-    private function completeResult($data)
+    private function setController($controller)
     {
-        $keys = ['module','controller','action','format'];
-        foreach($keys as $key){
-            if(isset($data[$key])){
-                $this->routes[$key] = $data[$key];
-            }else{
-                $action = 'setDefault' . ucfirst($key);
-                $this->$action();
-            }
-        }
-        if(isset($data['parameter']) && !empty($data['parameter'])){
-            foreach($data['parameter'] as $k => $v){
-                $_GET[$k] = $v;
-                $_REQUEST[$k] = $v;
-            }
-        }
+        $this->routes['controller'] = $controller;
     }
 
-    private function parseAction($action)
+    private function setFormat($format)
     {
-        $pos = strpos($action,'.');
-        if(false === $pos){
-            $this->routes['action']  = $action;
-            $this->setDefaultFormat();
-        }else{
-            $this->routes['action']  = substr($action, 0, $pos);
-            $this->routes['format']  = substr($action, $pos + 1);
-        }
+        $this->routes['format'] = $format;
     }
 
-    protected function parseStringRoute($url=null)
+    private function setMethod($method)
     {
-        if (null === $url){
-            $url = $this->url;
-        }
-        $path = explode('/', ltrim($url, '/'));
-        $len  = count($path);
-
-        if($len > 0 && strpos($path[0], '.') === false){
-            $this->routes['module'] = $path[0];
-        }
-        if($len > 1){
-            $this->routes['controller'] = ucfirst($path[1]);
-        }
-        if($len > 2){
-            $this->parseAction($path[2]);
-        }
+        $this->routes['method'] = strtolower($method);
     }
 
     private function setDefaultModule()
     {
-        $this->routes['module'] = $this->config['default_module'];
+        $this->routes['module'] = [$this->config['default_module']];
     }
 
     private function setDefaultController()

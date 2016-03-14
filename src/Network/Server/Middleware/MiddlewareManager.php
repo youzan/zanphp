@@ -14,7 +14,7 @@ use Zan\Framework\Contract\Network\Response;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-class Manager {
+class MiddlewareManager {
     use Singleton;
 
     private $path = null;
@@ -35,6 +35,14 @@ class Manager {
      */
     public function executeFilters(Request $request, Context $context)
     {
+        $route = $request->getRoute();
+        foreach($this->rules as $rule){
+            if(preg_match($rule, $route)){
+                $middlewareGroup = $this->ruleMap[$rule];
+                break;
+            }
+        }
+
 
     }
 

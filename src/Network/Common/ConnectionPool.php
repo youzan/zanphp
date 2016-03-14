@@ -6,11 +6,10 @@
  * Time: 22:22
  */
 
-namespace Zan\Framework\Network\Contract;
+namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Core\ObjectPool;
-use Zan\Framework\Network\Facade\ConnectionManager;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
 class ConnectionPool extends ObjectPool{
