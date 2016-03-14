@@ -11,7 +11,7 @@ use Zan\Framework\Sdk\Log\LoggerFactory;
 use Zan\Framework\Foundation\Coroutine\Task;
 
 class Logtest extends \PHPUnit_Framework_TestCase{
-    public function testNew(){
+    public function testWirteLog(){
 
         $log        = LoggerFactory::getLogger('zanhttdemo');
         $task       = $log->info('hht test');
