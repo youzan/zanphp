@@ -39,7 +39,7 @@ class SelectJob extends Job
     {
         $db = new Db();
         $response = (yield $db->executer($this->sid, $this->data, $this->options));
-        $this->context->set('response', $response);
+        var_dump($response);exit;
         yield $response;
     }
 }

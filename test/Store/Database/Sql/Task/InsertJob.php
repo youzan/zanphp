@@ -37,8 +37,7 @@ class InsertJob extends Job
 
     public function run()
     {
-        $db = new Db();
-        $response = (yield $db->executer($this->sid, $this->insert, $this->options));
+        $response = (yield Db::executer($this->sid, $this->insert, $this->options));
         $this->context->set('response', $response);
         yield $response;
     }
