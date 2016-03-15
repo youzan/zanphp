@@ -34,7 +34,7 @@ class ConnectionPool extends ObjectPool{
         for ($i=0; $i<$initConnection; $i++) {
             //todo 创建链接,存入数组
             $conn = new ConnBean();
-            $this->_freeConnection->push($conn);
+            $this->_freeConnection->push($conn->db);
         }
 
     }

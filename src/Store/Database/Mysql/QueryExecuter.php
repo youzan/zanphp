@@ -7,6 +7,7 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
+use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\FutureQuery;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
@@ -30,19 +31,13 @@ class QueryExecuter
     {
         if (null == $this->connection) {
             //todo connectionManage
-            $db = new \mysqli();
-            $config = array(
-                'host' => '127.0.0.1',
-                'user' => 'root',
-                'password' => '',
-                'database' => 'test',
-                'port' => '3306',
-            );
-            $db->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
-            $db->autocommit(true);
+
+            $m = new ConnectionManager(null);
+            $db = (yield $m::get('p_zan'));
+            var_dump($db);
             $this->connection = $db;
         }
-        return $this->connection;
+//        return $this->connection;
     }
 
     /**
