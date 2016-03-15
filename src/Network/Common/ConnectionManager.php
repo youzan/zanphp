@@ -8,21 +8,29 @@
 
 namespace Zan\Framework\Network\Facade;
 
-use Zan\Framework\Network\Contract\ConnectionPool as Pool;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Client\FutureConnection;
+use Zan\Framework\Network\Common\ConnectionPool as Pool;
 
 
 class ConnectionManager {
+
+    private static $_config=null;
     private static $poolMap = [];
 
-    public static function init()
-    {
-        self::$poolMap = [];
+    public function __construct($config) {
+        //self::$_config = $config;
+        self::$_config = self::configDemo();
+        init();
     }
 
-    public static function addPool($key, Pool $pool)
+    public function init()
     {
-        self::$poolMap[$key] = $pool;
+        $connectionPool = new Pool(self::$_config);
+        $key = self::$_config['pool_name'];
+        self::$poolMap[$key] = $connectionPool;
     }
+
 
     public static function get($key) /* Connection */
     {
@@ -30,15 +38,33 @@ class ConnectionManager {
             return null;
         }
         $pool = self::$poolMap[$key];
-        $conn = (yield $pool->get());
+        $conn = $pool->get();
+        if ($conn) {
+            return $conn;
+        }
 
-        defer(function() use($conn, $key){
-            ConnectionManager::release($conn, $key);
-        });
+        ;
+        $conn = yield (new FutureConnection($key));
+        deferRelease($conn);
     }
 
     public static function release($key=null,Connection $conn)
     {
+        self::$poolMap[$key]->release($conn);
+    }
+
+    public static function configDemo() {
+        self::$_config['host']= '192.168.66.202:3306';
+        self::$_config['user'] = 'test_koudaitong';
+        self::$_config['pool_name'] = 'p_zan';
+        self::$_config['maximum-connection-count'] ='100';
+        self::$_config['minimum-connection-count'] = '10';
+        self::$_config['keeping-sleep-time'] = '10';//等待时间
+        self::$_config['maximum-new-connections'] = '5';
+        self::$_config['prototype-count'] = '5';
+        self::$_config['init-connection'] = '10';
+
+        return self::$_config;
 
     }
 

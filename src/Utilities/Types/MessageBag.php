@@ -6,8 +6,8 @@ use Countable;
 use JsonSerializable;
 use Zan\Framework\Contract\Foundation\MessageProvider;
 use Zan\Framework\Contract\Utilities\Types\MessageBag as MessageBagContract;
-use Zan\Framework\Foundation\Contract\Arrayable;
-use Zan\Framework\Foundation\Contract\Jsonable;
+use Zan\Framework\Contract\Foundation\Arrayable;
+use Zan\Framework\Contract\Foundation\Jsonable;
 
 class MessageBag implements Arrayable, Countable, Jsonable, JsonSerializable, MessageBagContract, MessageProvider
 {

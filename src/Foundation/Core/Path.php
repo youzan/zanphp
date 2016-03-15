@@ -9,6 +9,7 @@
 namespace Zan\Framework\Foundation\Core;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Utilities\Types\Dir;
 
 class Path {
     const DEFAULT_CONFIG_PATH   = 'resource/config/';

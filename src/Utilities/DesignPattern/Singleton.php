@@ -26,4 +26,13 @@ trait Singleton {
     {
         return static::instance();
     }
+
+    final public static function swap($instance)
+    {
+        static::$_instance = $instance;
+    }
+
+    final private function __construct()
+    {
+    }
 }
