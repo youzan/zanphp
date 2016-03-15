@@ -37,7 +37,7 @@ class Scheduler
         $signal = $this->checkTaskDone($value);
         if ($signal !== null) return $signal;
 
-        return Signal::TASK_CONTINUE;
+        return Signal::TASK_DONE;
     }
 
     public function isStackEmpty()
@@ -55,8 +55,6 @@ class Scheduler
 
     public function asyncCallback($response)
     {
-        $coroutine = $this->stack->pop();
-        $this->task->setCoroutine($coroutine);
         $this->task->send($response);
         $this->task->run();
     }
@@ -96,9 +94,6 @@ class Scheduler
         if (!is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Contract\\Async')) {
             return null;
         }
-
-        $coroutine = $this->task->getCoroutine();
-        $this->stack->push($coroutine);
         $value->execute([$this, 'asyncCallback']);
 
         return Signal::TASK_WAIT;

@@ -8,12 +8,11 @@
 
 namespace Zan\Framework\Test\Network\Http;
 
-use Zan\Framework\Network\Http\Url;
+use Zan\Framework\Utilities\Types\Url;
 use Zan\Framework\Sdk\Cdn\Qiniu;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
 
-class UrlTest extends \UnitTest
+class UrlTest extends \TestCase
 {
 
     public function setUp()
