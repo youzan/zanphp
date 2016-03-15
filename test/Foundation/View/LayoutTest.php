@@ -9,19 +9,30 @@
 namespace Zan\Framework\Test\Foundation\View;
 
 use Zan\Framework\Foundation\View\Layout;
+use Zan\Framework\Foundation\View\Tpl;
+use Zan\Framework\Foundation\Coroutine\Event;
 
 class LayoutTest extends \TestCase
 {
     public $layout = null;
+    public $tpl = null;
+    public $event = null;
+    public $tplPath = '';
 
     public function setUp()
     {
-        $this->layout = new Layout('test', ['title' => '标题']);
+        $this->event = new Event();
+        $this->tpl = new Tpl($this->event);
+        $this->tplPath = __DIR__ . '/Tpl/Content.html';
+        $this->layout = new Layout($this->tpl, $this->event, $this->tplPath);
     }
 
     public function tearDown()
     {
         $this->layout = null;
+        $this->event = null;
+        $this->tpl = null;
+        $this->tplPath = '';
     }
 
     public function testBlockAndEndBlock()
