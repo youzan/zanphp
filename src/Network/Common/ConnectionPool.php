@@ -20,11 +20,9 @@ class ConnectionPool extends ObjectPool{
 
     private $_config=null;
 
-
-
     public function __construct($config) {
         $this->_config = $config;
-        init();
+        $this->init();
     }
 
     public function init() {

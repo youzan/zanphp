@@ -6,7 +6,7 @@
  * Time: 22:23
  */
 
-namespace Zan\Framework\Network\Facade;
+namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Client\FutureConnection;
@@ -20,8 +20,8 @@ class ConnectionManager {
 
     public function __construct($config) {
         //self::$_config = $config;
-        self::$_config = self::configDemo();
-        init();
+        self::configDemo();
+        $this->init();
     }
 
     public function init()
@@ -44,7 +44,7 @@ class ConnectionManager {
         }
 
         ;
-        $conn = yield (new FutureConnection($key));
+        $conn = (yield new FutureConnection($key));;
         deferRelease($conn);
     }
 
@@ -63,9 +63,6 @@ class ConnectionManager {
         self::$_config['maximum-new-connections'] = '5';
         self::$_config['prototype-count'] = '5';
         self::$_config['init-connection'] = '10';
-
-        return self::$_config;
-
     }
 
 }
