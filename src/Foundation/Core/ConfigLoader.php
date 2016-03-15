@@ -10,7 +10,7 @@ class ConfigLoader
 {
     use Singleton;
 
-    public function load($path)
+    public function load($path ,$ignoreStructure = false)
     {
         if(!is_dir($path)){
             throw new InvalidArgumentException('Invalid path for ConfigLoader');
@@ -25,9 +25,10 @@ class ConfigLoader
             if(!is_array($loadedConfig)){
                 throw new InvalidArgumentException("syntax error find in config file: " . $configFile);
             }
-
-            $keyString = substr($configFile, strlen($path), -4);
-            $loadedConfig = Arr::createTreeByList(explode('/',$keyString),$loadedConfig);
+            if(!$ignoreStructure){
+                $keyString = substr($configFile, strlen($path), -4);
+                $loadedConfig = Arr::createTreeByList(explode('/',$keyString),$loadedConfig);
+            }
 
             $configMap = Arr::merge($configMap,$loadedConfig);
         }

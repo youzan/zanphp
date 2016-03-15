@@ -1,4 +1,8 @@
 <?php
+/**
+ * @author hupp
+ * create date: 16/01/15
+ */
 
 namespace Zan\Framework\Network\Http\Request;
 
@@ -34,7 +38,7 @@ class RequestProcessor {
         if (!($controller instanceof Controller)) {
             throw new InvalidRoute('Not found controller:'.$controller);
         }
-        $action = $route['action'];
+        $action = $this->createAction($route);
 
         if (!method_exists($controller, $action)) {
             throw new InvalidRoute('Class does not exist method '. get_class($controller).'::'.$action);
@@ -61,19 +65,35 @@ class RequestProcessor {
 
     private function createController($route)
     {
-        $module    = ucwords($route['module']);
-        $className = ucwords($route['controller']);
+        $module = $this->getModule($route['module']);
 
-        if (!preg_match('%^[A-Z][a-zA-Z][a-z0-9]*$%', $className)) {
-            return null;
+        if (!isset($route['controller'])) {
+            throw new InvalidRoute('Invalid request.');
         }
+        $className  = ucwords($route['controller']);
         $className  = str_replace(' ', '', $className);
-        $controller = ltrim($this->appNamespace . '\\' . $module . '\\Controller\\'. $className);
+        $controller = ltrim($this->appNamespace . '\\Controller\\'. $module . '\\' . $className);
 
         if (!class_exists($controller)) {
-            return null;
+            return $className;
         }
         return new $controller($this->request, $this->response);
+    }
+
+    private function createAction($route)
+    {
+        if (!isset($route['method'])) {
+            throw new InvalidRoute('Invalid request.');
+        }
+        return ucwords($route['action']);
+    }
+
+    private function getModule($module = [])
+    {
+        foreach ($module as $index => $name) {
+            $module[$index] = ucwords($name);
+        }
+        return join('\\', $module);
     }
 
 }

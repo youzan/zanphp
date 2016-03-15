@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Request;
 
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Routing\Router;

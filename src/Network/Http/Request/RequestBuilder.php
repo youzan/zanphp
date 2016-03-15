@@ -4,7 +4,7 @@
  * create date: 16/01/05
  */
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Request;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 

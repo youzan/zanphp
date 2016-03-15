@@ -6,7 +6,7 @@
  * Time: 00:02
  */
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Request;
 
 
 use Zan\Framework\Contract\Network\Request;
