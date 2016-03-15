@@ -9,7 +9,7 @@
 namespace Zan\Framework\Network\Common;
 
 
-class ConnBean {
+class Connection {
 
     private $conn;
 

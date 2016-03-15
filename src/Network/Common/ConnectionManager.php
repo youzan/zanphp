@@ -17,6 +17,7 @@ class ConnectionManager {
 
     private static $_config=null;
     private static $poolMap = [];
+    private static $_registry=[];
 
     public function __construct($config) {
         //self::$_config = $config;
@@ -28,6 +29,7 @@ class ConnectionManager {
     {
         $connectionPool = new Pool(self::$_config);
         $key = self::$_config['pool_name'];
+        self::$_registry[] = $key;//注册连接池
         self::$poolMap[$key] = $connectionPool;
     }
 
@@ -35,12 +37,12 @@ class ConnectionManager {
     public static function get($key) /* Connection */
     {
         if(!isset(self::$poolMap[$key])){
-            return null;
+            yield null;
         }
         $pool = self::$poolMap[$key];
         $conn = $pool->get();
         if ($conn) {
-            return $conn;
+            yield $conn;
         }
 
         ;
