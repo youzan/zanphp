@@ -9,9 +9,8 @@ namespace Zan\Framework\Test\Foundation\Core;
 
 use Zan\Framework\Foundation\Core\ConfigLoader;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
 
-class ConfigLoaderTest extends \UnitTest {
+class ConfigLoaderTest extends \TestCase {
 
     private $path;
 
