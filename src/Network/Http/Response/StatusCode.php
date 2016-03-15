@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Response;
 
 class StatusCode {
 

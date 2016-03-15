@@ -16,6 +16,7 @@ class Scheduler
     public function schedule()
     {
         $coroutine = $this->task->getCoroutine();
+
         $value = $coroutine->current();
 
         $signal = $this->handleSysCall($value);
@@ -27,8 +28,8 @@ class Scheduler
         $signal = $this->handleAsyncJob($value);
         if ($signal !== null) return $signal;
 
-//        $signal = $this->handleAsyncCallback($value);
-//        if ($signal !== null) return $signal;
+        $signal = $this->handleYieldValue($value);
+        if ($signal !== null) return $signal;
 
         $signal = $this->handleTaskStack($value);
         if ($signal !== null) return $signal;

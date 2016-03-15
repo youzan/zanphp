@@ -22,7 +22,7 @@ class FilterLoader {
 
     private static function loadFilterClass($filterType, & $filterConfig)
     {
-        if (empty(($filterList = $filterConfig[$filterType]))) return;
+        if (empty($filterList = $filterConfig[$filterType])) return;
 
         foreach ($filterList as $filter) {
 
