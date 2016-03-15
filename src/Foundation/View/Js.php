@@ -60,7 +60,7 @@ class Js extends BaseLoader
         $asyncJsList = $this->_mergeAsyncJs();
         if(empty($asyncJsList)) return $html;
         $scriptStr = '_js_files=';
-        $scriptStr = '<script>'. $scriptStr . json_encode($asyncJsList) .'</script>';
+        $scriptStr = '<script>'. $scriptStr . json_encode($asyncJsList) .';</script>';
         $bodyTagLastPos = strrpos($html, '</body>', -1);
         return substr($html, 0, $bodyTagLastPos) . $scriptStr . substr($html, $bodyTagLastPos);
     }
@@ -71,6 +71,6 @@ class Js extends BaseLoader
         foreach($this->blockResQueue as $block => $jsList) {
             $blockResQueue = array_merge($blockResQueue, $jsList);
         }
-        return array_unique(array_merge($blockResQueue, $this->noBlockResQueue));
+        return array_values(array_unique(array_merge($blockResQueue, $this->noBlockResQueue)));
     }
 }
