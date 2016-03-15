@@ -1,6 +1,6 @@
 <?php
 
-define('APP_PATH', '/Users/hupeipei/www/zan');
+define('APP_PATH', __DIR__);
 
 require (__DIR__ . '/src/Zan.php');
 
