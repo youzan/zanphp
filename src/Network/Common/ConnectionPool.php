@@ -35,7 +35,7 @@ class ConnectionPool extends ObjectPool{
         $this->_activeConnection = new ObjectArray();
         for ($i=0; $i<$initConnection; $i++) {
             //todo 创建链接,存入数组
-            $conn = new ConnBeanTest();
+            $conn = new ConnBean();
             $this->_freeConnection->push($conn);
         }
 
