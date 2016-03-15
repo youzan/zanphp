@@ -1,0 +1,23 @@
+<?php $layout->extend(__DIR__ . '/base.html'); ?>
+
+<?php $layout->block('title'); ?>
+<?php echo $title;?>
+<?php $layout->endBlock();?>
+
+<?php $layout->block('content'); ?>
+<?php echo $content;?>
+<?php $layout->endBlock();?>
+
+<?php $layout->block('tpl_load'); ?>
+<?php $tpl->load('/Users/chenfan/workspace/zan/test/Foundation/View/Tpl/tpl_load.html', ['tplData' => '这是传给tpl的变量输出的']);?>
+<?php $layout->endBlock();?>
+
+<?php $layout->block('load_js');?>
+<?php $js->asyncLoad('async_d.js');?>
+<?php $js->asyncLoad('async_e.js');?>
+<?php $layout->endBlock();?>
+
+<?php $layout->block('load_js_b');?>
+<?php $js->asyncLoad('async_d.js');?>
+<?php $js->asyncLoad('async_e.js');?>
+<?php $layout->endBlock();?>

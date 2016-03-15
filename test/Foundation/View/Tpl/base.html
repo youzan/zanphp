@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html class="<?php $layout->place('html_class'); ?>" lang="zh-CN" >
+<head>
+    <meta charset="utf-8">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="cleartype" content="on">
+
+    <?php $layout->block('load_js');?>
+    <?php $js->asyncLoad('async_a.js');?>
+    <?php $js->asyncLoad('async_b.js');?>
+    <?php $layout->endBlock();?>
+
+    <?php $layout->block('meta_block'); ?>
+    <meta name="keywords" content="有赞批发,批发,选货,进货,每天上线 ,档口直供 ,男装,女装,童装, 价格低,赚钱">
+    <?php $layout->endBlock(); ?>
+
+    <?php $js->syncLoad('sync_a.js');?>
+    <?php $js->syncLoad('sync_b.js');?>
+
+    <?php $css->load('css_a.css');?>
+    <?php $css->load('css_b.css');?>
+
+    <?php $js->asyncLoad('async_c.js');?>
+
+    <title>
+        <?php $layout->place('title'); ?>
+    </title>
+
+</head>
+
+<body>
+    <div class="container <?php $layout->place('page-special-class'); ?>">
+        <?php $layout->place('content'); ?>
+    </div>
+
+    <?php $layout->block('tpl_load');?>
+    <?php $tpl->load('/Users/chenfan/workspace/zan/test/Foundation/View/Tpl/common.html');?>
+    <?php $layout->endBlock();?>
+
+    <?php $layout->block('footer'); ?>
+        <a style="display:none;" href="http://pf.koudaitong.com/page/index/mobile" class="ft-copyright"></a>
+    <?php $layout->endBlock();?>
+
+    <?php $js->syncLoad('common_js');?>
+</body>
+</html>
