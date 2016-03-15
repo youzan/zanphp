@@ -2,7 +2,7 @@
 
 $classAliasMap = [
     'Zan'             => 'Zan\\Framework\\Zan',
-    'UnitTest'        => 'PHPUnit_Framework_TestCase',
+    'UnitTest'        => 'Zan\\Framework\\Foundation\\Test\\UnitTest',
     'Config'          => 'Zan\\Framework\\Foundation\\Core\\Config',
     'Handler'         => 'Zan\\Framework\\Foundation\\Exception\\Handler',
     'HttpServer'      => 'Zan\\Framework\\Network\\Http\\Server',

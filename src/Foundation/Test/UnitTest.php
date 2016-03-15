@@ -6,7 +6,7 @@
  * Time: 15:45
  */
 
-namespace Zan\Framework\Foundation\Core;
+namespace Zan\Framework\Foundation\Test;
 
 class UnitTest extends \PHPUnit_Framework_TestCase
 {
