@@ -9,7 +9,7 @@
 namespace Zan\Framework\Network\Common;
 
 
-class ConnBeanTest {
+class ConnBean {
 
     public function __construct()
     {
