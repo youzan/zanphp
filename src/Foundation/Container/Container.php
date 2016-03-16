@@ -6,11 +6,17 @@ use ReflectionClass;
 
 class Container
 {
+    protected $mockInstances = [];
+
     protected $instances = [];
 
     public function get($abstract)
     {
         $abstract = $this->normalize($abstract);
+
+        if (isset($this->mockInstances[$abstract])) {
+            return $this->mockInstances[$abstract];
+        }
 
         if (isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
@@ -26,9 +32,22 @@ class Container
         }
     }
 
+    public function setMockInstance($abstract, $instance)
+    {
+        $abstract = $this->normalize($abstract);
+
+        if (!isset($this->mockInstances[$abstract])) {
+            $this->mockInstances[$abstract] = $instance;
+        }
+    }
+
     public function make($abstract, array $parameters = [], $shared = false)
     {
         $abstract = $this->normalize($abstract);
+
+        if (isset($this->mockInstances[$abstract])) {
+            return $this->mockInstances[$abstract];
+        }
 
         if ($shared && isset($this->instances[$abstract])) {
             return $this->instances[$abstract];
