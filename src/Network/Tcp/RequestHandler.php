@@ -4,7 +4,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use \swoole_server as TcpServer;
 
-class ReceiveHandler {
+class RequestHandler {
 
     public function __construct()
     {
