@@ -16,13 +16,15 @@ use Zan\Framework\Network\http\Dispatcher;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Foundation\Container\Di;
 
+use swoole_http_response  as SwooleHttpResponse;
+
 class RequestTask {
     /**
      * @var Request
      */
     private $request;
     /**
-     * @var \swoole_response
+     * @var SwooleHttpResponse
      */
     private $swooleResponse;
     /**
@@ -30,7 +32,7 @@ class RequestTask {
      */
     private $context;
 
-    public function __construct(Request $request, $swooleResponse, Context $context)
+    public function __construct(Request $request,SwooleHttpResponse $swooleResponse, Context $context)
     {
         $this->request = $request;
         $this->swooleResponse = $swooleResponse;
@@ -47,7 +49,7 @@ class RequestTask {
             return null;
         }
 
-        $Dispatcher = Di::getInstance()->make(Dispatcher::class);
+        $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
 
         if(null === $response){
