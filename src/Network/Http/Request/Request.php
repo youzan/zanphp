@@ -280,7 +280,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      */
     public function all()
     {
-        return array_replace_recursive($this->input(), $this->allFiles());
+        return $this->input();
     }
 
     /**
