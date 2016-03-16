@@ -6,6 +6,9 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
+use swoole_http_request as SwooleHttpRequest;
+use swoole_http_response as SwooleHttpResponse;
+
 class RequestHandler {
     private $context  = null;
 
@@ -14,7 +17,7 @@ class RequestHandler {
         $this->context = new Context();
     }
 
-    public function handle(\swoole_http_request $request, \swoole_http_response $response)
+    public function handle(SwooleHttpRequest $request, SwooleHttpResponse $response)
     {
         $request  = $this->buildRequest($request);
         Router::getInstance()->route($request);
