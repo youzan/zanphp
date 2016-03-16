@@ -22,13 +22,13 @@ class Factory
             throw new RuntimeException('http server config not found');
         }
 
-        $ip = $config['host'];
+        $host = $config['host'];
         $port = $config['port'];
-        if (empty($ip) || empty($port)) {
+        if (empty($host) || empty($port)) {
             throw new RuntimeException('http server config error: empty ip/port');
         }
 
-        $swooleServer = Di::make(SwooleHttpServer::class, [$ip, $port]);
+        $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port]);
 
         $server = Di::make(HttpServer::class, [$swooleServer, $config]);
 
@@ -45,13 +45,13 @@ class Factory
             throw new RuntimeException('tcp server config not found');
         }
 
-        $ip = $config['host'];
+        $host = $config['host'];
         $port = $config['port'];
-        if (empty($ip) || empty($port)) {
+        if (empty($host) || empty($port)) {
             throw new RuntimeException('tcp server config error: empty ip/port');
         }
 
-        $swooleServer = Di::make(SwooleTcpServer::class, [$ip, $port]);
+        $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port]);
 
         $server = Di::make(TcpServer::class, [$swooleServer, $config]);
 

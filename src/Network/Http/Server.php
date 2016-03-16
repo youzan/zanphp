@@ -12,7 +12,7 @@ class Server implements ServerContract
     /**
      * @var swooleServer
      */
-    private $swooleServer;
+    public $swooleServer;
 
     public function __construct(SwooleServer $swooleServer, array $config)
     {
@@ -43,32 +43,32 @@ class Server implements ServerContract
 
     }
 
-    private function onStart($swooleServer)
+    public function onStart($swooleServer)
     {
 
     }
 
-    private function onShutdown($swooleServer)
+    public function onShutdown($swooleServer)
     {
 
     }
 
-    private function onWorkerStart($swooleServer, $workerId)
+    public function onWorkerStart($swooleServer, $workerId)
     {
 
     }
 
-    private function onWorkerStop($swooleServer, $workerId)
+    public function onWorkerStop($swooleServer, $workerId)
     {
 
     }
 
-    private function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
 
     }
 
-    private function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
+    public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
         (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
     }

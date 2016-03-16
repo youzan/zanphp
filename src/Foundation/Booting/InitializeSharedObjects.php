@@ -2,11 +2,12 @@
 
 namespace Zan\Framework\Foundation\Booting;
 
+use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Utilities\Validation\Factory as ValidatorFactory;
 
-class InitializeSharedObjects
+class InitializeSharedObjects implements Bootable
 {
     /**
      * @var \Zan\Framework\Foundation\Application

@@ -20,6 +20,9 @@ class RequestHandler
 
     public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
+        echo "swoole handle\n\n\n";
+        $swooleResponse->end('Hello world');
+        return ;
         $request  = Request::createFromSwooleHttpRequest($swooleRequest);
         Router::getInstance()->route($request);
 

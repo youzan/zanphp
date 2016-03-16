@@ -2,9 +2,10 @@
 
 namespace Zan\Framework\Foundation\Booting;
 
+use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 
-class RegisterClassAliases
+class RegisterClassAliases implements Bootable
 {
     /**
      * Bootstrap the given application.
