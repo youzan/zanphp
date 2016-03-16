@@ -41,13 +41,13 @@ class RequestTask {
 
     public function run()
     {
-        $middlewareManager = MiddlewareManager::getInstance();
-
-        $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
-        if(null !== $response){
-            yield $response->sendBy($this->swooleResponse);
-            return null;
-        }
+//        $middlewareManager = MiddlewareManager::getInstance();
+//
+//        $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
+//        if(null !== $response){
+//            yield $response->sendBy($this->swooleResponse);
+//            return null;
+//        }
 
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
@@ -56,10 +56,10 @@ class RequestTask {
             throw new ZanException('');
         }else{
             yield $response->sendBy($this->swooleResponse);
-            return null;
+            return ;
         }
 
-        yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
+        //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
     }
 
 

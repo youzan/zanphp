@@ -25,9 +25,6 @@ class RequestHandler
 
         Router::getInstance()->route($request);
 
-
-        $swooleResponse->end('Hello world ' . $request->getRoute());
-        return;
         $task = new RequestTask($request, $swooleResponse, $this->context);
         $coroutine = $task->run();
 
