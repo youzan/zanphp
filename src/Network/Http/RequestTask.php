@@ -59,7 +59,7 @@ class RequestTask {
             return null;
         }
 
-        $middlewareManager->executeTerminators($this->request, $response, $this->context);
+        yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
     }
 
 
