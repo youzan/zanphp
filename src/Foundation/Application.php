@@ -8,6 +8,7 @@ use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
 use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
 use Zan\Framework\Utilities\Types\Arr;
+use Zan\Framework\Network\Server\Factory as ServerFactory;
 
 class Application
 {
@@ -211,5 +212,29 @@ class Application
         }
 
         throw new RuntimeException('Unable to detect application namespace.');
+    }
+
+    /**
+     * get http server.
+     *
+     * @return \Zan\Framework\Network\Http\Server
+     */
+    public function createHttpServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createHttpServer();
+    }
+
+    /**
+     * get tcp server.
+     *
+     * @return \Zan\Framework\Network\Tcp\Server
+     */
+    public function createTcpServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createTcpServer();
     }
 }
