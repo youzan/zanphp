@@ -20,6 +20,11 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     protected $json;
 
     /**
+     * @var string
+     */
+    protected $route;
+
+    /**
      * Create a new HTTP request from swoole http request.
      *
      * @return static
