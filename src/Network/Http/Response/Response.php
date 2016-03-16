@@ -6,6 +6,7 @@ use Exception;
 use ArrayObject;
 use JsonSerializable;
 use Zan\Framework\Contract\Foundation\Jsonable;
+use swoole_http_response as SwooleHttpResponse;
 
 class Response extends BaseResponse
 {
@@ -109,9 +110,10 @@ class Response extends BaseResponse
     /**
      * Sends HTTP headers and content.
      *
+     * @param SwooleHttpResponse $swooleHttpResponse
      * @return BaseResponse
      */
-    public function sendBySwoole(\swoole_http_response $swooleHttpResponse)
+    public function sendBy(SwooleHttpResponse $swooleHttpResponse)
     {
         $this->sendHeaders($swooleHttpResponse);
         $this->sendContent($swooleHttpResponse);
@@ -120,9 +122,10 @@ class Response extends BaseResponse
     /**
      * Sends HTTP headers.
      *
+     * @param SwooleHttpResponse $swooleHttpResponse
      * @return BaseResponse
      */
-    public function sendHeaders(\swoole_http_response $swooleHttpResponse)
+    public function sendHeaders(SwooleHttpResponse $swooleHttpResponse)
     {
         if (!$this->headers->has('Date')) {
             $this->setDate(\DateTime::createFromFormat('U', time()));
@@ -152,9 +155,10 @@ class Response extends BaseResponse
     /**
      * Sends content for the current web response.
      *
+     * @param SwooleHttpResponse $swooleHttpResponse
      * @return BaseResponse
      */
-    public function sendContent(\swoole_http_response $swooleHttpResponse)
+    public function sendContent(SwooleHttpResponse $swooleHttpResponse)
     {
         $swooleHttpResponse->end($this->content);
 
