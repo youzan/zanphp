@@ -22,7 +22,7 @@ class Factory
             throw new RuntimeException('http server config not found');
         }
 
-        $ip = $config['ip'];
+        $ip = $config['host'];
         $port = $config['port'];
         if (empty($ip) || empty($port)) {
             throw new RuntimeException('http server config error: empty ip/port');
@@ -45,7 +45,7 @@ class Factory
             throw new RuntimeException('tcp server config not found');
         }
 
-        $ip = $config['ip'];
+        $ip = $config['host'];
         $port = $config['port'];
         if (empty($ip) || empty($port)) {
             throw new RuntimeException('tcp server config error: empty ip/port');
