@@ -1,20 +1,12 @@
 <?php
 
-namespace Zan\Framework\Foundation\Container\Container;
+namespace Zan\Framework\Foundation\Container;
 
 use ReflectionClass;
-use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Container
 {
-    use Singleton;
-
     protected $instances = [];
-
-    private function __construct()
-    {
-
-    }
 
     public function get($abstract)
     {

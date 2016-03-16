@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation\Booting;
 
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Utilities\Validation\Factory as ValidatorFactory;
 
 class InitializeSharedObjects
@@ -21,6 +22,8 @@ class InitializeSharedObjects
     {
         $this->app = $app;
 
+        $this->initDiFacade();
+
         //$this->initializeValidator();
     }
 
@@ -28,7 +31,12 @@ class InitializeSharedObjects
     {
         $instance = ValidatorFactory::getInstance();
 
-        $this->app->getDi()->set('validator', $instance);
+        Di::set('validator', $instance);
+    }
+
+    private function initDiFacade()
+    {
+        Di::resolveFacadeInstance($this->app->getContainer());
     }
 
 }
