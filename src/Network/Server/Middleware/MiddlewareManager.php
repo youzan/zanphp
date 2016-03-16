@@ -67,7 +67,7 @@ class MiddlewareManager {
         foreach($terminators as $terminator){
             $terminatorObject = new $terminator();
             if($terminatorObject instanceof RequestTerminator){
-                $terminatorObject->terminate($request, $response ,$context);
+                yield $terminatorObject->terminate($request, $response ,$context);
             }
             unset($terminatorObject);
         }
