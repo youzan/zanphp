@@ -6,7 +6,7 @@
  * Time: 23:21
  */
 
-namespace Zan\Framework\Foundation\Daemon\Output;
+namespace Zan\Framework\Foundation\Console\Output;
 
 use League\CLImate\Util\Writer\WriterInterface;
 
