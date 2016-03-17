@@ -88,6 +88,7 @@ class MysqlTest extends UnitTest
             'and1' => [
                 ['id_number', '=', 2147483647],
             ],
+            'limit' => '1'
 
         ];
         $options = [];
@@ -95,9 +96,9 @@ class MysqlTest extends UnitTest
         $coroutine = $job->run();
         $task = new Task($coroutine);
         $task->run();
-        exit;
         $result = $context->show();
-        var_dump($result);exit;
+//        var_dump(11111);exit;
+        //var_dump($result);
         //exit;
         //$this->assertTrue($result['response'] instanceof QueryResult);
         //$this->assertArrayHasKey('name', $result['response']->one());

@@ -39,6 +39,9 @@ class QueryResult implements Async
     public function execute(callable $callback)
     {
         $this->callback = $callback;
+
+        $result = $this->connection->query($this->sqlMap['sql'], MYSQLI_ASYNC);
+
         $dbSock = swoole_get_mysqli_sock($this->connection);
         swoole_event_add($dbSock, [$this, 'onQueryReady']);
     }
@@ -64,6 +67,7 @@ class QueryResult implements Async
                 break;
         }
         call_user_func($this->callback, $result);
+        swoole_event_exit();
     }
 
     private function select()

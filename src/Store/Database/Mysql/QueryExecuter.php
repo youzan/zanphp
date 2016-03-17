@@ -24,17 +24,17 @@ class QueryExecuter
 
     public function __construct()
     {
-        $this->setConnection();
+
     }
 
-    private function setConnection()
+    public function setConnection()
     {
         if (null == $this->connection) {
             //todo connectionManage
 
             $m = new ConnectionManager(null);
+
             $db = (yield $m::get('p_zan'));
-            var_dump($db);
             $this->connection = $db;
         }
 //        return $this->connection;
@@ -52,10 +52,8 @@ class QueryExecuter
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
         $this->sql = $sqlMap['sql'];
-        $this->doQuery();
-        $queryResult = $this->queryResult($sqlMap);
-        $response = (yield $queryResult);
-        yield $response;
+        //$this->doQuery();
+        yield $this->queryResult($sqlMap);
     }
 
     private function doQuery()

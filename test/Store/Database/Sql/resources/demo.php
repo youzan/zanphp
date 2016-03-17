@@ -25,6 +25,7 @@ return [
             WHERE 1
             AND `name` = #{name}
             AND `nick_name` = #{nick_name}
+            #LIMIT#
         ",
     ],
     'demo_sql_id2'      => [

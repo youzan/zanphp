@@ -37,9 +37,20 @@ class SelectJob extends Job
 
     public function run()
     {
+
+        yield 'ccccc';
+        var_dump('xxxx');
         $response = (yield Db::executer($this->sid, $this->data, $this->options));
-//        $this->context->set('response', $response);
-        print_r($response);exit;
+
+
+        var_dump('db return');
+        yield 'aaa';
+        var_dump('yyyy');
+        yield 'bbb';
+
+        $this->context->set('response', $response);
+        var_dump('response:', $response);
+//        print_r($response);
         yield $response;
     }
 }

@@ -17,10 +17,15 @@ use Zan\Framework\Store\Database\Mysql\QueryExecuter;
 class Db {
     public static function executer($sid, $data, $options)
     {
-        $executer = new QueryExecuter();
-        $response = (yield $executer->execute($sid, $data, $options));
+        $executer = new QueryExecuter() ;
+        yield $executer->setConnection();
 
+        $response = (yield $executer->execute($sid, $data, $options));
+        var_dump('before finally out put');
         yield $response;
 
+        var_dump('finally output');
+
     }
+
 }
