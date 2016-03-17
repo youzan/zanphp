@@ -4,7 +4,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use \swoole_server as TcpServer;
 
-class Server implements \Zan\Framework\Contract\Network\Server {
+class Server {
 
     /**
      * @var TcpServer

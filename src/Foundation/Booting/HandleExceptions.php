@@ -4,9 +4,10 @@ namespace Zan\Framework\Foundation\Booting;
 
 use ErrorException;
 use Exception;
+use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 
-class HandleExceptions
+class HandleExceptions implements Bootable
 {
     /**
      * @var \Zan\Framework\Foundation\Application

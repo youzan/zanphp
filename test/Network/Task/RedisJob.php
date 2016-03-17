@@ -23,6 +23,9 @@ class RedisJob extends Job {
 
         swoole_event_exit();
 
+        $this->context->set('abc', $getRet);
+
         yield 'RedisJob finish';
+
     }
 }

@@ -20,11 +20,9 @@ class ConnectionPool extends ObjectPool{
 
     private $_config=null;
 
-
-
     public function __construct($config) {
         $this->_config = $config;
-        init();
+        $this->init();
     }
 
     public function init() {
@@ -35,8 +33,8 @@ class ConnectionPool extends ObjectPool{
         $this->_activeConnection = new ObjectArray();
         for ($i=0; $i<$initConnection; $i++) {
             //todo 创建链接,存入数组
-            $conn = new ConnBean();
-            $this->_freeConnection->push($conn);
+            $connection = new Connection();
+            $this->_freeConnection->push($connection);
         }
 
     }

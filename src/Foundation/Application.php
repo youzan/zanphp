@@ -3,11 +3,14 @@
 namespace Zan\Framework\Foundation;
 
 use RuntimeException;
-use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Container\Container;
 use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
+use Zan\Framework\Foundation\Booting\InitializePathes;
+use Zan\Framework\Foundation\Booting\InitializeRunMode;
 use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
 use Zan\Framework\Utilities\Types\Arr;
+use Zan\Framework\Network\Server\Factory as ServerFactory;
 
 class Application
 {
@@ -47,9 +50,9 @@ class Application
     protected $namespace = null;
 
     /**
-     * @var \Zan\Framework\Foundation\Container\Di
+     * @var \Zan\Framework\Foundation\Container\Container
      */
-    protected $di;
+    protected $container;
 
     /**
      * Create a new Zan application instance.
@@ -70,9 +73,11 @@ class Application
 
     protected function bootstrap()
     {
-        $this->setDi();
+        $this->setContainer();
 
         $bootstrapItems = [
+            InitializeRunMode::class,
+            InitializePathes::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
             RegisterClassAliases::class,
@@ -85,7 +90,7 @@ class Application
 
     public function make($abstract, array $parameters = [], $shared = false)
     {
-        return $this->di->make($abstract, $parameters, $shared);
+        return $this->container->make($abstract, $parameters, $shared);
     }
 
     /**
@@ -144,11 +149,11 @@ class Application
     /**
      * Get the di
      *
-     * @return \Zan\Framework\Foundation\Container\Di
+     * @return \Zan\Framework\Foundation\Container\Container
      */
-    public function getDi()
+    public function getContainer()
     {
-        return $this->di;
+        return $this->container;
     }
 
     /**
@@ -156,9 +161,9 @@ class Application
      *
      * @return $this
      */
-    public function setDi()
+    public function setContainer()
     {
-        $this->di = Di::getInstance();
+        $this->container = new Container();
 
         return $this;
     }
@@ -211,5 +216,29 @@ class Application
         }
 
         throw new RuntimeException('Unable to detect application namespace.');
+    }
+
+    /**
+     * get http server.
+     *
+     * @return \Zan\Framework\Network\Http\Server
+     */
+    public function createHttpServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createHttpServer();
+    }
+
+    /**
+     * get tcp server.
+     *
+     * @return \Zan\Framework\Network\Tcp\Server
+     */
+    public function createTcpServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createTcpServer();
     }
 }

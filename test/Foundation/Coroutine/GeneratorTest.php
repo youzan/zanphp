@@ -9,25 +9,14 @@
 namespace Zan\Framework\Test\Foundation\Coroutine;
 
 
-class GeneratorTest extends \PHPUnit_Framework_TestCase {
-    public function testAsynNumWork() {
-        $gen = $this->asynNum();
+class GeneratorTest extends Base {
 
-        $value = $gen->current();
-        $this->assertEquals(1, $value, ' yield num error happened!');
+    protected function step()
+    {
+        $a = (yield 1);
 
-        $gen->send(2);
-        $value = $gen->current();
-        $this->assertNull($value, 'asynNum do not return null after send');
+        $this->assertEquals(1, $a, 'fail');
     }
-
-
-
-
-    private function asynNum() {
-        yield 1;
-    }
-
 
 
 }

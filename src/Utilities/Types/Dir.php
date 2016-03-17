@@ -65,6 +65,7 @@ class Dir
             '*'     => '.*',
             '.'     => '\.',
             '+'     => '.+',
+            '/'     => '\/',
         ];
 
         $pattern = str_replace(array_keys($replaceMap), array_values($replaceMap), $pattern);

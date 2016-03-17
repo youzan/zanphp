@@ -2,9 +2,11 @@
 
 namespace Zan\Framework\Foundation\Booting;
 
+use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\Config;
 
-class LoadConfiguration
+class LoadConfiguration implements Bootable
 {
     /**
      * Bootstrap the given application.
@@ -13,11 +15,9 @@ class LoadConfiguration
      */
     public function bootstrap(Application $app)
     {
-        // TODO: 加载配置，检测环境
-
-
         date_default_timezone_set('Asia/Shanghai');
-
         mb_internal_encoding('UTF-8');
+
+        Config::init();
     }
 }
