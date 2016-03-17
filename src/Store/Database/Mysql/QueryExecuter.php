@@ -9,7 +9,6 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
-use Zan\Framework\Store\Database\Mysql\FutureQuery;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 class QueryExecuter
 {
@@ -30,14 +29,11 @@ class QueryExecuter
     public function setConnection()
     {
         if (null == $this->connection) {
-            //todo connectionManage
-
             $m = new ConnectionManager(null);
 
             $db = (yield $m::get('p_zan'));
             $this->connection = $db;
         }
-//        return $this->connection;
     }
 
     /**
