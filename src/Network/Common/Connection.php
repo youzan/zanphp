@@ -9,13 +9,13 @@
 namespace Zan\Framework\Network\Common;
 
 
-class ConnBean {
+class Connection {
 
-    public $db;
+    private $conn;
 
     public function __construct()
     {
-        $this->db = new \mysqli();
+        $this->conn = new \mysqli();
 
         $config = array(
             'host' => '192.168.66.202',
@@ -24,8 +24,13 @@ class ConnBean {
             'database' => 'zan_test',
             'port' => '3306',
         );
-        $this->db->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
-        $this->db->autocommit(true);
+        $this->conn->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
+        $this->conn->autocommit(true);
+    }
+
+    public function getConnection()
+    {
+        return $this->conn;
     }
 
 }
