@@ -6,7 +6,7 @@
  * Time: 22:23
  */
 
-namespace Zan\Framework\Network\Facade;
+namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Client\FutureConnection;
@@ -17,17 +17,19 @@ class ConnectionManager {
 
     private static $_config=null;
     private static $poolMap = [];
+    private static $_registry=[];
 
     public function __construct($config) {
         //self::$_config = $config;
-        self::$_config = self::configDemo();
-        init();
+        self::configDemo();
+        $this->init();
     }
 
     public function init()
     {
         $connectionPool = new Pool(self::$_config);
         $key = self::$_config['pool_name'];
+        self::$_registry[] = $key;//注册连接池
         self::$poolMap[$key] = $connectionPool;
     }
 
@@ -35,16 +37,16 @@ class ConnectionManager {
     public static function get($key) /* Connection */
     {
         if(!isset(self::$poolMap[$key])){
-            return null;
+            yield null;
         }
         $pool = self::$poolMap[$key];
         $conn = $pool->get();
         if ($conn) {
-            return $conn;
+            yield $conn;
         }
 
         ;
-        $conn = yield (new FutureConnection($key));
+        $conn = (yield new FutureConnection($key));;
         deferRelease($conn);
     }
 
@@ -63,9 +65,6 @@ class ConnectionManager {
         self::$_config['maximum-new-connections'] = '5';
         self::$_config['prototype-count'] = '5';
         self::$_config['init-connection'] = '10';
-
-        return self::$_config;
-
     }
 
 }
