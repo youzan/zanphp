@@ -34,6 +34,7 @@ class Scheduler
         $signal = $this->handleTaskStack($value);
         if ($signal !== null) return $signal;
 
+
         $signal = $this->checkTaskDone($value);
         if ($signal !== null) return $signal;
 
@@ -94,6 +95,7 @@ class Scheduler
         if (!is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Contract\\Async')) {
             return null;
         }
+
         $value->execute([$this, 'asyncCallback']);
 
         return Signal::TASK_WAIT;
@@ -121,7 +123,7 @@ class Scheduler
             return null;
         }
 
-        $this->task->send($value);
+        $status = $this->task->send($value);
         return Signal::TASK_CONTINUE;
     }
 
