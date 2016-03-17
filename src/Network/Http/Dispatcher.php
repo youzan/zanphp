@@ -41,7 +41,7 @@ class Dispatcher {
         $controller = join('\\', $parts);
 
         $app = Application::getInstance();
-        $controller = $app->getNamespace() . 'Controller\\' .  $controller;
+        $controller = $app->getNamespace() . 'Controller\\' .  $controller . 'Controller';
 
         return [
             'controller' => $controller,
