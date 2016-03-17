@@ -7,10 +7,13 @@
  */
 namespace Zan\Framework;
 
+use Zan\Framework\Foundation\Core\Path;
+
 require __DIR__ . '/../vendor/autoload.php';
 require __DIR__ . '/Zan.php';
 
-define('SQL_PATH', dirname(__DIR__) . '/test/Store/Database/Sql/resources/');
+
+//define('SQL_PATH', dirname(__DIR__) . '/test/Store/Database/Sql/resources/');
 class Test {
     public static function init()
     {

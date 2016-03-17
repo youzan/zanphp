@@ -7,6 +7,7 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Store\Database\Mysql\Validator;
+use Zan\Framework\Foundation\Core\Path;
 
 class SqlMap
 {
@@ -16,7 +17,7 @@ class SqlMap
 
     private function loadAllSqlFiles($sqlPath = '')
     {
-        $sqlPath = $sqlPath === '' ? SQL_PATH : $sqlPath;
+        $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
     }
 
     public function setSqlMaps()
@@ -280,7 +281,7 @@ class SqlMap
     private function getSqlFile($filePath)
     {
         //todo SQL_PATH
-        return require SQL_PATH . $filePath . '.php';
+        return require Path::getSqlPath() . $filePath . '.php';
     }
 
     private function checkRequire($where)
