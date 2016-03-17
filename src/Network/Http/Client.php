@@ -9,7 +9,6 @@ namespace Zan\Framework\Network\Http;
 use \swoole_client;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Response\Parser;
 
 class Client implements Async {
 
@@ -110,9 +109,13 @@ class Client implements Async {
 
     public function onReceive($cli, $data)
     {
-        list($header, $body) = Parser::parseResponseData($data);
+        //暂时不考虑 Transfer-Encoding:chunked
 
-        call_user_func($this->callback, $body);
+        $responseParts = explode("\r\n\r\n", $data, 2);
+
+        call_user_func($this->callback, end($responseParts));
+
+        swoole_event_exit();
     }
 
     public function OnError()
