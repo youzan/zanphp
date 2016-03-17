@@ -225,7 +225,6 @@ class Swoole
         {
             $reqState = 'OK';
         }
-        else
         {
             $reqState = 'ER';
             $server->close($fd);

@@ -28,7 +28,7 @@ class Factory
             throw new RuntimeException('http server config error: empty ip/port');
         }
 
-        $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port]);
+        $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port], true);
 
         $server = Di::make(HttpServer::class, [$swooleServer, $config]);
 
@@ -51,7 +51,7 @@ class Factory
             throw new RuntimeException('tcp server config error: empty ip/port');
         }
 
-        $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port]);
+        $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port], true);
 
         $server = Di::make(TcpServer::class, [$swooleServer, $config]);
 
