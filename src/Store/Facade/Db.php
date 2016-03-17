@@ -21,11 +21,7 @@ class Db {
         yield $executer->setConnection();
 
         $response = (yield $executer->execute($sid, $data, $options));
-        var_dump('before finally out put');
         yield $response;
-
-        var_dump('finally output');
-
     }
 
 }
