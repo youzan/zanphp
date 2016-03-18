@@ -5,7 +5,7 @@
  * create date: 16/03/02
  */
 
-namespace Zan\Framework\Network\Http\Common;
+namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Network\Http\Client as HttpClient;
 
