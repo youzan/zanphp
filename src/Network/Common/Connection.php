@@ -12,8 +12,9 @@ namespace Zan\Framework\Network\Common;
 class Connection {
 
     private $conn;
+    private $pool;
 
-    public function __construct()
+    public function __construct($pool)
     {
         $this->conn = new \mysqli();
 
@@ -26,11 +27,24 @@ class Connection {
         );
         $this->conn->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
         $this->conn->autocommit(true);
+        $this->pool = $pool;
+    }
+
+    public function close() {
+        $this->conn->close();
     }
 
     public function getConnection()
     {
         return $this->conn;
+    }
+
+    public function release() {
+        if ($this->pool->isExist($this)) {
+            $this->pool->release($this);
+        } else {
+            $this->close();
+        }
     }
 
 }
