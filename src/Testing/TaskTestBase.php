@@ -8,7 +8,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 
 abstract class TaskTestBase extends \TestCase {
 
-    private $testAction = [];
+    protected $testAction = [];
 
     abstract function taskStep();
 
