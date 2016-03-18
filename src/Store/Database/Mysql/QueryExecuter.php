@@ -32,7 +32,7 @@ class QueryExecuter
             $m = new ConnectionManager(null);
 
             $db = (yield $m::get('p_zan'));
-            $this->connection = $db;
+            $this->connection = $db->getConnection();
         }
     }
 

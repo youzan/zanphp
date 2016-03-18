@@ -22,7 +22,7 @@ class Connection {
             'host' => '192.168.66.202',
             'user' => 'test_koudaitong',
             'password' => 'nPMj9WWpZr4zNmjz',
-            'database' => 'zan_test',
+            'database' => 'pf',
             'port' => '3306',
         );
         $this->conn->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
