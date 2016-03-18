@@ -22,7 +22,7 @@ class ConnectionPool extends ObjectPool{
 
     public function __construct($config) {
         $this->_config = $config;
-        //$this->init();//外部调用
+        $this->init();//外部调用
     }
 
     public function init() {
