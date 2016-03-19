@@ -5,16 +5,10 @@
  */
 namespace Zan\Framework\Test\Network\Http;
 
-use Zan\Framework\Network\Http\Client;
+
+use Zan\Framework\Network\Common\Client;
 
 class HttpClient {
-
-    protected $context = null;
-
-    public function __construct($context) {
-
-        $this->context = $context;
-    }
 
     private function getOrder($orderNo, $kdtId)
     {
@@ -32,13 +26,6 @@ class HttpClient {
 
     public function call()
     {
-        $that = $this;
-        $result = (yield ($this->getOrder('E123', 1)) );
-
-        $this->context->set('key', $result);
-        var_dump($this, time());exit;
-
-        yield $result;
-        //swoole_event_exit();
+        yield ($this->getOrder('E123', 1));
     }
 }

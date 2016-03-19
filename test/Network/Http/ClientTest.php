@@ -8,15 +8,14 @@ namespace Zan\Framework\Test\Network\Http;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\RunMode;
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Test\Foundation\Coroutine\Context;
+use Zan\Framework\Network\Common\Client;
+use Zan\Framework\Testing\TaskTestBase;
 
-class ClientTest extends \PHPUnit_Framework_TestCase {
+class ClientTest extends TaskTestBase {
 
     public function setUp()
     {
         $path = __DIR__ . '/config/';
-
         Path::setConfigPath($path);
         RunMode::set('dev');
 
@@ -24,17 +23,14 @@ class ClientTest extends \PHPUnit_Framework_TestCase {
         Config::get('http.client');
     }
 
-    public function testClientCall()
+    public function taskStep()
     {
-        $context = new Context();
-        $job = new HttpClient($context);
-        $coroutine = $job->call();
+        $option = [
+            'order_no'  => 'E123',
+            'kdt_id'    => 1,
+        ];
+        $result = (yield Client::call('trade.order.detail.byOrderNo', $option));
 
-        $task = new Task($coroutine);
-        $task->run();
-
-        //var_dump($context->show());
-
+        $this->assertEquals('{"code":40201,"msg":"\u8ba2\u5355\u4e0d\u5b58\u5728","data":null}', $result, 'fail');
     }
-
 }
