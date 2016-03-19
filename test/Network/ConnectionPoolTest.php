@@ -10,15 +10,13 @@ namespace Zan\Framework\Test\Network;
 
 
 
-use Zan\Framework\Foundation\Test\UnitTest;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 use Zan\Framework\Test\Network\Task\ConnectPoolJob;
 
-require __DIR__ . '/../../' . 'src/Test.php';
 
-class ConnectionPoolTest extends UnitTest {
+class ConnectionPoolTest extends \TestCase {
 
 
     public function testPoolWork()
