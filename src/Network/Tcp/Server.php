@@ -25,7 +25,8 @@ class Server {
         $this->swooleServer->on('workerStop', [$this, 'onWorkerStop']);
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
-        $this->swooleServer->on('request', [$this, 'onRequest']);
+        $this->swooleServer->on('receive', [$this, 'onReceive']);
+        $this->swooleServer->on('packet', [$this, 'onPacket']);
 
         $this->swooleServer->start();
     }
@@ -65,7 +66,12 @@ class Server {
 
     }
 
-    public function onRequest(SwooleServer $swooleServer, $fd, $fromId, $data)
+    public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
+    {
+
+    }
+
+    public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
