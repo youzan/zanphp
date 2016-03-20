@@ -12,9 +12,8 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Core\Path;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
 
-class ConfigTest extends \UnitTest
+class ConfigTest extends \TestCase
 {
     public function setUp()
     {

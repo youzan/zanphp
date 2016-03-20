@@ -66,7 +66,7 @@ class Task
                 }
             } catch (\Exception $e) {
                 if ($this->scheduler->isStackEmpty()) {
-                    throw $e;
+                    $this->coroutine->throw($e);
                 }
                 $this->scheduler->throwException($e);
             }
