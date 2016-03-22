@@ -82,6 +82,6 @@ class LoggerFactory
         if (!self::$instance) {
            new self($config);
         }
-        return self::$instance;
+        yield self::$instance;
     }
 }
