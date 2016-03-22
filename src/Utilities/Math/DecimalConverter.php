@@ -10,7 +10,7 @@ namespace Zan\Framework\Utilities\Math;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
-class Convert
+class DecimalConverter
 {
     private static $dict = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/';
 
