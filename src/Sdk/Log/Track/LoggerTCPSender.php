@@ -22,7 +22,7 @@ class LoggerTCPSender {
     private function __clone() {}
 
     public function __destruct() {
-        yield socket_close($this->socket);
+        socket_close($this->socket);
     }
 
     public static function getInstance() {
@@ -39,6 +39,6 @@ class LoggerTCPSender {
             $logger->error("flume not avalible");
         }
         $log = $log."\n";
-        yield socket_write($this->socket, $log);
+        socket_write($this->socket, $log);
     }
 }

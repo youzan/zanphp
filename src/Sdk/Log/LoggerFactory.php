@@ -2,63 +2,86 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Zan\Framework\Sdk\Log\Track\LoggerFactory as Track;
-use Zan\Framework\Sdk\Log\Track\TrackLogger;
-use Zan\Framework\Sdk\Log\Track\TrackPersistenceLogger;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Sdk\Log\Track\LoggerFile;
+use Zan\Framework\Sdk\Log\Track\LoggerSystem;
+use Psr\Log\LoggerInterface;
+use Exception;
 
-class LoggerFactory extends Track
+class LoggerFactory
 {
+    private $config = [
+        'factory'   => '',
+        'app'       => 'zanphp',
+        'level'     => 'debug',
+        'module'    => 'default',
+        'type'      => 'normal',
+        'path'      => 'debug.log',
+    ];
+
     /**
-     * 非持久化日志
-     *
-     * @param string $module
-     *            模块名字
-     * @param string $type
-     *            业务方自定义type字段日后查询用
-     * @return TrackLogger
+     * @var LoggerInterface
      */
-    public static function getLogger($module, $type = 'normal')
-    {
-        if (defined("APP_NAME")) {
-            $app = APP_NAME;
-        } else {
-            $app = Track::app;
-        }
-        return self::get($app, $module, $type);
+    private static $instance;
+
+    public function __construct($config){
+        $this->configParser($config);
+        $this->adapter();
     }
 
     /**
-     * 持久化日志
-     *
-     * @param string $module
-     *            模块名字
-     * @param string $type
-     *            业务方自定义type字段日后查询用
-     * @return TrackPersistenceLogger
+     * 日志配置解析
+     * @param $key
+     * @throws Exception
      */
-    public static function getPersistenceLogger($module, $type = 'persistence')
-    {
-        if (defined("APP_NAME")) {
-            $app = APP_NAME;
-        } else {
-            $app = Track::app;
+    private function configParser($key){
+        if(!$key){
+            throw new Exception('Configuration key cannot be null');
         }
-        return self::get($app, $module, $type, true);
+        //$logUrl = Config::get('log'.$key);
+        $logUrl = "syslog://error/error.log?module=trade";
+
+        if(!$logUrl){
+            throw new Exception('Configuration cannot be null');
+        }
+
+        $config = parse_url($logUrl);
+        parse_str($config['query'], $ps);
+
+        $this->config['factory']    = $config['scheme'];
+        $this->config['level']      = $config['host'];
+        $this->config['module']     = isset($ps['module']) ? $ps['module'] : $this->config['module'];
+        $this->config['type']       = isset($ps['type']) ? $ps['type'] : $this->config['type'];
+        $this->config['path']       = isset($ps['path']) ? $ps['path'] : $this->config['path'];
     }
 
     /**
-     * 这个方法用的时候找下陈阳
-     *
-     * @param string $app
-     * @param string $module
-     * @param string $type
-     *            业务方自定义type字段日后查询用
-     * @param boolean $persistence
-     *            是否持久化
-     * @return TrackLogger|TrackPersistenceLogger|null
+     * 适配器
+     * @return mixed
+     * @throws Exception
      */
-    public static function getCustomerLogger($app, $module, $type = 'normal', $persistence = false, $topic = null)
-    {
-        return self::get($app, $module, $type, $persistence, $topic);
+    private function adapter(){
+        $factory = $this->config['factory'];
+        switch($factory){
+            case "syslog":
+                self::$instance = new LoggerSystem($this->config);
+                break;
+            case "log":
+                self::$instance = new LoggerFile($this->config);
+                break;
+            default:
+                throw new Exception('Cannot support this pattern');
+        }
+    }
+
+    /**
+     * 单例
+     * @var LoggerInterface
+     */
+    public static function getInstance($config){
+        if (!self::$instance) {
+           new self($config);
+        }
+        return self::$instance;
     }
 }

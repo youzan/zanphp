@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Sdk\Log\Track;
 
-class LoggerFactory
+class Track
 {
 
     const app = "php";
@@ -23,6 +23,6 @@ class LoggerFactory
         } else {
             $logger = new TrackLogger($app, $module, $type, $topic);
         }
-        return $logger;
+        yield $logger;
     }
 }

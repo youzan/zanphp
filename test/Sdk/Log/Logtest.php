@@ -7,16 +7,17 @@
  */
 namespace Zan\Framework\Test\Sdk\Log;
 
-use Zan\Framework\Sdk\Log\LoggerFactory;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Sdk\Log\LoggerFactory;
 
-class Logtest extends \PHPUnit_Framework_TestCase{
+class Logtest extends \PHPUnit_Framework_TestCase {
     public function testWirteLog(){
-
-        $log        = LoggerFactory::getLogger('zanhttdemo');
-        $task       = $log->info('hht test');
-        print_r($task);exit;
-        $scheduler  = new Task($task);
-        $scheduler->run();
+        /*
+        $test = new LogClient();
+        $result = $test->addLog('hht test');
+        $task = new Task($result);
+        $task->run();
+        */
+        LoggerFactory::getInstance('trade')->info('test');
     }
 }

@@ -62,7 +62,7 @@ class TrackFilter {
                         'kdt_id' => $kdtId 
                     ] 
                 ];
-                $logger = LoggerFactory::get("user_track", "fengkong", $item['name'], true, "fengkong");
+                $logger = Track::get("user_track", "fengkong", $item['name'], true, "fengkong");
                 $logger->info($host . $uri, null, $extra);
                 break;
             }

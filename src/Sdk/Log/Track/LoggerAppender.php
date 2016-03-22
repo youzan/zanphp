@@ -4,6 +4,7 @@ namespace Zan\Framework\Sdk\Log\Track;
 
 use Exception;
 
+
 class LoggerAppender
 {
     const TOPIC_PREFIX = "track";
@@ -35,9 +36,7 @@ class LoggerAppender
         $body = $this->bulidBody($app, $module, $level, $msg, $e, $extra);
 
         $log = $header . "topic=" . $tag . " " . $module . " " . $body;
-
-        $trackSender = LoggerTCPSender::getInstance();
-        $trackSender->send($log);
+        yield (new TrackClient())->send($log);
     }
 
     private function buildHeader($level)
