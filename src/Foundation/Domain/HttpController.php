@@ -20,12 +20,12 @@ class HttpController extends Controller
         $this->jsVar = new JsVar();
     }
 
-    public function setJsVarBusiness($key, $value)
+    public function setJsVar($key, $value)
     {
         $this->jsVar->setBusiness($key, $value);
     }
 
-    public function setShareData($cover, $title, $desc)
+    public function setShare($cover, $title, $desc)
     {
         $this->jsVar->setShare('cover', trim($cover));
         $this->jsVar->setShare('title', trim($title));
