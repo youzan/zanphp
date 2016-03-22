@@ -36,7 +36,7 @@ class LoggerAppender
         $body = $this->bulidBody($app, $module, $level, $msg, $e, $extra);
 
         $log = $header . "topic=" . $tag . " " . $module . " " . $body;
-        yield (new TrackClient())->send($log);
+        return (new TrackClient())->send($log);
     }
 
     private function buildHeader($level)

@@ -23,6 +23,6 @@ class Track
         } else {
             $logger = new TrackLogger($app, $module, $type, $topic);
         }
-        yield $logger;
+        return $logger;
     }
 }

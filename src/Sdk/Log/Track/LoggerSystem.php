@@ -34,7 +34,7 @@ class LoggerSystem extends LoggerBase implements LoggerInterface {
      */
     public function error($message, array $context = array()){
         if($this->checkLevel(LogLevel::ERROR)){
-            yield $this->track->error($message);
+            return $this->track->error($message);
         }
     }
 
@@ -46,7 +46,7 @@ class LoggerSystem extends LoggerBase implements LoggerInterface {
      */
     public function warning($message, array $context = array()){
         if($this->checkLevel(LogLevel::WARNING)){
-            yield $this->track->warn($message);
+            return $this->track->warn($message);
         }
     }
 
@@ -68,7 +68,7 @@ class LoggerSystem extends LoggerBase implements LoggerInterface {
      */
     public function info($message, array $context = array()){
         if($this->checkLevel(LogLevel::INFO)){
-            yield $this->track->info($message);
+            return $this->track->info($message);
         }
     }
 
@@ -80,7 +80,7 @@ class LoggerSystem extends LoggerBase implements LoggerInterface {
      */
     public function debug($message, array $context = array()){
         if($this->checkLevel(LogLevel::DEBUG)){
-            yield $this->track->debug($message);
+            return $this->track->debug($message);
         }
     }
 

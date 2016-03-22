@@ -14,7 +14,8 @@ class Logtest extends TaskTest {
 
     public function taskWirteLog(){
 
-        $ret = (yield LoggerFactory::getInstance('trade')->info('test'));
+        $log = LoggerFactory::getInstance('trade');
+        $ret = (yield $log->info('test'));
 
         var_dump($ret);
         /*

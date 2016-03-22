@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Sdk\Log\Track\LoggerFile;
 use Zan\Framework\Sdk\Log\Track\LoggerSystem;
 use Psr\Log\LoggerInterface;
@@ -82,6 +81,6 @@ class LoggerFactory
         if (!self::$instance) {
            new self($config);
         }
-        yield self::$instance;
+        return self::$instance;
     }
 }

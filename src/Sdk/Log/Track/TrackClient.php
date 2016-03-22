@@ -17,10 +17,7 @@ class TrackClient implements Async{
     private $client = null;
 
     public function __construct() {
-
-
         $this->client = new swoole_client(SWOOLE_TCP, SWOOLE_SOCK_ASYNC);
-
     }
 
     public function send($log)
@@ -28,6 +25,7 @@ class TrackClient implements Async{
         $this->postData = $log . "\n";
         $this->bindEvent();
         $this->client->connect($this->host, $this->port);
+        return $this;
     }
 
     public function execute(callable $callback){
