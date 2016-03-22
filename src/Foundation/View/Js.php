@@ -38,7 +38,6 @@ class Js extends BaseLoader
 
     public function getJsUrl($index, $vendor = false)
     {
-        return 'static.youzan.com/' . $index;
         $isUseCdn = Config::get('js.use_js_cdn');
         $url = $project = '';
         if ($vendor !== false) {
