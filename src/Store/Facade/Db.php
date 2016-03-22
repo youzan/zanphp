@@ -15,7 +15,7 @@ use Zan\Framework\Store\Database\Mysql\FutureQuery;
 use Zan\Framework\Store\Database\Mysql\QueryExecuter;
 
 class Db {
-    public static function executer($sid, $data, $options)
+    public static function execute($sid, $data, $options)
     {
         $executer = new QueryExecuter() ;
         yield $executer->setConnection();

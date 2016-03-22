@@ -8,9 +8,6 @@
 
 
 namespace Zan\Framework\Test\Store\Database;
-require __DIR__ . '/../../../' . 'src/Test.php';
-
-use Zan\Framework\Foundation\Test\UnitTest;
 
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 use Zan\Framework\Foundation\Coroutine\Task;
@@ -18,7 +15,7 @@ use Zan\Framework\Test\Store\Database\Sql\Task\InsertJob;
 use Zan\Framework\Test\Store\Database\Sql\Task\SelectJob;
 use Zan\Framework\Test\Store\Database\Sql\Task\UpdateJob;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
-class MysqlTest extends UnitTest
+class MysqlTest extends \TestCase
 {
 /*
     public function testInsert()

@@ -10,9 +10,8 @@ namespace Zan\Framework\Test\Utilities\Types;
 
 use Zan\Framework\Utilities\Types\ObjectArray;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
 
-class ObjectArrayTest extends \UnitTest {
+class ObjectArrayTest extends \TestCase {
 
     private $arrayObject = null;
 

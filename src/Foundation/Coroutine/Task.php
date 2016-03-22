@@ -27,7 +27,7 @@ class Task
             $task = new Task($coroutine, $context, $taskId, $parentId);
             $task->run();
 
-            return null;
+            return $task;
         }
 
         return $coroutine;
@@ -66,7 +66,7 @@ class Task
                 }
             } catch (\Exception $e) {
                 if ($this->scheduler->isStackEmpty()) {
-                    return;
+                    $this->coroutine->throw($e);
                 }
                 $this->scheduler->throwException($e);
             }

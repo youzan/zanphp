@@ -22,7 +22,6 @@ class RequestHandler
     {
         $request  = Request::createFromSwooleHttpRequest($swooleRequest);
 
-
         Router::getInstance()->route($request);
 
         $task = new RequestTask($request, $swooleResponse, $this->context);

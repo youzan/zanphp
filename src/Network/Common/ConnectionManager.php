@@ -22,7 +22,7 @@ class ConnectionManager {
     public function __construct($config) {
         //self::$_config = $config;
         self::configDemo();
-        $this->init();
+        //$this->init();
     }
 
     public function init()
