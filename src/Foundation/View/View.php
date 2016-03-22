@@ -27,6 +27,7 @@ class View
         $this->_js = new Js($this->_event);
         $this->_css = new Css($this->_event);
         $this->_tpl = new Tpl($this->_event);
+        $this->_layout = new Layout($this->_tpl, $this->_event, $this->_tplPath);
     }
 
     public static function display($tplPath, array $data = [])
@@ -37,7 +38,6 @@ class View
 
     public function render()
     {
-        $this->_layout = new Layout($this->_tpl, $this->_event, $this->_tplPath);
         $this->_tpl->setViewVars($this->_getViewVars());
         return $this->_js->replaceJS($this->_layout->render());
     }
