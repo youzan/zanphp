@@ -8,14 +8,13 @@
 
 namespace Zan\Framework\Test\Network;
 
-
+use Zan\Framework\Foundation\Test\UnitTest;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 use Zan\Framework\Test\Network\Task\RedisJob;
 
-require __DIR__ . '/../../' . 'src/Test.php';
 
-class RedisTest extends \UnitTest {
+class RedisTest extends \TestCase {
 
     public function testRedisWork() {
 

@@ -25,9 +25,9 @@ class Path {
     private static $cachePath   = null;
     private static $modelPath   = null;
 
-    public static function init($config)
+    public static function init($rootPath)
     {
-        self::setRootPath($config);
+        self::setRootPath($rootPath);
         self::setOtherPathes();
     }
 
@@ -65,16 +65,9 @@ class Path {
         return self::$cachePath;
     }
 
-    private static function setRootPath($config)
+    private static function setRootPath($rootPath)
     {
-        if(!isset($config['rootPath'])){
-            throw new InvalidArgumentException('rootPath not defined in init.bootstrap file');
-        }
-
-        if (!is_dir($config['rootPath']) ) {
-            throw new InvalidArgumentException('Application root path ({$dir}) is invalid!');
-        }
-        self::$rootPath = Dir::formatPath($config['rootPath']);
+        self::$rootPath = Dir::formatPath($rootPath);
     }
 
     private static function setOtherPathes()

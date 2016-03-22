@@ -1,44 +1,36 @@
 <?php
-/**
- * @author hupp
- * create date: 16/01/05
- */
+
 namespace Zan\Framework\Network\Http;
 
-use \swoole_http_server as HttpServer;
+use swoole_http_server as SwooleServer;
+use swoole_http_request as SwooleHttpRequest;
+use swoole_http_response as SwooleHttpResponse;
+use Zan\Framework\Contract\Network\Server as ServerContract;
 
-class Server implements \Zan\Framework\Contract\Network\Server {
-
+class Server implements ServerContract
+{
     /**
-     * @var HttpServer
+     * @var swooleServer
      */
-    public $server;
+    public $swooleServer;
 
-    public function __construct($config=[])
+    public function __construct(SwooleServer $swooleServer, array $config)
     {
-        $this->server = new HttpServer($config['host'], $config['port']);
-        $this->setServerConfig($config);
-    }
-
-    public function init()
-    {
-        $this->bindRequestEvents();
-    }
-
-    private function bindRequestEvents()
-    {
-        $this->server->on('Request', [new RequestHandler(), 'handle']);
-    }
-
-    private function setServerConfig($config)
-    {
-        $acceptKeys = [];
-        $this->server->set($config);
+        $this->swooleServer = $swooleServer;
     }
 
     public function start()
     {
-        $this->server->start();
+        $this->swooleServer->on('start', [$this, 'onStart']);
+        $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
+
+        $this->swooleServer->on('workerStart', [$this, 'onWorkerStart']);
+        $this->swooleServer->on('workerStop', [$this, 'onWorkerStop']);
+        $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
+
+        $this->swooleServer->on('request', [$this, 'onRequest']);
+
+        $this->swooleServer->start();
     }
 
     public function stop()
@@ -49,5 +41,35 @@ class Server implements \Zan\Framework\Contract\Network\Server {
     public function reload()
     {
 
+    }
+
+    public function onStart($swooleServer)
+    {
+
+    }
+
+    public function onShutdown($swooleServer)
+    {
+
+    }
+
+    public function onWorkerStart($swooleServer, $workerId)
+    {
+
+    }
+
+    public function onWorkerStop($swooleServer, $workerId)
+    {
+
+    }
+
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    {
+
+    }
+
+    public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
+    {
+        (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
     }
 }

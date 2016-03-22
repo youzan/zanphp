@@ -2,51 +2,78 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use \swoole_server as TcpServer;
+use swoole_server as SwooleServer;
 
-class Server implements \Zan\Framework\Contract\Network\Server {
+class Server {
 
     /**
-     * @var TcpServer
+     * @var SwooleServer
      */
-    private $server;
+    private $swooleServer;
 
-    public function __construct($config=[])
+    public function __construct(SwooleServer $swooleServer, array $config)
     {
-        $this->server = new TcpServer($config['host'], $config['port']);
-        $this->setServerConfig($config['option']);
-    }
-
-    public function init()
-    {
-        $this->bindRequestEvents();
-    }
-
-    private function bindRequestEvents()
-    {
-        $this->server->on('receive', [new ReceiveHandler(), 'handle']);
-    }
-
-    private function setServerConfig(array $serverOption)
-    {
-        $this->server->set($serverOption);
+        $this->swooleServer = $swooleServer;
     }
 
     public function start()
     {
-        $this->server->start();
+        $this->swooleServer->on('start', [$this, 'onStart']);
+        $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
+
+        $this->swooleServer->on('workerStart', [$this, 'onWorkerStart']);
+        $this->swooleServer->on('workerStop', [$this, 'onWorkerStop']);
+        $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
+
+        $this->swooleServer->on('receive', [$this, 'onReceive']);
+        $this->swooleServer->on('packet', [$this, 'onPacket']);
+
+        $this->swooleServer->start();
     }
 
     public function stop()
     {
-        $this->server->shutdown();
+
     }
 
-    /**
-     * only reload task worker
-     */
     public function reload()
     {
-        $this->server->reload();
+
     }
+
+    public function onStart($swooleServer)
+    {
+
+    }
+
+    public function onShutdown($swooleServer)
+    {
+
+    }
+
+    public function onWorkerStart($swooleServer, $workerId)
+    {
+
+    }
+
+    public function onWorkerStop($swooleServer, $workerId)
+    {
+
+    }
+
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    {
+
+    }
+
+    public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
+    {
+
+    }
+
+    public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
+    {
+        (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
+    }
+
 }

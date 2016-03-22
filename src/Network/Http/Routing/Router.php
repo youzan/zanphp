@@ -20,6 +20,7 @@ class Router {
     private $rules  = [];
     private $routes = [];
     private $routeConKey = 'route';
+    private $separator = '/';
 
     public function __construct($config = [])
     {
@@ -33,21 +34,14 @@ class Router {
 
     public function route(Request $request)
     {
-        $this->url = ltrim($request->getUrl(), '/');
-        $this->setMethod($request->getMethod());
+        $requestUri = $request->server->get('REQUEST_URI');
+        $requestUri = ltrim($requestUri, '/');
 
-        if (!$this->url) {
-            $this->setDefaultRoute();
-            goto quit;
+        if (!$requestUri) {
+            return $this->setDefaultRoute($request);
         }
-        list($url, $params) = $this->parseRegexRoute();
-        $this->setRoutes($url);
 
-        quit:
-        return [
-            $this->routes,
-            isset($params) ? $params : []
-        ];
+        $request->setRoute($requestUri);
     }
 
     private function parseRegexRoute()
@@ -82,12 +76,16 @@ class Router {
         }
     }
 
-    private function setDefaultRoute()
+    private function setDefaultRoute(Request $request)
     {
-        $this->setDefaultModule();
-        $this->setDefaultController();
-        $this->setDefaultAction();
-        $this->setDefaultFormat();
+        $routeArr = [
+            $this->config['default_module'],
+            $this->config['default_controller'],
+            $this->config['default_action'],
+        ];
+        $route = $this->separator . join($this->separator, $routeArr);
+
+        $request->setRoute($route);
     }
 
     private function setModule($module = [])
@@ -110,28 +108,4 @@ class Router {
         $this->routes['format'] = $format;
     }
 
-    private function setMethod($method)
-    {
-        $this->routes['method'] = strtolower($method);
-    }
-
-    private function setDefaultModule()
-    {
-        $this->routes['module'] = [$this->config['default_module']];
-    }
-
-    private function setDefaultController()
-    {
-        $this->routes['controller'] = $this->config['default_controller'];
-    }
-
-    private function setDefaultAction()
-    {
-        $this->routes['action'] = $this->config['default_action'];
-    }
-
-    private function setDefaultFormat()
-    {
-        $this->routes['format'] = $this->config['default_format'];
-    }
 }

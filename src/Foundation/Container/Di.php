@@ -2,64 +2,61 @@
 
 namespace Zan\Framework\Foundation\Container;
 
-use ReflectionClass;
-use Zan\Framework\Utilities\DesignPattern\Singleton;
+use RuntimeException;
 
 class Di
 {
-    use Singleton;
+    /**
+     * The resolved object instances.
+     *
+     * @var \Zan\Framework\Foundation\Container\Container
+     */
+    protected static $instance;
 
-    protected $instances = [];
-
-    private function __construct()
+    /**
+     * set the underlying instance behind the facade.
+     *
+     * @param  \Zan\Framework\Foundation\Container\Container  $instance
+     */
+    public static function resolveFacadeInstance(Container $instance)
     {
-
-    }
-
-    public function get($abstract)
-    {
-        $abstract = $this->normalize($abstract);
-
-        if (isset($this->instances[$abstract])) {
-            return $this->instances[$abstract];
-        }
-
-        return null;
-    }
-
-    public function set($alias, $instance)
-    {
-        if (!isset($this->instances[$alias])) {
-            $this->instances[$alias] = $instance;
-        }
-    }
-
-    public function make($abstract, array $parameters = [], $shared = false)
-    {
-        $abstract = $this->normalize($abstract);
-
-        if ($shared && isset($this->instances[$abstract])) {
-            return $this->instances[$abstract];
-        }
-
-        $class = new ReflectionClass($abstract);
-        $object = $class->newInstanceArgs($parameters);
-
-        if ($shared && $object !== null) {
-            $this->instances[$abstract] = $object;
-        }
-
-        return $object;
+        static::$instance = $instance;
     }
 
     /**
-     * Normalize the given class name by removing leading slashes.
+     * Handle dynamic, static calls to the object.
      *
-     * @param  string $className
-     * @return string
+     * @param  string $method
+     * @param  array $args
+     * @return mixed
+     * @throws RuntimeException
      */
-    protected function normalize($className)
+    public static function __callStatic($method, $args)
     {
-        return is_string($className) ? ltrim($className, '\\') : $className;
+        $instance = static::$instance;
+
+        if (! $instance) {
+            throw new RuntimeException('A facade instance has not been set.');
+        }
+
+        switch (count($args)) {
+            case 0:
+                return $instance->$method();
+
+            case 1:
+                return $instance->$method($args[0]);
+
+            case 2:
+                return $instance->$method($args[0], $args[1]);
+
+            case 3:
+                return $instance->$method($args[0], $args[1], $args[2]);
+
+            case 4:
+                return $instance->$method($args[0], $args[1], $args[2], $args[3]);
+
+            default:
+                return call_user_func_array([$instance, $method], $args);
+        }
     }
 }
