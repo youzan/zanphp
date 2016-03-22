@@ -8,9 +8,9 @@
 
 namespace Zan\Framework\Test\Foundation\View;
 
-use Zan\Framework\Foundation\View\TplLoader;
+use Zan\Framework\Foundation\View\Tpl;
 
-class TplLoaderTest extends \TestCase
+class TplTest extends \TestCase
 {
     public $tplLoader = null;
 
