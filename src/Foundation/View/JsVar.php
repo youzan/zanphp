@@ -15,6 +15,8 @@ class JsVar
     private $_config = [];
     private $_query = [];
     private $_env = [];
+    private $_business = [];
+    private $_share = [];
 
     public function setSession($key, $value)
     {
@@ -36,6 +38,16 @@ class JsVar
         $this->_env[$key] = $value;
     }
 
+    public function setBusiness($key, $value)
+    {
+        $this->_business[$key] = $value;
+    }
+
+    public function setShare($key, $value)
+    {
+        $this->_share[$key] = $value;
+    }
+
     public function get()
     {
         return [
@@ -43,6 +55,8 @@ class JsVar
             '_config' => $this->_config,
             '_query' => $this->_query,
             '_env' => $this->_env,
+            '_business' => $this->_business,
+            '_share' => $this->_share
         ];
     }
 } 
