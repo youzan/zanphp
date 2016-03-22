@@ -10,7 +10,7 @@ namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\View\BaseLoader;
-
+use Zan\Framework\Utilities\Types\Url;
 
 class Js extends BaseLoader
 {
