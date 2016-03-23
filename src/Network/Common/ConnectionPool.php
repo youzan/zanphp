@@ -12,7 +12,7 @@ use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Core\ObjectPool;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
-class ConnectionPool extends ObjectPool{
+class ConnectionPool{
 
     private $_freeConnection = null;
 
