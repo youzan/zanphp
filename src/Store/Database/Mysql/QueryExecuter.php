@@ -10,6 +10,7 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
+use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 class QueryExecuter
 {
     /**
