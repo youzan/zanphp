@@ -13,6 +13,9 @@ use Exception;
 class TrackFile {
 
     private $path;
+    private $postData;
+    private $module;
+    private $type;
 
     public function __constract($app, $module, $type, $path){
         $this->path = Path::getLogPath();
@@ -25,6 +28,20 @@ class TrackFile {
             mkdir($dir, 0755, true);
             chmod($dir, 0755);
         }
+        $this->module = $module;
+        $this->type   = $type;
+        return $this;
     }
 
+    public function doWrite($log, $level){
+        $this->getLogData($log, $level);
+        file_put_contents($this->path, $this->postData, FILE_APPEND);
+    }
+
+    private function getLogData($log, $level){
+        if(is_array($log)){
+            $log = json_encode($log,JSON_UNESCAPED_UNICODE);
+        }
+        $this->postData .= sprintf("[%s]\t[%s]\t[%s]\t%s\t%s\n", date('Y-m-d H:i:s.u'), $level,  $this->module, $this->type, $log);
+    }
 }

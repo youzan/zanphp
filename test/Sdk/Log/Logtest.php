@@ -13,16 +13,8 @@ use Zan\Framework\Testing\TaskTest;
 class Logtest extends TaskTest {
 
     public function taskWirteLog(){
-
         $log = LoggerFactory::getInstance('trade');
         $ret = (yield $log->info('test'));
-
         var_dump($ret);
-        /*
-        $test = new LogClient();
-        $result = $test->addLog('hht test');
-        $task = new Task($result);
-        $task->run();
-        */
     }
 }

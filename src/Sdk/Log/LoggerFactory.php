@@ -38,7 +38,9 @@ class LoggerFactory
             throw new Exception('Configuration key cannot be null');
         }
         //$logUrl = Config::get('log'.$key);
-        $logUrl = "syslog://error/error.log?module=trade";
+
+        //test log url
+        $logUrl = "log://error/error.log?module=trade";
 
         if(!$logUrl){
             throw new Exception('Configuration cannot be null');

@@ -13,6 +13,9 @@ use Psr\Log\LogLevel;
 
 class LoggerFile extends LoggerBase implements LoggerInterface {
 
+    /**
+     * @var TrackFile
+     */
     private $track;
 
     public function __constract($config){
@@ -32,7 +35,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function error($message, array $context = array()){
         if($this->checkLevel(LogLevel::ERROR)){
-            $this->track->error($message);
+            $this->track->doWrite($message, LogLevel::ERROR);
         }
     }
 
@@ -44,7 +47,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function warning($message, array $context = array()){
         if($this->checkLevel(LogLevel::WARNING)){
-            $this->track->warn($message);
+            $this->track->doWrite($message, LogLevel::WARNING);
         }
     }
 
@@ -55,7 +58,9 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      * @return null|void
      */
     public function notice($message, array $context = array()){
-
+        if($this->checkLevel(LogLevel::NOTICE)){
+            $this->track->doWrite($message, LogLevel::NOTICE);
+        }
     }
 
     /**
@@ -66,7 +71,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function info($message, array $context = array()){
         if($this->checkLevel(LogLevel::INFO)){
-            $this->track->info($message);
+            $this->track->doWrite($message, LogLevel::INFO);
         }
     }
 
@@ -78,7 +83,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function debug($message, array $context = array()){
         if($this->checkLevel(LogLevel::DEBUG)){
-            $this->track->debug($message);
+            $this->track->doWrite($message, LogLevel::DEBUG);
         }
     }
 
