@@ -55,7 +55,7 @@ class ConnectionPool extends ObjectPool{
         if ($conn) {
             $this->_activeConnection->push($conn);
         }
-        deferRelease($conn);
+//        deferRelease($conn);
         return $conn;
     }
 

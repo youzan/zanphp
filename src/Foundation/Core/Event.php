@@ -28,7 +28,7 @@ class Event
         }
     }
 
-    public static function once($evtName, \Closure $callback)
+    public static function once($evtName, $callback)
     {
         self::register($evtName);
 
@@ -38,7 +38,7 @@ class Event
         ];
     }
 
-    public static function bind($evtName, \Closure $callback)
+    public static function bind($evtName, $callback)
     {
         self::register($evtName);
 
@@ -48,7 +48,7 @@ class Event
         ];
     }
 
-    public static function unbind($evtName, \Closure $callback)
+    public static function unbind($evtName, $callback)
     {
         if (!isset(self::$evtMap[$evtName]) || !self::$evtMap[$evtName]) {
             return false;

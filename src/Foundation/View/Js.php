@@ -10,7 +10,7 @@ namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\View\BaseLoader;
-
+use Zan\Framework\Utilities\Types\Url;
 
 class Js extends BaseLoader
 {
@@ -38,18 +38,17 @@ class Js extends BaseLoader
 
     public function getJsUrl($index, $vendor = false)
     {
-        return 'static.youzan.com/' . $index;
         $isUseCdn = Config::get('js.use_js_cdn');
         $url = $project = '';
         if ($vendor !== false) {
-            $url = URL::site($index, $isUseCdn ? $this->getCdnType() : 'static');
+            $url = Url::site($index, $isUseCdn ? $this->getCdnType() : 'static');
         } else {
             $arr = explode('.', $index, 2);
             if ($isUseCdn) {
-                $url = URL::site(Config::get($index), $this->getCdnType());
+                $url = Url::site(Config::get($index), $this->getCdnType());
             } else {
                 $project = substr($arr[0], 8);
-                $url = URL::site($project .'/'. $arr[1] . '/main.js', 'static');
+                $url = Url::site($project .'/'. $arr[1] . '/main.js', 'static');
             }
         }
         return $url;

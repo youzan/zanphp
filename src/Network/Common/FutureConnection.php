@@ -6,7 +6,7 @@
  * Time: 22:42
  */
 
-namespace Zan\Framework\Network\Client;
+namespace Zan\Framework\Network\Common;
 
 
 use Zan\Framework\Foundation\Contract\Async;

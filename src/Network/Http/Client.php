@@ -113,7 +113,10 @@ class Client implements Async {
 
         $responseParts = explode("\r\n\r\n", $data, 2);
 
-        call_user_func($this->callback, end($responseParts));
+        $body = end($responseParts);
+        $data = json_decode($body, true);
+
+        call_user_func($this->callback, $data ? $data : $body);
 
         swoole_event_exit();
     }
