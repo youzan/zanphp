@@ -44,7 +44,7 @@ class QueryExecuter
         return $this->connection;
     }
 
-    public function execute($sid, $data, $options)
+    public function execute($sid, $data, $options = [])
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
         $this->sql = $sqlMap['sql'];
