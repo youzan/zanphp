@@ -111,11 +111,12 @@ class Client implements Async {
     {
         //暂时不考虑 Transfer-Encoding:chunked
 
-        $responseParts = end(explode("\r\n\r\n", $data, 2));
+        $responseParts = explode("\r\n\r\n", $data, 2);
 
-        $data = json_decode($responseParts, true);
+        $body = end($responseParts);
+        $data = json_decode($body, true);
 
-        call_user_func($this->callback, $data ? $data : $responseParts);
+        call_user_func($this->callback, $data ? $data : $body);
 
         swoole_event_exit();
     }
