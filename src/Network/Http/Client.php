@@ -3,7 +3,6 @@
  * @author hupp
  * create date: 16/03/02
  */
-
 namespace Zan\Framework\Network\Http;
 
 use \swoole_client;
@@ -26,8 +25,7 @@ class Client implements Async {
     protected $method;
     protected $request;
     protected $timeout;
-    protected $post_data = '';
-    protected $user_agent = 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36';
+    protected $postData = '';
 
     private $clientConfKey = 'http.client';
 
@@ -56,7 +54,10 @@ class Client implements Async {
         $this->client = new swoole_client(SWOOLE_TCP, SWOOLE_SOCK_ASYNC);
 
         $this->bindEvent();
-        $this->client->connect($this->host, $this->port, $this->timeout);
+
+        swoole_async_dns_lookup($this->host, function($host, $ip){
+            $this->client->connect($ip, $this->port, $this->timeout);
+        });
     }
 
     private function setPath($path)
@@ -70,12 +71,12 @@ class Client implements Async {
     private function buildParams($parameter)
     {
         if (is_string($parameter)) {
-            $this->post_data = $parameter;
+            $this->postData = $parameter;
         }
         else if (is_array($parameter) || is_object($parameter)) {
-            $this->post_data = http_build_query($parameter);
+            $this->postData = http_build_query($parameter);
         }
-        $this->post_data .= '&debug=json';
+        $this->postData .= '&debug=json';
     }
 
     private function buildHeader()
@@ -85,11 +86,11 @@ class Client implements Async {
         $header .= 'Accept-Encoding: gzip,deflate' . self::EOF;
         $header .= 'Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2' . self::EOF;
         $header .= 'Host: '. $this->host . self::EOF;
-        $header .= $this->user_agent . self::EOF;
+        $header .= 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36' . self::EOF;
 
-        if ($this->post_data) {
+        if ($this->postData) {
             $header .= 'Content-Type: application/x-www-form-urlencoded' . self::EOF;
-            $header .= 'Content-Length: ' . strlen($this->post_data) . self::EOF;
+            $header .= 'Content-Length: ' . strlen($this->postData) . self::EOF;
         }
         return $header;
     }
@@ -104,7 +105,7 @@ class Client implements Async {
 
     public function onConnect()
     {
-        $this->client->send($this->buildHeader() . self::EOF . $this->post_data);
+        $this->client->send($this->buildHeader() . self::EOF . $this->postData);
     }
 
     public function onReceive($cli, $data)
