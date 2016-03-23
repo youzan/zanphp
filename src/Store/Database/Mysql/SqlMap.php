@@ -8,7 +8,7 @@
 namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Store\Database\Mysql\Validator;
 use Zan\Framework\Foundation\Core\Path;
-
+use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 class SqlMap
 {
     private $sqlMaps = [];
@@ -54,7 +54,7 @@ class SqlMap
     {
         preg_match('/^\s*(INSERT|SELECT|UPDATE|DELETE)/is', $this->sqlMap['sql'], $match);
         if (!$match) {
-            //todo throw type error
+            throw new MysqlException('sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一');
         }
         return trim($match[0]);
     }
