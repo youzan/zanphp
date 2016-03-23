@@ -43,11 +43,10 @@ class ConnectionManager {
         $conn = $pool->get();
         if ($conn) {
             yield $conn;
+            return;
         }
-
-        ;
-        $conn = (yield new FutureConnection($key));;
-        deferRelease($conn);
+        $conn = (yield new FutureConnection($key));
+//        deferRelease($conn);
     }
 
     public static function release($key=null,Connection $conn)
