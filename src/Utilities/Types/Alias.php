@@ -18,7 +18,7 @@ class Alias
     {
         if ($int32 > (pow(2,32)-1))
         {
-            throw new InvalidArgumentException(10050,'参数不合法');
+            throw new InvalidArgumentException('参数不合法');
         }
         //获取随机数
         $random32 = self::genRandom32();

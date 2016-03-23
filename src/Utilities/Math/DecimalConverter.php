@@ -18,7 +18,7 @@ class DecimalConverter
     public static function decTo($num,$to)
     {
         if ( ! is_numeric($num) || ! is_numeric($to) || $to > 64 || $to < 0) {
-            throw new InvalidArgumentException(10051,'参数不合法');
+            throw new InvalidArgumentException('参数不合法');
         }
 
         $result = '';
