@@ -40,9 +40,6 @@ class QueryResult implements Async
     public function execute(callable $callback)
     {
         $this->callback = $callback;
-
-        $result = $this->connection->query($this->sqlMap['sql'], MYSQLI_ASYNC);
-
         $dbSock = swoole_get_mysqli_sock($this->connection);
         swoole_event_add($dbSock, [$this, 'onQueryReady']);
     }
@@ -92,7 +89,7 @@ class QueryResult implements Async
     private function insert()
     {
         if ($this->connection->reap_async_query()) {
-            return $this->setInsertId($this->connection->insert_id);
+            return $this->connection->insert_id;
         } else {
             throw new MysqlException($this->connection->error, $this->connection->errno);
         }

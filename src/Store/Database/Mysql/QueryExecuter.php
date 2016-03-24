@@ -11,7 +11,7 @@ use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
-class QueryExecuter
+class QueryExecutor
 {
     /**
      * @var \mysqli
@@ -42,15 +42,22 @@ class QueryExecuter
 
     public function initConnection()
     {
-        $m = new ConnectionManager(null);
-        $m->init();
-        $db = (yield $m::get('p_zan'));
+        $table = $this->sqlMap['table'];
+        $connectionManager = new ConnectionManager(null);
+        $connectionManager->init();
+        $db = (yield $connectionManager->get('p_zan'));
         $this->connection = $db->getConnection();
     }
 
     public function execute()
     {
+        $this->onQuery();
         yield new QueryResult($this->connection, $this->sqlMap);
+    }
+
+    private function onQuery()
+    {
+        $this->connection->query($this->sql, MYSQLI_ASYNC);
     }
 
     private function getSqlMap()

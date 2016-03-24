@@ -1,6 +1,6 @@
 <?php
 return [
-    'test'         => [
+    'market'         => [
         'database'              => 'pf',
     ],
 ];

@@ -21,7 +21,7 @@ class ConnectionManager {
 
     public function __construct($config) {
         //self::$_config = $config;
-        self::configDemo();
+        $this->configDemo();
         //$this->init();
     }
 
@@ -34,7 +34,7 @@ class ConnectionManager {
     }
 
 
-    public static function get($key) /* Connection */
+    public function get($key) /* Connection */
     {
         if(!isset(self::$poolMap[$key])){
             yield null;
@@ -45,7 +45,7 @@ class ConnectionManager {
             yield $conn;
             return;
         }
-        $conn = (yield new FutureConnection($key));
+        $conn = (yield new FutureConnection($this, $key));
 //        deferRelease($conn);
     }
 
@@ -54,7 +54,7 @@ class ConnectionManager {
         self::$poolMap[$key]->release($conn);
     }
 
-    public static function configDemo() {
+    public function configDemo() {
         self::$_config['host']= '192.168.66.202:3306';
         self::$_config['user'] = 'test_koudaitong';
         self::$_config['pool_name'] = 'p_zan';
