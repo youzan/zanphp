@@ -49,6 +49,8 @@ class QueryResult implements Async
 
     public function onQueryReady()
     {
+        $dbSock = swoole_get_mysqli_sock($this->connection);
+        swoole_event_del($dbSock);
         if (null === $this->sqlMap) {
             return false;
         }
@@ -68,7 +70,6 @@ class QueryResult implements Async
                 break;
         }
         call_user_func($this->callback, $result);
-        swoole_event_exit();
     }
 
     private function select()
@@ -81,12 +82,8 @@ class QueryResult implements Async
             if (is_object($result)) {
                 mysqli_free_result($result);
             }
-            $dbSock = swoole_get_mysqli_sock($this->connection);
-            swoole_event_del($dbSock);
             return $return;
         } else {
-            $dbSock = swoole_get_mysqli_sock($this->connection);
-            swoole_event_del($dbSock);
             return [];
             //todo throw error
         }

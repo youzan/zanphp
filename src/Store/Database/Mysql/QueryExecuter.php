@@ -22,60 +22,39 @@ class QueryExecuter
 
     private $sqlMap;
 
-    public function __construct()
+    public function __construct($sid, $data, $options)
     {
-
+        $this->init($sid, $data, $options);
     }
 
-    public function setConnection()
+    private function init($sid, $data, $options)
     {
-        if (null == $this->connection) {
-            $m = new ConnectionManager(null);
-            $m->init();
-            $db = (yield $m::get('p_zan'));
-            $this->connection = $db->getConnection();
-        }
+        $this->initSql($sid, $data, $options);
+        $this->initConnection();
     }
 
-    /**
-     * @return \mysqli
-     */
-    public function getConnection()
-    {
-        return $this->connection;
-    }
-
-    public function execute($sid, $data, $options = [])
+    private function initSql($sid, $data, $options)
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
+        $this->sqlMap = $sqlMap;
         $this->sql = $sqlMap['sql'];
-        //$this->doQuery();
-        yield $this->queryResult($sqlMap);
     }
 
-    private function doQuery()
+    public function initConnection()
     {
-        $result = $this->connection->query($this->sql, MYSQLI_ASYNC);
-        if ($result === false) {
-            //todo throw error
-        }
+        $m = new ConnectionManager(null);
+        $m->init();
+        $db = (yield $m::get('p_zan'));
+        $this->connection = $db->getConnection();
+    }
+
+    public function execute()
+    {
+        yield new QueryResult($this->connection, $this->sqlMap);
     }
 
     private function getSqlMap()
     {
-        if (null == $this->sqlMap) {
-            $this->sqlMap = $this->createSqlMap();
-        }
-        return $this->sqlMap;
-    }
-
-    private function createSqlMap()
-    {
         return new SqlMap();
-    }
-
-    private function queryResult($sqlMap)
-    {
-        return new QueryResult($this->connection, $sqlMap);
     }
 }
