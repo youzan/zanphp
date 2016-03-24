@@ -9,12 +9,15 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Contract\Network\Request as BaseRequest;
+use Kdt\Iron\Nova\Nova;
 
 class Request implements BaseRequest {
     private $route;
     private $serviceName;
+    private $novaServiceName;
     private $methodName;
     private $args;
+    private $fd;
 
     private $remoteIp;
     private $remotePort;
@@ -24,9 +27,24 @@ class Request implements BaseRequest {
 
     public function __construct($serviceName, $methodName, $args)
     {
-        $this->serviceName = $serviceName;
-        $this->methodName = $methodName;
+        $this->serviceName = trim($serviceName);
+        $this->methodName = trim($methodName);
         $this->args = $args;
+
+        $this->formatRoute();
+        $this->decodeArgs();
+    }
+
+    public function setFd($fd)
+    {
+        $this->fd = $fd;
+
+        return $this;
+    }
+
+    public function getFd()
+    {
+        return $this->fd;
     }
 
     public function setRemote($ip, $port)
@@ -58,6 +76,11 @@ class Request implements BaseRequest {
         return $this;
     }
 
+    public function getAttachData()
+    {
+        return $this->attachData;
+    }
+
     public function getRoute()
     {
         return $this->route;
@@ -68,25 +91,21 @@ class Request implements BaseRequest {
         return $this->serviceName;
     }
 
-    /**
-     * @return mixed
-     */
+    public function getNovaServiceName()
+    {
+        return $this->novaServiceName;
+    }
+
     public function getMethodName()
     {
         return $this->methodName;
     }
 
-    /**
-     * @return mixed
-     */
     public function getArgs()
     {
         return $this->args;
     }
 
-    /**
-     * @return mixed
-     */
     public function getRemote()
     {
         return [
@@ -95,28 +114,36 @@ class Request implements BaseRequest {
         ];
     }
 
-    /**
-     * @return mixed
-     */
     public function getRemotePort()
     {
         return $this->remotePort;
     }
 
-    /**
-     * @return mixed
-     */
     public function getFromId()
     {
         return $this->fromId;
     }
 
-    /**
-     * @return mixed
-     */
     public function getSeqNo()
     {
         return $this->seqNo;
     }
 
+    private function formatRoute()
+    {
+        $serviceName = ucwords($this->serviceName, '.');
+        $this->novaServiceName = str_replace('.','\\',$serviceName);
+
+        $path = '/'. str_replace('.', '/', $serviceName) . '/';
+        $this->route = $path . $this->methodName;
+    }
+
+    private function decodeArgs()
+    {
+        $this->args = Nova::decodeServiceArgs(
+            $this->novaServiceName,
+            $this->methodName,
+            $this->args
+        );
+    }
 }

@@ -38,33 +38,35 @@ class RequestHandler {
         $attachData = $execResult = null;
         $outputBuffer = $sendState = $reqState = null;
 
-        try {
+        //try {
             if (nova_decode($data, $serviceName, $methodName,
                     $remoteIP, $remotePort, $seqNo, $attachData, $novaData)) {
 
                 $request = new Request($serviceName, $methodName, $novaData);
-                $request->setRemote($remoteIP, $remotePort)
+                $request->setFd($this->fd)
+                        ->setRemote($remoteIP, $remotePort)
                         ->setFromId($this->fromId)
                         ->setSeqNo($seqNo)
                         ->setAttachData($attachData);
 
-                $response = new Response($this->swooleServer, $this->fd);
+                $response = new Response($this->swooleServer, $request);
 
                 $requestTask = new RequestTask($request, $response, $this->context);
                 $coroutine = $requestTask->run();
-
                 Task::create($coroutine, $this->context);
             }
-        } catch (\Exception $e) {
-            if ($seqNo) {
-                $execResult = base64_decode($this->processorExceptionB64);
-                if (nova_encode($serviceName, $methodName, $remoteIP,
-                            $remotePort, $seqNo, $this->attachmentContent,
-                            $execResult, $outputBuffer)) {
-                    $sendState = $this->swooleServer->send($this->fd, $outputBuffer);
-                }
-            }
-        }
+        //} catch (\Exception $e) {
+
+        //    echo "\n\nexception\n\n";
+        //    if ($seqNo) {
+        //        $execResult = base64_decode($this->processorExceptionB64);
+        //        if (nova_encode($serviceName, $methodName, $remoteIP,
+        //                    $remotePort, $seqNo, $this->attachmentContent,
+        //                    $execResult, $outputBuffer)) {
+        //            $sendState = $this->swooleServer->send($this->fd, $outputBuffer);
+        //        }
+        //    }
+        //}
     }
 
 
