@@ -10,6 +10,7 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
+use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 class QueryExecuter
 {
     /**
@@ -30,7 +31,7 @@ class QueryExecuter
     {
         if (null == $this->connection) {
             $m = new ConnectionManager(null);
-
+            $m->init();
             $db = (yield $m::get('p_zan'));
             $this->connection = $db->getConnection();
         }
@@ -44,7 +45,7 @@ class QueryExecuter
         return $this->connection;
     }
 
-    public function execute($sid, $data, $options)
+    public function execute($sid, $data, $options = [])
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
         $this->sql = $sqlMap['sql'];

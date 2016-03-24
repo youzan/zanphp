@@ -8,6 +8,7 @@
 namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 
 class QueryResult implements Async
 {
@@ -96,7 +97,7 @@ class QueryResult implements Async
         if ($this->connection->reap_async_query()) {
             return $this->setInsertId($this->connection->insert_id);
         } else {
-            //todo throw error
+            throw new MysqlException($this->connection->error, $this->connection->errno);
         }
     }
 
