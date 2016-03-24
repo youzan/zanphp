@@ -49,7 +49,7 @@ class QueryExecuter
     {
         $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
         $this->sql = $sqlMap['sql'];
-        //$this->doQuery();
+        $this->doQuery();
         yield $this->queryResult($sqlMap);
     }
 

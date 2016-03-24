@@ -41,7 +41,7 @@ class QueryResult implements Async
     {
         $this->callback = $callback;
 
-        $result = $this->connection->query($this->sqlMap['sql'], MYSQLI_ASYNC);
+//        $result = $this->connection->query($this->sqlMap['sql'], MYSQLI_ASYNC);
 
         $dbSock = swoole_get_mysqli_sock($this->connection);
         swoole_event_add($dbSock, [$this, 'onQueryReady']);
