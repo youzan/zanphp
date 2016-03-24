@@ -93,7 +93,7 @@ class QueryResult implements Async
     private function insert()
     {
         if ($this->connection->reap_async_query()) {
-            return $this->setInsertId($this->connection->insert_id);
+            return $this->connection->insert_id;
         } else {
             throw new MysqlException($this->connection->error, $this->connection->errno);
         }
