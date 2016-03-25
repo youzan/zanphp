@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Task
@@ -21,7 +22,7 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public static function create($coroutine, $taskId=0, $parentId=0, Context $context=null)
+    public static function execute($coroutine, $taskId=0, $parentId=0, Context $context=null)
     {
         if($coroutine instanceof \Generator) {
             $task = new Task($coroutine, $context, $taskId, $parentId);
@@ -31,6 +32,15 @@ class Task
         }
 
         return $coroutine;
+    }
+
+    public static function create($coroutine, $taskId=0, $parentId=0, Context $context=null)
+    {
+        if($coroutine instanceof \Generator) {
+            throw new InvalidArgumentException('invalid generator passed to Task::create');
+        }
+        $task = new Task($coroutine, $context, $taskId, $parentId);
+        return $task;
     }
 
     public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, $parentId=0)

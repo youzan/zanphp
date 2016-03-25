@@ -53,7 +53,7 @@ class RequestHandler {
                 $requestTask = new RequestTask($request, $response, $this->context);
                 $coroutine = $requestTask->run();
 
-                Task::create($coroutine, $this->context);
+                Task::execute($coroutine, $this->context);
             }
         } catch (\Exception $e) {
             if ($seqNo) {
