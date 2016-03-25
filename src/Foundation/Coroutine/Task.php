@@ -22,7 +22,7 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public static function execute($coroutine, $taskId=0, $parentId=0, Context $context=null)
+    public static function execute($coroutine, Context $context=null, $taskId=0, $parentId=0)
     {
         if($coroutine instanceof \Generator) {
             $task = new Task($coroutine, $context, $taskId, $parentId);
@@ -34,7 +34,7 @@ class Task
         return $coroutine;
     }
 
-    public static function create($coroutine, $taskId=0, $parentId=0, Context $context=null)
+    public static function create($coroutine, Context $context=null, $taskId=0, $parentId=0)
     {
         if($coroutine instanceof \Generator) {
             throw new InvalidArgumentException('invalid generator passed to Task::create');
