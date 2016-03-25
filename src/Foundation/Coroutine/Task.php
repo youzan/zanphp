@@ -34,15 +34,6 @@ class Task
         return $coroutine;
     }
 
-    public static function create($coroutine, Context $context=null, $taskId=0, $parentId=0)
-    {
-        if($coroutine instanceof \Generator) {
-            throw new InvalidArgumentException('invalid generator passed to Task::create');
-        }
-        $task = new Task($coroutine, $context, $taskId, $parentId);
-        return $task;
-    }
-
     public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, $parentId=0)
     {
         $this->coroutine = $coroutine;
