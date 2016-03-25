@@ -7,14 +7,16 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
+use Zan\Framework\Network\Common\Connection;
 use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
+use Zan\Framework\Store\Database\Mysql\Table;
 class QueryExecutor
 {
     /**
-     * @var \mysqli
+     * @var Connection
      */
     private $connection;
 
@@ -43,10 +45,11 @@ class QueryExecutor
     public function initConnection()
     {
         $table = $this->sqlMap['table'];
+        $db = Table::getInstance()->getDatabase($table);
+        $key = $db . '.' . $table;
         $connectionManager = new ConnectionManager(null);
         $connectionManager->init();
-        $db = (yield $connectionManager->get('p_zan'));
-        $this->connection = $db->getConnection();
+        $this->connection = (yield $connectionManager->get($key));
     }
 
     public function execute()
@@ -57,7 +60,17 @@ class QueryExecutor
 
     private function onQuery()
     {
-        $this->connection->query($this->sql, MYSQLI_ASYNC);
+        $connection = $this->connection->getConnection();
+        $this->sql = $connection->real_escape_string($this->sql);
+        $result = $connection->query($this->sql, MYSQLI_ASYNC);
+        if ($result === false) {
+            if (in_array($connection->errno, [2013, 2006])) {
+                $this->connection->close();
+                throw new MysqlException('数据库链接错误');
+            }
+            throw new MysqlException($connection->error);
+        }
+        return true;
     }
 
     private function getSqlMap()

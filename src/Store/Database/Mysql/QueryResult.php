@@ -8,12 +8,13 @@
 namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Common\Connection;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 
 class QueryResult implements Async
 {
     /**
-     * @var \mysqli
+     * @var Connection
      */
     private $connection;
 
@@ -40,13 +41,13 @@ class QueryResult implements Async
     public function execute(callable $callback)
     {
         $this->callback = $callback;
-        $dbSock = swoole_get_mysqli_sock($this->connection);
+        $dbSock = swoole_get_mysqli_sock($this->connection->getConnection());
         swoole_event_add($dbSock, [$this, 'onQueryReady']);
     }
 
     public function onQueryReady()
     {
-        $dbSock = swoole_get_mysqli_sock($this->connection);
+        $dbSock = swoole_get_mysqli_sock($this->connection->getConnection());
         swoole_event_del($dbSock);
         if (null === $this->sqlMap) {
             return false;
@@ -71,7 +72,7 @@ class QueryResult implements Async
 
     private function select()
     {
-        if ($result = $this->connection->reap_async_query()) {
+        if ($result = $this->connection->getConnection()->reap_async_query()) {
             $return = [];
             while ($data = $result->fetch_assoc()) {
                 $return[] = $data;
@@ -88,11 +89,33 @@ class QueryResult implements Async
 
     private function insert()
     {
-        if ($this->connection->reap_async_query()) {
-            return $this->connection->insert_id;
+        if ($this->connection->getConnection()->reap_async_query()) {
+            return $this->connection->getConnection()->insert_id;
         } else {
-            throw new MysqlException($this->connection->error, $this->connection->errno);
+            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }
+    }
+
+    private function update()
+    {
+        return $this->connection->getConnection()->reap_async_query();
+    }
+
+    private function delete()
+    {
+        return $this->connection->getConnection()->reap_async_query();
+    }
+
+
+
+
+    private function setRows($rows)
+    {
+        if (!is_array($rows)) {
+            //todo throw
+        }
+        $this->rows = $rows;
+        return $this;
     }
 
     private function setInsertId($insertId)
@@ -104,25 +127,6 @@ class QueryResult implements Async
     public function getInsertId()
     {
         return $this->insertId;
-    }
-
-    private function update()
-    {
-        return $this->connection->reap_async_query();
-    }
-
-    private function delete()
-    {
-        return $this->connection->reap_async_query();
-    }
-
-    private function setRows($rows)
-    {
-        if (!is_array($rows)) {
-            //todo throw
-        }
-        $this->rows = $rows;
-        return $this;
     }
 
     public function one()

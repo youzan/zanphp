@@ -280,7 +280,6 @@ class SqlMap
 
     private function getSqlFile($filePath)
     {
-        //todo SQL_PATH
         return require Path::getSqlPath() . $filePath . '.php';
     }
 

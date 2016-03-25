@@ -15,14 +15,13 @@ use Zan\Framework\Network\Common\ConnectionPool as Pool;
 
 class ConnectionManager {
 
-    private static $_config=null;
-    private static $poolMap = [];
-    private static $_registry=[];
+    private $_config=null;
+    private $poolMap = [];
+    private $_registry=[];
 
-    public function __construct($config) {
-        //self::$_config = $config;
+    public function __construct()
+    {
         $this->configDemo();
-        //$this->init();
     }
 
     public function init()
