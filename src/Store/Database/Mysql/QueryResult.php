@@ -82,28 +82,35 @@ class QueryResult implements Async
             }
             return $return;
         } else {
-            return [];
-            //todo throw error
+            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }
     }
 
     private function insert()
     {
-        if ($this->connection->getConnection()->reap_async_query()) {
-            return $this->connection->getConnection()->insert_id;
-        } else {
+        $result = $this->connection->getConnection()->reap_async_query();
+        if (!$result) {
             throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }
+        return $this->connection->getConnection()->insert_id;
     }
 
     private function update()
     {
-        return $this->connection->getConnection()->reap_async_query();
+        $result = $this->connection->getConnection()->reap_async_query();
+        if (!$result) {
+            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+        }
+        return $result;
     }
 
     private function delete()
     {
-        return $this->connection->getConnection()->reap_async_query();
+        $result = $this->connection->getConnection()->reap_async_query();
+        if (!$result) {
+            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+        }
+        return $result;
     }
 
 
