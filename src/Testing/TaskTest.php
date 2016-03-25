@@ -21,7 +21,7 @@ class TaskTest extends UnitTest {
             }
 
             $coroutine = $this->$methodName();
-            Task::create($coroutine);
+            Task::execute($coroutine);
         }
     }
 
