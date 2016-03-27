@@ -36,7 +36,7 @@ class Response implements BaseResponse {
             $this->send($content);
         }
 
-        $this->swooleServer->close($this->request->getFd());
+        //$this->swooleServer->close($this->request->getFd());
     }
 
     public function sendException(\Exception $e)
