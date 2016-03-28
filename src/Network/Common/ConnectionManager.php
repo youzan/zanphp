@@ -11,35 +11,38 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Client\FutureConnection;
 use Zan\Framework\Network\Common\ConnectionPool as Pool;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 
 class ConnectionManager {
 
-    private static $_config=null;
-    private static $poolMap = [];
-    private static $_registry=[];
+    use Singleton;
+
+    private  $_config=null;
+    private  $poolMap = [];
+    private  $_registry=[];
 
     public function __construct($config) {
-        //self::$_config = $config;
-        self::configDemo();
+        //$this->$_config = $config;
+        $this->configDemo();
         //$this->init();
     }
 
     public function init()
     {
-        $connectionPool = new Pool(self::$_config);
-        $key = self::$_config['pool_name'];
-        self::$_registry[] = $key;//注册连接池
-        self::$poolMap[$key] = $connectionPool;
+        $connectionPool = new Pool($this->$_config);
+        $key = $this->_config['pool_name'];
+        $this->_registry[] = $key;//注册连接池
+        $this->poolMap[$key] = $connectionPool;
     }
 
 
-    public static function get($key) /* Connection */
+    public function get($key) /* Connection */
     {
-        if(!isset(self::$poolMap[$key])){
+        if(!isset($this->poolMap[$key])){
             yield null;
         }
-        $pool = self::$poolMap[$key];
+        $pool = $this->poolMap[$key];
         $conn = $pool->get();
         if ($conn) {
             yield $conn;
@@ -50,21 +53,21 @@ class ConnectionManager {
         deferRelease($conn);
     }
 
-    public static function release($key=null,Connection $conn)
+    public function release($key=null,Connection $conn)
     {
-        self::$poolMap[$key]->release($conn);
+        $this->poolMap[$key]->release($conn);
     }
 
-    public static function configDemo() {
-        self::$_config['host']= '192.168.66.202:3306';
-        self::$_config['user'] = 'test_koudaitong';
-        self::$_config['pool_name'] = 'p_zan';
-        self::$_config['maximum-connection-count'] ='100';
-        self::$_config['minimum-connection-count'] = '10';
-        self::$_config['keeping-sleep-time'] = '10';//等待时间
-        self::$_config['maximum-new-connections'] = '5';
-        self::$_config['prototype-count'] = '5';
-        self::$_config['init-connection'] = '10';
+    public function configDemo() {
+        $this->_config['host']= '192.168.66.202:3306';
+        $this->_config['user'] = 'test_koudaitong';
+        $this->_config['pool_name'] = 'p_zan';
+        $this->_config['maximum-connection-count'] ='100';
+        $this->_config['minimum-connection-count'] = '10';
+        $this->_config['keeping-sleep-time'] = '10';//等待时间
+        $this->_config['maximum-new-connections'] = '5';
+        $this->_config['prototype-count'] = '5';
+        $this->_config['init-connection'] = '10';
     }
 
 }
