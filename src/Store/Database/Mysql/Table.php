@@ -53,6 +53,6 @@ class Table
 
     private function loadFile()
     {
-        return require Path::getSqlPath() . 'table.php';
+        return require Path::getDbPath() . 'table.php';
     }
 }

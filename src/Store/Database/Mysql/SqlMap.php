@@ -59,6 +59,14 @@ class SqlMap
         }
     }
 
+    private function parseSqlMapKey($sqlMap)
+    {
+        if (!is_array($sqlMap) || [] == $sqlMap) {
+            return [];
+        }
+        
+    }
+
     public function getSql($sid, $data = [], $options = [])
     {
         $this->sqlMap = $this->getSqlMapBySid($sid);

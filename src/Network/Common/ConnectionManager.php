@@ -33,6 +33,7 @@ class ConnectionManager {
         $key = $this->_config['pool_name'];
         $this->_registry[] = $key;//注册连接池
         $this->poolMap[$key] = $connectionPool;
+        return $this;
     }
 
 
