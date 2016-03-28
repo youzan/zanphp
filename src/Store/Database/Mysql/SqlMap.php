@@ -9,18 +9,48 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Store\Database\Mysql\Validator;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
+
 class SqlMap
 {
+    use Singleton;
     private $sqlMaps = [];
     private $sqlMap = [];
     private $andNum = 20;
 
+    public function init()
+    {
+        $this->setSqlMaps();
+    }
+
     private function loadAllSqlFiles($sqlPath = '')
     {
         $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
+
     }
 
-    public function setSqlMaps()
+    private function loadDirFile($dir)
+    {
+        $sqlFiles = [];
+        if (!is_dir($dir)) {
+            return null;
+        }
+
+        $fileNames = scandir($dir);
+
+        $index = 0;
+        while ($index < 5) {
+
+        }
+        foreach (scandir($dir) as $file) {
+            if (is_file($file)) {
+
+            }
+        }
+    }
+
+
+    private function setSqlMaps()
     {
         $sqlMaps = $this->loadAllSqlFiles();
         $this->sqlMaps = $sqlMaps;

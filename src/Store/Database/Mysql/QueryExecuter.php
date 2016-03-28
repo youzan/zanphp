@@ -75,6 +75,6 @@ class QueryExecutor
 
     private function getSqlMap()
     {
-        return new SqlMap();
+        return SqlMap::getInstance();
     }
 }
