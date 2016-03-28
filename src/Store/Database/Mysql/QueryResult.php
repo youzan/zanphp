@@ -70,7 +70,6 @@ class QueryResult implements Async
                 break;
         }
         call_user_func($this->callback, $result);
-        swoole_event_exit();
     }
 
     private function select()
