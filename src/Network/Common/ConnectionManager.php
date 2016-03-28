@@ -22,15 +22,14 @@ class ConnectionManager {
     private  $poolMap = [];
     private  $_registry=[];
 
-    public function __construct($config) {
-        //$this->$_config = $config;
+    public function __construct($config)
+    {
         $this->configDemo();
-        //$this->init();
     }
 
     public function init()
     {
-        $connectionPool = new Pool($this->$_config);
+        $connectionPool = new Pool($this->_config);
         $key = $this->_config['pool_name'];
         $this->_registry[] = $key;//注册连接池
         $this->poolMap[$key] = $connectionPool;
