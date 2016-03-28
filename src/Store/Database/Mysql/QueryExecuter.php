@@ -30,9 +30,9 @@ class QueryExecuter
     public function setConnection()
     {
         if (null == $this->connection) {
-            $m = new ConnectionManager(null);
+            $m = ConnectionManager::getInstance();
             $m->init();
-            $db = (yield $m::get('p_zan'));
+            $db = (yield $m->get('p_zan'));
             $this->connection = $db->getConnection();
         }
     }

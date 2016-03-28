@@ -30,7 +30,7 @@ class ConnectionManager {
 
     public function init()
     {
-        $connectionPool = new Pool($this->$_config);
+        $connectionPool = new Pool($this->_config);
         $key = $this->_config['pool_name'];
         $this->_registry[] = $key;//注册连接池
         $this->poolMap[$key] = $connectionPool;
