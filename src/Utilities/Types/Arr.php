@@ -80,6 +80,51 @@ class Arr {
         return $result;
     }
 
+    public static function mapKey(array $array, $col){
+        $cols = self::array_cols($array,$col);
+        if(empty($cols)){
+            return array();
+        }
+        return array_combine($cols,$array);
+    }
+
+    /**
+     * ======================================
+     *  input:
+     * --------------------------------------
+     *  $arr = array(
+     *      [ key1 => 1 , key2 => 2],
+     *      [ key1 => 3 , key2 => 4],
+     *      [ key1 => 5 , key2 => 6],
+     *  );
+     *  $col = key1;
+     * ======================================
+     * output
+     * --------------------------------------
+     * array( 1,3,5 );
+     *
+     */
+    public static function array_cols($arr,$col,$default=false,$is_unique = false)
+    {
+        if(empty($arr)){
+            return array();
+        }
+
+        $ret    = array();
+
+        foreach($arr as $row){
+            if(isset($row[$col])){
+                $ret[] = $row[$col];
+            }elseif(false !== $default){
+                $ret[] = $default;
+            }
+        }
+        if($is_unique){
+            $ret = array_unique($ret);
+        }
+        return $ret;
+    }
+
     /**
      * @param array $list
      * @param $value
@@ -313,4 +358,7 @@ class Arr {
             unset($array[array_shift($parts)]);
         }
     }
+
+
+
 }

@@ -343,7 +343,11 @@ class SqlMap
         foreach ($vars as $key => $value) {
             $firstSearches[] = '#' . strtoupper($key) . '#';
             $secSearches[] = '#{' . strtolower($key) . '}';
-            $replaces[] = "'" . $value . "'";
+            if (is_array($value)) {
+                $replaces[] = '(' . implode(',', $value) . ')';
+            } else {
+                $replaces[] = "'" . $value . "'";
+            }
         }
         $this->sqlMap['sql'] = str_replace($firstSearches, $replaces, $this->sqlMap['sql']);
         $this->sqlMap['sql'] = str_replace($secSearches, $replaces, $this->sqlMap['sql']);
