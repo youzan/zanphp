@@ -22,10 +22,8 @@ class ConnectionManager {
     private  $poolMap = [];
     private  $_registry=[];
 
-    public function __construct($config) {
-        //$this->$_config = $config;
+    public function __construct() {
         $this->configDemo();
-        //$this->init();
     }
 
     public function init()
