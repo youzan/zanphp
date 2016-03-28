@@ -39,7 +39,7 @@ class RegisterClassAliases implements Bootable
     private function getClassAliasesMap()
     {
         return [
-            'UnitTest'        => 'Zan\\Framework\\Testing\\UnitTest',
+            //'UnitTest'        => 'Zan\\Framework\\Testing\\UnitTest',
             'Config'          => 'Zan\\Framework\\Foundation\\Core\\Config',
             'Handler'         => 'Zan\\Framework\\Foundation\\Exception\\Handler',
             'HttpServer'      => 'Zan\\Framework\\Network\\Http\\Server',
