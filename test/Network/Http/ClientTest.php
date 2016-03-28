@@ -9,9 +9,9 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Common\Client;
-use Zan\Framework\Testing\TaskTestBase;
+use Zan\Framework\Testing\TaskTest;
 
-class ClientTest extends TaskTestBase {
+class ClientTest extends TaskTest {
 
     public function setUp()
     {
@@ -23,7 +23,7 @@ class ClientTest extends TaskTestBase {
         Config::get('http.client');
     }
 
-    public function taskStep()
+    public function taskCall()
     {
         $option = [
             'order_no'  => 'E123',
@@ -31,6 +31,6 @@ class ClientTest extends TaskTestBase {
         ];
         $result = (yield Client::call('trade.order.detail.byOrderNo', $option));
 
-        $this->assertEquals('{"code":40201,"msg":"\u8ba2\u5355\u4e0d\u5b58\u5728","data":null}', $result, 'fail');
+        $this->assertEquals(3, count($result), 'fail');
     }
 }

@@ -35,7 +35,13 @@ class RequestTask {
     {
         $dispatcher = new Dispatcher();
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
-
-        yield $this->response->end($result);
+        $this->output($result);
     }
+
+    private function output($execResult)
+    {
+        return $this->response->end($execResult);
+    }
+
+
 }

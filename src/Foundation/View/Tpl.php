@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Foundation\View;
 
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\Types\Dir;
 use Zan\Framework\Foundation\Coroutine\Event;
 
@@ -16,11 +17,13 @@ class Tpl
     private $_data = [];
     private $_tplPath = '';
     private $_event = '';
+    private $_rootPath = '';
 
     public function __construct(Event $event)
     {
         $that = $this;
         $this->_event = $event;
+        $this->_rootPath = Application::getInstance()->getBasePath();
         $this->_event->bind('set_view_vars', function($args) use ($that) {
             $this->setViewVars($args);
         });
@@ -52,13 +55,25 @@ class Tpl
         if(false !== strpos($path, '.html')) {
             return $path;
         }
-        if(!preg_match('/^static./i', $path)){
-            $path = explode('/', $path);
-            $mod = array_shift($path);
-            return APP_PATH . $mod . '/views/' . join('/', $path) . '.html';
-        }
-        $path = substr($path,7);
-        $path = COMMON_STATIC_PATH  .  $path . '.html';
-        return $path;
+        $pathArr = $this->_parsePath($path);
+        $module = array_shift($pathArr);
+        $fullPath = $this->_rootPath . DIRECTORY_SEPARATOR .
+                'src' . DIRECTORY_SEPARATOR .
+                $this->_pathUcfirst($module) . DIRECTORY_SEPARATOR .
+                'View' . DIRECTORY_SEPARATOR .
+                join(DIRECTORY_SEPARATOR, $pathArr) .
+                '.html';
+        return $fullPath;
     }
+
+    private function _parsePath($path)
+    {
+        return explode('/', $path);
+    }
+
+    private function _pathUcfirst($path)
+    {
+        return ucfirst($path);
+    }
+
 }

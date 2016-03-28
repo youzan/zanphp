@@ -16,6 +16,6 @@ class Base extends \TestCase{
     {
         $coroutine = $this->step();
 
-        Task::create($coroutine);
+        Task::execute($coroutine);
     }
 }

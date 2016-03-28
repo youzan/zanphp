@@ -9,7 +9,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Client\FutureConnection;
+use Zan\Framework\Network\Common\FutureConnection;
 use Zan\Framework\Network\Common\ConnectionPool as Pool;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
@@ -46,11 +46,10 @@ class ConnectionManager {
         $conn = $pool->get();
         if ($conn) {
             yield $conn;
+            return;
         }
-
-        ;
-        $conn = (yield new FutureConnection($key));;
-        deferRelease($conn);
+        $conn = (yield new FutureConnection($key));
+//        deferRelease($conn);
     }
 
     public function release($key=null,Connection $conn)
