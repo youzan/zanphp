@@ -61,7 +61,7 @@ class QueryExecutor
     private function onQuery()
     {
         $connection = $this->connection->getConnection();
-        $this->sql = $connection->real_escape_string($this->sql);
+//        $this->sql = $connection->real_escape_string($this->sql);
         $result = $connection->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
             if (in_array($connection->errno, [2013, 2006])) {

@@ -17,11 +17,12 @@ class Table
 
     private function __construct()
     {
-        $this->init();
+//        $this->init();
     }
 
     public function getDatabase($table)
     {
+        return 'pifa';
         if (!isset($this->tables[$table])) {
             throw new MysqlException('无法获取数'.$table.'表所在的数据库配置');
         }
