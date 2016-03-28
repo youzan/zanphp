@@ -10,7 +10,7 @@ namespace Zan\Framework\Network\Contract;
 
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Core\ObjectPool;
-use Zan\Framework\Network\Facade\ConnectionManager;
+use Zan\Framework\Network\Common\ConnectionManager;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
 class ConnectionPool extends ObjectPool{

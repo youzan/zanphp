@@ -12,7 +12,7 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Network\Contract\Response;
-use Zan\Framework\Network\Facade\ConnectionManager;
+use Zan\Framework\Network\Common\ConnectionManager;
 
 class FutureConnection implements Async {
     private $poolKey = null;
