@@ -14,47 +14,49 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 class SqlMap
 {
     use Singleton;
+
+    private $andNum = 20;
+    private $maxDirDepth = 5;
     private $sqlMaps = [];
     private $sqlMap = [];
-    private $andNum = 20;
 
-    public function init()
+    public function init($sqlPath = '')
     {
-        $this->setSqlMaps();
+        $this->setSqlMaps($sqlPath);
     }
 
-    private function loadAllSqlFiles($sqlPath = '')
+    private function setSqlMaps($sqlPath = '')
     {
         $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
-
+        $this->loadFiles($sqlPath);
     }
 
-    private function loadDirFile($dir)
+    private function loadFiles($dir, $parentDir = '')
     {
-        $sqlFiles = [];
         if (!is_dir($dir)) {
-            return null;
+            return;
         }
-
-        $fileNames = scandir($dir);
-
-        $index = 0;
-        while ($index < 5) {
-
+        $dirFiles = scandir($dir);
+        if (!$dirFiles) {
+            return;
         }
-        foreach (scandir($dir) as $file) {
-            if (is_file($file)) {
-
+        foreach ($dirFiles as $file) {
+            if (in_array($file, ['.', '..'])) {
+                continue;
+            }
+            $path = $dir . $file;
+            if (is_file($path) && strpos($file, '.php')) {
+                $fileName = '' != $parentDir ? $parentDir . '.' . substr($file, 0, strpos($file, '.php')) : substr($file, 0, strpos($file, '.php'));
+                $this->sqlMaps[$fileName] = require $path;
+                continue;
+            }
+            if (substr_count($parentDir, '.') > $this->maxDirDepth) {
+                return;
+            }
+            if (is_dir($path)) {
+                $this->loadFiles($path . '/', '' != $parentDir ? $parentDir . '.' . $file : $file);
             }
         }
-    }
-
-
-    private function setSqlMaps()
-    {
-        $sqlMaps = $this->loadAllSqlFiles();
-        $this->sqlMaps = $sqlMaps;
-        return $this;
     }
 
     public function getSql($sid, $data = [], $options = [])
