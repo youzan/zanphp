@@ -21,8 +21,8 @@ class QueryExecutor
     private $connection;
 
     private $sql;
-
     private $sqlMap;
+    private $db;
 
     public function __construct($sid, $data, $options)
     {
@@ -32,6 +32,7 @@ class QueryExecutor
     private function init($sid, $data, $options)
     {
         $this->initSql($sid, $data, $options);
+        $this->initTable();
         $this->initConnection();
     }
 
@@ -42,11 +43,15 @@ class QueryExecutor
         $this->sql = $sqlMap['sql'];
     }
 
-    public function initConnection()
+    private function initTable()
     {
         $table = $this->sqlMap['table'];
-        $db = Table::getInstance()->getDatabase($table);
-        $key = $db . '.' . $table;
+        $this->db = Table::getInstance()->getDatabase($table);
+    }
+
+    public function initConnection()
+    {
+        $key = $this->db . '.' . $this->sqlMap['table'];
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->init();
         $this->connection = (yield $connectionManager->get($key));
