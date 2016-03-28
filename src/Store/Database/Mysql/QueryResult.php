@@ -10,6 +10,7 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Network\Common\Connection;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
+use Zan\Framework\Store\Database\Mysql\SqlMap;
 
 class QueryResult implements Async
 {
@@ -80,7 +81,12 @@ class QueryResult implements Async
             if (is_object($result)) {
                 mysqli_free_result($result);
             }
-            return $return;
+            if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_ROW) {
+                return $return[0];
+            }
+            if (in_array($this->sqlMap['result_type'], [SqlMap::RESULT_TYPE_ALL, SqlMap::RESULT_TYPE_DEFAULT])) {
+                return $return;
+            }
         } else {
             throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }

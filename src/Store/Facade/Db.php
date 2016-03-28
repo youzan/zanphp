@@ -13,8 +13,10 @@ use Zan\Framework\Store\Database\Mysql\QueryExecutor;
 class Db {
     public static function execute($sid, $data, $options = [])
     {
-        $executor = new QueryExecutor($sid, $data, $options);
+        $executor = new QueryExecutor();
+        yield $executor->init($sid, $data, $options);
         yield $executor->execute($sid, $data, $options);
+        return;
     }
 
 }

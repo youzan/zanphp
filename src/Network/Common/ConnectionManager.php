@@ -59,7 +59,7 @@ class ConnectionManager {
     public function configDemo() {
         $this->_config['host']= '192.168.66.202:3306';
         $this->_config['user'] = 'test_koudaitong';
-        $this->_config['pool_name'] = 'p_zan';
+        $this->_config['pool_name'] = 'pifa.member_log';
         $this->_config['maximum-connection-count'] ='100';
         $this->_config['minimum-connection-count'] = '10';
         $this->_config['keeping-sleep-time'] = '10';//等待时间

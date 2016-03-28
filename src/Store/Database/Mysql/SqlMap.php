@@ -19,6 +19,13 @@ class SqlMap
     private $maxDirDepth = 5;
     private $sqlMaps = [];
     private $sqlMap = [];
+    const RESULT_TYPE_INSERT = 'insert';
+    const RESULT_TYPE_UPDATE = 'update';
+    const RESULT_TYPE_DELETE = 'delete';
+    const RESULT_TYPE_ROW = 'row';
+    const RESULT_TYPE_ALL = 'all';
+    const RESULT_TYPE_COUNT = 'count';
+    const RESULT_TYPE_DEFAULT = 'default';
 
     public function init($sqlPath = '')
     {
@@ -48,6 +55,7 @@ class SqlMap
             if (is_file($path) && strpos($file, '.php')) {
                 $fileName = '' != $parentDir ? $parentDir . '.' . substr($file, 0, strpos($file, '.php')) : substr($file, 0, strpos($file, '.php'));
                 $this->sqlMaps[$fileName] = require $path;
+                $this->sqlMaps[$fileName] = $this->parseSqlMapResultType($this->sqlMaps[$fileName]);
                 continue;
             }
             if (substr_count($parentDir, '.') > $this->maxDirDepth) {
@@ -59,12 +67,25 @@ class SqlMap
         }
     }
 
-    private function parseSqlMapKey($sqlMap)
+    private function parseSqlMapResultType($sqlMap)
     {
         if (!is_array($sqlMap) || [] == $sqlMap) {
             return [];
         }
-        
+        foreach ($sqlMap as $key => $detail) {
+            if ($key == 'table') {
+                continue;
+            }
+            $expKey = explode('_', $key);
+            $tmpKey = end($expKey);
+            if (in_array($tmpKey, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_ALL, self::RESULT_TYPE_COUNT])) {
+                $detail['result_type'] = $tmpKey;
+            } else {
+                $detail['result_type'] = self::RESULT_TYPE_DEFAULT;
+            }
+            $sqlMap[$key] = $detail;
+        }
+        return $sqlMap;
     }
 
     public function getSql($sid, $data = [], $options = [])
@@ -277,6 +298,7 @@ class SqlMap
 
     private function parseSqlMap($sqlMap, $base, $filePath)
     {
+        $sqlMap = $this->parseSqlMapResultType($sqlMap);
         foreach ($sqlMap as $key => $row) {
             if ('table' === $key) {
                 continue;
@@ -288,12 +310,6 @@ class SqlMap
             if (!isset($row['limit'])) {
                 $sqlMap[$key]['limit'] = [];
             }
-
-            //todo connection 是否放入sql map中
-//            if (!isset($row['connection']) && isset($sqlMap['common']['connection'])) {
-//                $sqlMap[$key]['connection'] = $sqlMap['common']['connection'];
-//            }
-
             if (!isset($row['distribute']) && isset($sqlMap['common']['distribute'])) {
                 $sqlMap[$key]['distribute'] = $sqlMap['common']['distribute'];
             }
@@ -306,9 +322,6 @@ class SqlMap
                     }
                 }
             }
-//            if (!isset($sqlMap[$key]['connection']) || empty($sqlMap[$key]['connection'])) {
-//
-//            }
             $sqlMap[$key]['rw']   = 'w';
 
             if (preg_match('/^\s*select/i', $row['sql'])) {
