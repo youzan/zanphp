@@ -118,8 +118,6 @@ class Client implements Async {
         $data = json_decode($body, true);
 
         call_user_func($this->callback, $data ? $data : $body);
-
-        swoole_event_exit();
     }
 
     public function OnError()

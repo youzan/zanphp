@@ -10,6 +10,7 @@ use Zan\Framework\Foundation\Coroutine\SysCall;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Contract\Resource;
+use Zan\Framework\Foundation\Coroutine\Parallel;
 
 function taskSleep()
 {
@@ -71,6 +72,15 @@ function wait()
 {
     return new SysCall(function (Task $task) {
 
+    });
+}
+
+function parallel($coroutines)
+{
+    return new SysCall(function (Task $task) use ($coroutines) {
+        (new Parallel($task))->call($coroutines);
+
+        return Signal::TASK_WAIT;
     });
 }
 
