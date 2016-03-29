@@ -31,14 +31,14 @@ class Event
         }
     }
 
-    public function bind($evtName, \Closure $callback)
+    public function bind($evtName, callable $callback)
     {
         $this->register($evtName);
 
         $this->evtMap[$evtName][] = $callback;
     }
 
-    public function unbind($evtName, \Closure $callback)
+    public function unbind($evtName, callable $callback)
     {
         if (!isset($this->evtMap[$evtName]) || !$this->evtMap[$evtName]) {
             return false;

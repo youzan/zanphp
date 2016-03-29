@@ -7,7 +7,6 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 class Parallel
 {
     private $task;
-    private $taskDoneEventName;
     private $childTasks = [];
     private $sendValues = [];
 
@@ -18,51 +17,43 @@ class Parallel
 
     public function call($coroutines)
     {
-        $this->taskDoneEventName = 'parallel_task_done_' . $this->task->getTaskId();
-        $this->task->getContext()->getEvent()->bind($this->taskDoneEventName, $this->run());
+        $parentTaskId = $this->task->getTaskId();
+        $taskContext = $this->task->getContext();
+        
+        $taskDoneEventName = 'parallel_task_done_' . $parentTaskId;
+        $event = $this->task->getContext()->getEvent();
+        $eventChain = $event->getEventChain();
+        $event->bind($taskDoneEventName, [$this,'done']);
 
         foreach($coroutines as $key => $coroutine) {
-
             if ($coroutine instanceof SysCall) {
-                throw new InvalidArgumentException();
+                throw new InvalidArgumentException('can not run syscall in parallel');
             }
-
-            if ($coroutine instanceof \Generator) {
-                $newTask = new Task($coroutine, $this->task->getContext(), 0, $this->task->getTaskId());
-                $newTaskId = $newTask->getTaskId();
-                $this->childTasks[$key] = $newTask;
-                $this->sendValues[$key] = null;
-
-                $evtName = 'task_event_' . $newTaskId;
-                $this->task->getContext()->getEvent()->getEventChain()->after($evtName, $this->taskDoneEventName);
-            } else {
+            
+            if(!($coroutine instanceof \Generator)) {
                 $this->sendValues[$key] = $coroutine;
+                continue; 
             }
-        }
 
-        foreach ($this->childTasks as $childTask) {
-            /** @var $childTask Task */
+            $childTask = new Task($coroutine, $taskContext, 0, $parentTaskId);
+            $this->childTasks[$key] = $childTask;
+
+            $newTaskId = $childTask->getTaskId();
+            $evtName = 'task_event_' . $newTaskId;
+            $eventChain->after($evtName, $taskDoneEventName);
+            
             $childTask->run();
         }
+
     }
 
-    private function run()
+    private function done()
     {
-        return function() {
-            $isOver = true;
-            foreach ($this->childTasks as $key => $childTask) {
-                /** @var $childTask Task */
-                $this->sendValues[$key] = $childTask->getResult();
+        foreach ($this->childTasks as $key => $childTask) {
+            $this->sendValues[$key] = $childTask->getResult();
+        }
 
-                if (is_null($this->sendValues[$key])) {
-                    $isOver = false;
-                }
-            }
-
-            if ($isOver and !empty($this->sendValues)) {
-                $this->task->send($this->sendValues);
-                $this->task->run();
-            }
-        };
+        $this->task->send($this->sendValues);
+        $this->task->run();
     }
 }
