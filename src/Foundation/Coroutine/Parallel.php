@@ -23,6 +23,7 @@ class Parallel
         $taskDoneEventName = 'parallel_task_done_' . $parentTaskId;
         $event = $this->task->getContext()->getEvent();
         $eventChain = $event->getEventChain();
+        
         $event->bind($taskDoneEventName, [$this,'done']);
 
         foreach($coroutines as $key => $coroutine) {
@@ -40,14 +41,15 @@ class Parallel
 
             $newTaskId = $childTask->getTaskId();
             $evtName = 'task_event_' . $newTaskId;
-            $eventChain->after($evtName, $taskDoneEventName);
-            
+            $eventChain->before($evtName, $taskDoneEventName);
+        }
+        
+        foreach ($this->childTasks as $childTask){
             $childTask->run();
         }
-
     }
 
-    private function done()
+    public function done()
     {
         foreach ($this->childTasks as $key => $childTask) {
             $this->sendValues[$key] = $childTask->getResult();
