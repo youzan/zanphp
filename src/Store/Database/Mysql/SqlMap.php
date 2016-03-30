@@ -215,7 +215,6 @@ class SqlMap
         return '`'. str_replace('.', '`.`', $col) . '`';
     }
 
-
     private function getSqlMapBySid($sid)
     {
         $sidData = $this->parseSid($sid);
@@ -357,6 +356,20 @@ class SqlMap
         return $this;
     }
 
+    private function parseCount($data)
+    {
+        if (!$data || !isset($data['count']) || '' == $data['count']) {
+            throw new MysqlException('what field do you want count?');
+        }
+        if (!is_string($data['count'])) {
+            $count = 'count(*) as count_sql_rows';
+        } else {
+            $count = 'count(' . $data['count'] .') as count_sql_rows';
+        }
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
+        return $this;
+    }
+
     private function parseVars($data)
     {
         if (!$data || !isset($data['var']) || count($data['var']) == 0) {
@@ -459,7 +472,7 @@ class SqlMap
                 break;
             }
         }
-        return $this->removeAnd($this->sqlMap);
+        return $this->removeAnd();
     }
 
     private function parseAnd($andData, $andLabel = "")
@@ -573,7 +586,6 @@ class SqlMap
         }
         return $this;
     }
-
 
     private function formatSql()
     {

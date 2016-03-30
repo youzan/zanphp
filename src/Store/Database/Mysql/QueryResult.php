@@ -84,9 +84,13 @@ class QueryResult implements Async
             if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_ROW) {
                 return $return[0];
             }
+            if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_COUNT) {
+                return $return[0]['count_sql_rows'];
+            }
             if (in_array($this->sqlMap['result_type'], [SqlMap::RESULT_TYPE_SELECT, SqlMap::RESULT_TYPE_DEFAULT])) {
                 return $return;
             }
+            return $return;
         } else {
             throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }
@@ -107,6 +111,9 @@ class QueryResult implements Async
         if (!$result) {
             throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }
+        if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_UPDATE) {
+            return $result ? true : false;
+        }
         return $result;
     }
 
@@ -115,6 +122,9 @@ class QueryResult implements Async
         $result = $this->connection->getConnection()->reap_async_query();
         if (!$result) {
             throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+        }
+        if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_DELETE) {
+            return $result ? true : false;
         }
         return $result;
     }

@@ -38,7 +38,7 @@ class Table
             if (null == $tables || [] == $tables) {
                 return;
             }
-            foreach ($tables as $key => $table) {
+            foreach ($tables as $table) {
                 if (null == $table || [] == $table) {
                     continue;
                 }
