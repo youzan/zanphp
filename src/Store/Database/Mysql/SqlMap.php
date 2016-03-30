@@ -191,6 +191,7 @@ class SqlMap
             $this->checkRequire($data['where']);
         }
         $this->parseColumn($data);
+        $this->parseCount($data);
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
