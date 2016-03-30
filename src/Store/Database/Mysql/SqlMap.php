@@ -35,11 +35,15 @@ class SqlMap
     private function setSqlMaps($sqlPath = '')
     {
         $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
-        $sqlMaps = ConfigLoader::getInstance()->load($sqlPath);
-
-
-
-
+        $sqlMaps = ConfigLoader::getInstance()->loadDistinguishBetweenFolderAndFile($sqlPath);
+        if (null == $sqlMaps || [] == $sqlMaps) {
+            return;
+        }
+        foreach ($sqlMaps as $key => $sqlMap) {
+            $sqlMap = $this->parseSqlMap($sqlMap, explode('.', $key), str_replace('.', '/', $key));
+            $sqlMaps[$key] = $sqlMap;
+        }
+        $this->sqlMaps = $sqlMaps;
     }
 
     private function loadFiles($dir, $parentDir = '')
