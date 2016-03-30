@@ -49,7 +49,7 @@ class QueryExecutor
         $key = $this->database . '.' . $this->sqlMap['table'];
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->init();
-        $this->connection = (yield $connectionManager->get($key));
+        $this->connection = (yield $connectionManager->get($this->database));
     }
 
     public function execute()
