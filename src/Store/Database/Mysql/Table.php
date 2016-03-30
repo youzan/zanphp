@@ -9,46 +9,56 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-
+use Zan\Framework\Foundation\Core\ConfigLoader;
 class Table
 {
     use Singleton;
     private $tables = [];
 
-    public function getDatabase($table)
+    public function getDatabase($tableName)
     {
-        return 'pifa';
-        if (!isset($this->tables[$table])) {
-            throw new MysqlException('无法获取数'.$table.'表所在的数据库配置');
+        if (!isset($this->tables[$tableName])) {
+            $this->setTables();
+            if (!isset($this->tables[$tableName])) {
+                throw new MysqlException('无法获取数' . $tableName . '表所在的数据库配置');
+            }
         }
-        return $this->tables[$table];
+        return $this->tables[$tableName];
     }
 
     public function init()
     {
+        $this->setTables();
+    }
+
+    private function setTables()
+    {
         if ([] == $this->tables) {
-            $this->tables = $this->parseFile();
+            $tables = ConfigLoader::getInstance()->loadDistinguishBetweenFolderAndFile(Path::getTablePath());
+            if (null == $tables || [] == $tables) {
+                return;
+            }
+            foreach ($tables as $key => $table) {
+                if (null == $table || [] == $table) {
+                    unset($tables[$key]);
+                    continue;
+                }
+                $tables[$key] = $this->parseTable($table);
+            }
+            $this->tables = $tables;
         }
         return;
     }
 
-    private function parseFile()
+    private function parseTable($table)
     {
-        $tables = [];
-        $config = $this->loadFile();
-        if (null == $config || [] == $config) {
-            return [];
-        }
-        foreach ($config as $db => $list) {
-            foreach ($list as $table) {
-                $tables[$table] = $db;
+        $result = [];
+        foreach ($table as $db => $tableList) {
+            foreach ($tableList as $tableName) {
+                $result[$tableName] = $db;
             }
         }
-        return $tables;
+        return $result;
     }
 
-    private function loadFile()
-    {
-        return require Path::getDbPath() . 'table.php';
-    }
 }

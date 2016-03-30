@@ -17,7 +17,7 @@ class Path {
     const DEFAULT_LOG_PATH      = 'resource/log/';
     const DEFAULT_CACHE_PATH    = 'resource/cache/';
     const DEFAULT_MODEL_PATH    = 'resource/model/';
-    const DEFAULT_TABLE_PATH       = 'resource/table/';
+    const DEFAULT_TABLE_PATH    = 'resource/config/share/table/';
 
     private static $rootPath    = null;
     private static $configPath  = null;
@@ -25,7 +25,7 @@ class Path {
     private static $logPath     = null;
     private static $cachePath   = null;
     private static $modelPath   = null;
-    private static $tablePath      = null;
+    private static $tablePath   = null;
 
     public static function init($rootPath)
     {

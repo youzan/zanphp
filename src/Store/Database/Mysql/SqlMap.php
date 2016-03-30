@@ -46,35 +46,6 @@ class SqlMap
         $this->sqlMaps = $sqlMaps;
     }
 
-    private function loadFiles($dir, $parentDir = '')
-    {
-        if (!is_dir($dir)) {
-            return;
-        }
-        $dirFiles = scandir($dir);
-        if (!$dirFiles) {
-            return;
-        }
-        foreach ($dirFiles as $file) {
-            if (in_array($file, ['.', '..'])) {
-                continue;
-            }
-            $path = $dir . $file;
-            if (is_file($path) && strpos($file, '.php')) {
-                $fileName = '' != $parentDir ? $parentDir . '.' . substr($file, 0, strpos($file, '.php')) : substr($file, 0, strpos($file, '.php'));
-                $this->sqlMaps[$fileName] = require $path;
-                $this->sqlMaps[$fileName] = $this->parseSqlMap($this->sqlMaps[$fileName]);
-                continue;
-            }
-            if (substr_count($parentDir, '.') > $this->maxDirDepth) {
-                return;
-            }
-            if (is_dir($path)) {
-                $this->loadFiles($path . '/', '' != $parentDir ? $parentDir . '.' . $file : $file);
-            }
-        }
-    }
-
     public function getSql($sid, $data = [], $options = [])
     {
         $this->sqlMap = $this->getSqlMapBySid($sid);

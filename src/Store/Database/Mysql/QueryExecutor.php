@@ -33,7 +33,7 @@ class QueryExecutor
 
     private function initSql($sid, $data, $options)
     {
-        $sqlMap = $this->getSqlMap()->getSql($sid, $data, $options);
+        $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
         $this->sqlMap = $sqlMap;
         $this->sql = $sqlMap['sql'];
     }
@@ -71,10 +71,5 @@ class QueryExecutor
             throw new MysqlException($connection->error);
         }
         return true;
-    }
-
-    private function getSqlMap()
-    {
-        return SqlMap::getInstance();
     }
 }
