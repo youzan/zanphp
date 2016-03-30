@@ -84,7 +84,7 @@ class QueryResult implements Async
             if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_ROW) {
                 return $return[0];
             }
-            if (in_array($this->sqlMap['result_type'], [SqlMap::RESULT_TYPE_ALL, SqlMap::RESULT_TYPE_DEFAULT])) {
+            if (in_array($this->sqlMap['result_type'], [SqlMap::RESULT_TYPE_SELECT, SqlMap::RESULT_TYPE_DEFAULT])) {
                 return $return;
             }
         } else {

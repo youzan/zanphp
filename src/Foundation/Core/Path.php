@@ -17,7 +17,7 @@ class Path {
     const DEFAULT_LOG_PATH      = 'resource/log/';
     const DEFAULT_CACHE_PATH    = 'resource/cache/';
     const DEFAULT_MODEL_PATH    = 'resource/model/';
-    const DEFAULT_Db_PATH       = 'resource/config/db/';
+    const DEFAULT_TABLE_PATH       = 'resource/table/';
 
     private static $rootPath    = null;
     private static $configPath  = null;
@@ -25,7 +25,7 @@ class Path {
     private static $logPath     = null;
     private static $cachePath   = null;
     private static $modelPath   = null;
-    private static $dbPath      = null;
+    private static $tablePath      = null;
 
     public static function init($rootPath)
     {
@@ -67,9 +67,9 @@ class Path {
         return self::$cachePath;
     }
 
-    public static function getDbPath()
+    public static function getTablePath()
     {
-        return self::$dbPath;
+        return self::$tablePath;
     }
 
     private static function setRootPath($rootPath)
@@ -84,7 +84,7 @@ class Path {
         self::$logPath = self::$rootPath . self::DEFAULT_LOG_PATH;
         self::$modelPath = self::$rootPath . self::DEFAULT_MODEL_PATH;
         self::$cachePath = self::$rootPath . self::DEFAULT_CACHE_PATH;
-        self::$dbPath = self::$rootPath . self::DEFAULT_Db_PATH;
+        self::$tablePath = self::$rootPath . self::DEFAULT_TABLE_PATH;
     }
 
 }

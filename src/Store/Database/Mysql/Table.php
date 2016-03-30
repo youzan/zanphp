@@ -15,11 +15,6 @@ class Table
     use Singleton;
     private $tables = [];
 
-    private function __construct()
-    {
-//        $this->init();
-    }
-
     public function getDatabase($table)
     {
         return 'pifa';
@@ -29,7 +24,7 @@ class Table
         return $this->tables[$table];
     }
 
-    private function init()
+    public function init()
     {
         if ([] == $this->tables) {
             $this->tables = $this->parseFile();

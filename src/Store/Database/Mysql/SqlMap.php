@@ -10,7 +10,7 @@ use Zan\Framework\Store\Database\Mysql\Validator;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-
+use Zan\Framework\Foundation\Core\ConfigLoader;
 class SqlMap
 {
     use Singleton;
@@ -23,7 +23,7 @@ class SqlMap
     const RESULT_TYPE_UPDATE = 'update';
     const RESULT_TYPE_DELETE = 'delete';
     const RESULT_TYPE_ROW = 'row';
-    const RESULT_TYPE_ALL = 'all';
+    const RESULT_TYPE_SELECT = 'select';
     const RESULT_TYPE_COUNT = 'count';
     const RESULT_TYPE_DEFAULT = 'default';
 
@@ -35,7 +35,11 @@ class SqlMap
     private function setSqlMaps($sqlPath = '')
     {
         $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
-        $this->loadFiles($sqlPath);
+        $sqlMaps = ConfigLoader::getInstance()->load($sqlPath);
+
+
+
+
     }
 
     private function loadFiles($dir, $parentDir = '')
@@ -55,7 +59,7 @@ class SqlMap
             if (is_file($path) && strpos($file, '.php')) {
                 $fileName = '' != $parentDir ? $parentDir . '.' . substr($file, 0, strpos($file, '.php')) : substr($file, 0, strpos($file, '.php'));
                 $this->sqlMaps[$fileName] = require $path;
-                $this->sqlMaps[$fileName] = $this->parseSqlMapResultType($this->sqlMaps[$fileName]);
+                $this->sqlMaps[$fileName] = $this->parseSqlMap($this->sqlMaps[$fileName]);
                 continue;
             }
             if (substr_count($parentDir, '.') > $this->maxDirDepth) {
@@ -65,27 +69,6 @@ class SqlMap
                 $this->loadFiles($path . '/', '' != $parentDir ? $parentDir . '.' . $file : $file);
             }
         }
-    }
-
-    private function parseSqlMapResultType($sqlMap)
-    {
-        if (!is_array($sqlMap) || [] == $sqlMap) {
-            return [];
-        }
-        foreach ($sqlMap as $key => $detail) {
-            if ($key == 'table') {
-                continue;
-            }
-            $expKey = explode('_', $key);
-            $tmpKey = end($expKey);
-            if (in_array($tmpKey, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_ALL, self::RESULT_TYPE_COUNT])) {
-                $detail['result_type'] = $tmpKey;
-            } else {
-                $detail['result_type'] = self::RESULT_TYPE_DEFAULT;
-            }
-            $sqlMap[$key] = $detail;
-        }
-        return $sqlMap;
     }
 
     public function getSql($sid, $data = [], $options = [])
@@ -262,17 +245,25 @@ class SqlMap
     {
         $sidData = $this->parseSid($sid);
         $base = $sidData['base'];
-        $filePath = $sidData['file_path'];
+        $filePath = $sidData['file_path'] ;
         $mapKey = $sidData['key'];
-        if (isset($this->sqlMaps[$filePath])) {
-            if (isset($this->sqlMaps[$filePath][$mapKey])) {
-                return $this->sqlMaps[$filePath][$mapKey];
+        $sqlMap = [];
+        foreach ($base as $route) {
+            if ([] == $sqlMap && !isset($this->sqlMaps[$route])) {
+                break;
             }
-            //todo throw error
+            $sqlMap = [] == $sqlMap ? $this->sqlMaps[$route] : $sqlMap[$route];
         }
+        if ([] != $sqlMap) {
+            if (isset($sqlMap[$mapKey])) {
+                return $sqlMap[$mapKey];
+            }
+            throw new MysqlException('no such sql key: ' . $sid);
+        }
+
         $sqlMap = $this->getSqlFile($filePath);
         if (!$sqlMap || !isset($sqlMap[$mapKey])) {
-            //todo throw error
+            throw new MysqlException('no such sql: ' . $sid);
         }
         $this->sqlMaps[$filePath] = $this->parseSqlMap($sqlMap, $base, $filePath);
         return $this->sqlMaps[$filePath][$mapKey];
@@ -282,11 +273,11 @@ class SqlMap
     {
         $pos = strrpos($sid, '.');
         if (false === $pos) {
-            //todo throw sid error
+            throw new MysqlException('no such sql id');
         }
 
         $filePath = substr($sid, 0, $pos);
-        $base = $filePath;
+        $base = explode('.', $filePath);
         $filePath = str_replace('.', '/', $filePath);
 
         return [
@@ -298,11 +289,18 @@ class SqlMap
 
     private function parseSqlMap($sqlMap, $base, $filePath)
     {
-        $sqlMap = $this->parseSqlMapResultType($sqlMap);
         foreach ($sqlMap as $key => $row) {
             if ('table' === $key) {
                 continue;
             }
+            $expKey = explode('_', $key);
+            $resultType = $expKey[0];
+            if (in_array($resultType, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_SELECT, self::RESULT_TYPE_COUNT])) {
+                $sqlMap[$key]['result_type'] = $resultType;
+            } else {
+                $sqlMap[$key]['result_type'] = self::RESULT_TYPE_DEFAULT;
+            }
+
             $sqlMap[$key]['key']  = $base . '.' . $key;
             if (!isset($row['require'])) {
                 $sqlMap[$key]['require'] = [];
