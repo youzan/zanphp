@@ -42,7 +42,10 @@ class Table
                 if (null == $table || [] == $table) {
                     continue;
                 }
-                $this->tables = array_merge($this->tables, $this->parseTable($table));
+                $parseTable = $this->parseTable($table);
+                if ([] != $parseTable) {
+                    $this->tables = array_merge($this->tables, $parseTable);
+                }
             }
         }
         return;
