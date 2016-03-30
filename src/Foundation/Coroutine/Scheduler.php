@@ -2,6 +2,8 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
+use Zan\Framework\Foundation\Contract\Async;
+
 class Scheduler
 {
     private $task = null;
@@ -64,7 +66,7 @@ class Scheduler
     private function handleSysCall($value)
     {
         if (!($value instanceof SysCall)
-            && !is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Coroutine\\Syscall')
+            && !is_subclass_of($value, SysCall::class)
         ) {
             return null;
         }
@@ -92,7 +94,7 @@ class Scheduler
 
     private function handleAsyncJob($value)
     {
-        if (!is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Contract\\Async')) {
+        if (!is_subclass_of($value, Async::class)) {
             return null;
         }
 

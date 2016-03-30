@@ -10,6 +10,7 @@ namespace Zan\Framework\Test\Foundation\Coroutine;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\SysCall\GetTaskId;
 use Zan\Framework\Test\Foundation\Coroutine\SysCall\KillTask;
+use Zan\Framework\Test\Foundation\Coroutine\SysCall\Parallel;
 
 class SysCallTest extends \TestCase
 {
@@ -48,5 +49,37 @@ class SysCallTest extends \TestCase
 
         $taskData = $task->getResult();
         $this->assertEquals('SysCall.KillTask.calling', $taskData, 'get KillTask task final output fail');
+    }
+
+    public function testParallel()
+    {
+        $context = new Context();
+
+        $context->set('first_coroutine', '战场原黑仪最萌');
+        $context->set('second_coroutine', '两仪式？no no no');
+        $context->set('third_coroutine', '魔法少女小圆');
+
+        $job = new Parallel($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine, null, 19);
+        $task->run();
+
+        $result = $context->show();
+
+        $this->assertArrayHasKey('parallel_value',$result, 'parallel job failed to set context');
+        $this->assertEquals(4, count($result['parallel_value']), 'parallel result number get wrong');
+        $this->assertEquals($context->get('first_coroutine'), $result['parallel_value'][0], 'parallel callback 1 get wrong context value');
+        $this->assertEquals($context->get('second_coroutine'), $result['parallel_value'][1], 'parallel callback 2 get wrong context value');
+        $this->assertEquals($context->get('third_coroutine'), $result['parallel_value'][2], 'parallel callback 3 get wrong context value');
+        $this->assertInternalType('int', $result['parallel_value'][3], 'parallel callback 4 get wrong context value');
+
+        $taskData = $task->getResult();
+        $this->assertEquals('SysCall.Parallel', $taskData, 'get Parallel task final output fail');
+    }
+
+    public function tearDown()
+    {
+        swoole_event_exit();
     }
 }
