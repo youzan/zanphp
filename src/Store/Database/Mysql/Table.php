@@ -40,12 +40,10 @@ class Table
             }
             foreach ($tables as $key => $table) {
                 if (null == $table || [] == $table) {
-                    unset($tables[$key]);
                     continue;
                 }
-                $tables[$key] = $this->parseTable($table);
+                $this->tables = array_merge($this->tables, $this->parseTable($table));
             }
-            $this->tables = $tables;
         }
         return;
     }
