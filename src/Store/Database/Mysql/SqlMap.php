@@ -276,7 +276,7 @@ class SqlMap
                 $sqlMap[$key]['result_type'] = self::RESULT_TYPE_DEFAULT;
             }
 
-            $sqlMap[$key]['key']  = $base . '.' . $key;
+            $sqlMap[$key]['key']  = implode('.', $base) . '.' . $key;
             if (!isset($row['require'])) {
                 $sqlMap[$key]['require'] = [];
             }
