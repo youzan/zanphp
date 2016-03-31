@@ -11,9 +11,9 @@ use Zan\Framework\Test\Foundation\Coroutine\Task\parallel;
 
 class TaskTest extends UnitTest
 {
+    public static $isInitialized = false;
+    
     protected $taskMethodPattern = '/^task.+/i';
-
-    protected static $isInitialized = false;
     protected $taskCounter = 0;
     protected $coroutines = [];
 
@@ -47,10 +47,10 @@ class TaskTest extends UnitTest
 
     protected function initTask()
     {
-        if (static::$isInitialized) {
+        if (TaskTest::$isInitialized) {
             return false;
         }
-        static::$isInitialized = true;
+        TaskTest::$isInitialized = true;
         
         Event::bind('test_task_done', function () {
             swoole_event_exit();
