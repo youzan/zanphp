@@ -15,7 +15,7 @@
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/elasticsearch-elasticsearch.git"
+            "url": "http://gitlab.qima-inc.com/xiaonuo/yz-elasticsearch.git"
         },
         {
             "packagist": false
@@ -28,7 +28,7 @@
     "require": {
         "league/climate": "3.2.0",
         "qiniu/php-sdk": "7.0.0",
-        "elasticsearch/elasticsearch": "dev-changed/transport"
+        "elasticsearch/yz-elasticsearch-client": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",
