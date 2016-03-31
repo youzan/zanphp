@@ -15,7 +15,7 @@
         },
         {
             "type": "git",
-            "url": "http://gitlab.qima-inc.com/xiaonuo/yz-elasticsearch.git"
+            "url": "http://gitlab.qima-inc.com/php-3rd-lib/yz-elasticsearch.git"
         },
         {
             "packagist": false
