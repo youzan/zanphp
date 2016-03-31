@@ -13,26 +13,24 @@ class TaskTest extends UnitTest
 {
     protected $taskMethodPattern = '/^task.+/i';
 
-    protected $isInitialized = false;
-    protected $counter = 0;
+    protected static $isInitialized = false;
+    protected $taskCounter = 0;
     protected $coroutines = [];
-
-    public function init()
-    {
-        if ($this->isInitialized) {
-            return false;
-        }
-        Event::bind('test_task_done', function () {
-            swoole_event_exit();
-        });
-        $this->isInitialized = true;
-    }
 
     public function testTasksWork()
     {
-        $this->counter++;
-        EventChain::before('test_task_num_' . $this->counter, 'test_task_done');
+        $this->initTask();
 
+        $this->taskCounter++;
+        EventChain::before('test_task_num_' . $this->taskCounter, 'test_task_done');
+
+        $this->scanTasks(); 
+        $taskCoroutine = $this->runTest();
+        Task::execute($taskCoroutine);
+    }
+    
+    protected function scanTasks()
+    {
         $ref = new \ReflectionClass($this);
         $methods = $ref->getMethods(\ReflectionMethod::IS_PROTECTED | \ReflectionMethod::IS_PUBLIC);
 
@@ -44,10 +42,22 @@ class TaskTest extends UnitTest
 
             $coroutine = $this->$methodName();
             $this->coroutines[] = $coroutine;
-        }
+        } 
     }
 
-    public function runTest()
+    protected function initTask()
+    {
+        if (static::$isInitialized) {
+            return false;
+        }
+        static::$isInitialized = true;
+        
+        Event::bind('test_task_done', function () {
+            swoole_event_exit();
+        });
+    }
+    
+    protected function runTest()
     {
         yield parallel($this->coroutines);
         Event::fire('test_task_done');
