@@ -22,6 +22,9 @@ class RequestHandler
     {
         $request  = Request::createFromSwooleHttpRequest($swooleRequest);
 
+        $cookie = new Cookie($request, $swooleResponse);
+        $this->context->set('cookie', $cookie);
+
         Router::getInstance()->route($request);
 
         $task = new RequestTask($request, $swooleResponse, $this->context);

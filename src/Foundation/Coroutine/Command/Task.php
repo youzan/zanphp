@@ -99,6 +99,16 @@ function release(Resource $res, $stradegy = Resource::AUTO_RELEASE)
 
 }
 
+function getCookieHandler()
+{
+    return new SysCall(function(Task $task){
+        $context = $task->getContext();
+        $cookie = $context->get('cookie');
+        $task->send($cookie);
+
+        return Signal::TASK_CONTINUE;
+    });
+}
 
 
 

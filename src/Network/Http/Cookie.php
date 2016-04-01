@@ -16,6 +16,7 @@ use swoole_http_response as SwooleHttpResponse;
 class Cookie
 {
     private $configKey = 'cookie';
+    private $config;
     private $request;
     private $response;
 
@@ -30,25 +31,33 @@ class Cookie
         if (!$config) {
             throw new InvalidArgumentException('cookie config is required');
         }
+        $this->config = $config;
         $this->request = $request;
         $this->response = $swooleResponse;
     }
 
-    public function get($name, $default = '')
+    public function get($key, $default = null)
     {
-        if (!$name) {
-            yield '';
-        }
-
-        if (!isset($this->request->cookies[$name])) {
+        $cookies = $this->request->cookies;
+        if (!$key) {
             yield $default;
         }
-        yield $this->request->cookies[$name];
+
+        yield $cookies->get($key, $default);
     }
 
-    public function set($name, $value = null, $expire = null, $path = null, $domain = null, $secure = null, $httponly = null)
+    public function set($key, $value = null, $expire, $path, $domain, $secure, $httponly)
     {
+        if (!$key) {
+            return false;
+        }
+        $expire = isset($expire) ? $expire : $this->config['expire'];
+        $path = isset($path) ? $path : $this->config['path'];
+        $domain = isset($domain) ? $domain : $this->config['domain'];
+        $secure = isset($secure) ? $secure : $this->config['secure'];
+        $httponly = isset($httponly) ? $httponly : $this->config['httponly'];
 
+        $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httponly);
     }
 
 }
