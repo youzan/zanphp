@@ -5,7 +5,7 @@ namespace Zan\Framework\Sdk\Log;
 use Zan\Framework\Sdk\Log\Track\LoggerFile;
 use Zan\Framework\Sdk\Log\Track\LoggerSystem;
 use Psr\Log\LoggerInterface;
-use Exception;
+use Zan\Framework\Foundation\Exception\ZanException;
 
 class LoggerFactory
 {
@@ -31,11 +31,11 @@ class LoggerFactory
     /**
      * 日志配置解析
      * @param $key
-     * @throws Exception
+     * @throws ZanException
      */
     private function configParser($key){
         if(!$key){
-            throw new Exception('Configuration key cannot be null');
+            throw new ZanException('Configuration key cannot be null');
         }
         //$logUrl = Config::get('log'.$key);
 
@@ -43,7 +43,7 @@ class LoggerFactory
         $logUrl = "log://error/error.log?module=trade";
 
         if(!$logUrl){
-            throw new Exception('Configuration cannot be null');
+            throw new ZanException('Configuration cannot be null');
         }
 
         $config = parse_url($logUrl);
@@ -59,7 +59,7 @@ class LoggerFactory
     /**
      * 适配器
      * @return mixed
-     * @throws Exception
+     * @throws ZanException
      */
     private function adapter(){
         $factory = $this->config['factory'];
@@ -71,7 +71,7 @@ class LoggerFactory
                 self::$instance = new LoggerFile($this->config);
                 break;
             default:
-                throw new Exception('Cannot support this pattern');
+                throw new ZanException('Cannot support this pattern');
         }
     }
 
