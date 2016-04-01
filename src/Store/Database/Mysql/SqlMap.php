@@ -80,6 +80,9 @@ class SqlMap
 
     private function insert($data, $options)
     {
+        if (isset($data['column'])) {
+            return $this->batchInserts($data, $options);
+        }
         $insertData = (isset($data['insert'])) ? $data['insert'] : [];
         if (!is_array($insertData) || count($insertData) == 0) {
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
@@ -96,6 +99,35 @@ class SqlMap
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $insert);
 
 //        $this->splitTable($data);
+        $this->getTable($data)
+            ->addSqlLint($options);
+        $this->formatSql();
+        return $this;
+    }
+
+    private function batchInserts($data, $options)
+    {
+        if (!isset($data['column'])) {
+            throw new MysqlException('can not find inserts column!');
+        }
+        $insertDatas = (isset($data['inserts'])) ? $data['inserts'] : [];
+        if (!is_array($insertDatas) || count($insertDatas) == 0) {
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
+            return $this;
+        }
+        $insertsArr = [];
+        $inserts  = '(' . implode(',', $data['column']) . ') values ';
+        foreach ($insertDatas as $insert) {
+            $values = [];
+            foreach ($insert as $value) {
+                $values[] = "'" . Validator::validate($value) . "'";
+            }
+            $insertsArr[] = '(' . implode(',', $values) . ')';
+        }
+        $inserts .= implode(',', $insertsArr);
+
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', $inserts);
+
         $this->getTable($data)
             ->addSqlLint($options);
         $this->formatSql();
