@@ -20,6 +20,7 @@ class SqlMap
     private $sqlMaps = [];
     private $sqlMap = [];
     const RESULT_TYPE_INSERT = 'insert';
+    const RESULT_TYPE_BATCH = 'batch';
     const RESULT_TYPE_UPDATE = 'update';
     const RESULT_TYPE_DELETE = 'delete';
     const RESULT_TYPE_ROW = 'row';
@@ -302,7 +303,7 @@ class SqlMap
             }
             $expKey = explode('_', $key);
             $resultType = $expKey[0];
-            if (in_array($resultType, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_SELECT, self::RESULT_TYPE_COUNT])) {
+            if (in_array($resultType, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_BATCH, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_SELECT, self::RESULT_TYPE_COUNT])) {
                 $sqlMap[$key]['result_type'] = $resultType;
             } else {
                 $sqlMap[$key]['result_type'] = self::RESULT_TYPE_DEFAULT;
