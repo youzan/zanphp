@@ -30,6 +30,7 @@ class TimerManager
 
     /**
      * 获取tick类型的timer的回调包装函数
+     *
      * @param Timer    $timer
      * @param callable $callback
      *
@@ -44,6 +45,7 @@ class TimerManager
 
     /**
      * 获取after类型的timer的回调包装函数
+     *
      * @param Timer    $timer
      * @param callable $callback
      *
