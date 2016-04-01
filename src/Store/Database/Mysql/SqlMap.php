@@ -81,7 +81,7 @@ class SqlMap
 
     private function insert($data, $options)
     {
-        if (isset($data['column'])) {
+        if (isset($data['inserts'])) {
             return $this->batchInserts($data, $options);
         }
         $insertData = (isset($data['insert'])) ? $data['insert'] : [];
@@ -108,16 +108,14 @@ class SqlMap
 
     private function batchInserts($data, $options)
     {
-        if (!isset($data['column'])) {
-            throw new MysqlException('can not find inserts column!');
-        }
         $insertDatas = (isset($data['inserts'])) ? $data['inserts'] : [];
         if (!is_array($insertDatas) || count($insertDatas) == 0) {
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
             return $this;
         }
         $insertsArr = [];
-        $inserts  = '(' . implode(',', $data['column']) . ') values ';
+        $cloumns = array_keys($insertDatas[0]);
+        $inserts  = '(' . implode(',', $cloumns) . ') values ';
         foreach ($insertDatas as $insert) {
             $values = [];
             foreach ($insert as $value) {
