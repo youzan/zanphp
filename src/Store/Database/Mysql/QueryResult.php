@@ -102,7 +102,12 @@ class QueryResult implements Async
         if (!$result) {
             throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
         }
-        return $this->connection->getConnection()->insert_id;
+        if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_INSERT) {
+            return $this->connection->getConnection()->insert_id;
+        }
+        if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_BATCH) {
+            return $result;
+        }
     }
 
     private function update()

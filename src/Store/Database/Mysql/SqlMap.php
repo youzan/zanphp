@@ -20,6 +20,7 @@ class SqlMap
     private $sqlMaps = [];
     private $sqlMap = [];
     const RESULT_TYPE_INSERT = 'insert';
+    const RESULT_TYPE_BATCH = 'batch';
     const RESULT_TYPE_UPDATE = 'update';
     const RESULT_TYPE_DELETE = 'delete';
     const RESULT_TYPE_ROW = 'row';
@@ -80,6 +81,9 @@ class SqlMap
 
     private function insert($data, $options)
     {
+        if (isset($data['inserts'])) {
+            return $this->batchInserts($data, $options);
+        }
         $insertData = (isset($data['insert'])) ? $data['insert'] : [];
         if (!is_array($insertData) || count($insertData) == 0) {
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
@@ -96,6 +100,33 @@ class SqlMap
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $insert);
 
 //        $this->splitTable($data);
+        $this->getTable($data)
+            ->addSqlLint($options);
+        $this->formatSql();
+        return $this;
+    }
+
+    private function batchInserts($data, $options)
+    {
+        $insertDatas = (isset($data['inserts'])) ? $data['inserts'] : [];
+        if (!is_array($insertDatas) || count($insertDatas) == 0) {
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
+            return $this;
+        }
+        $insertsArr = [];
+        $cloumns = array_keys($insertDatas[0]);
+        $inserts  = '(' . implode(',', $cloumns) . ') values ';
+        foreach ($insertDatas as $insert) {
+            $values = [];
+            foreach ($insert as $value) {
+                $values[] = "'" . Validator::validate($value) . "'";
+            }
+            $insertsArr[] = '(' . implode(',', $values) . ')';
+        }
+        $inserts .= implode(',', $insertsArr);
+
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', $inserts);
+
         $this->getTable($data)
             ->addSqlLint($options);
         $this->formatSql();
@@ -270,7 +301,7 @@ class SqlMap
             }
             $expKey = explode('_', $key);
             $resultType = $expKey[0];
-            if (in_array($resultType, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_SELECT, self::RESULT_TYPE_COUNT])) {
+            if (in_array($resultType, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_BATCH, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_SELECT, self::RESULT_TYPE_COUNT])) {
                 $sqlMap[$key]['result_type'] = $resultType;
             } else {
                 $sqlMap[$key]['result_type'] = self::RESULT_TYPE_DEFAULT;
