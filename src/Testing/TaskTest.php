@@ -25,7 +25,7 @@ class TaskTest extends UnitTest
         TaskTest::$eventChain->before('test_task_num_' . $this->taskCounter, 'test_task_done');
 
         $this->scanTasks(); 
-        $taskCoroutine = $this->runTest();
+        $taskCoroutine = $this->runTaskTests();
         Task::execute($taskCoroutine);
     }
     
@@ -60,7 +60,7 @@ class TaskTest extends UnitTest
         });
     }
     
-    protected function runTest()
+    protected function runTaskTests()
     {
         yield parallel($this->coroutines);
         TaskTest::$event->fire('test_task_done');
