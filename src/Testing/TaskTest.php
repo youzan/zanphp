@@ -7,7 +7,6 @@ namespace Zan\Framework\Testing;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Core\EventChain;
 use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Test\Foundation\Coroutine\Task\parallel;
 
 class TaskTest extends UnitTest
 {
