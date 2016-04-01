@@ -81,7 +81,7 @@ class SqlMap
 
     private function insert($data, $options)
     {
-        if (isset($data['column'])) {
+        if (isset($data['inserts'])) {
             return $this->batchInserts($data, $options);
         }
         $insertData = (isset($data['insert'])) ? $data['insert'] : [];
