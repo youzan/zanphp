@@ -56,23 +56,19 @@ class Tpl
             return $path;
         }
         $pathArr = $this->_parsePath($path);
+        $module = array_shift($pathArr);
         $fullPath = $this->_rootPath . DIRECTORY_SEPARATOR .
                 'src' . DIRECTORY_SEPARATOR .
-                $pathArr['module'] . DIRECTORY_SEPARATOR .
+                $this->_pathUcfirst($module) . DIRECTORY_SEPARATOR .
                 'View' . DIRECTORY_SEPARATOR .
-                $pathArr['controller'] . DIRECTORY_SEPARATOR .
-                $pathArr['action'] .
+                join(DIRECTORY_SEPARATOR, $pathArr) .
                 '.html';
         return $fullPath;
     }
 
     private function _parsePath($path)
     {
-        $result = explode('/', $path);
-        $pathArr['module'] = isset($result[0]) ? trim($result[0]) : 'index';
-        $pathArr['controller'] = isset($result[1]) ? trim($result[1]) : 'index';
-        $pathArr['action'] = isset($result[2]) ? trim($result[2]) : 'index';
-        return array_map([$this, '_pathUcfirst'], $pathArr);
+        return explode('/', $path);
     }
 
     private function _pathUcfirst($path)

@@ -27,6 +27,6 @@ class RequestHandler
         $task = new RequestTask($request, $swooleResponse, $this->context);
         $coroutine = $task->run();
 
-        Task::create($coroutine, $this->context);
+        Task::execute($coroutine, $this->context);
     }
 }

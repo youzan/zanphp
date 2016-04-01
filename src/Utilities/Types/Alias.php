@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Utilities\Types;
 
-use Zan\Framework\Utilities\Math\Convert;
+use Zan\Framework\Utilities\Math\DecimalConverter;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Alias
@@ -18,11 +18,10 @@ class Alias
     {
         if ($int32 > (pow(2,32)-1))
         {
-            throw new InvalidArgumentException(10050,'参数不合法');
+            throw new InvalidArgumentException('参数不合法');
         }
         //获取随机数
         $random32 = self::genRandom32();
-
         //转换二进制
         $int32 = base_convert($int32, 10, 2);
         $random32 = base_convert($random32, 10, 2);
@@ -35,11 +34,10 @@ class Alias
         $arr = array_map(function($randomPart,$intPart){
             return $randomPart.$intPart;
         }, $arr2, $arr1);
-
         $result64 = implode($arr);
 
         //转换成36进制
-        $result64 = Convert::convert($result64,2,36);
+        $result64 = DecimalConverter::convert($result64,2,36);
         return $result64;
     }
 
@@ -48,21 +46,18 @@ class Alias
         if (!self::isValid($alias64)) {
             return null;
         }
-
         //转换成2进制
-        $alias64 = Convert::convert($alias64,36,2);
-
+        $alias64 = DecimalConverter::convert($alias64,36,2);
         $int32 = '';
         for ($i=4; $i < 64; $i+=8) {
             $int32 .= substr($alias64, $i, 4);
         }
-
-        return Convert::toDec($int32,2);
+        return DecimalConverter::toDec($int32,2);
     }
 
     public static function genRandom32()
     {
-        $random = crc32(microtime(TRUE) . Text::random('alnum', 50));
+        $random = crc32(microtime(TRUE) . Str::randomString('alnum', 50));
         return $random | pow(2, 31);
     }
 
@@ -71,7 +66,6 @@ class Alias
         if (strlen($alias) !== 13) {
             return false;
         }
-
         return true;
     }
 }

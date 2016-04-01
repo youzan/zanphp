@@ -14,9 +14,19 @@ class Time
         $this->timeStamp = time();
     }
 
-    public static function current()
+    public static function current($format=false)
     {
+        $timeStamp = time();
 
+        if(true === $format){
+            return $timeStamp;
+        }
+
+        if(false === $format){
+            return date('Y-m-d H:i:s',$timeStamp);
+        }
+
+        return date($format,$timeStamp);
     }
 
 }

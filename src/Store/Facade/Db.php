@@ -8,20 +8,19 @@
 
 namespace Zan\Framework\Store\Facade;
 
-
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Network\Contract\Connection;
-use Zan\Framework\Store\Database\Mysql\FutureQuery;
-use Zan\Framework\Store\Database\Mysql\QueryExecuter;
+use Zan\Framework\Store\Database\Mysql\QueryExecutor;
 
 class Db {
-    public static function execute($sid, $data, $options)
-    {
-        $executer = new QueryExecuter() ;
-        yield $executer->setConnection();
+    const RETURN_AFFECTED_ROWS                          = 'true';
+    const USE_MASTER                                    = 'true';
+    const RETURN_INSERT_ID                              = 'false';
 
-        $response = (yield $executer->execute($sid, $data, $options));
-        yield $response;
+    public static function execute($sid, $data, $options = [])
+    {
+        $executor = new QueryExecutor();
+        yield $executor->init($sid, $data, $options);
+        yield $executor->execute($sid, $data, $options);
+        return;
     }
 
 }
