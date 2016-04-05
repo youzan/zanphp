@@ -417,7 +417,7 @@ class SqlMap
             $firstSearches[] = '#' . strtoupper($key) . '#';
             $secSearches[] = '#{' . strtolower($key) . '}';
             if (is_array($value)) {
-                $replaces[] = '("' . implode(',', $value) . '")';
+                $replaces[] = '(' . implode(',', array_map([$this, 'parseVarsInValue'], $value)) . ')';
             } else {
                 $replaces[] = "'" . $value . "'";
             }
@@ -425,6 +425,14 @@ class SqlMap
         $this->sqlMap['sql'] = str_replace($firstSearches, $replaces, $this->sqlMap['sql']);
         $this->sqlMap['sql'] = str_replace($secSearches, $replaces, $this->sqlMap['sql']);
         return $this;
+    }
+
+    private function parseVarsInValue($value)
+    {
+        if (is_string($value)) {
+            return "'" . $value . "'";
+        }
+        return $value;
     }
 
     private function parseWhere($data, $or = false, $andLabel = '')

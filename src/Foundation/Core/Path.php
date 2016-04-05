@@ -30,7 +30,6 @@ class Path {
     public static function init($rootPath)
     {
         self::setRootPath($rootPath);
-        self::setOtherPathes();
     }
 
     public static function getRootPath()
