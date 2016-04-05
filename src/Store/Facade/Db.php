@@ -11,10 +11,10 @@ namespace Zan\Framework\Store\Facade;
 use Zan\Framework\Store\Database\Mysql\QueryExecutor;
 
 class Db {
-    const RETURN_AFFECTED_ROWS                          = 'true';
-    const USE_MASTER                                    = 'true';
-    const RETURN_INSERT_ID                              = 'false';
-
+    const RETURN_AFFECTED_ROWS  = true;
+    const USE_MASTER            = true;
+    const RETURN_INSERT_ID      = false;
+    
     public static function execute($sid, $data, $options = [])
     {
         $executor = new QueryExecutor();
@@ -22,5 +22,19 @@ class Db {
         yield $executor->execute($sid, $data, $options);
         return;
     }
-
+ 
+    public static function beginTransaction($table, $autoHandleException=false)
+    {
+        
+    }
+    
+    public static function commit()
+    {
+        
+    }
+    
+    public static function rollback()
+    {
+        
+    }
 }
