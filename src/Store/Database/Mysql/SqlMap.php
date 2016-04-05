@@ -417,7 +417,7 @@ class SqlMap
             $firstSearches[] = '#' . strtoupper($key) . '#';
             $secSearches[] = '#{' . strtolower($key) . '}';
             if (is_array($value)) {
-                $replaces[] = '(' . implode(',', $value) . ')';
+                $replaces[] = '("' . implode(',', $value) . '")';
             } else {
                 $replaces[] = "'" . $value . "'";
             }
