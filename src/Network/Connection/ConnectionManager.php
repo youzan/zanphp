@@ -10,17 +10,13 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Network\Common\ConnectionPool;
 use Zan\Framework\Network\Connection\Engine\FutureConnection;
 
 class ConnectionManager
 {
     private static $poolMap = [];
     
-    public static function init()
-    {
-        
-    }
-
     /**
      * @param string $connKey
      * @param int $timeout
@@ -41,5 +37,14 @@ class ConnectionManager
         }
         
         yield new FutureConnection($connKey, $timeout); 
+    }
+
+    /**
+     * @param $poolKey
+     * @param ConnectionPool $pool
+     */
+    public function addPool($poolKey, ConnectionPool $pool)
+    {
+        self::$poolMap[$poolKey] = $pool;
     }
 }
