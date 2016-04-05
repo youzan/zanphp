@@ -14,7 +14,10 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 class ConnectionInitiator
 {
     use Singleton;
-    
+
+    /**
+     * @param array $config(=Config::get('connection'))
+     */
     public function init(array $config)
     {
         
