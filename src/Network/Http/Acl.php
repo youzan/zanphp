@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Acl
@@ -28,9 +29,10 @@ class Acl
         $cookie = (yield getCookieHandler());
         $sid = $cookie->get('sid');
         if (!$sid) {
-            yield RedirectResponse::create($this->config['login_url'], HTTP_REDIRECT_FOUND);
+            yield RedirectResponse::create($this->config['login_url'], 302);
         } else {
             $this->context->set('sid', $sid);
+            yield null;
         }
     }
 
