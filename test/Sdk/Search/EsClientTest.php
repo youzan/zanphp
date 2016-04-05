@@ -6,9 +6,9 @@ require __DIR__ . '/../../bootstrap.php';
 
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Sdk\Searcher\Client;
+use Zan\Framework\Sdk\Search\EsClient;
 
-class ClientTest extends \TestCase
+class EsClientTest extends \TestCase
 {
     public function testSearch()
     {
@@ -178,7 +178,7 @@ class ClientTest extends \TestCase
                 ),
         );
 
-        $client = Client::newInstance($nodeInfo)->setParams([]);
+        $client = EsClient::newInstance($nodeInfo)->setParams([]);
         $result = (yield $client->info());
         var_dump('aa');
     }
@@ -189,4 +189,4 @@ class ClientTest extends \TestCase
     }
 }
 
-(new ClientTest())->testSearch();
+(new EsClientTest())->testSearch();

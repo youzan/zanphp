@@ -3,24 +3,34 @@
 namespace Zan\Framework\Sdk\Search;
 
 use Zan\Framework\Foundation\Contract\Async;
-use Elasticsearch\Client as EsClient;
+use Elasticsearch\Client;
+use Zan\Framework\Foundation\Core\Config;
 
-class Client implements Async
+class EsClient implements Async
 {
+    const DEFAULT_NODE = 'default';
+
     private $client;
 
     private $handle;
 
     private $params;
 
-    public static function newInstance($nodeInfo)
+    public static function newInstance($node)
     {
-        return new Client($nodeInfo);
+        if (empty($node) || $node === self::DEFAULT_NODE) {
+            $node = '';
+        } else {
+            $node = '_' . $node;
+        }
+        $nodeInfo = Config::get('elasticsearch.connect' . $node);
+
+        return new EsClient($nodeInfo);
     }
 
     private function __construct($nodeInfo)
     {
-        $this->client = new EsClient($nodeInfo);
+        $this->client = new Client($nodeInfo);
     }
 
     public function setParams($params)
