@@ -19,7 +19,7 @@ interface ConnectionPool
 
     /**
      * @param array $config
-     * @return null
+     * @return bool
      */
     public function reload(array $config);
 
@@ -37,8 +37,8 @@ interface ConnectionPool
 
     /**
      * @param Connection $conn
-     * @return null
+     * @return bool 
      */
-    public function release(Connection $conn);
+    public function recycle(Connection $conn);
     
 }
