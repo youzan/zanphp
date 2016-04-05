@@ -4,13 +4,14 @@
  */
 namespace Zan\Framework\Testing;
 
-use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Foundation\Core\EventChain;
+use Zan\Framework\Foundation\Coroutine\Event;
 use Zan\Framework\Foundation\Coroutine\Task;
 
 class TaskTest extends UnitTest
 {
     public static $isInitialized = false;
+    public static $event = null;
+    public static $eventChain = null;
     
     protected $taskMethodPattern = '/^task.+/i';
     protected $taskCounter = 0;
@@ -21,10 +22,10 @@ class TaskTest extends UnitTest
         $this->initTask();
 
         $this->taskCounter++;
-        EventChain::before('test_task_num_' . $this->taskCounter, 'test_task_done');
+        TaskTest::$eventChain->before('test_task_num_' . $this->taskCounter, 'test_task_done');
 
         $this->scanTasks(); 
-        $taskCoroutine = $this->runTest();
+        $taskCoroutine = $this->runTaskTests();
         Task::execute($taskCoroutine);
     }
     
@@ -51,15 +52,18 @@ class TaskTest extends UnitTest
         }
         TaskTest::$isInitialized = true;
         
-        Event::bind('test_task_done', function () {
+        TaskTest::$event = new Event();
+        TaskTest::$eventChain = TaskTest::$event->getEventChain();
+        
+        TaskTest::$event->bind('test_task_done', function () {
             swoole_event_exit();
         });
     }
     
-    protected function runTest()
+    protected function runTaskTests()
     {
         yield parallel($this->coroutines);
-        Event::fire('test_task_done');
+        TaskTest::$event->fire('test_task_done');
     }
 
 }
