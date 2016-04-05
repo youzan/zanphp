@@ -18,6 +18,10 @@
             "url": "http://gitlab.qima-inc.com/php-3rd-lib/yz-elasticsearch.git"
         },
         {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/psr-log.git"
+        },
+        {
             "packagist": false
         },
         {
@@ -28,7 +32,8 @@
     "require": {
         "league/climate": "3.2.0",
         "qiniu/php-sdk": "7.0.0",
-        "elasticsearch/yz-elasticsearch-client": "dev-master"
+        "elasticsearch/yz-elasticsearch-client": "dev-master",
+        "psr/log": "1.0.0"
     },
     "require-dev": {
         "phpunit/phpunit": "4.*",

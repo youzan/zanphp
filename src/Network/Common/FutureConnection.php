@@ -12,15 +12,17 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Network\Contract\Response;
-use Zan\Framework\Network\Facade\ConnectionManager;
+use Zan\Framework\Network\Common\ConnectionManager;
 
 class FutureConnection implements Async {
     private $poolKey = null;
     private $callback = null;
+    private $connectionManager = null;
 
-    public function __construct($poolKey)
+    public function __construct($connectionManager, $poolKey)
     {
         $this->poolKey = $poolKey;
+        $this->connectionManager = $connectionManager;
         $this->init();
     }
 
@@ -43,7 +45,7 @@ class FutureConnection implements Async {
 
     public function getConnection()
     {
-        $conn = ConnectionManager::get($this->poolKey);
+        $conn = $this->connectionManager->get($this->poolKey);
         call_user_func($this->callback, $conn);
     }
 

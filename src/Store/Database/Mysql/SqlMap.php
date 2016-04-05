@@ -9,22 +9,42 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Store\Database\Mysql\Validator;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Foundation\Core\ConfigLoader;
 class SqlMap
 {
+    use Singleton;
+
+    private $andNum = 20;
+    private $maxDirDepth = 5;
     private $sqlMaps = [];
     private $sqlMap = [];
-    private $andNum = 20;
+    const RESULT_TYPE_INSERT = 'insert';
+    const RESULT_TYPE_BATCH = 'batch';
+    const RESULT_TYPE_UPDATE = 'update';
+    const RESULT_TYPE_DELETE = 'delete';
+    const RESULT_TYPE_ROW = 'row';
+    const RESULT_TYPE_SELECT = 'select';
+    const RESULT_TYPE_COUNT = 'count';
+    const RESULT_TYPE_DEFAULT = 'default';
 
-    private function loadAllSqlFiles($sqlPath = '')
+    public function init($sqlPath = '')
     {
-        $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
+        $this->setSqlMaps($sqlPath);
     }
 
-    public function setSqlMaps()
+    private function setSqlMaps($sqlPath = '')
     {
-        $sqlMaps = $this->loadAllSqlFiles();
+        $sqlPath = $sqlPath === '' ? Path::getSqlPath() : $sqlPath;
+        $sqlMaps = ConfigLoader::getInstance()->loadDistinguishBetweenFolderAndFile($sqlPath);
+        if (null == $sqlMaps || [] == $sqlMaps) {
+            return;
+        }
+        foreach ($sqlMaps as $key => $sqlMap) {
+            $sqlMap = $this->parseSqlMap($sqlMap, explode('.', $key), str_replace('.', '/', $key));
+            $sqlMaps[$key] = $sqlMap;
+        }
         $this->sqlMaps = $sqlMaps;
-        return $this;
     }
 
     public function getSql($sid, $data = [], $options = [])
@@ -61,6 +81,9 @@ class SqlMap
 
     private function insert($data, $options)
     {
+        if (isset($data['inserts'])) {
+            return $this->batchInserts($data, $options);
+        }
         $insertData = (isset($data['insert'])) ? $data['insert'] : [];
         if (!is_array($insertData) || count($insertData) == 0) {
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
@@ -77,6 +100,33 @@ class SqlMap
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $insert);
 
 //        $this->splitTable($data);
+        $this->getTable($data)
+            ->addSqlLint($options);
+        $this->formatSql();
+        return $this;
+    }
+
+    private function batchInserts($data, $options)
+    {
+        $insertDatas = (isset($data['inserts'])) ? $data['inserts'] : [];
+        if (!is_array($insertDatas) || count($insertDatas) == 0) {
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
+            return $this;
+        }
+        $insertsArr = [];
+        $cloumns = array_keys($insertDatas[0]);
+        $inserts  = '(' . implode(',', $cloumns) . ') values ';
+        foreach ($insertDatas as $insert) {
+            $values = [];
+            foreach ($insert as $value) {
+                $values[] = "'" . Validator::validate($value) . "'";
+            }
+            $insertsArr[] = '(' . implode(',', $values) . ')';
+        }
+        $inserts .= implode(',', $insertsArr);
+
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', $inserts);
+
         $this->getTable($data)
             ->addSqlLint($options);
         $this->formatSql();
@@ -172,6 +222,7 @@ class SqlMap
             $this->checkRequire($data['where']);
         }
         $this->parseColumn($data);
+        $this->parseCount($data);
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
@@ -196,22 +247,29 @@ class SqlMap
         return '`'. str_replace('.', '`.`', $col) . '`';
     }
 
-
     private function getSqlMapBySid($sid)
     {
         $sidData = $this->parseSid($sid);
         $base = $sidData['base'];
-        $filePath = $sidData['file_path'];
+        $filePath = $sidData['file_path'] ;
         $mapKey = $sidData['key'];
-        if (isset($this->sqlMaps[$filePath])) {
-            if (isset($this->sqlMaps[$filePath][$mapKey])) {
-                return $this->sqlMaps[$filePath][$mapKey];
+        $sqlMap = [];
+        foreach ($base as $route) {
+            if ([] == $sqlMap && !isset($this->sqlMaps[$route])) {
+                break;
             }
-            //todo throw error
+            $sqlMap = [] == $sqlMap ? $this->sqlMaps[$route] : $sqlMap[$route];
         }
+        if ([] != $sqlMap) {
+            if (isset($sqlMap[$mapKey])) {
+                return $sqlMap[$mapKey];
+            }
+            throw new MysqlException('no such sql key: ' . $sid);
+        }
+
         $sqlMap = $this->getSqlFile($filePath);
         if (!$sqlMap || !isset($sqlMap[$mapKey])) {
-            //todo throw error
+            throw new MysqlException('no such sql: ' . $sid);
         }
         $this->sqlMaps[$filePath] = $this->parseSqlMap($sqlMap, $base, $filePath);
         return $this->sqlMaps[$filePath][$mapKey];
@@ -221,11 +279,11 @@ class SqlMap
     {
         $pos = strrpos($sid, '.');
         if (false === $pos) {
-            //todo throw sid error
+            throw new MysqlException('no such sql id');
         }
 
         $filePath = substr($sid, 0, $pos);
-        $base = $filePath;
+        $base = explode('.', $filePath);
         $filePath = str_replace('.', '/', $filePath);
 
         return [
@@ -241,19 +299,21 @@ class SqlMap
             if ('table' === $key) {
                 continue;
             }
-            $sqlMap[$key]['key']  = $base . '.' . $key;
+            $expKey = explode('_', $key);
+            $resultType = $expKey[0];
+            if (in_array($resultType, [self::RESULT_TYPE_INSERT, self::RESULT_TYPE_BATCH, self::RESULT_TYPE_UPDATE, self::RESULT_TYPE_DELETE, self::RESULT_TYPE_ROW, self::RESULT_TYPE_SELECT, self::RESULT_TYPE_COUNT])) {
+                $sqlMap[$key]['result_type'] = $resultType;
+            } else {
+                $sqlMap[$key]['result_type'] = self::RESULT_TYPE_DEFAULT;
+            }
+
+            $sqlMap[$key]['key']  = implode('.', $base) . '.' . $key;
             if (!isset($row['require'])) {
                 $sqlMap[$key]['require'] = [];
             }
             if (!isset($row['limit'])) {
                 $sqlMap[$key]['limit'] = [];
             }
-
-            //todo connection 是否放入sql map中
-//            if (!isset($row['connection']) && isset($sqlMap['common']['connection'])) {
-//                $sqlMap[$key]['connection'] = $sqlMap['common']['connection'];
-//            }
-
             if (!isset($row['distribute']) && isset($sqlMap['common']['distribute'])) {
                 $sqlMap[$key]['distribute'] = $sqlMap['common']['distribute'];
             }
@@ -266,9 +326,6 @@ class SqlMap
                     }
                 }
             }
-//            if (!isset($sqlMap[$key]['connection']) || empty($sqlMap[$key]['connection'])) {
-//
-//            }
             $sqlMap[$key]['rw']   = 'w';
 
             if (preg_match('/^\s*select/i', $row['sql'])) {
@@ -280,7 +337,6 @@ class SqlMap
 
     private function getSqlFile($filePath)
     {
-        //todo SQL_PATH
         return require Path::getSqlPath() . $filePath . '.php';
     }
 
@@ -329,6 +385,20 @@ class SqlMap
             $column = implode(',', $column);
         }
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'column', $column);
+        return $this;
+    }
+
+    private function parseCount($data)
+    {
+        if (!$data || !isset($data['count']) || '' == $data['count']) {
+            throw new MysqlException('what field do you want count?');
+        }
+        if (!is_string($data['count'])) {
+            $count = 'count(*) as count_sql_rows';
+        } else {
+            $count = 'count(' . $data['count'] .') as count_sql_rows';
+        }
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
         return $this;
     }
 
@@ -434,7 +504,7 @@ class SqlMap
                 break;
             }
         }
-        return $this->removeAnd($this->sqlMap);
+        return $this->removeAnd();
     }
 
     private function parseAnd($andData, $andLabel = "")
@@ -548,7 +618,6 @@ class SqlMap
         }
         return $this;
     }
-
 
     private function formatSql()
     {

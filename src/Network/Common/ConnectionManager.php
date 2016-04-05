@@ -32,6 +32,7 @@ class ConnectionManager {
         $key = $this->_config['pool_name'];
         $this->_registry[] = $key;//注册连接池
         $this->poolMap[$key] = $connectionPool;
+        return $this;
     }
 
 
@@ -46,7 +47,7 @@ class ConnectionManager {
             yield $conn;
             return;
         }
-        $conn = (yield new FutureConnection($key));
+        $conn = (yield new FutureConnection($this, $key));
 //        deferRelease($conn);
     }
 
@@ -58,7 +59,7 @@ class ConnectionManager {
     public function configDemo() {
         $this->_config['host']= '192.168.66.202:3306';
         $this->_config['user'] = 'test_koudaitong';
-        $this->_config['pool_name'] = 'p_zan';
+        $this->_config['pool_name'] = 'pifa';
         $this->_config['maximum-connection-count'] ='100';
         $this->_config['minimum-connection-count'] = '10';
         $this->_config['keeping-sleep-time'] = '10';//等待时间
