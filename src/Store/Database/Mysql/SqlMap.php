@@ -222,7 +222,9 @@ class SqlMap
             $this->checkRequire($data['where']);
         }
         $this->parseColumn($data);
-        $this->parseCount($data);
+        if (isset($data['count'])) {
+            $this->parseCount($data);
+        }
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
@@ -364,12 +366,12 @@ class SqlMap
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col]) ) {
-                    //todo throw limit error
+                    throw new MysqlException('sql map limit error');
                 }
             }
         }
         if (count($requireMap) > 0) {
-            //todo throw require error
+            throw new MysqlException('sql map require error');
         }
         return true;
     }
@@ -447,8 +449,7 @@ class SqlMap
             $condition = strtolower(trim($condition));
             $column = trim($column);
             if ('like' === $condition && '%%%' === trim($value)) {
-                //todo throw 过滤%%%
-
+                throw new MysqlException('sql like can not contain %%%');
             }
 
             if (false === $expr) {
@@ -483,7 +484,7 @@ class SqlMap
     {
         $value = is_string($value) ? explode(',',$value) : $value;
         if (!is_array($value) || count($value) == 0) {
-            //todo throw sql where条件中in为空
+            throw new MysqlException('sql where条件中in为空');
         }
         $clause = $this->quotaColumn($column) . ' ' . $condition . ' (';
         $tmp = [];
@@ -582,11 +583,11 @@ class SqlMap
             $matches = null;
 
             if (!isset($tablePregMap[$type])) {
-                //todo throw Can not find sql type
+                throw new MysqlException('Can not find table name, please check your sql type');
             }
             preg_match($tablePregMap[$type], $sql, $matches);
             if (!is_array($matches) || !isset($matches[0])) {
-                //todo throw Can not find sql type
+                throw new MysqlException('Can not find table name, please check your sql type');
             }
             $table = $matches[0];
             //去除`符合和库名
@@ -597,7 +598,7 @@ class SqlMap
         }
 
         if ('' == $table || !strlen($table)) {
-            //todo throw Can not get table name
+            throw new MysqlException('Can not get table name');
         }
         $this->sqlMap['table'] = $table;
         return $this;

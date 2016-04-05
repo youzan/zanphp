@@ -27,6 +27,7 @@ class Connection {
         );
         $this->conn->connect($config['host'], $config['user'], $config['password'], $config['database'], $config['port']);
         $this->conn->autocommit(true);
+        $this->conn->set_charset("utf8");
         $this->pool = $pool;
     }
 
