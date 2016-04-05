@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Sdk\Searcher;
+namespace Zan\Framework\Sdk\Search;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Elasticsearch\Client as EsClient;
