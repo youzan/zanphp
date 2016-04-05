@@ -625,7 +625,6 @@ class SqlMap
         $sql = trim($this->sqlMap['sql']);
         $sql = str_replace("\n", NULL, $sql);
         $sql = str_replace("\r", NULL, $sql);
-        $sql = preg_replace('/\s+/', " ", $sql);
 
         $this->sqlMap['sql'] = $sql;
         return $this;
