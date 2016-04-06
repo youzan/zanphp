@@ -46,7 +46,7 @@ class Cookie
         yield $cookies->get($key, $default);
     }
 
-    public function set($key, $value = null, $expire, $path, $domain, $secure, $httponly)
+    public function set($key, $value = null, $expire, $path, $domain, $secure, $httpOnly)
     {
         if (!$key) {
             return false;
@@ -55,9 +55,9 @@ class Cookie
         $path = isset($path) ? $path : $this->config['path'];
         $domain = isset($domain) ? $domain : $this->config['domain'];
         $secure = isset($secure) ? $secure : $this->config['secure'];
-        $httponly = isset($httponly) ? $httponly : $this->config['httponly'];
+        $httpOnly = isset($httpOnly) ? $httpOnly : $this->config['httponly'];
 
-        $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httponly);
+        $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httpOnly);
     }
 
 }
