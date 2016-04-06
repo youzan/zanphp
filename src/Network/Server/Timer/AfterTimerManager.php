@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Server\Timer;
 
-class AfterTimerManager extends BaseTimerManager
+class AfterTimerManager extends TimerManagerAbstract
 {
     /**
      * 获取tick类型的timer的回调包装函数
