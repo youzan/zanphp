@@ -38,7 +38,7 @@ abstract class Base implements Connection
     public function release()
     {
         if(null !== $this->pool){
-            return $this->pool->release($this);
+            return $this->pool->recycle($this);
         }
         
         return $this->closeSocket();

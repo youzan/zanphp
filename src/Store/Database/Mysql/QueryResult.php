@@ -23,10 +23,6 @@ class QueryResult implements Async
 
     private $callback;
 
-    private $rows = [];
-
-    private $insertId;
-
     public function __construct($connection, $sqlMap)
     {
         $this->init($connection, $sqlMap);
@@ -133,58 +129,4 @@ class QueryResult implements Async
         }
         return $result;
     }
-
-
-
-
-    private function setRows($rows)
-    {
-        if (!is_array($rows)) {
-            //todo throw
-        }
-        $this->rows = $rows;
-        return $this;
-    }
-
-    private function setInsertId($insertId)
-    {
-        $this->insertId = $insertId;
-        return $this;
-    }
-
-    public function getInsertId()
-    {
-        return $this->insertId;
-    }
-
-    public function one()
-    {
-        if ([] === $this->rows) {
-            return null;
-        }
-        return $this->rows[0];
-    }
-
-    public function all()
-    {
-        return $this->rows;
-    }
-
-    public function count($q = '*')
-    {
-        if (!isset($this->rows[0]) || !isset($this->rows[0]['count('.$q.')'])) {
-            return 0;
-        }
-        return $this->rows[0]['count('.$q.')'];
-    }
-
-    public function exits()
-    {
-        if (!isset($this->rows[0]) || count($this->rows[0]) == 0) {
-            return false;
-        }
-        return true;
-    }
-
-
 }
