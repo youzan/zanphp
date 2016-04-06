@@ -222,7 +222,9 @@ class SqlMap
             $this->checkRequire($data['where']);
         }
         $this->parseColumn($data);
-        $this->parseCount($data);
+        if (isset($data['count'])) {
+            $this->parseCount($data);
+        }
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
@@ -364,12 +366,12 @@ class SqlMap
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col]) ) {
-                    //todo throw limit error
+                    throw new MysqlException('sql map limit error');
                 }
             }
         }
         if (count($requireMap) > 0) {
-            //todo throw require error
+            throw new MysqlException('sql map require error');
         }
         return true;
     }
@@ -415,7 +417,7 @@ class SqlMap
             $firstSearches[] = '#' . strtoupper($key) . '#';
             $secSearches[] = '#{' . strtolower($key) . '}';
             if (is_array($value)) {
-                $replaces[] = '(' . implode(',', $value) . ')';
+                $replaces[] = '(' . implode(',', array_map([$this, 'parseVarsInValue'], $value)) . ')';
             } else {
                 $replaces[] = "'" . $value . "'";
             }
@@ -423,6 +425,14 @@ class SqlMap
         $this->sqlMap['sql'] = str_replace($firstSearches, $replaces, $this->sqlMap['sql']);
         $this->sqlMap['sql'] = str_replace($secSearches, $replaces, $this->sqlMap['sql']);
         return $this;
+    }
+
+    private function parseVarsInValue($value)
+    {
+        if (is_string($value)) {
+            return "'" . $value . "'";
+        }
+        return $value;
     }
 
     private function parseWhere($data, $or = false, $andLabel = '')
@@ -447,8 +457,7 @@ class SqlMap
             $condition = strtolower(trim($condition));
             $column = trim($column);
             if ('like' === $condition && '%%%' === trim($value)) {
-                //todo throw 过滤%%%
-
+                throw new MysqlException('sql like can not contain %%%');
             }
 
             if (false === $expr) {
@@ -483,7 +492,7 @@ class SqlMap
     {
         $value = is_string($value) ? explode(',',$value) : $value;
         if (!is_array($value) || count($value) == 0) {
-            //todo throw sql where条件中in为空
+            throw new MysqlException('sql where条件中in为空');
         }
         $clause = $this->quotaColumn($column) . ' ' . $condition . ' (';
         $tmp = [];
@@ -582,11 +591,11 @@ class SqlMap
             $matches = null;
 
             if (!isset($tablePregMap[$type])) {
-                //todo throw Can not find sql type
+                throw new MysqlException('Can not find table name, please check your sql type');
             }
             preg_match($tablePregMap[$type], $sql, $matches);
             if (!is_array($matches) || !isset($matches[0])) {
-                //todo throw Can not find sql type
+                throw new MysqlException('Can not find table name, please check your sql type');
             }
             $table = $matches[0];
             //去除`符合和库名
@@ -597,7 +606,7 @@ class SqlMap
         }
 
         if ('' == $table || !strlen($table)) {
-            //todo throw Can not get table name
+            throw new MysqlException('Can not get table name');
         }
         $this->sqlMap['table'] = $table;
         return $this;
@@ -624,7 +633,6 @@ class SqlMap
         $sql = trim($this->sqlMap['sql']);
         $sql = str_replace("\n", NULL, $sql);
         $sql = str_replace("\r", NULL, $sql);
-        $sql = preg_replace('/\s+/', " ", $sql);
 
         $this->sqlMap['sql'] = $sql;
         return $this;
