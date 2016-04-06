@@ -10,21 +10,29 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 
 class TimerTest extends \TestCase
 {
-//    public function testTimerTickCreate()
-//    {
-//        $context = new Context();
-//
-//        $context->set('begin_time', time());
-//        $context->set('interval', 1000);
-//        $context->set('tick_name', '侑子姐姐赛高哒');
-//
-//        $testCase = $this;
-//        Timer::tick($context->get('interval'), $context->get('tick_name'), function($jobName) use ($context, $testCase) {
-//            $testCase->assertEquals($context->get('tick_name'), $jobName, 'tick timer job name error!');
-//
-//            Timer::clearTickJob($jobName);
-//        });
-//    }
+    public function testTimerTickCreate()
+    {
+        $context = new Context();
+
+        $context->set('begin_time', time());
+        $context->set('interval', 1000);
+        $context->set('tick_name', '侑子姐姐赛高哒');
+
+        $testCase = $this;
+        Timer::tick($context->get('interval'), $context->get('tick_name'), function($jobName) use ($context, $testCase) {
+            var_dump($jobName);
+        });
+
+        $timers = TickTimerManager::getInstance()->show();
+
+        var_dump($timers);
+
+        Timer::clearTickJob($context->get('tick_name'));
+
+        $timers = TickTimerManager::getInstance()->show();
+
+        var_dump($timers);
+    }
 //
 //    public function testTimerTickClear()
 //    {
@@ -43,19 +51,21 @@ class TimerTest extends \TestCase
 //        $this->assertFalse($timer);
 //    }
 //
-//    public function testTimerAfterCreate()
-//    {
-//        $context = new Context();
-//
-//        $context->set('begin_time', time());
-//        $context->set('interval', 1000);
-//        $context->set('after_name', '绫濑小公主萌萌哒');
-//
-//        $testCase = $this;
-//        Timer::after($context->get('interval'), $context->get('after_name'), function() use ($context, $testCase) {
-//            $testCase->assertEquals($context->get('interval'), time() - $context->get('begin_time'), 'time interval error!');
-//        });
-//    }
+    public function testTimerAfterCreate()
+    {
+        $context = new Context();
+
+        $context->set('begin_time', time());
+        $context->set('interval', 1000);
+        $context->set('after_name', '绫濑小公主萌萌哒');
+
+        $testCase = $this;
+        Timer::after($context->get('interval'), $context->get('after_name'), function() use ($context, $testCase) {
+            var_dump(AfterTimerManager::getInstance()->show());
+        });
+
+        var_dump(AfterTimerManager::getInstance()->show());
+    }
 //
 //    public function testTimerAfterClear()
 //    {

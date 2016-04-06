@@ -2,64 +2,74 @@
 
 namespace Zan\Framework\Network\Server\Timer;
 
-use Zan\Framework\Utilities\DesignPattern\Singleton;
-
 abstract class TimerManagerAbstract
 {
-    use Singleton;
-
-    /**
-     * the type of tick timer
-     */
-    const TICK_TYPE = 'tick';
-    /**
-     * the type of after timer
-     */
-    const AFTER_TYPE = 'after';
-
     /**
      * @var $timers Timer[] the list of tick timers
      */
     protected $timers;
 
     /**
-     * 检查当前job name 是否已经存在一个timer
+     * 检查当前job id 是否已经存在一个timer record
      *
-     * @param $jobName
-     *
-     * @return bool
-     */
-    public static function isExist($jobName)
-    {
-        $timer = static::get($jobName);
-
-        return $timer instanceof TimerJob;
-    }
-
-    /**
-     * 添加一个timer到timerManager 返回timer job name
-     *
-     * @param TimerJob $timer
-     *
-     * @return string
-     */
-    public static function addTimer(TimerJob $timer)
-    {
-        static::getInstance()->add($timer);
-
-        return $timer->getJobName();
-    }
-
-    /**
-     * 从timerManager里移除一个timer
-     *
-     * @param TimerJob $timer
+     * @param $jobId
      *
      * @return bool
      */
-    public static function removeTimer(TimerJob $timer)
+    public function isExist($jobId)
     {
-        return static::getInstance()->delete($timer);
+        return isset($this->timers[$jobId]);
+    }
+
+    /**
+     * 添加一个timer record 到timerManager 返回timer job id
+     *
+     * @param String $jobId
+     * @param Int    $timerId
+     *
+     * @return String $jobId
+     */
+    public function add($jobId, $timerId)
+    {
+        $this->timers[$jobId] = $timerId;
+
+        return $jobId;
+    }
+
+    /**
+     * 根据job id获取对应timer id，不存在则返回false
+     *
+     * @param string $jobId
+     *
+     * @return bool|int
+     */
+    public function get($jobId)
+    {
+        return isset($this->timers[$jobId]) ? $this->timers[$jobId] : false;
+    }
+
+    /**
+     * delete a timer in timer list
+     *
+     * @param String $jobId
+     *
+     * @return Bool
+     */
+    public function delete($jobId)
+    {
+        unset($this->timers[$jobId]);
+
+        return !isset($this->timers[$jobId]);
+    }
+
+    /**
+     * 获取当前进程内所有timer的列表
+     *
+     * @return Timer[]
+     */
+    public function show()
+    {
+        return $this->timers;
     }
 
     /**
@@ -76,80 +86,5 @@ abstract class TimerManagerAbstract
         }
 
         return true;
-    }
-
-    /**
-     * 获取当前进程内所有timer的列表
-     *
-     * @return Timer[]
-     */
-    public static function show()
-    {
-        return static::getInstance()->getTimers();
-    }
-
-    /**
-     * 根据hash获取对应timer，不存在则返回false
-     *
-     * @param string $jobName
-     *
-     * @return bool|Timer
-     */
-    public static function get($jobName)
-    {
-        return static::getInstance()->getTimer($jobName);
-    }
-
-    /**
-     * add timer in timer list
-     *
-     * @param TimerJob $timer
-     *
-     * @return bool
-     */
-    protected function add(TimerJob $timer)
-    {
-        $this->timers[$timer->getJobName()] = $timer;
-        return true;
-    }
-
-    /**
-     * delete a timer in timer list
-     *
-     * @param TimerJob $timer
-     *
-     * @return bool
-     */
-    protected function delete(TimerJob $timer)
-    {
-        unset($this->timers[$timer->getJobName()]);
-
-        return !isset($this->timers[$timer->getJobName()]);
-    }
-
-    /**
-     * get timer list
-     *
-     * @return Timer[]
-     */
-    protected function getTimers()
-    {
-        return $this->timers;
-    }
-
-    /**
-     * get timer by job name
-     *
-     * @param string $jobName
-     *
-     * @return bool|Timer
-     */
-    protected function getTimer($jobName)
-    {
-        if (isset($this->timers[$jobName])) {
-            return $this->timers[$jobName];
-        }
-
-        return false;
     }
 }
