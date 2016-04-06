@@ -9,7 +9,7 @@ class Config
 
     public static function init()
     {
-        $path = Path::getConfigPath();
+        $path = Config::get('path.config');
         $sharePath = $path . 'share/';
         $shareConfigMap = ConfigLoader::getInstance()->load($sharePath);
 

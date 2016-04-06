@@ -18,6 +18,7 @@ class InitializePathes implements Bootable
     {
         $rootPath = $app->getBasePath();
 
-        Path::init($rootPath);
+        $pathConfig = Path::init($rootPath);
+        Config::set('path', $pathConfig);
     }
 }
