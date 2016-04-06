@@ -6,18 +6,17 @@ trait Singleton {
     /**
      * @var static
      */
-    protected static $_instances = [];
+    private static $_instance = null;
 
     /**
      * @return static
      */
     final public static function instance()
     {
-        $class = get_called_class();
-        if (!isset(static::$_instances[$class]) or null === static::$_instances[$class]) {
-            static::$_instances[$class] = new $class();
+        if (null === static::$_instance) {
+            static::$_instance = new static();
         }
-        return static::$_instances[$class];
+        return static::$_instance;
     }
 
     /**
@@ -30,7 +29,7 @@ trait Singleton {
 
     final public static function swap($instance)
     {
-        static::$_instances[get_class($instance)] = $instance;
+        static::$_instance = $instance;
     }
 
     final private function __construct()
