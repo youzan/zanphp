@@ -4,7 +4,7 @@ namespace Zan\Framework\Network\Server\Timer;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-class BaseTimerManager
+abstract class TimerManagerAbstract
 {
     use Singleton;
 
