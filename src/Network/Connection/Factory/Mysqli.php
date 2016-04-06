@@ -17,6 +17,7 @@ class Mysqli implements ConnectionFactory
      * @var array
      */
     private $config;
+    private $conn;
 
     public function __construct(array $config)
     {
@@ -25,6 +26,11 @@ class Mysqli implements ConnectionFactory
     
     public function create()
     {
-        
+        $this->conn = new \mysqli();
+        $this->conn->connect($this->config['host'], $this->config['user'], $this->config['password'],
+            $this->config['database'], $this->config['port']);
+        $this->conn->autocommit(true);
+        return $this->conn;
     }
+
 }
