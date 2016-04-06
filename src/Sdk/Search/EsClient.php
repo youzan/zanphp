@@ -21,9 +21,9 @@ class EsClient implements Async
         if (empty($node) || $node === self::DEFAULT_NODE) {
             $node = '';
         } else {
-            $node = '_' . $node;
+            $node = '.' . $node;
         }
-        $nodeInfo = Config::get('elasticsearch.connect' . $node);
+        $nodeInfo = Config::get('connection.elasticsearch' . $node);
 
         return new EsClient($nodeInfo);
     }
