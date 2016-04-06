@@ -12,6 +12,7 @@ namespace Zan\Framework\Network\Connection;
 use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Network\Connection\Driver\Mysqli;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
