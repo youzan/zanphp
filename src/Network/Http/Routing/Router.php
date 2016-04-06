@@ -17,95 +17,72 @@ class Router {
 
     private $config;
     private $url;
-    private $rules  = [];
-    private $routes = [];
+    private $route = '';
+    private $rules = [];
     private $routeConKey = 'route';
     private $separator = '/';
 
     public function __construct($config = [])
     {
         $this->config = $config;
-
         if (!$this->config) {
             $this->config = Config::get($this->routeConKey);
         }
         $this->rules  = UrlRule::getRules();
     }
 
+    private function prepare($url)
+    {
+        if(empty($url)) {
+            return;
+        }
+        $this->url = ltrim($url, $this->separator);
+        $this->removeIllegalString();
+    }
+
     public function route(Request $request)
     {
-        $requestUri = $request->server->get('REQUEST_URI');
-        $requestUri = ltrim($requestUri, '/');
-
-        if (!$requestUri) {
-            return $this->setDefaultRoute($request);
-        }
-
-        $request->setRoute($requestUri);
+        $this->prepare($request->server->get('REQUEST_URI'));
+        empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
+        $request->setRoute($this->route);
     }
 
     private function parseRegexRoute()
     {
         $rules = UrlRegex::formatRules($this->rules);
-        $route = UrlRegex::decode($this->url, $rules);
-
-        return [
-            isset($route['url']) ? $route['url'] : $this->url,
-            isset($route['parameter']) ? $route['parameter'] : [],
-        ];
+        $result = UrlRegex::decode($this->url, $rules);
+        $this->route = ltrim($result['url'], $this->separator);
+        $this->setParameters($result['parameter']);
     }
 
-    private function setRoutes($url)
+    private function setParameters(array $parameters = [])
     {
-        $pathInfo = explode('/', ltrim($url, '/'));
-        $pathInfo = array_filter($pathInfo);
-        $levelLen = count($pathInfo);
-
-        if ($levelLen >= self::BASIC_LEVEL) {
-            $action = end($pathInfo);
-            $pos    = strpos($action, '.');
-            if ($pos === false) {
-                $this->setAction($action);
-                $this->setDefaultFormat();
-            }else {
-                $this->setAction(substr($action, 0, $pos));
-                $this->setFormat(substr($action, $pos + 1));
-            }
-            $this->setController($pathInfo[$levelLen-2]);
-            $this->setModule(array_slice($pathInfo, 0, $levelLen - 2));
+        if(empty($parameters)) {
+            return;
+        }
+        foreach($parameters as $k => $v) {
+            $_GET[$k] = $v;
         }
     }
 
-    private function setDefaultRoute(Request $request)
+    private function setDefaultRoute()
     {
-        $routeArr = [
-            $this->config['default_module'],
-            $this->config['default_controller'],
-            $this->config['default_action'],
+        $this->route = $this->getDefaultRoute();
+    }
+
+    private function getDefaultRoute()
+    {
+        return $this->config['default'];
+    }
+
+    private function removeIllegalString()
+    {
+        $patterns   = [
+            '/^\s*\/\//','/\?.*$/','/\#.*$/','/\/\s*$/','/^\s*\//'
         ];
-        $route = $this->separator . join($this->separator, $routeArr);
-
-        $request->setRoute($route);
+        $replaces   = [
+            '','','','','',
+        ];
+        $this->url = preg_replace($patterns, $replaces, $this->url);
     }
-
-    private function setModule($module = [])
-    {
-        $this->routes['module'] = $module;
-    }
-
-    private function setAction($action)
-    {
-        $this->routes['action'] = $action;
-    }
-
-    private function setController($controller)
-    {
-        $this->routes['controller'] = $controller;
-    }
-
-    private function setFormat($format)
-    {
-        $this->routes['format'] = $format;
-    }
-
 }

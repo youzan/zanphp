@@ -10,8 +10,6 @@ use Zan\Framework\Utilities\Types\Dir;
 
 class UrlRule {
 
-    const ROUTE_KEY = 'rewrite';
-
     private static $rules = [];
 
     public static function loadRules($routingPath)
@@ -23,11 +21,8 @@ class UrlRule {
         foreach ($routeFiles as $file)
         {
             $route = include $file;
-
-            if (!isset($route[self::ROUTE_KEY]))  continue;
-            if (!is_array($route[self::ROUTE_KEY])) continue;
-
-            self::$rules = Arr::merge(self::$rules, $route[self::ROUTE_KEY]);
+            if (!is_array($route)) continue;
+            self::$rules = Arr::merge(self::$rules, self::optimizeRules($route));
         }
     }
 
@@ -36,4 +31,32 @@ class UrlRule {
         return self::$rules;
     }
 
+    private static function optimizeRules(array $rules)
+    {
+        if(empty($rules)) {
+            return [];
+        }
+        $controllerFullMatch = $actionFullMatch = $normalMatch = [];
+        foreach($rules as $key => $value) {
+            $hasRegex = false;
+            $regex = $key;
+            $tree = array_filter(explode('/', $regex));
+            if(empty($tree)) continue;
+            foreach($tree as $leafKey => $leaf) {
+                if('.*' === trim($leaf)) {
+                    if(2 == (int)$leafKey) {
+                        $controllerFullMatch[$key] = $value;
+                    } elseif(3 == (int)$leafKey) {
+                        $actionFullMatch[$key] = $value;
+                    }
+                    $hasRegex = true;
+                    break;
+                }
+            }
+            if(!$hasRegex) {
+                $normalMatch[$key] = $value;
+            }
+        }
+        return array_merge($normalMatch, $actionFullMatch, $controllerFullMatch);
+    }
 }

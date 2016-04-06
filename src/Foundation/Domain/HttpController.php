@@ -49,6 +49,27 @@ class HttpController extends Controller
         return $this->output($content);
     }
 
+    public function jsonOutput($code, $msg = '', array $data = [])
+    {
+        $format = $this->request->wantsJson();
+        $contentArr = [
+            'code' => $code,
+            'msg' => $msg,
+            'data' => $data
+        ];
+        if(in_array($format, ['json', 'jsonp'])) {
+            $content = json_encode($contentArr, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP);
+            if('jsonp' === $format) {
+                $callback = isset($_GET['callback']) ? trim($_GET['callback']) : 'callback';
+                if(!preg_match('/[0-9A-Za-z]+/i',$callback)){
+                    die('are you hacking!');
+                }
+                $content = $callback . '('.$content. ')';
+            }
+        }
+        return $this->output($content);
+    }
+
     public function assign($key, $value)
     {
         $this->viewData[$key] = $value;

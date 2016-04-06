@@ -35,7 +35,6 @@ class Dispatcher {
         $parts = explode('/', $route);
 
         $action = array_pop($parts);
-        $action = $this->parseAction($action);
 
         $parts = array_map('ucfirst', $parts);
         $controller = join('\\', $parts);
@@ -49,21 +48,4 @@ class Dispatcher {
             'format' => $action['format'],
         ];
     }
-
-    private function parseAction($action)
-    {
-        $arr = explode('.', $action);
-        $ret = [
-            'action'    => $arr[0],
-        ];
-
-        if(isset($arr[1])){
-            $ret['format']  = $arr[1];
-        } else {
-            $ret['format']  = 'html';
-        }
-
-        return $ret;
-    }
-
 }
