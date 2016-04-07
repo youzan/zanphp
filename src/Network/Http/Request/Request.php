@@ -347,9 +347,21 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      * @param  string|array|null  $default
      * @return string|array
      */
-    public function query($key = null, $default = null)
+    public function get($key = null, $default = null)
     {
         return $this->retrieveItem('query', $key, $default);
+    }
+
+    /**
+     * Retrieve a post string item from the request.
+     *
+     * @param  string  $key
+     * @param  string|array|null  $default
+     * @return string|array
+     */
+    public function post($key = null, $default = null)
+    {
+        return $this->retrieveItem('request', $key, $default);
     }
 
     /**
