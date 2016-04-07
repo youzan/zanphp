@@ -6,7 +6,6 @@ use Exception;
 use ArrayObject;
 use JsonSerializable;
 use Zan\Framework\Contract\Foundation\Jsonable;
-use swoole_http_response as SwooleHttpResponse;
 
 class Response extends BaseResponse
 {
@@ -103,64 +102,6 @@ class Response extends BaseResponse
     public function withException(Exception $e)
     {
         $this->exception = $e;
-
-        return $this;
-    }
-
-    /**
-     * Sends HTTP headers and content.
-     *
-     * @param SwooleHttpResponse $swooleHttpResponse
-     * @return BaseResponse
-     */
-    public function sendBy(SwooleHttpResponse $swooleHttpResponse)
-    {
-        $this->sendHeaders($swooleHttpResponse);
-        $this->sendContent($swooleHttpResponse);
-    }
-
-    /**
-     * Sends HTTP headers.
-     *
-     * @param SwooleHttpResponse $swooleHttpResponse
-     * @return BaseResponse
-     */
-    public function sendHeaders(SwooleHttpResponse $swooleHttpResponse)
-    {
-        if (!$this->headers->has('Date')) {
-            $this->setDate(\DateTime::createFromFormat('U', time()));
-        }
-
-        // headers
-        foreach ($this->headers->allPreserveCase() as $name => $values) {
-            foreach ($values as $value) {
-                $swooleHttpResponse->header($name, $value);
-            }
-        }
-
-        // status
-        $swooleHttpResponse->status($this->statusCode);
-
-        // status
-        //header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText), true, $this->statusCode);
-
-        // cookies
-        foreach ($this->headers->getCookies() as $cookie) {
-            $swooleHttpResponse->cookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
-        }
-
-        return $this;
-    }
-
-    /**
-     * Sends content for the current web response.
-     *
-     * @param SwooleHttpResponse $swooleHttpResponse
-     * @return BaseResponse
-     */
-    public function sendContent(SwooleHttpResponse $swooleHttpResponse)
-    {
-        $swooleHttpResponse->end($this->content);
 
         return $this;
     }

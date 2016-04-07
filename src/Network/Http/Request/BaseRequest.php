@@ -455,8 +455,8 @@ class BaseRequest
         $dup->method = null;
         $dup->format = null;
 
-        if (!$dup->get('_format') && $this->get('_format')) {
-            $dup->attributes->set('_format', $this->get('_format'));
+        if (!$dup->parameter('_format') && $this->parameter('_format')) {
+            $dup->attributes->set('_format', $this->parameter('_format'));
         }
 
         if (!$dup->getRequestFormat(null)) {
@@ -712,7 +712,7 @@ class BaseRequest
      *
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function parameter($key, $default = null)
     {
         if ($this !== $result = $this->attributes->get($key, $this)) {
             return $result;
