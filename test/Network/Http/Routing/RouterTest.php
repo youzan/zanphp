@@ -11,7 +11,6 @@ use swoole_http_request as SwooleHttpRequest;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Dispatcher;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Foundation\Container\Di;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
@@ -26,8 +25,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
 
         $router->route($request);
 
-        $Dispatcher = new Dispatcher();
-        $response = ( $Dispatcher->dispatch($request, new Context()));
+        var_dump($request->getRequestFormat());exit;
 
 
 
@@ -77,7 +75,7 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         ];
         $swooleHttpRequest->server = [
             'request_method' => 'GET',
-            'request_uri' => '/goods/wxpay/123/xxx',
+            'request_uri' => '/goods/wxpay/123/xxx.json',
             'path_info' => '/market/create/index',
             'request_time' => '1459911416',
             'server_port' => '8000',
