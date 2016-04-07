@@ -27,7 +27,7 @@ class Acl
         $cookie = (yield getCookieHandler());
         $sid = $cookie->get('sid', '');
         if ('' === $sid) {
-            $cookie->set('redirect', $this->request->fullUrl());
+            $cookie->set('redirect', $this->request->getFullUrl());
             yield RedirectResponse::create($this->config['login_url'], 302);
         }
     }
