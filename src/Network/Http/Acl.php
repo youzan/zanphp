@@ -26,10 +26,18 @@ class Acl
     {
         $cookie = (yield getCookieHandler());
         $sid = $cookie->get('sid', '');
+        $userId = $cookie->get('user_id', 0);
         if ('' === $sid) {
             $cookie->set('redirect', $this->request->getFullUrl());
             yield RedirectResponse::create($this->config['login_url'], 302);
+        } else {
+            if (0 === $userId) {
+                $userId = (yield Client::call('account.sso.getAdminIdBySid', ['sid' => $sid]));
+                $cookie->set('user_id', $userId, 0);
+            }
         }
+
+        yield null;
     }
 
 }
