@@ -11,11 +11,9 @@ class TaskTest extends \PHPUnit_Framework_TestCase {
 
     public function testUrlRuleLoad()
     {
-        $rulePath = __DIR__ . '/routing/';
-
+        $rulePath = __DIR__ . '/routing_new/';
         UrlRule::loadRules($rulePath);
         $ruleMap = UrlRule::getRules();
-
         $this->assertEquals(3, count($ruleMap), 'UrlRule::loadRules fail');
     }
 }

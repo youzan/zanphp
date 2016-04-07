@@ -7,19 +7,30 @@ namespace Zan\Framework\Test\Network\Http\Routing;
 
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Http\Routing\UrlRule;
-use Zan\Framework\Test\Network\Http\Request;
+use swoole_http_request as SwooleHttpRequest;
+use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Network\Http\Dispatcher;
+use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Foundation\Container\Di;
 
 class RouterTest extends \PHPUnit_Framework_TestCase {
 
     public function testRouter()
     {
         $defaultRouteConf = include 'route.php';
-        UrlRule::loadRules(__DIR__ . '/routing/');
-
+        UrlRule::loadRules(__DIR__ . '/routing_new/');
         $router  = new Router($defaultRouteConf);
-        $request = new Request();
-        $request->setUrl('http://127.0.0.1:5601');
-        list($route, $params) = $router->route($request);
+
+        $swooleHttpRequest = $this->mockSwooleHttpRequest();
+        $request = Request::createFromSwooleHttpRequest($swooleHttpRequest);
+
+        $router->route($request);
+
+        $Dispatcher = new Dispatcher();
+        $response = ( $Dispatcher->dispatch($request, new Context()));
+
+
+
 
         $this->assertEquals('order/homePage/index', $this->formatRoute($route), 'Routing parse error!');
         $this->assertEquals([], $params, 'Error in routing parameter analysis!');
@@ -50,6 +61,36 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
             $module[$index] = $name;
         }
         return join('\\', $module);
+    }
+
+    private function mockSwooleHttpRequest()
+    {
+        $swooleHttpRequest = new SwooleHttpRequest();
+        $swooleHttpRequest->header = [
+            'host' => '127.0.0.1:8000',
+            'connection' => 'close',
+            'accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'upgrade-insecure-requests' => 1,
+            'user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.110 Safari/537.36',
+            'accept-encoding' => 'gzip, deflate, sdch',
+            'accept-language' => 'zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4',
+        ];
+        $swooleHttpRequest->server = [
+            'request_method' => 'GET',
+            'request_uri' => '/goods/wxpay/123/xxx',
+            'path_info' => '/market/create/index',
+            'request_time' => '1459911416',
+            'server_port' => '8000',
+            'remote_port' => '55105',
+            'remote_addr' => '127.0.0.1',
+            'server_protocol' => 'HTTP/1.0',
+            'server_software' => 'swoole-http-server'
+        ];
+        $swooleHttpRequest->cookie = [
+            'KDTSESSIONID' => '21v241199of5n49s7fm8th7bp0',
+        ];
+
+        return $swooleHttpRequest;
     }
 }
 

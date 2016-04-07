@@ -10,10 +10,10 @@ class UrlRegex {
     public static function formatRules($rules = [])
     {
         if (!$rules) return false;
-
         $regexRules = [];
         foreach ($rules as $regex => $realUrl) {
             $regex = ltrim($regex, '/');
+            $realUrl = isset($realUrl['rewrite']) ? $realUrl['rewrite'] : '';
             if (!$regex || !$realUrl){
                 continue;
             }
@@ -27,8 +27,7 @@ class UrlRegex {
     {
         $regex  = self::parseRegex($regex);
         $regex  = str_replace('/','\/',$regex);
-        $regex  = '/^' . $regex . '/i';
-
+        $regex  = '#^' . $regex . '#i';
         return [
             'regex' => $regex,
             'rule'  => [
@@ -39,27 +38,51 @@ class UrlRegex {
 
     private static function parseRegex($regex)
     {
-        if (false === strpos($regex, ':')){
+        if(false === strpos($regex, ':') and false === strpos($regex, '.*')) {
             return $regex;
         }
-        $pattern    = '/(\/:([^\/]+))/';
-        $replace    = '/?(?<${2}>[^/]*)';
-
+        $pattern = [
+            '/(\/:([^\/]+))/',
+            '/(\/\.\*\/\?)/'
+        ];
+        $replace = [
+            '/?(?<${2}>[^/]*)',
+            '/.*/'
+        ];
         return preg_replace($pattern, $replace, $regex);
     }
 
     public static function decode($url, $rules = [])
     {
-        if (!$rules) return false;
-
+        $return = [
+            'url' => $url,
+            'parameter' => [],
+        ];
+        if (!$rules) return $return;
         foreach ($rules as $regex => $route) {
             if (preg_match($regex, $url, $matching)) {
                 $parameter = self::getParameter($matching);
-                $route['parameter'] = $parameter;
-                return $route;
+                $return = [
+                    'url' => $route['url'],
+                    'parameter' => $parameter
+                ];
+                break;
             }
         }
-        return false;
+        return self::parseDecodeResult($return);
+    }
+
+    private static function parseDecodeResult($result)
+    {
+        if(count($result['parameter']) <= 0 or false === strpos($result['url'], '${')) {
+            return $result;
+        }
+        $tmp = [];
+        foreach($result['parameter'] as $key => $value) {
+            $tmp['${' . $key . '}'] = $value;
+        }
+        $result['url'] = str_replace(array_keys($tmp),array_values($tmp), $result['url']);
+        return $result;
     }
 
     private static function getParameter($matching)
