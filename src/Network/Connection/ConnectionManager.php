@@ -57,6 +57,7 @@ class ConnectionManager
         $connection = $pool->get();
         if($connection){
             yield $connection;
+            return;
         }
         
         yield new FutureConnection($this, $connKey, $timeout);
