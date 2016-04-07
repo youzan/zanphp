@@ -6,7 +6,7 @@
  * Time: 21:14
  */
 
-namespace Zan\Framework\Contract\Database;
+namespace Zan\Framework\Contract\Store\Database;
 
 
 interface ResultFormater
