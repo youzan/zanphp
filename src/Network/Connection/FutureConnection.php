@@ -6,7 +6,7 @@
  * Time: 00:57
  */
 
-namespace Zan\Framework\Network\Connection\Engine;
+namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;

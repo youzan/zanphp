@@ -11,7 +11,7 @@ namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\ConnectionPool;
-use Zan\Framework\Network\Connection\Engine\FutureConnection;
+use Zan\Framework\Network\Connection\FutureConnection;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
