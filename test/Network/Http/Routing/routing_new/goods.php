@@ -7,10 +7,10 @@
  */
 return [
     'goods/:payType/:kdt_id/xxx' => [
-        'rewrite' => 'goods/${payType}/notify/aaaa/bbbb/ccccc/dddd',
+        'rewrite' => 'goods',
         'example' => [
-            'goods/wxpay/xxx' => 'goods/wxpay/notify/aaaa/bbbb/ccccc/dddd',
-            'goods/alipay/xxx' => 'goods/alipay/notify/aaaa/bbbb/ccccc/dddd',
+            'goods/wxpay/xxx' => 'goods/wxpay/index',
+            'goods/alipay/xxx' => 'goods/alipay/index',
         ],
     ],
 ];

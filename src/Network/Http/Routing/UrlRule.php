@@ -38,7 +38,7 @@ class UrlRule {
         }
         $controllerFullMatch = $actionFullMatch = $normalMatch = [];
         foreach($rules as $key => $value) {
-            $hasRegex = false;
+            $hasFullMatch = false;
             $regex = $key;
             $tree = array_filter(explode('/', $regex));
             if(empty($tree)) continue;
@@ -49,11 +49,11 @@ class UrlRule {
                     } elseif(3 == (int)$leafKey) {
                         $actionFullMatch[$key] = $value;
                     }
-                    $hasRegex = true;
+                    $hasFullMatch = true;
                     break;
                 }
             }
-            if(!$hasRegex) {
+            if(!$hasFullMatch) {
                 $normalMatch[$key] = $value;
             }
         }

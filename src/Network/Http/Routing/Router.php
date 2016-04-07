@@ -13,8 +13,6 @@ class Router {
 
     use Singleton;
 
-    const BASIC_LEVEL = 3;
-
     private $config;
     private $url;
     private $route = '';
@@ -28,7 +26,7 @@ class Router {
         if (!$this->config) {
             $this->config = Config::get($this->routeConKey);
         }
-        $this->rules  = UrlRule::getRules();
+        $this->rules = UrlRule::getRules();
     }
 
     private function prepare($url)
@@ -44,7 +42,27 @@ class Router {
     {
         $this->prepare($request->server->get('REQUEST_URI'));
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
+        $this->checkAndRepairRoute();
+        var_dump($this->route);exit;
         $request->setRoute($this->route);
+    }
+
+    private function checkAndRepairRoute()
+    {
+        $path = array_filter(explode($this->separator, $this->route));
+        $pathCount = count($path);
+        switch($pathCount)
+        {
+            case 0:
+                $this->setDefaultRoute();
+                break;
+            case 1:
+                $this->setDefaultControllerAndDefaultAction();
+                break;
+            case 2:
+                $this->setDefaultAction();
+                break;
+        }
     }
 
     private function parseRegexRoute()
@@ -62,6 +80,7 @@ class Router {
         }
         foreach($parameters as $k => $v) {
             $_GET[$k] = $v;
+            $_REQUEST[$k] = $v;
         }
     }
 
@@ -72,7 +91,31 @@ class Router {
 
     private function getDefaultRoute()
     {
-        return $this->config['default'];
+        return $this->config['default_route'];
+    }
+
+    private function setDefaultControllerAndDefaultAction()
+    {
+        $path = array_filter(explode($this->separator, $this->route));
+        array_push($path, $this->getDefaultController(), $this->getDefaultAction());
+        $this->route = join($this->separator, $path);
+    }
+
+    private function getDefaultController()
+    {
+        return $this->config['default_controller'];
+    }
+
+    private function setDefaultAction()
+    {
+        $path = array_filter(explode($this->separator, $this->route));
+        array_push($path, $this->getDefaultAction());
+        $this->route = join($this->separator, $path);
+    }
+
+    private function getDefaultAction()
+    {
+        return $this->config['default_action'];
     }
 
     private function removeIllegalString()

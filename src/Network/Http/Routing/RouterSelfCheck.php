@@ -11,5 +11,13 @@ namespace Zan\Framework\Network\Http\Routing;
 
 class RouterSelfCheck
 {
+    public function __construct()
+    {
 
+    }
+
+    public function check()
+    {
+
+    }
 } 
