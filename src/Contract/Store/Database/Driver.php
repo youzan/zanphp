@@ -6,7 +6,7 @@
  * Time: 20:12
  */
 
-namespace Zan\Framework\Contract\Database;
+namespace Zan\Framework\Contract\Store\Database;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;

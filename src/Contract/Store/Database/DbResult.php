@@ -6,7 +6,7 @@
  * Time: 21:08
  */
 
-namespace Zan\Framework\Contract\Database;
+namespace Zan\Framework\Contract\Store\Database;
 
 interface DbResult
 {

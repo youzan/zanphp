@@ -6,7 +6,7 @@
  * Time: 10:39
  */
 
-namespace Zan\Framework\Contract\Database;
+namespace Zan\Framework\Contract\Store\Database;
 
 
 interface ResultType
