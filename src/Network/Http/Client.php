@@ -55,7 +55,7 @@ class Client implements Async {
 
         $this->bindEvent();
 
-        swoole_async_dns_lookup($this->host, function($host, $ip){
+        swoole_async_dns_lookup($this->host, function($host, $ip) {
             $this->client->connect($ip, $this->port, $this->timeout);
         });
     }
@@ -95,6 +95,82 @@ class Client implements Async {
         return $header;
     }
 
+    public static function parseHeader($header)
+    {
+        $headerLines = explode("\r\n", $header);
+        list($method, $uri, $protocol) = explode(' ', $headerLines[0], 3);
+
+        if (empty($method) or empty($uri) or empty($protocol)) {
+            return false;
+        }
+        unset($headerLines[0]);
+
+        if (is_string($headerLines)) {
+            $headerLines = explode("\r\n", $headerLines);
+        }
+        $header = [];
+        foreach ($headerLines as $line) {
+            $line = trim($line);
+            if (empty($line)) continue;
+            $row = explode(':', $line, 2);
+            $value = isset($row[1]) ? $row[1] : '';
+            $header[trim($row[0])] = trim($value);
+        }
+        return $header;
+    }
+
+    public static function parseBody($header, $body)
+    {
+        $trunkLength = 0;
+
+        if (isset($header['Transfer-Encoding']) and $header['Transfer-Encoding'] == 'chunked') {
+
+            while (true) {
+
+                if ($trunkLength == 0) {
+
+                    if (($len = strstr($body, "\r\n", true)) === false) break;
+                    if (($length = hexdec($len)) == 0) break;
+
+                    $trunkLength = $length;
+                    $body = substr($body, strlen($len) + 2);
+                }
+                else {
+                    if (strlen($body) < $trunkLength) break;
+
+                    $body .= substr($body, 0, $trunkLength);
+                    $body  = substr($body, $trunkLength + 2);
+
+                    $trunkLength = 0;
+                }
+            }
+        }
+        return self::decode($header, $body);
+    }
+
+    public static function decode($header, $data)
+    {
+        $encoding = isset($header['Content-Encoding']) ? $header['Content-Encoding'] : '';
+
+        switch ($encoding)
+        {
+            case 'gzip':
+                $content = gzdecode($data);
+                break;
+            case 'deflate':
+                $content = gzinflate($data);
+                break;
+            case 'compress':
+                $content = gzinflate(substr($data, 2, -4));
+                break;
+            default:
+                $content = $data;
+        }
+        $jsonData = json_decode($content, true);
+
+        return $jsonData ? $jsonData : $content;
+    }
+
     private function bindEvent()
     {
         $this->client->on('connect', [$this, 'onConnect']);
@@ -110,14 +186,12 @@ class Client implements Async {
 
     public function onReceive($cli, $data)
     {
-        //暂时不考虑 Transfer-Encoding:chunked
+        list($header, $body) = explode("\r\n\r\n", $data, 2);
 
-        $responseParts = explode("\r\n\r\n", $data, 2);
+        $header = self::parseHeader($header);
+        $body   = self::parseBody($header, $body);
 
-        $body = end($responseParts);
-        $data = json_decode($body, true);
-
-        call_user_func($this->callback, $data ? $data : $body);
+        call_user_func($this->callback, $body);
     }
 
     public function OnError()

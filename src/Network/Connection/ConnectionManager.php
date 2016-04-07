@@ -12,10 +12,33 @@ namespace Zan\Framework\Network\Connection;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\ConnectionPool;
 use Zan\Framework\Network\Connection\Engine\FutureConnection;
+use Zan\Framework\Network\Connection\Factory\Mysqli;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class ConnectionManager
 {
+
+    use Singleton;
+
     private static $poolMap = [];
+    private static $poolConfig=null;
+    private static $mysqlConfig=null;
+    private static $registry=[];
+
+    public function __construct() {
+        $this->configDemo();
+        $this->mysqlConfig();
+    }
+
+    public function init()
+    {
+        $factory = new Mysqli(self::$mysqlConfig);
+        $connectionPool = new Pool($factory, self::$poolConfig);
+        $key = self::$poolConfig['pool_name'];
+        self::$registry[] = $key;//注册连接池
+        self::$poolMap[$key] = $connectionPool;
+        return $this;
+    }
     
     /**
      * @param string $connKey
@@ -23,7 +46,7 @@ class ConnectionManager
      * @return \Zan\Framework\Contract\Network\Connection 
      * @throws InvalidArgumentException
      */
-    public static function get($connKey, $timeout=0)
+    public function get($connKey, $timeout=0)
     {
         if(!isset(self::$poolMap[$connKey])){
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
@@ -36,7 +59,7 @@ class ConnectionManager
             yield $connection;
         }
         
-        yield new FutureConnection($connKey, $timeout); 
+        yield new FutureConnection($this, $connKey, $timeout);
     }
 
     /**
@@ -46,5 +69,27 @@ class ConnectionManager
     public function addPool($poolKey, ConnectionPool $pool)
     {
         self::$poolMap[$poolKey] = $pool;
+    }
+
+
+    public function configDemo() {
+        self::$poolConfig['host']= '192.168.66.202:3306';
+        self::$poolConfig['user'] = 'test_koudaitong';
+        self::$poolConfig['pool_name'] = 'pifa';
+        self::$poolConfig['maximum-connection-count'] ='100';
+        self::$poolConfig['minimum-connection-count'] = '10';
+        self::$poolConfig['keeping-sleep-time'] = '10';//等待时间
+        self::$poolConfig['maximum-new-connections'] = '5';
+        self::$poolConfig['prototype-count'] = '5';
+        self::$poolConfig['init-connection'] = '10';
+    }
+
+    public function mysqlConfig()
+    {
+        self::$mysqlConfig['host'] = '192.168.66.202';
+        self::$mysqlConfig['user'] = 'test_koudaitong';
+        self::$mysqlConfig['password'] = 'nPMj9WWpZr4zNmjz';
+        self::$mysqlConfig['database'] = 'pf';
+        self::$mysqlConfig['port'] = '3306';
     }
 }

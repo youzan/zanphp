@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Http\Request;
 
-use ArrayAccess;
 use swoole_http_request as SwooleHttpRequest;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Str;
@@ -10,7 +9,7 @@ use Zan\Framework\Contract\Foundation\Arrayable;
 use Zan\Framework\Network\Http\Bag\ParameterBag;
 use Zan\Framework\Contract\Network\Request as RequestContract;
 
-class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestContract
+class Request extends BaseRequest implements Arrayable, RequestContract
 {
     /**
      * The decoded JSON content for the request.
@@ -31,7 +30,6 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      */
     public static function createFromSwooleHttpRequest(SwooleHttpRequest $swooleRequest)
     {
-
         $get = isset($swooleRequest->get) ? $swooleRequest->get : [];
         $post = isset($swooleRequest->post) ? $swooleRequest->post : [];
         $attributes = [];
@@ -62,9 +60,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function root()
+    public function getUrlRoot()
     {
-        return rtrim($this->getSchemeAndHttpHost() . $this->getBaseUrl(), '/');
+        return rtrim($this->getSchemeAndHttpHost().$this->getBaseUrl(), '/');
     }
 
     /**
@@ -72,7 +70,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function url()
+    public function getUrl()
     {
         return rtrim(preg_replace('/\?.*/', '', $this->getUri()), '/');
     }
@@ -82,26 +80,26 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function fullUrl()
+    public function getFullUrl()
     {
         $query = $this->getQueryString();
 
-        $question = $this->getBaseUrl() . $this->getPathInfo() == '/' ? '/?' : '?';
+        $question = $this->getBaseUrl().$this->getPathInfo() == '/' ? '/?' : '?';
 
-        return $query ? $this->url() . $question . $query : $this->url();
+        return $query ? $this->getUrl().$question.$query : $this->getUrl();
     }
 
     /**
      * Get the full URL for the request with the added query string parameters.
      *
-     * @param  array $query
+     * @param  array  $query
      * @return string
      */
-    public function fullUrlWithQuery(array $query)
+    public function getFullUrlWithAddedQuery(array $query)
     {
-        return count($this->query()) > 0
-            ? $this->url() . '/?' . http_build_query(array_merge($this->query(), $query))
-            : $this->fullUrl() . '?' . http_build_query($query);
+        return count($this->get()) > 0
+                        ? $this->getUrl().'/?'.http_build_query(array_merge($this->get(), $query))
+                        : $this->getFullUrl().'?'.http_build_query($query);
     }
 
     /**
@@ -109,7 +107,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function path()
+    public function getPath()
     {
         $pattern = trim($this->getPathInfo(), '/');
 
@@ -121,21 +119,21 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function decodedPath()
+    public function getDecodedPath()
     {
-        return rawurldecode($this->path());
+        return rawurldecode($this->getPath());
     }
 
     /**
      * Get a segment from the URI (1 based index).
      *
-     * @param  int $index
-     * @param  string|null $default
+     * @param  int  $index
+     * @param  string|null  $default
      * @return string|null
      */
-    public function segment($index, $default = null)
+    public function getSegment($index, $default = null)
     {
-        return Arr::get($this->segments(), $index - 1, $default);
+        return Arr::get($this->getSegments(), $index - 1, $default);
     }
 
     /**
@@ -143,9 +141,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return array
      */
-    public function segments()
+    public function getSegments()
     {
-        $segments = explode('/', $this->path());
+        $segments = explode('/', $this->getPath());
 
         return array_values(array_filter($segments, function ($v) {
             return $v != '';
@@ -161,7 +159,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     public function is()
     {
         foreach (func_get_args() as $pattern) {
-            if (Str::is($pattern, urldecode($this->path()))) {
+            if (Str::is($pattern, urldecode($this->getPath()))) {
                 return true;
             }
         }
@@ -175,9 +173,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      * @param  mixed  string
      * @return bool
      */
-    public function fullUrlIs()
+    public function isFullUrlMatch()
     {
-        $url = $this->fullUrl();
+        $url = $this->getFullUrl();
 
         foreach (func_get_args() as $pattern) {
             if (Str::is($pattern, $url)) {
@@ -211,7 +209,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Determine if the request contains a given input item key.
      *
-     * @param  string|array $key
+     * @param  string|array  $key
      * @return bool
      */
     public function exists($key)
@@ -221,7 +219,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
         $input = $this->all();
 
         foreach ($keys as $value) {
-            if (!array_key_exists($value, $input)) {
+            if (! array_key_exists($value, $input)) {
                 return false;
             }
         }
@@ -232,7 +230,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Determine if the request contains a non-empty value for an input item.
      *
-     * @param  string|array $key
+     * @param  string|array  $key
      * @return bool
      */
     public function has($key)
@@ -251,7 +249,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Determine if the given input key is an empty string for "has".
      *
-     * @param  string $key
+     * @param  string  $key
      * @return bool
      */
     protected function isEmptyString($key)
@@ -260,7 +258,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
 
         $boolOrArray = is_bool($value) || is_array($value);
 
-        return !$boolOrArray && trim((string)$value) === '';
+        return ! $boolOrArray && trim((string) $value) === '';
     }
 
     /**
@@ -276,8 +274,8 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Retrieve an input item from the request.
      *
-     * @param  string $key
-     * @param  string|array|null $default
+     * @param  string  $key
+     * @param  string|array|null  $default
      * @return string|array
      */
     public function input($key = null, $default = null)
@@ -290,7 +288,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Get a subset of the items from the input data.
      *
-     * @param  array|mixed $keys
+     * @param  array|mixed  $keys
      * @return array
      */
     public function only($keys)
@@ -311,7 +309,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Get all of the input except for a specified array of items.
      *
-     * @param  array|mixed $keys
+     * @param  array|mixed  $keys
      * @return array
      */
     public function except($keys)
@@ -328,31 +326,43 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Retrieve a query string item from the request.
      *
-     * @param  string $key
-     * @param  string|array|null $default
+     * @param  string  $key
+     * @param  string|array|null  $default
      * @return string|array
      */
-    public function query($key = null, $default = null)
+    public function get($key = null, $default = null)
     {
         return $this->retrieveItem('query', $key, $default);
     }
 
     /**
+     * Retrieve a post string item from the request.
+     *
+     * @param  string  $key
+     * @param  string|array|null  $default
+     * @return string|array
+     */
+    public function post($key = null, $default = null)
+    {
+        return $this->retrieveItem('request', $key, $default);
+    }
+
+    /**
      * Determine if a cookie is set on the request.
      *
-     * @param  string $key
+     * @param  string  $key
      * @return bool
      */
     public function hasCookie($key)
     {
-        return !is_null($this->cookie($key));
+        return ! is_null($this->cookie($key));
     }
 
     /**
      * Retrieve a cookie from the request.
      *
-     * @param  string $key
-     * @param  string|array|null $default
+     * @param  string  $key
+     * @param  string|array|null  $default
      * @return string|array
      */
     public function cookie($key = null, $default = null)
@@ -363,8 +373,8 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Retrieve a header from the request.
      *
-     * @param  string $key
-     * @param  string|array|null $default
+     * @param  string  $key
+     * @param  string|array|null  $default
      * @return string|array
      */
     public function header($key = null, $default = null)
@@ -375,8 +385,8 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Retrieve a server variable from the request.
      *
-     * @param  string $key
-     * @param  string|array|null $default
+     * @param  string  $key
+     * @param  string|array|null  $default
      * @return string|array
      */
     public function server($key = null, $default = null)
@@ -387,9 +397,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Retrieve a parameter item from a given source.
      *
-     * @param  string $source
-     * @param  string $key
-     * @param  string|array|null $default
+     * @param  string  $source
+     * @param  string  $key
+     * @param  string|array|null  $default
      * @return string|array
      */
     protected function retrieveItem($source, $key, $default)
@@ -404,7 +414,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Merge new input into the current request's input array.
      *
-     * @param  array $input
+     * @param  array  $input
      * @return void
      */
     public function merge(array $input)
@@ -415,7 +425,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Replace the input for the current request.
      *
-     * @param  array $input
+     * @param  array  $input
      * @return void
      */
     public function replace(array $input)
@@ -426,14 +436,14 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Get the JSON payload for the request.
      *
-     * @param  string $key
-     * @param  mixed $default
+     * @param  string  $key
+     * @param  mixed   $default
      * @return mixed
      */
     public function json($key = null, $default = null)
     {
-        if (!isset($this->json)) {
-            $this->json = new ParameterBag((array)json_decode($this->getContent(), true));
+        if (! isset($this->json)) {
+            $this->json = new ParameterBag((array) json_decode($this->getContent(), true));
         }
 
         if (is_null($key)) {
@@ -460,8 +470,8 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Determine if the given content types match.
      *
-     * @param  string $actual
-     * @param  string $type
+     * @param  string  $actual
+     * @param  string  $type
      * @return bool
      */
     public static function matchesType($actual, $type)
@@ -472,7 +482,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
 
         $split = explode('/', $actual);
 
-        if (isset($split[1]) && preg_match('/' . $split[0] . '\/.+\+' . $split[1] . '/', $type)) {
+        if (isset($split[1]) && preg_match('/'.$split[0].'\/.+\+'.$split[1].'/', $type)) {
             return true;
         }
 
@@ -504,7 +514,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Determines whether the current requests accepts a given content type.
      *
-     * @param  string|array $contentTypes
+     * @param  string|array  $contentTypes
      * @return bool
      */
     public function accepts($contentTypes)
@@ -515,7 +525,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
             return true;
         }
 
-        $types = (array)$contentTypes;
+        $types = (array) $contentTypes;
 
         foreach ($accepts as $accept) {
             if ($accept === '*/*' || $accept === '*') {
@@ -523,7 +533,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
             }
 
             foreach ($types as $type) {
-                if ($this->matchesType($accept, $type) || $accept === strtok($type, '/') . '/*') {
+                if ($this->matchesType($accept, $type) || $accept === strtok($type, '/').'/*') {
                     return true;
                 }
             }
@@ -535,14 +545,14 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     /**
      * Return the most suitable content type from the given array based on content negotiation.
      *
-     * @param  string|array $contentTypes
+     * @param  string|array  $contentTypes
      * @return string|null
      */
     public function prefers($contentTypes)
     {
         $accepts = $this->getAcceptableContentTypes();
 
-        $contentTypes = (array)$contentTypes;
+        $contentTypes = (array) $contentTypes;
 
         foreach ($accepts as $accept) {
             if (in_array($accept, ['*/*', '*'])) {
@@ -552,11 +562,11 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
             foreach ($contentTypes as $contentType) {
                 $type = $contentType;
 
-                if (!is_null($mimeType = $this->getMimeType($contentType))) {
+                if (! is_null($mimeType = $this->getMimeType($contentType))) {
                     $type = $mimeType;
                 }
 
-                if ($this->matchesType($type, $accept) || $accept === strtok($type, '/') . '/*') {
+                if ($this->matchesType($type, $accept) || $accept === strtok($type, '/').'/*') {
                     return $contentType;
                 }
             }
@@ -584,23 +594,6 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     }
 
     /**
-     * Get the data format expected in the response.
-     *
-     * @param  string $default
-     * @return string
-     */
-    public function format($default = 'html')
-    {
-        foreach ($this->getAcceptableContentTypes() as $type) {
-            if ($format = $this->getFormat($type)) {
-                return $format;
-            }
-        }
-
-        return $default;
-    }
-
-    /**
      * Get the bearer token from the request headers.
      *
      * @return string|null
@@ -612,14 +605,6 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
         if (Str::startsWith($header, 'Bearer ')) {
             return Str::substr($header, 7);
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function duplicate(array $query = null, array $request = null, array $attributes = null, array $cookies = null, array $files = null, array $server = null)
-    {
-        return parent::duplicate($query, $request, $attributes, $cookies, array_filter((array)$files), $server);
     }
 
     public function getRoute()
@@ -642,79 +627,5 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     public function toArray()
     {
         return $this->all();
-    }
-
-    /**
-     * Determine if the given offset exists.
-     *
-     * @param  string $offset
-     * @return bool
-     */
-    public function offsetExists($offset)
-    {
-        return array_key_exists($offset, $this->all());
-    }
-
-    /**
-     * Get the value at the given offset.
-     *
-     * @param  string $offset
-     * @return mixed
-     */
-    public function offsetGet($offset)
-    {
-        return Arr::get($this->all(), $offset);
-    }
-
-    /**
-     * Set the value at the given offset.
-     *
-     * @param  string $offset
-     * @param  mixed $value
-     * @return void
-     */
-    public function offsetSet($offset, $value)
-    {
-        return $this->getInputSource()->set($offset, $value);
-    }
-
-    /**
-     * Remove the value at the given offset.
-     *
-     * @param  string $offset
-     * @return void
-     */
-    public function offsetUnset($offset)
-    {
-        return $this->getInputSource()->remove($offset);
-    }
-
-    /**
-     * Check if an input element is set on the request.
-     *
-     * @param  string $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return !is_null($this->__get($key));
-    }
-
-    /**
-     * Get an input element from the request.
-     *
-     * @param  string $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        $all = $this->all();
-
-        if (array_key_exists($key, $all)) {
-            return $all[$key];
-        } else {
-            //return $this->route($key);
-            return null;
-        }
     }
 }

@@ -606,7 +606,7 @@ class SqlMap
         }
 
         if ('' == $table || !strlen($table)) {
-            throw new MysqlException('Can not get table name');
+            throw new MysqlException("Can't get table name");
         }
         $this->sqlMap['table'] = $table;
         return $this;
