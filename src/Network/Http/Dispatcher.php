@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Network\Http;
 
-
+use RuntimeException;
 use Mockery\CountValidator\Exception;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
@@ -18,13 +18,19 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 class Dispatcher {
     public function dispatch(Request $request, Context $context)
     {
-
         $route = $request->getRoute();
         $route = $this->parseRoute($route);
 
         $controller = $route['controller'];
+        if(!class_exists($controller)) {
+            throw new RuntimeException("controller:{$controller} not found!");
+        }
+
         $controller = new $controller($request, $context);
         $action = $route['action'];
+        if(!is_callable([$controller, $action])) {
+            throw new RuntimeException("action:{$action} is not callable in controller:{$controller}!");
+        }
 
         yield $controller->$action();
     }
@@ -35,7 +41,6 @@ class Dispatcher {
         $parts = explode('/', $route);
 
         $action = array_pop($parts);
-        $action = $this->parseAction($action);
 
         $parts = array_map('ucfirst', $parts);
         $controller = join('\\', $parts);
@@ -45,25 +50,7 @@ class Dispatcher {
 
         return [
             'controller' => $controller,
-            'action' => $action['action'],
-            'format' => $action['format'],
+            'action' => $action
         ];
     }
-
-    private function parseAction($action)
-    {
-        $arr = explode('.', $action);
-        $ret = [
-            'action'    => $arr[0],
-        ];
-
-        if(isset($arr[1])){
-            $ret['format']  = $arr[1];
-        } else {
-            $ret['format']  = 'html';
-        }
-
-        return $ret;
-    }
-
 }
