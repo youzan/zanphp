@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Http\Request;
 
-use ArrayAccess;
 use swoole_http_request as SwooleHttpRequest;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Str;
@@ -10,7 +9,7 @@ use Zan\Framework\Contract\Foundation\Arrayable;
 use Zan\Framework\Network\Http\Bag\ParameterBag;
 use Zan\Framework\Contract\Network\Request as RequestContract;
 
-class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestContract
+class Request extends BaseRequest implements Arrayable, RequestContract
 {
     /**
      * The decoded JSON content for the request.
@@ -33,34 +32,32 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     {
         static::enableHttpMethodParameterOverride();
 
-        $_GET = $_POST = $_COOKIE = $_REQUEST = $_SERVER = [];
+        $_get = $_post = $_cookie = $_server = [];
 
         if (isset($swooleRequest->get)) {
-            $_GET = $swooleRequest->get;
+            $_get = $swooleRequest->get;
         }
 
         if (isset($swooleRequest->post)) {
-            $_POST = $swooleRequest->post;
+            $_post = $swooleRequest->post;
         }
 
         if (isset($swooleRequest->cookie)) {
-            $_COOKIE = $swooleRequest->cookie;
+            $_cookie = $swooleRequest->cookie;
         }
 
-        $_REQUEST = array_merge($_GET, $_POST, $_COOKIE);
-
         if (isset($swooleRequest->server)) {
-            $_SERVER = array_change_key_case($swooleRequest->server, CASE_UPPER);
+            $_server = array_change_key_case($swooleRequest->server, CASE_UPPER);
         }
 
         if (isset($swooleRequest->header)) {
             foreach ($swooleRequest->header as $key => $value) {
                 $newKey = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
-                $_SERVER[$newKey] = $value;
+                $_server[$newKey] = $value;
             }
         }
 
-        $request = new static($_GET, $_POST, [], $_COOKIE, [], $_SERVER);
+        $request = new static($_get, $_post, [], $_cookie, [], $_server);
 
         if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
             && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
@@ -77,7 +74,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function root()
+    public function getUrlRoot()
     {
         return rtrim($this->getSchemeAndHttpHost().$this->getBaseUrl(), '/');
     }
@@ -87,7 +84,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function url()
+    public function getUrl()
     {
         return rtrim(preg_replace('/\?.*/', '', $this->getUri()), '/');
     }
@@ -97,13 +94,13 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function fullUrl()
+    public function getFullUrl()
     {
         $query = $this->getQueryString();
 
         $question = $this->getBaseUrl().$this->getPathInfo() == '/' ? '/?' : '?';
 
-        return $query ? $this->url().$question.$query : $this->url();
+        return $query ? $this->getUrl().$question.$query : $this->getUrl();
     }
 
     /**
@@ -112,11 +109,11 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      * @param  array  $query
      * @return string
      */
-    public function fullUrlWithQuery(array $query)
+    public function getFullUrlWithAddedQuery(array $query)
     {
-        return count($this->query()) > 0
-                        ? $this->url().'/?'.http_build_query(array_merge($this->query(), $query))
-                        : $this->fullUrl().'?'.http_build_query($query);
+        return count($this->get()) > 0
+                        ? $this->getUrl().'/?'.http_build_query(array_merge($this->get(), $query))
+                        : $this->getFullUrl().'?'.http_build_query($query);
     }
 
     /**
@@ -124,7 +121,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function path()
+    public function getPath()
     {
         $pattern = trim($this->getPathInfo(), '/');
 
@@ -136,9 +133,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return string
      */
-    public function decodedPath()
+    public function getDecodedPath()
     {
-        return rawurldecode($this->path());
+        return rawurldecode($this->getPath());
     }
 
     /**
@@ -148,9 +145,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      * @param  string|null  $default
      * @return string|null
      */
-    public function segment($index, $default = null)
+    public function getSegment($index, $default = null)
     {
-        return Arr::get($this->segments(), $index - 1, $default);
+        return Arr::get($this->getSegments(), $index - 1, $default);
     }
 
     /**
@@ -158,9 +155,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      *
      * @return array
      */
-    public function segments()
+    public function getSegments()
     {
-        $segments = explode('/', $this->path());
+        $segments = explode('/', $this->getPath());
 
         return array_values(array_filter($segments, function ($v) {
             return $v != '';
@@ -176,7 +173,7 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     public function is()
     {
         foreach (func_get_args() as $pattern) {
-            if (Str::is($pattern, urldecode($this->path()))) {
+            if (Str::is($pattern, urldecode($this->getPath()))) {
                 return true;
             }
         }
@@ -190,9 +187,9 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
      * @param  mixed  string
      * @return bool
      */
-    public function fullUrlIs()
+    public function isFullUrlMatch()
     {
-        $url = $this->fullUrl();
+        $url = $this->getFullUrl();
 
         foreach (func_get_args() as $pattern) {
             if (Str::is($pattern, $url)) {
@@ -611,23 +608,6 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     }
 
     /**
-     * Get the data format expected in the response.
-     *
-     * @param  string  $default
-     * @return string
-     */
-    public function format($default = 'html')
-    {
-        foreach ($this->getAcceptableContentTypes() as $type) {
-            if ($format = $this->getFormat($type)) {
-                return $format;
-            }
-        }
-
-        return $default;
-    }
-
-    /**
      * Get the bearer token from the request headers.
      *
      * @return string|null
@@ -639,14 +619,6 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
         if (Str::startsWith($header, 'Bearer ')) {
             return Str::substr($header, 7);
         }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function duplicate(array $query = null, array $request = null, array $attributes = null, array $cookies = null, array $files = null, array $server = null)
-    {
-        return parent::duplicate($query, $request, $attributes, $cookies, array_filter((array) $files), $server);
     }
 
     public function getRoute()
@@ -669,79 +641,5 @@ class Request extends BaseRequest implements Arrayable, ArrayAccess, RequestCont
     public function toArray()
     {
         return $this->all();
-    }
-
-    /**
-     * Determine if the given offset exists.
-     *
-     * @param  string  $offset
-     * @return bool
-     */
-    public function offsetExists($offset)
-    {
-        return array_key_exists($offset, $this->all());
-    }
-
-    /**
-     * Get the value at the given offset.
-     *
-     * @param  string  $offset
-     * @return mixed
-     */
-    public function offsetGet($offset)
-    {
-        return Arr::get($this->all(), $offset);
-    }
-
-    /**
-     * Set the value at the given offset.
-     *
-     * @param  string  $offset
-     * @param  mixed  $value
-     * @return void
-     */
-    public function offsetSet($offset, $value)
-    {
-        return $this->getInputSource()->set($offset, $value);
-    }
-
-    /**
-     * Remove the value at the given offset.
-     *
-     * @param  string  $offset
-     * @return void
-     */
-    public function offsetUnset($offset)
-    {
-        return $this->getInputSource()->remove($offset);
-    }
-
-    /**
-     * Check if an input element is set on the request.
-     *
-     * @param  string  $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return ! is_null($this->__get($key));
-    }
-
-    /**
-     * Get an input element from the request.
-     *
-     * @param  string  $key
-     * @return mixed
-     */
-    public function __get($key)
-    {
-        $all = $this->all();
-
-        if (array_key_exists($key, $all)) {
-            return $all[$key];
-        } else {
-            //return $this->route($key);
-            return null;
-        }
     }
 }
