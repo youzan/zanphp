@@ -166,7 +166,7 @@ class Client implements Async {
             default:
                 $content = $data;
         }
-        $jsonData = json_decode($data, true);
+        $jsonData = json_decode($content, true);
 
         return $jsonData ? $jsonData : $content;
     }
