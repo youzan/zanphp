@@ -16,6 +16,7 @@ class Router {
     private $config;
     private $url;
     private $route = '';
+    private $format = '';
     private $rules = [];
     private $routeConKey = 'route';
     private $separator = '/';
@@ -40,15 +41,27 @@ class Router {
 
     public function route(Request $request)
     {
-        $this->prepare($request->server->get('REQUEST_URI'));
+        $requestUri = $request->server->get('REQUEST_URI');
+        $this->prepare($requestUri);
+        $this->parseRequestFormat($requestUri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
-        $this->checkAndRepairRoute();
+        $this->repairRoute();
         $this->route = explode('.', $this->route);
         $this->route = $this->route[0];
         $request->setRoute($this->route);
+        $request->setRequestFormat($this->format);
     }
 
-    private function checkAndRepairRoute()
+    private function parseRequestFormat($requestUri)
+    {
+        if(false === strpos($requestUri, '.')) {
+            return $this->setDefaultFormat();
+        }
+        $explodeArr = explode('.', $requestUri);
+        $this->format = in_array($explodeArr[1], $this->config['format_whitelist']) ? trim($explodeArr[1]) : $this->getDefaultFormat();
+    }
+
+    private function repairRoute()
     {
         $path = array_filter(explode($this->separator, $this->route));
         $pathCount = count($path);
@@ -117,6 +130,16 @@ class Router {
     private function getDefaultAction()
     {
         return $this->config['default_action'];
+    }
+
+    private function setDefaultFormat()
+    {
+        $this->format = $this->getDefaultFormat();
+    }
+
+    private function getDefaultFormat()
+    {
+        return $this->config['default_format'];
     }
 
     private function removeIllegalString()
