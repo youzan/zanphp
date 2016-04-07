@@ -8,14 +8,14 @@
 namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Network\Common\Connection;
+use Zan\Framework\Network\Connection\Driver\Mysqli;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 
 class QueryResult implements Async
 {
     /**
-     * @var Connection
+     * @var Mysqli
      */
     private $connection;
 
@@ -38,13 +38,13 @@ class QueryResult implements Async
     public function execute(callable $callback)
     {
         $this->callback = $callback;
-        $dbSock = swoole_get_mysqli_sock($this->connection->getConnection());
+        $dbSock = swoole_get_mysqli_sock($this->connection->getSocket());
         swoole_event_add($dbSock, [$this, 'onQueryReady']);
     }
 
     public function onQueryReady()
     {
-        $dbSock = swoole_get_mysqli_sock($this->connection->getConnection());
+        $dbSock = swoole_get_mysqli_sock($this->connection->getSocket());
         swoole_event_del($dbSock);
         if (null === $this->sqlMap) {
             return false;
@@ -69,7 +69,7 @@ class QueryResult implements Async
 
     private function select()
     {
-        if ($result = $this->connection->getConnection()->reap_async_query()) {
+        if ($result = $this->connection->getSocket()->reap_async_query()) {
             $return = [];
             while ($data = $result->fetch_assoc()) {
                 $return[] = $data;
@@ -88,18 +88,18 @@ class QueryResult implements Async
             }
             return $return;
         } else {
-            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
         }
     }
 
     private function insert()
     {
-        $result = $this->connection->getConnection()->reap_async_query();
+        $result = $this->connection->getSocket()->reap_async_query();
         if (!$result) {
-            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_INSERT) {
-            return $this->connection->getConnection()->insert_id;
+            return $this->connection->getSocket()->insert_id;
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_BATCH) {
             return $result;
@@ -108,9 +108,9 @@ class QueryResult implements Async
 
     private function update()
     {
-        $result = $this->connection->getConnection()->reap_async_query();
+        $result = $this->connection->getSocket()->reap_async_query();
         if (!$result) {
-            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_UPDATE) {
             return $result ? true : false;
@@ -120,9 +120,9 @@ class QueryResult implements Async
 
     private function delete()
     {
-        $result = $this->connection->getConnection()->reap_async_query();
+        $result = $this->connection->getSocket()->reap_async_query();
         if (!$result) {
-            throw new MysqlException($this->connection->getConnection()->error, $this->connection->getConnection()->errno);
+            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_DELETE) {
             return $result ? true : false;
