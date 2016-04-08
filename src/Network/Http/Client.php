@@ -138,8 +138,11 @@ class Client implements Async {
                 else {
                     if (strlen($body) < $trunkLength) break;
 
-                    $body .= substr($body, 0, $trunkLength);
-                    $body  = substr($body, $trunkLength + 2);
+                    $body  = trim($body);
+                    $body  = rtrim($body, '0');
+                    $body  = substr($body, 0, $trunkLength);
+
+                    //$body  = substr($body, $trunkLength + 2);
 
                     $trunkLength = 0;
                 }
