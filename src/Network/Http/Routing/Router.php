@@ -47,8 +47,6 @@ class Router {
         $this->parseRequestFormat($requestUri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
         $this->repairRoute();
-        $this->route = explode('.', $this->route);
-        $this->route = $this->route[0];
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
         $this->setParameters($this->parameters);

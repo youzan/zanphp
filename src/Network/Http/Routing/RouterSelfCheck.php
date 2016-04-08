@@ -16,36 +16,33 @@ use Zan\Framework\Network\Http\Request\Request;
 class RouterSelfCheck
 {
     public $urlRulesPath = '';
-    public $defaultRouteConfPath = '';
     public $checkResult;
 
     const CHECK_SUCCESS = 'success';
     const CHECK_FAILED = 'failed';
+    const OUTPUT_PREFIX = '【RouteCheck】';
 
-    public function __construct($urlRulesPath, $defaultRouteConfPath)
+    public function __construct($urlRulesPath)
     {
         $this->urlRulesPath = $urlRulesPath;
-        $this->defaultRouteConfPath = $defaultRouteConfPath;
         $this->checkResult = self::CHECK_SUCCESS;
     }
 
     public function check()
     {
-        $defaultRouteConf = include $this->defaultRouteConfPath;
-        $router = new Router($defaultRouteConf);
-
-        UrlRule::loadRules($this->urlRulesFilePath);
-
+        UrlRule::loadRules($this->urlRulesPath);
         $urlRules = UrlRule::getRules();
         if(empty($urlRules)) {
             echo 'no rules need to check' . PHP_EOL;
         }
 
+        $router = new Router();
         $swooleHttpRequest = new SwooleHttpRequest();
         foreach($urlRules as $rule) {
             if(!isset($rule['unit_test']) or empty($rule['unit_test'])) {
                 $this->checkResult = self::CHECK_FAILED;
-                echo "rule : {$rule['regex']} check failed, reason : no unit_test" . PHP_EOL;
+                $msg = "rule : {$rule['regex']} check failed, reason : no unit_test";
+                $this->output($msg);
                 break;
             }
             foreach($rule['unit_test'] as $testCase) {
@@ -55,22 +52,32 @@ class RouterSelfCheck
                 $request = Request::createFromSwooleHttpRequest($swooleHttpRequest);
                 $router->route($request);
 
-                if($request->getRoute() !== $testCase['route']) {
+                if($request->getRoute() != $testCase['route']) {
                     $this->checkResult = self::CHECK_FAILED;
-                    echo "rule : {$rule['regex']}, testcase : {$testCase['route']} check failed, reason : route pase faild" . PHP_EOL;
+                    $msg = "rule : {$rule['regex']}, testcase : {$testCase['route']} check failed, reason : route parse failed";
+                    $this->output($msg);
                     break 2;
                 }
-                if($router->getParameters() !== $testCase['parameters']) {
+                if($router->getParameters() != $testCase['parameters']) {
                     $this->checkResult = self::CHECK_FAILED;
-                    echo "rule : {$rule['regex']} , testcase : {$testCase['route']} check failed, reason : parameters pase faild" . PHP_EOL;
+                    $msg = "rule : {$rule['regex']} , testcase : {$testCase['route']} check failed, reason : parameters parse failed";
+                    $this->output($msg);
                 }
             }
         }
 
         if(self::CHECK_FAILED === $this->checkResult) {
-            echo "route self check failed!";exit;
+            $msg = 'route self check failed!';
+            $this->output($msg);
+            exit;
         }
 
-        echo "route self check success!";
+        $msg = "route self check success!";
+        $this->output($msg);
+    }
+
+    protected function output($msg)
+    {
+        echo self::OUTPUT_PREFIX . $msg . PHP_EOL;
     }
 }
