@@ -21,13 +21,13 @@ class Dispatcher {
 
         $controller = $route['controller'];
         if(!class_exists($controller)) {
-            throw new RuntimeException("controller:{$controller} not found!");
+            throw new RuntimeException("controller:{$controller} not found");
         }
 
         $controller = new $controller($request, $context);
         $action = $route['action'];
         if(!is_callable([$controller, $action])) {
-            throw new RuntimeException("action:{$action} is not callable in controller:{$controller}!");
+            throw new RuntimeException("action:{$action} is not callable in controller:" . get_class($controller));
         }
 
         yield $controller->$action();
