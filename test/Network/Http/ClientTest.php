@@ -93,6 +93,9 @@ class ClientTest extends TaskTest {
 
         $result = (yield Client::call('account.team.getTeamByIds',$params));
 
+
+        //$result = (yield Client::call('account.team.getTeamInfo',['kdt_id'=>13397]));
+
         var_dump($result);exit;
 
         $this->assertEquals(3, count($result), 'fail');
