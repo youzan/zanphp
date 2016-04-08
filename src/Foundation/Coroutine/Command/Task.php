@@ -110,7 +110,7 @@ function getCookieHandler()
     });
 }
 
-function getCookie($key, $default = null)
+function cookieGet($key, $default = null)
 {
     return new SysCall(function (Task $task) use ($key, $default) {
         $cookies = $this->request->cookies;
@@ -121,7 +121,7 @@ function getCookie($key, $default = null)
     });
 }
 
-function setCookie($key, $value = null, $expire, $path, $domain, $secure, $httpOnly)
+function cookieSet($key, $value = null, $expire, $path, $domain, $secure, $httpOnly)
 {
     $args = func_get_args();
     return new SysCall(function(Task $task) use ($args){
@@ -135,7 +135,6 @@ function setCookie($key, $value = null, $expire, $path, $domain, $secure, $httpO
         return Signal::TASK_CONTINUE;
     });
 }
-
 
 
 
