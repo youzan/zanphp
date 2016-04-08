@@ -7,8 +7,8 @@
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
-use Zan\Framework\Network\Common\Connection;
-use Zan\Framework\Network\Common\ConnectionManager;
+use Zan\Framework\Network\Connection\ConnectionManager;
+use Zan\Framework\Network\Connection\Driver\Mysqli;
 use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
@@ -16,7 +16,7 @@ use Zan\Framework\Store\Database\Mysql\Table;
 class QueryExecutor
 {
     /**
-     * @var Connection
+     * @var Mysqli
      */
     private $connection;
 
@@ -60,7 +60,7 @@ class QueryExecutor
 
     private function onQuery()
     {
-        $connection = $this->connection->getConnection();
+        $connection = $this->connection->getSocket();
 //        $this->sql = $connection->real_escape_string($this->sql);
         $result = $connection->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
