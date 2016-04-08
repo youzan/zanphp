@@ -59,6 +59,7 @@ class Router {
         }
         $explodeArr = explode('.', $requestUri);
         $this->format = in_array($explodeArr[1], $this->config['format_whitelist']) ? trim($explodeArr[1]) : $this->getDefaultFormat();
+        $this->url = $explodeArr[0];
     }
 
     private function repairRoute()
