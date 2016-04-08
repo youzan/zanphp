@@ -9,16 +9,24 @@ use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Http\Routing\UrlRule;
 use swoole_http_request as SwooleHttpRequest;
 use Zan\Framework\Network\Http\Request\Request;
-use Zan\Framework\Network\Http\Dispatcher;
-use Zan\Framework\Utilities\DesignPattern\Context;
 
-class RouterTest extends \PHPUnit_Framework_TestCase {
+class RouterTest extends \TestCase
+{
+    public $urlRulesFilePath = '';
+    public $defaultRouteConfPath = '';
+
+    public function setUp()
+    {
+        $this->urlRulesFilePath = __DIR__ . '/routing_new/';
+        $this->defaultRouteConfPath = 'route.php';
+    }
 
     public function testRouter()
     {
-        $defaultRouteConf = include 'route.php';
-        UrlRule::loadRules(__DIR__ . '/routing_new/');
-        $router  = new Router($defaultRouteConf);
+        $defaultRouteConf = include $this->defaultRouteConfPath;
+        $router = new Router($defaultRouteConf);
+
+        UrlRule::loadRules($this->urlRulesFilePath);
 
         $swooleHttpRequest = $this->mockSwooleHttpRequest();
         $request = Request::createFromSwooleHttpRequest($swooleHttpRequest);
@@ -87,7 +95,6 @@ class RouterTest extends \PHPUnit_Framework_TestCase {
         $swooleHttpRequest->cookie = [
             'KDTSESSIONID' => '21v241199of5n49s7fm8th7bp0',
         ];
-
         return $swooleHttpRequest;
     }
 }
