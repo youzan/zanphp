@@ -42,7 +42,7 @@ class RunMode {
         }
 
         if (!isset(self::$modeMap[$mode])) {
-            throw new InvalidArgumentException('invlid runMode from cli');
+            throw new InvalidArgumentException('invalid runMode from cli');
         }
         self::$cliInput = $mode;
     }
