@@ -11,12 +11,8 @@ namespace Zan\Framework\Test\Foundation\Coroutine\Task;
 class Error extends Job {
     public function run() {
         try {
-
-            $a = (yield 1);
-            throw new ErrorException('ErrorException Msg',404);
-
-            //$work = (yield $this->work());
-            //$this->context->set('work_response', $work);
+            $work = (yield $this->work());
+            $this->context->set('work_response', $work);
         } catch (\Exception $e) {
             $this->context->set('exception_code', $e->getCode());
             $this->context->set('exception_msg', $e->getMessage());

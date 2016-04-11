@@ -101,6 +101,7 @@ class RouterSelfCheck
 
     protected function output($msg)
     {
+        //TODO: throw Exception
         echo self::OUTPUT_PREFIX . $msg . PHP_EOL;
     }
 }

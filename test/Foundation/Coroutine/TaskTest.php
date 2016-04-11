@@ -8,13 +8,14 @@
 namespace Zan\Framework\Test\Foundation\Coroutine;
 
 use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Foundation\Test\UnitTest;
 use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
+use Zan\Framework\Test\Foundation\Coroutine\Task\ErrorException;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Steps;
 use Zan\Framework\Test\Foundation\Coroutine\Task\YieldValues;
+use Zan\Framework\Test\Foundation\Coroutine\Task\Response;
 
 class TaskTest extends \TestCase {
     public function setUp() {
@@ -95,7 +96,7 @@ class TaskTest extends \TestCase {
         $this->assertEquals('call', $context->get('call()'), 'async job get wrong context value');
 
         $this->assertArrayHasKey('response',$result, 'async job failed to set context');
-        $this->assertInstanceOf('Zan\Framework\Network\Contract\Response',$context->get('response'),'async job get response fail');
+        $this->assertInstanceOf(Response::class,$context->get('response'),'async job get response fail');
 
         $response = $context->get('response');
         $responseData = $response->getData();
@@ -120,15 +121,14 @@ class TaskTest extends \TestCase {
 
         $job = new Error($context);
         $coroutine = $job->run();
-
+        
         $task = new Task($coroutine);
         $task->run();
-
+    
         $result = $context->show();
 
-
-        //$this->assertArrayHasKey('step1_response',$result, 'exception job failed to set context');
-        //$this->assertEquals('step1', $context->get('step1_response'), 'exception job get wrong context value');
+        $this->assertArrayHasKey('step1_response',$result, 'exception job failed to set context');
+        $this->assertEquals('step1', $context->get('step1_response'), 'exception job get wrong context value');
 
         $this->assertArrayHasKey('exception_code',$result, 'exception job failed to set context');
         $this->assertEquals(404, $context->get('exception_code'), 'exception job get wrong context value');
