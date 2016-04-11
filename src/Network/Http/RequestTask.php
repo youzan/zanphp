@@ -41,20 +41,20 @@ class RequestTask
 
     public function run()
     {
-//        $middlewareManager = MiddlewareManager::getInstance();
-//
-//        $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
-//        if(null !== $response){
-//            yield $response->sendBy($this->swooleResponse);
-//            return;
-//        }
-
-        $acl = new Acl($this->request);
-        $result = (yield $acl->auth());
-        if ($result !== null) {
-            yield $result->sendBy($this->swooleResponse);
+        $middlewareManager = MiddlewareManager::getInstance();
+        $middlewareManager->loadConfig();
+        $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
+        if(null !== $response){
+            yield $response->sendBy($this->swooleResponse);
             return;
         }
+
+//        $acl = new Acl($this->request);
+//        $result = (yield $acl->auth());
+//        if ($result !== null) {
+//            yield $result->sendBy($this->swooleResponse);
+//            return;
+//        }
 
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
@@ -68,6 +68,4 @@ class RequestTask
 
         //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
     }
-
-
 }
