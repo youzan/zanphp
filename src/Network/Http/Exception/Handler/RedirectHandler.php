@@ -16,7 +16,7 @@ class RedirectHandler implements ExceptionHandler
 {
     public function handle(\Exception $e)
     {
-        if(!isset($e->redirectUrl) && !is_a(RedirectException::class)){
+        if(!isset($e->redirectUrl) && !is_a($e, RedirectException::class)){
             return null;
         }
         

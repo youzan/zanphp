@@ -18,10 +18,11 @@ interface ExceptionHandler
      *  * \Zan\Framework\Foundation\Exception\ZanException
      *      * \Zan\Framework\Foundation\Exception\SystemException
      *      * \Zan\Framework\Foundation\Exception\BusinessException
-     *      * 其它ZanException
-     *  * 其它Exception
+     *      * OtherZanExceptions
+     *  * OtherExceptions
      *
      * @return mixed
+     *  * bool
      */
     public function handle(\Exception $e);
 }

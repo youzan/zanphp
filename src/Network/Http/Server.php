@@ -72,7 +72,11 @@ class Server implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
-        (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
+        try{
+            (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
+        }catch(\Exception $e){
+            RequestExceptionHandlerChain::getInstance()->handle($e);
+        }
     }
 
     private function routerSelfCheck()

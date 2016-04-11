@@ -11,5 +11,4 @@ namespace Zan\Framework\Foundation\Exception;
 
 class BusinessException extends ZanException
 {
-
 }
