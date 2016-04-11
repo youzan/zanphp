@@ -14,7 +14,7 @@ class UrlRule {
 
     public static function loadRules($routingPath)
     {
-        $routeFiles = Dir::glob($routingPath, '*.php');
+        $routeFiles = Dir::glob($routingPath, '*.routing.php');
 
         if (!$routeFiles) return false;
 

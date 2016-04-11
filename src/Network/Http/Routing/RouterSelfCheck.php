@@ -12,40 +12,45 @@ use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Http\Routing\UrlRule;
 use swoole_http_request as SwooleHttpRequest;
 use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Utilities\Types\Arr;
+use Zan\Framework\Utilities\Types\Dir;
 
 class RouterSelfCheck
 {
     public $urlRulesPath = '';
+    public $checkListPath = '';
+    public $checkList = [];
+    public $urlRules = [];
     public $checkResult;
 
     const CHECK_SUCCESS = 'success';
     const CHECK_FAILED = 'failed';
     const OUTPUT_PREFIX = '【RouteCheck】';
 
-    public function __construct($urlRulesPath)
+    public function __construct($urlRulesPath, $checkListPath)
     {
         $this->urlRulesPath = $urlRulesPath;
+        $this->checkListPath = $checkListPath;
         $this->checkResult = self::CHECK_SUCCESS;
     }
 
     public function check()
     {
-        UrlRule::loadRules($this->urlRulesPath);
-        $urlRules = UrlRule::getRules();
-        if(empty($urlRules)) {
+        $this->loadUrlRules();
+        if(empty($this->urlRules)) {
             echo 'no rules need to check' . PHP_EOL;
         }
-
+        $this->loadCheckList();
         $router = new Router();
         $swooleHttpRequest = new SwooleHttpRequest();
-        foreach($urlRules as $rule) {
-            if(!isset($rule['unit_test']) or empty($rule['unit_test'])) {
+        foreach($this->urlRules as $rule) {
+            if(!isset($this->checkList[$rule['regex']]) or empty($this->checkList[$rule['regex']])) {
                 $this->checkResult = self::CHECK_FAILED;
                 $msg = "rule : {$rule['regex']} check failed, reason : no unit_test";
                 $this->output($msg);
                 break;
             }
-            foreach($rule['unit_test'] as $testCase) {
+            foreach($this->checkList[$rule['regex']] as $testCase) {
                 $swooleHttpRequest->server = [
                     'request_uri' => $testCase['request_uri'],
                 ];
@@ -74,6 +79,24 @@ class RouterSelfCheck
 
         $msg = "route self check success!";
         $this->output($msg);
+    }
+
+    private function loadCheckList()
+    {
+        $checkListFiles = Dir::glob($this->checkListPath, '*.check.php');
+        if (!$checkListFiles) return false;
+        foreach ($checkListFiles as $file)
+        {
+            $checkList = include $file;
+            if (!is_array($checkList)) continue;
+            $this->checkList = Arr::merge($this->checkList, $checkList);
+        }
+    }
+
+    private function loadUrlRules()
+    {
+        UrlRule::loadRules($this->urlRulesPath);
+        $this->urlRules = UrlRule::getRules();
     }
 
     protected function output($msg)
