@@ -6,6 +6,8 @@ use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Server as ServerContract;
+use Zan\Framework\Network\Http\Routing\RouterSelfCheck;
+use Zan\Framework\Foundation\Application;
 
 class Server implements ServerContract
 {
@@ -45,7 +47,7 @@ class Server implements ServerContract
 
     public function onStart($swooleServer)
     {
-
+        $this->routerSelfCheck();
     }
 
     public function onShutdown($swooleServer)
@@ -71,5 +73,13 @@ class Server implements ServerContract
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
         (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
+    }
+
+    private function routerSelfCheck()
+    {
+        $basePath = Application::getInstance()->getBasePath();
+        $urlRulesPath = $checkListPath = $basePath . '/init/routing/';
+        $routerSelfCheck = new RouterSelfCheck($urlRulesPath, $checkListPath);
+        $routerSelfCheck->check();
     }
 }

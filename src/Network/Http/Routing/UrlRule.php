@@ -14,7 +14,7 @@ class UrlRule {
 
     public static function loadRules($routingPath)
     {
-        $routeFiles = Dir::glob($routingPath, '*.php');
+        $routeFiles = Dir::glob($routingPath, '*.routing.php');
 
         if (!$routeFiles) return false;
 
@@ -22,41 +22,12 @@ class UrlRule {
         {
             $route = include $file;
             if (!is_array($route)) continue;
-            self::$rules = Arr::merge(self::$rules, self::optimizeRules($route));
+            self::$rules = Arr::merge(self::$rules, $route);
         }
     }
 
     public static function getRules()
     {
         return self::$rules;
-    }
-
-    private static function optimizeRules(array $rules)
-    {
-        if(empty($rules)) {
-            return [];
-        }
-        $controllerFullMatch = $actionFullMatch = $normalMatch = [];
-        foreach($rules as $key => $value) {
-            $hasFullMatch = false;
-            $regex = $key;
-            $tree = array_filter(explode('/', $regex));
-            if(empty($tree)) continue;
-            foreach($tree as $leafKey => $leaf) {
-                if('.*' === trim($leaf)) {
-                    if(2 == (int)$leafKey) {
-                        $controllerFullMatch[$key] = $value;
-                    } elseif(3 == (int)$leafKey) {
-                        $actionFullMatch[$key] = $value;
-                    }
-                    $hasFullMatch = true;
-                    break;
-                }
-            }
-            if(!$hasFullMatch) {
-                $normalMatch[$key] = $value;
-            }
-        }
-        return array_merge($normalMatch, $actionFullMatch, $controllerFullMatch);
     }
 }

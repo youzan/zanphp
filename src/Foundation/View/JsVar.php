@@ -17,6 +17,7 @@ class JsVar
     private $_env = [];
     private $_business = [];
     private $_share = [];
+    private $_domain = [];
 
     public function setSession($key, $value)
     {
@@ -48,15 +49,21 @@ class JsVar
         $this->_share[$key] = $value;
     }
 
+    public function setDomain(array $domainList)
+    {
+        $this->_domain = $domainList;
+    }
+
     public function get()
     {
         return [
-            '_session' => $this->_session,
-            '_config' => $this->_config,
-            '_query' => $this->_query,
-            '_env' => $this->_env,
-            '_business' => $this->_business,
-            '_share' => $this->_share
+            'session' => $this->_session,
+            'config' => $this->_config,
+            'query' => $this->_query,
+            'env' => $this->_env,
+            'business' => $this->_business,
+            'share' => $this->_share,
+            'url' => $this->_domain,
         ];
     }
 } 

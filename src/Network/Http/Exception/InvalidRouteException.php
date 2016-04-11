@@ -10,6 +10,6 @@ namespace Zan\Framework\Network\Http\Exception;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class InvalidRoute extends ZanException {
+class InvalidRouteException extends ZanException {
 
 }
