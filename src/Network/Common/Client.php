@@ -4,18 +4,31 @@ namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Network\Http\Client\HttpClient;
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\Config;
 
 class Client implements Async
 {
+    const JAVA_TYPE = 'java';
+    const PHP_TYPE = 'php';
+
     /** @var  HttpClient */
     private $httpClient;
 
+    /** @var  string */
+    private $type;
+
+    private function __construct($host, $port, $type)
+    {
+        $this->httpClient = new HttpClient($host, $port);
+        $this->type = $type;
+    }
+
     public static function call($api, $parameter = [], $method = 'POST')
     {
-        $apiConfig = ClientRouter::lookup($api);
+        $apiConfig = self::getApiConfig($api);
 
-        $client = new self($apiConfig['host'], $apiConfig['port']);
-        $client->setApi($api);
+        $client = new self($apiConfig['host'], $apiConfig['port'], $apiConfig['type']);
+        $client->setUri($api);
         $client->setMethod($method);
         $client->setTimeout($apiConfig['timeout']);
         $client->setParams($parameter);
@@ -23,12 +36,7 @@ class Client implements Async
         yield $client;
     }
 
-    private function __construct($host, $port)
-    {
-        $this->httpClient = new HttpClient($host, $port);
-    }
-
-    private function setApi($api)
+    private function setUri($api)
     {
         if (false != strpos($api, '.')) {
              $this->httpClient->setUri('/' . str_replace('.', '/', $api));
@@ -47,12 +55,37 @@ class Client implements Async
 
     private function setParams($params)
     {
-        $params['debug'] = 'json';
+        if ($this->type == self::PHP_TYPE) {
+            $params['debug'] = 'json';
+        }
+
         $this->httpClient->setParams($params);
     }
 
-    public function execute(Callable $callback)
+    public function execute(callable $callback)
     {
-        $this->httpClient->setCallback($callback)->handle();
+        $this->httpClient->setCallback($this->getCallback($callback))->handle();
+    }
+
+    private function getCallback(callable $callback)
+    {
+        return function($response) use ($callback) {
+            $data = isset($response['data']) ? $response['data'] : $response;
+            call_user_func($callback, $data);
+        };
+    }
+
+    private static function getApiConfig($api)
+    {
+        $javaApiConfig = Config::get('services.java');
+        $phpApiConfig = Config::get('services.php');
+
+        if (isset($javaApiConfig[$api])) {
+            $javaApiConfig[$api]['type'] = self::JAVA_TYPE;
+            return $javaApiConfig[$api];
+        } else {
+            $phpApiConfig['type'] = self::PHP_TYPE;
+            return $phpApiConfig;
+        }
     }
 }

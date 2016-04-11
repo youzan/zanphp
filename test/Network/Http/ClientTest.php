@@ -41,6 +41,8 @@ class ClientTest extends TaskTest {
         ]));
         $context->set('result', $result);
 
+        var_dump($result);exit;
+
         yield 'success';
     }
 }
