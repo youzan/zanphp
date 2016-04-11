@@ -78,8 +78,8 @@ class Server implements ServerContract
     private function routerSelfCheck()
     {
         $basePath = Application::getInstance()->getBasePath();
-        $urlRulesPath = $basePath . '/init/routing/';
-        $routerSelfCheck = new RouterSelfCheck($urlRulesPath);
+        $urlRulesPath = $checkListPath = $basePath . '/init/routing/';
+        $routerSelfCheck = new RouterSelfCheck($urlRulesPath, $checkListPath);
         $routerSelfCheck->check();
     }
 }
