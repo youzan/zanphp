@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
+use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Response\JsonResponse;
 use Zan\Framework\Foundation\View\View;
@@ -64,9 +65,14 @@ class HttpController extends Controller
         return new JsonResponse($data);
     }
 
+    public function redirect($url,$code = 302){
+        return RedirectResponse::create($url, $code);
+    }
+
     protected function dispatch($action,$mode=0)
     {
         switch($mode){
         }
     }
+
 }

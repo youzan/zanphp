@@ -52,7 +52,7 @@ class ConnectionManager
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
         }     
         
-        $pool = &self::$poolMap[$connKey];
+        $pool = self::$poolMap[$connKey];
         
         $connection = $pool->get();
         if($connection){

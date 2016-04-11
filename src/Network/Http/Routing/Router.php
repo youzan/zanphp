@@ -18,6 +18,7 @@ class Router {
     private $route = '';
     private $format = '';
     private $rules = [];
+    private $parameters = [];
     private $routeConKey = 'route';
     private $separator = '/';
 
@@ -46,10 +47,9 @@ class Router {
         $this->parseRequestFormat($requestUri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
         $this->repairRoute();
-        $this->route = explode('.', $this->route);
-        $this->route = $this->route[0];
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
+        $this->setParameters($this->parameters);
     }
 
     private function parseRequestFormat($requestUri)
@@ -59,6 +59,7 @@ class Router {
         }
         $explodeArr = explode('.', $requestUri);
         $this->format = in_array($explodeArr[1], $this->config['format_whitelist']) ? trim($explodeArr[1]) : $this->getDefaultFormat();
+        $this->url = $explodeArr[0];
     }
 
     private function repairRoute()
@@ -84,7 +85,7 @@ class Router {
         $rules = UrlRegex::formatRules($this->rules);
         $result = UrlRegex::decode($this->url, $rules);
         $this->route = ltrim($result['url'], $this->separator);
-        $this->setParameters($result['parameter']);
+        $this->parameters = $result['parameter'];
     }
 
     private function setParameters(array $parameters = [])
@@ -96,6 +97,11 @@ class Router {
             $_GET[$k] = $v;
             $_REQUEST[$k] = $v;
         }
+    }
+
+    public function getParameters()
+    {
+        return $this->parameters;
     }
 
     private function setDefaultRoute()
