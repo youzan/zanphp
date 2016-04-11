@@ -101,7 +101,7 @@ function release(Resource $res, $stradegy = Resource::AUTO_RELEASE)
 
 function getCookieHandler()
 {
-    return new SysCall(function(Task $task){
+    return new SysCall(function (Task $task) {
         $context = $task->getContext();
         $cookie = $context->get('cookie');
         $task->send($cookie);
@@ -114,8 +114,9 @@ function cookieGet($key, $default = null)
 {
     return new SysCall(function (Task $task) use ($key, $default) {
         $context = $task->getContext();
-        $cookie = $context->get('cookie');
-        $value = $cookie->get($key, $default);
+        $request = $context->get('request');
+        $cookies = $request->cookies;
+        $value = isset($key) ? $cookies->get($key, $default) : null;
         $task->send($value);
 
         return Signal::TASK_CONTINUE;
@@ -125,7 +126,7 @@ function cookieGet($key, $default = null)
 function cookieSet($key, $value = null, $expire, $path, $domain, $secure, $httpOnly)
 {
     $args = func_get_args();
-    return new SysCall(function(Task $task) use ($args){
+    return new SysCall(function (Task $task) use ($args) {
         $context = $task->getContext();
         $cookie = $context->get('cookie');
         $func = [$cookie, 'set'];
