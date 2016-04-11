@@ -29,13 +29,13 @@ class Acl
         $sid = (yield $cookie->get('sid', ''));
         $userId = (yield $cookie->get('user_id', 0));
         if ('' === $sid) {
-            cookieSet('redirect', $this->request->getFullUrl(), 0);
+            $cookie->set('redirect', $this->request->getFullUrl(), 0);
             yield RedirectResponse::create($this->config['login_url'], 302);
             return;
         } else {
             if (0 === $userId) {
                 $userId = (yield $this->getAdminIdBySid($sid));
-                cookieSet('user_id', $userId, 0);
+                $cookie->set('user_id', $userId, 0);
             }
         }
 

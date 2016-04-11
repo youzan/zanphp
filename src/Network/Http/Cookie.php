@@ -51,11 +51,11 @@ class Cookie
         if (!$key) {
             return false;
         }
-        $expire = isset($expire) ? $expire : $this->config['expire'];
-        $path = isset($path) ? $path : $this->config['path'];
-        $domain = isset($domain) ? $domain : $this->config['domain'];
-        $secure = isset($secure) ? $secure : $this->config['secure'];
-        $httpOnly = isset($httpOnly) ? $httpOnly : $this->config['httponly'];
+        $expire = (isset($expire) && NULL !== $expire) ? $expire : $this->config['expire'];
+        $path = (isset($path) && NULL !== $path) ? $path : $this->config['path'];
+        $domain = (isset($domain) && NULL !== $domain) ? $domain : $this->config['domain'];
+        $secure = (isset($secure) && NULL !== $secure) ? $secure : $this->config['secure'];
+        $httpOnly = (isset($httpOnly) && NULL !== $httpOnly) ? $httpOnly : $this->config['httponly'];
 
         $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httpOnly);
     }

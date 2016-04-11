@@ -115,7 +115,7 @@ function cookieGet($key, $default = null)
     return new SysCall(function (Task $task) use ($key, $default) {
         $context = $task->getContext();
         $cookie = $context->get('cookie');
-        $value = (yield $cookie->get($key, $default));
+        $value = $cookie->get($key, $default);
         $task->send($value);
 
         return Signal::TASK_CONTINUE;

@@ -8,7 +8,6 @@
 
 namespace Zan\Framework\Network\Http;
 
-
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
