@@ -91,7 +91,7 @@ class MiddlewareManager {
         }
 
         if(null === $groupKey){
-            throw new InvalidArgumentException('No match Url in MiddlewareManager');
+            return null;
         }
         if(!isset($this->config['group'][$groupKey])){
             throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');

@@ -49,12 +49,6 @@ class RequestTask
             return;
         }
 
-//        $acl = new Acl($this->request);
-//        $result = (yield $acl->auth());
-//        if ($result !== null) {
-//            yield $result->sendBy($this->swooleResponse);
-//            return;
-//        }
 
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
