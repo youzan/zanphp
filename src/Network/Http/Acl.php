@@ -21,7 +21,7 @@ class Acl
     protected $context = null;
     protected $request = null;
 
-    public function __construct(Request $request,Context $context)
+    public function __construct(Request $request, Context $context)
     {
         $this->request = $request;
         $this->context = $context;
@@ -42,11 +42,11 @@ class Acl
             $cookie->set('redirect', $this->request->getFullUrl(), 0);
             yield RedirectResponse::create($this->config['login_url'], 302);
             return;
-        } else {
-            if (0 === $userId) {
-                yield $this->setAdminInfoToCookie($sid);
-            }
         }
+        if (0 === $userId) {
+            yield $this->setAdminInfoToCookie($sid);
+        }
+
 
         yield null;
     }
@@ -59,16 +59,16 @@ class Acl
         }
         $cookie = (yield getCookieHandler());
         $userId = (yield $this->getAdminIdBySid($sid));
-        if($userId <= 0){
+        if ($userId <= 0) {
             yield null;
             return;
         }
         $adminInfo = (yield $this->getAdminInfoById($userId));
-        if(empty($adminInfo)){
+        if (empty($adminInfo)) {
             yield null;
             return;
         }
-        $this->context->set('admin',$adminInfo);
+        $this->context->set('admin', $adminInfo);
         yield $cookie->set('user_id', $userId, 0);
         yield $cookie->set('account', $adminInfo['account'], 0);
         yield $cookie->set('avatar', $adminInfo['avatar'], 0);
