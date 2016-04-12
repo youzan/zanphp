@@ -72,8 +72,7 @@ class Client implements Async
         return function($response) use ($callback) {
             $jsonData = json_decode($response, true);
             $response = $jsonData ? $jsonData : $response;
-            $data = isset($response['data']) ? $response['data'] : $response;
-            call_user_func($callback, $data);
+            call_user_func($callback, $response);
         };
     }
 
