@@ -11,6 +11,9 @@ use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Common\Client;
 use Zan\Framework\Testing\TaskTest;
 
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Test\Foundation\Coroutine\Context;
+
 class ClientTest extends TaskTest {
 
     public function setUp()
@@ -20,84 +23,26 @@ class ClientTest extends TaskTest {
         RunMode::set('dev');
 
         Config::init();
-        Config::get('http.client');
+        Config::get('services.php');
+    }
+
+    public function testTaskCall()
+    {
+        $context = new Context();
+        $task = new Task($this->makeCoroutine($context), null, 8);
+        $task->run();
 
     }
 
-    public function taskCall()
+    private function makeCoroutine($context)
     {
-//        $option = [
-//            'order_no'  => 'E123',
-//            'kdt_id'    => 1,
-//        ];
-//        $result = (yield Client::call('trade.order.detail.byOrderNo', $option));
-
-        $params = [
-            'kdt_id' => ['11280',
-                '11282',
-                '3311',
-                '11578',
-                '11587',
-                '3627',
-                '3618',
-                '3620',
-                '3639',
-                '3634',
-                '3642',
-                '3644',
-                '3646',
-                '3648',
-                '3659',
-                '3655',
-                '3657',
-                '3666',
-                '3667',
-                '3662',
-                '3664',
-                '3665',
-                '3670',
-                '3688',
-                '3689',
-                '3692',
-                '3691',
-                '3706',
-                '3713',
-                '3711',
-                '3714',
-                '3754',
-                '11047',
-                '11048',
-                '11063',
-                '11060',
-                '11061',
-                '11055',
-                '11059',
-                '11057',
-                '11064',
-                '11086',
-                '11085',
-                '11100',
-                '11109',
-                '11110',
-                '11112',
-                '11113',
-                '11210',
-                '11212',
-                '11213',
-                '11202',
-                '11206',
-                '11204',
-                '11205',
-                '11209',]
-        ];
-
-        $result = (yield Client::call('account.team.getTeamByIds',$params));
-
-
-        //$result = (yield Client::call('account.team.getTeamInfo',['kdt_id'=>13397]));
+         $result = (yield Client::call('fenxiao.supplier.goods.getGoodsByKdtGoodsId', [
+            'kdt_goods_id' => 1111
+        ]));
+        $context->set('result', $result);
 
         var_dump($result);exit;
 
-        $this->assertEquals(3, count($result), 'fail');
+        yield 'success';
     }
 }
