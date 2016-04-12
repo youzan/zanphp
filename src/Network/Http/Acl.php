@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Guzzle\Plugin\Cookie\Cookie;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
@@ -46,6 +47,13 @@ class Acl
         if ($userId <= 0) {
             yield $this->setAdminInfoToCookie($sid);
         }else {
+            $admin = [
+                'user_id'=>$userId,
+                'account'=>(yield $cookie->get('account', '')) ,
+                'avatar'=>(yield $cookie->get('avatar', '')),
+                'nickname'=>(yield $cookie->get('nickname', ''))
+                ];
+            $this->context->set('admin', $admin);
             $this->context->set('admin', (yield $this->request->cookie('admin',[])) );
         }
         yield null;
@@ -71,7 +79,9 @@ class Acl
         $admin = ['user_id'=>$userId,'account'=>$adminInfo['account'],'avatar'=>$adminInfo['avatar'],'nickname'=>$adminInfo['nick_name']];
         $this->context->set('admin', $admin);
         yield $cookie->set('user_id',$userId,0);
-        yield $cookie->set('admin', $admin, []);
+        yield $cookie->set('account',$adminInfo['account'],'');
+        yield $cookie->set('avatar',$adminInfo['avatar'],'');
+        yield $cookie->set('nickname',$adminInfo['nickname'],'');
 
     }
 
