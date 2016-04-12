@@ -45,6 +45,7 @@ class Acl
         }
         if ($userId <= 0) {
             yield $this->setAdminInfoToCookie($sid);
+            return;
         }else {
             $admin = [
                 'user_id'=>$userId,
