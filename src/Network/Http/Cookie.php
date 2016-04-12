@@ -46,12 +46,11 @@ class Cookie
         yield $cookies->get($key, $default);
     }
 
-    public function set($key, $value = null, $expire = 86400, $path = null, $domain = null, $secure = null, $httpOnly = null)
+    public function set($key, $value = null, $expire = 0, $path = null, $domain = null, $secure = null, $httpOnly = null)
     {
         if (!$key) {
             return false;
         }
-        $expire = (null !== $expire) ? $expire : $this->config['expire'];
         $path = (null !== $path) ? $path : $this->config['path'];
         $domain = (null !== $domain) ? $domain : $this->config['domain'];
         $secure = (null !== $secure) ? $secure : $this->config['secure'];

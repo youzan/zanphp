@@ -13,7 +13,6 @@ use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Common\Client;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Utilities\Types\Arr;
 
 class Acl
 {
@@ -30,11 +29,6 @@ class Acl
 
     public function auth()
     {
-        $aclWhiteList = $this->config['white_list'];
-        $currentPath = $this->request->getPath();
-        if (in_array($currentPath, $aclWhiteList)) {
-            return;
-        }
         $cookie = (yield getCookieHandler());
         $sid = (yield $cookie->get('sid', ''));
         $userId = (yield $cookie->get('user_id', 0));
@@ -45,13 +39,14 @@ class Acl
         }
         if ($userId <= 0) {
             yield $this->setAdminInfoToCookie($sid);
-        }else {
+            return;
+        } else {
             $admin = [
-                'user_id'=>$userId,
-                'account'=>(yield $cookie->get('account', '')) ,
-                'avatar'=>(yield $cookie->get('avatar', '')),
-                'nickname'=>(yield $cookie->get('nickname', ''))
-                ];
+                'user_id' => $userId,
+                'account' => (yield $cookie->get('account', '')),
+                'avatar' => (yield $cookie->get('avatar', '')),
+                'nickname' => (yield $cookie->get('nickname', ''))
+            ];
             $this->context->set('admin', $admin);
         }
         yield null;
@@ -65,22 +60,23 @@ class Acl
         }
         $cookie = (yield getCookieHandler());
         $userId = (yield $this->getAdminIdBySid($sid));
+
         if ($userId <= 0) {
             yield null;
             return;
         }
         $adminInfo = (yield $this->getAdminInfoById($userId));
+
         if (empty($adminInfo)) {
             yield null;
             return;
         }
-        $admin = ['user_id'=>$userId,'account'=>$adminInfo['account'],'avatar'=>$adminInfo['avatar'],'nickname'=>$adminInfo['nick_name']];
+        $admin = ['user_id' => $userId, 'account' => $adminInfo['account'], 'avatar' => $adminInfo['avatar'], 'nickname' => $adminInfo['nick_name']];
         $this->context->set('admin', $admin);
-        yield $cookie->set('user_id',$userId);
-        yield $cookie->set('account',$adminInfo['account']);
-        yield $cookie->set('avatar',$adminInfo['avatar']);
-        yield $cookie->set('nickname',$adminInfo['nick_name']);
-
+        yield $cookie->set('user_id', $userId);
+        yield $cookie->set('account', $adminInfo['account']);
+        yield $cookie->set('avatar', $adminInfo['avatar']);
+        yield $cookie->set('nickname', $adminInfo['nick_name']);
     }
 
     private function getAdminIdBySid($sid)
