@@ -45,9 +45,9 @@ class Acl
         }
         if ($userId <= 0) {
             yield $this->setAdminInfoToCookie($sid);
+        }else {
+            $this->context->set('admin', (yield $this->request->cookie('admin',[])) );
         }
-
-
         yield null;
     }
 
@@ -68,12 +68,9 @@ class Acl
             yield null;
             return;
         }
-        $this->context->set('admin', $adminInfo);
-        yield $cookie->set('user_id', $userId, 0);
-        yield $cookie->set('account', $adminInfo['account'], 0);
-        yield $cookie->set('avatar', $adminInfo['avatar'], 0);
-        yield $cookie->set('nickname', $adminInfo['nick_name'], 0);
-
+        $admin = ['user_id'=>$userId,'account'=>$adminInfo['account'],'avatar'=>$adminInfo['avatar'],'nickname'=>$adminInfo['nick_name']];
+        $this->context->set('admin', $admin);
+        yield $cookie->set('admin', $admin, 0);
 
     }
 
