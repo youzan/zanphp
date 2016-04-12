@@ -43,7 +43,7 @@ class Acl
             yield RedirectResponse::create($this->config['login_url'], 302);
             return;
         }
-        if (0 === $userId) {
+        if ($userId <= 0) {
             yield $this->setAdminInfoToCookie($sid);
         }
 
