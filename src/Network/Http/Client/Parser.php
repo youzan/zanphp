@@ -105,8 +105,7 @@ class Parser
             default:
                 $content = $data;
         }
-        $jsonData = json_decode($content, true);
 
-        return $jsonData ? $jsonData : $content;
+        return $content;
     }
 }
