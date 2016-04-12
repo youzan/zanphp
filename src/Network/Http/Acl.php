@@ -68,7 +68,7 @@ class Acl
             yield null;
             return;
         }
-        $this->context->set('yz_user',$adminInfo);
+        $this->context->set('admin',$adminInfo);
         yield $cookie->set('user_id', $userId, 0);
         yield $cookie->set('account', $adminInfo['account'], 0);
         yield $cookie->set('avatar', $adminInfo['avatar'], 0);
