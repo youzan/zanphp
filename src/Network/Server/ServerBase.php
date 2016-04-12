@@ -1,6 +1,6 @@
 <?php
 
-namespace Network\Server;
+namespace Zan\Framework\Network\Server;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
