@@ -76,10 +76,10 @@ class Acl
         }
         $admin = ['user_id'=>$userId,'account'=>$adminInfo['account'],'avatar'=>$adminInfo['avatar'],'nickname'=>$adminInfo['nick_name']];
         $this->context->set('admin', $admin);
-        yield $cookie->set('user_id',$userId,0);
-        yield $cookie->set('account',$adminInfo['account'],'');
-        yield $cookie->set('avatar',$adminInfo['avatar'],'');
-        yield $cookie->set('nickname',$adminInfo['nickname'],'');
+        yield $cookie->set('user_id',$userId);
+        yield $cookie->set('account',$adminInfo['account']);
+        yield $cookie->set('avatar',$adminInfo['avatar']);
+        yield $cookie->set('nickname',$adminInfo['nick_name']);
 
     }
 
