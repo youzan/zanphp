@@ -24,7 +24,7 @@ class Parser
 
     public function parse($data)
     {
-        $lines = explode("\r\n", $data, -1);
+        $lines = explode("\r\n", $data);
         foreach ($lines  as $line) {
             if (strlen($line) == 0) {
                 $this->current++;
