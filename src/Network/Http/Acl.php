@@ -12,15 +12,19 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Common\Client;
+use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Arr;
 
 class Acl
 {
     private $configKey = 'acl';
+    protected $context = null;
+    protected $request = null;
 
-    public function __construct(Request $request)
+    public function __construct(Request $request,Context $context)
     {
         $this->request = $request;
+        $this->context = $context;
         $this->config = Config::get($this->configKey, null);
     }
 
@@ -50,22 +54,27 @@ class Acl
     private function setAdminInfoToCookie($sid)
     {
         if (!$sid) {
+            yield null;
             return;
         }
         $cookie = (yield getCookieHandler());
         $userId = (yield $this->getAdminIdBySid($sid));
-        yield $cookie->set('user_id', $userId, 0);
-
+        if($userId <= 0){
+            yield null;
+            return;
+        }
         $adminInfo = (yield $this->getAdminInfoById($userId));
-        if (isset($adminInfo['account'])) {
-            yield $cookie->set('account', $adminInfo['account'], 0);
+        if(empty($adminInfo)){
+            yield null;
+            return;
         }
-        if (isset($adminInfo['avatar'])) {
-            yield $cookie->set('avatar', $adminInfo['avatar'], 0);
-        }
-        if (isset($adminInfo['nickname'])) {
-            yield $cookie->set('nickname', $adminInfo['nick_name'], 0);
-        }
+        $this->context->set('yz_user',$adminInfo);
+        yield $cookie->set('user_id', $userId, 0);
+        yield $cookie->set('account', $adminInfo['account'], 0);
+        yield $cookie->set('avatar', $adminInfo['avatar'], 0);
+        yield $cookie->set('nickname', $adminInfo['nick_name'], 0);
+
+
     }
 
     private function getAdminIdBySid($sid)
