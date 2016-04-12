@@ -40,7 +40,7 @@ class Acl
         if ($userId <= 0) {
             yield $this->setAdminInfoToCookie($sid);
             return;
-        } else {
+        }else {
             $admin = [
                 'user_id' => $userId,
                 'account' => (yield $cookie->get('account', '')),
