@@ -8,7 +8,6 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Guzzle\Plugin\Cookie\Cookie;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
@@ -54,7 +53,6 @@ class Acl
                 'nickname'=>(yield $cookie->get('nickname', ''))
                 ];
             $this->context->set('admin', $admin);
-            $this->context->set('admin', (yield $this->request->cookie('admin',[])) );
         }
         yield null;
     }
