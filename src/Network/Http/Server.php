@@ -2,15 +2,26 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
+use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Http\Routing\RouterSelfCheck;
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Network\Server\ServerBase;
 
-class Server implements ServerContract
+class Server extends ServerBase implements ServerContract
 {
+    protected $serverStartItems = [
+        InitializeRouter::class
+    ];
+
+    protected $workerStartItems = [
+        InitializeConnectionPool::class
+    ];
+
     /**
      * @var swooleServer
      */
@@ -32,6 +43,8 @@ class Server implements ServerContract
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
 
+        $this->bootServerStartItem();
+
         $this->swooleServer->start();
     }
 
@@ -47,7 +60,7 @@ class Server implements ServerContract
 
     public function onStart($swooleServer)
     {
-        $this->routerSelfCheck();
+        
     }
 
     public function onShutdown($swooleServer)
@@ -57,7 +70,7 @@ class Server implements ServerContract
 
     public function onWorkerStart($swooleServer, $workerId)
     {
-
+        $this->bootWorkerStartItem($workerId);
     }
 
     public function onWorkerStop($swooleServer, $workerId)
