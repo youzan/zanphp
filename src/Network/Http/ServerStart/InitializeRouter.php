@@ -8,9 +8,11 @@
 
 namespace Zan\Framework\Network\Http\ServerStart;
 
-
 class InitializeRouter
 {
+    /**
+     * @param \Zan\Framework\Network\Http\Server $server
+     */
     public function bootstrap($server)
     {
     
