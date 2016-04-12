@@ -9,7 +9,7 @@
 namespace Zan\Framework\Contract\Store\Database;
 
 
-interface ResultType
+interface ResultTypeInterface
 {
     /**
      * return the query return

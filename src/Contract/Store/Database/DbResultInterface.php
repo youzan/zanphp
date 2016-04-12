@@ -7,14 +7,14 @@
  */
 
 namespace Zan\Framework\Contract\Store\Database;
-
-interface DbResult
+use Zan\Framework\Contract\Store\Database\DriverInterface;
+interface DbResultInterface
 {
     /**
      * FutureResult constructor.
-     * @param Driver $driver
+     * @param DriverInterface $driver
      */
-    public function __construct(Driver $driver);
+    public function __construct(DriverInterface $driver);
 
     /**
      * @return int 
