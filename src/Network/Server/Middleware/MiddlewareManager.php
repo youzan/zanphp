@@ -110,6 +110,6 @@ class MiddlewareManager {
 
     private function getObject($objectName)
     {
-        return Application::getInstance()->getNamespace() . 'Middleware\\' . $objectName;
+        return $objectName;
     }
 }
