@@ -84,6 +84,7 @@ class Parser
             }
         } else {
             $this->body .= $data;
+            $this->current++;
         }
     }
 
