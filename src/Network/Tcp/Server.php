@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Network\Server\ServerBase;
 use Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
@@ -10,6 +9,7 @@ use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Server\ServerBase;
 
 class Server extends ServerBase {
 

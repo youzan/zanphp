@@ -3,7 +3,6 @@
 namespace Zan\Framework\Network\Http;
 
 use Network\Http\ServerStart\InitializeRouter;
-use Network\Server\ServerBase;
 use Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
@@ -11,6 +10,7 @@ use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Http\Routing\RouterSelfCheck;
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Network\Server\ServerBase;
 
 class Server extends ServerBase implements ServerContract
 {
