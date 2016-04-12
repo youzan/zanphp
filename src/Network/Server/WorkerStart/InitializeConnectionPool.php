@@ -1,6 +1,6 @@
 <?php
 
-namespace Network\Server\WorkerStart;
+namespace Zan\Framework\Network\Server\WorkerStart;
 
 class InitializeConnectionPool
 {

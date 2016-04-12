@@ -6,7 +6,7 @@
  * Time: 12:14
  */
 
-namespace Network\Http\ServerStart;
+namespace Zan\Framework\Network\Http\ServerStart;
 
 
 class InitializeRouter
