@@ -11,22 +11,25 @@ namespace Zan\Framework\Network\Server\Middleware;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Contract\Network\RequestTerminator;
 use Zan\Framework\Foundation\Core\ConfigLoader;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\Response;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Foundation\Application;
 
 class MiddlewareManager {
 
     use Singleton;
 
     private $config = null;
+    private $conKey = 'middleware';
 
-    public function loadConfig($path)
+    public function loadConfig($path = '')
     {
-        $this->config = ConfigLoader::getInstance()->load($path,true);
-        $this->config['match'] = array_reverse($this->config['match']);
+        $this->config = empty($path) ? Config::get($this->conKey) : ConfigLoader::getInstance()->load($path, true);
+        $this->config['match'] = isset($this->config['match']) ? array_reverse($this->config['match']) : [];
     }
 
     public function optimize()
@@ -43,7 +46,8 @@ class MiddlewareManager {
     {
         $filters = $this->getGroupValue($request);
         foreach($filters as $filter){
-            $filterObject = new $filter();
+            $filterObjectName = $this->getObject($filter);
+            $filterObject = new $filterObjectName();
             if($filterObject instanceof RequestFilter){
                 $response = (yield $filterObject->doFilter($request, $context));
                 if(null !== $response) {
@@ -65,7 +69,8 @@ class MiddlewareManager {
     {
         $terminators = $this->getGroupValue($request);
         foreach($terminators as $terminator){
-            $terminatorObject = new $terminator();
+            $terminatorObjectName = $this->getObject($terminator);
+            $terminatorObject = new $terminatorObjectName();
             if($terminatorObject instanceof RequestTerminator){
                 yield $terminatorObject->terminate($request, $response ,$context);
             }
@@ -80,7 +85,7 @@ class MiddlewareManager {
         foreach($this->config['match'] as $match){
             $pattern = $match[0];
             if($this->match($pattern,$route)){
-                $groupKey = $match[1];;
+                $groupKey = $match[1];
                 break;
             }
         }
@@ -103,4 +108,8 @@ class MiddlewareManager {
         return false;
     }
 
+    private function getObject($objectName)
+    {
+        return Application::getInstance()->getNamespace() . 'Middleware\\' . $objectName;
+    }
 }

@@ -21,6 +21,11 @@ class RequestHandler
     public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
         $request  = Request::createFromSwooleHttpRequest($swooleRequest);
+        $this->context->set('request', $request);
+        $this->context->set('response', $swooleResponse);
+        
+        $cookie = new Cookie($request, $swooleResponse);
+        $this->context->set('cookie', $cookie);
 
         Router::getInstance()->route($request);
 

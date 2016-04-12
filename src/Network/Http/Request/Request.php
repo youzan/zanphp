@@ -30,34 +30,20 @@ class Request extends BaseRequest implements Arrayable, RequestContract
      */
     public static function createFromSwooleHttpRequest(SwooleHttpRequest $swooleRequest)
     {
-        static::enableHttpMethodParameterOverride();
-
-        $_get = $_post = $_cookie = $_server = [];
-
-        if (isset($swooleRequest->get)) {
-            $_get = $swooleRequest->get;
-        }
-
-        if (isset($swooleRequest->post)) {
-            $_post = $swooleRequest->post;
-        }
-
-        if (isset($swooleRequest->cookie)) {
-            $_cookie = $swooleRequest->cookie;
-        }
-
-        if (isset($swooleRequest->server)) {
-            $_server = array_change_key_case($swooleRequest->server, CASE_UPPER);
-        }
-
+        $get = isset($swooleRequest->get) ? $swooleRequest->get : [];
+        $post = isset($swooleRequest->post) ? $swooleRequest->post : [];
+        $attributes = [];
+        $cookie = isset($swooleRequest->cookie) ? $swooleRequest->cookie : [];
+        $files = [];
+        $server = isset($swooleRequest->server) ? array_change_key_case($swooleRequest->server, CASE_UPPER) : [];
         if (isset($swooleRequest->header)) {
             foreach ($swooleRequest->header as $key => $value) {
                 $newKey = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
-                $_server[$newKey] = $value;
+                $server[$newKey] = $value;
             }
         }
 
-        $request = new static($_get, $_post, [], $_cookie, [], $_server);
+        $request = new static($get, $post, $attributes, $cookie, $files, $server);
 
         if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
             && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
