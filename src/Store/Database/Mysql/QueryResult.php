@@ -64,6 +64,7 @@ class QueryResult implements Async
                 $result = $this->select();
                 break;
         }
+        $this->connection->release();
         call_user_func($this->callback, $result);
     }
 
