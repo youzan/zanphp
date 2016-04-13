@@ -124,7 +124,7 @@ class Client implements Async
         if (is_null(self::$apiConfig)) {
             $allApiConfig = include(__DIR__ . '/ApiConfig.php');
             $runMode = RunMode::get();
-            self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : 'dev';
+            self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : $allApiConfig['dev'];
         }
 
         if (isset(self::$apiConfig['java'][$api])) {
