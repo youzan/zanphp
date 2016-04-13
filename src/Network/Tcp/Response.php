@@ -32,16 +32,38 @@ class Response implements BaseResponse {
 
     public function end($content='')
     {
-        if($content){
-            $this->send($content);
-        }
+        $this->send($content);
 
         //$this->swooleServer->close($this->request->getFd());
     }
 
-    public function sendException(\Exception $e)
+    public function sendException($e)
     {
-        $this->end($e);
+        $serviceName = $this->request->getServiceName();
+        $novaServiceName = $this->request->getNovaServiceName();
+        $methodName  = $this->request->getMethodName();
+        $content = Nova::encodeServiceException($novaServiceName, $methodName, $e);
+
+        $remote = $this->request->getRemote();
+        $outputBuffer = '';
+        if (nova_encode($serviceName,
+            $methodName,
+            $remote['ip'],
+            $remote['port'],
+            $this->request->getSeqNo(),
+            $this->request->getAttachData(),
+            $content,
+            $outputBuffer)) {
+
+
+            $swooleServer = $this->getSwooleServer();
+            $sendState = $swooleServer->send(
+                $this->request->getFd(),
+                $outputBuffer
+            );
+        }
+
+        $this->swooleServer->close($this->request->getFd());
     }
 
     public function send($content)
@@ -70,5 +92,6 @@ class Response implements BaseResponse {
             );
         }
     }
+    
 
 }
