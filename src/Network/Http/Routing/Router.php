@@ -43,6 +43,9 @@ class Router {
     public function route(Request $request)
     {
         $requestUri = $request->server->get('REQUEST_URI');
+        if(preg_match('/\.ico$/i', $requestUri)){
+            $requestUri = '';
+        }
         $this->prepare($requestUri);
         $this->parseRequestFormat($requestUri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
