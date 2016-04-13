@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Common;
 
-use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Http\Client\HttpClient;
 use Zan\Framework\Foundation\Contract\Async;
