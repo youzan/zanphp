@@ -2,6 +2,8 @@
 
 namespace Zan\Framework\Network\Common;
 
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Http\Client\HttpClient;
 use Zan\Framework\Foundation\Contract\Async;
 
@@ -9,6 +11,8 @@ class Client implements Async
 {
     const JAVA_TYPE = 'java';
     const PHP_TYPE = 'php';
+
+    private static $apiConfig;
 
     /** @var  HttpClient */
     private $httpClient;
@@ -35,7 +39,6 @@ class Client implements Async
     public static function call($api, $params = [], $method = 'POST')
     {
         $apiConfig = self::getApiConfig($api);
-
         $params = self::filterParams($params, $apiConfig['type']);
 
         $client = new self($apiConfig['host'], $apiConfig['port']);
@@ -118,14 +121,19 @@ class Client implements Async
 
     private static function getApiConfig($api)
     {
-        $apiConfig = include(__DIR__ . '/ApiConfig.php');
+        if (is_null(self::$apiConfig)) {
+            $allApiConfig = include(__DIR__ . '/ApiConfig.php');
+            $allApiConfig = include(__DIR__ . '/ApiConfig.php');
+            $runMode = RunMode::get();
+            self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : 'dev';
+        }
 
-        if (isset($apiConfig['java'][$api])) {
-            $apiConfig['java'][$api]['type'] = self::JAVA_TYPE;
-            return $apiConfig['java'][$api];
+        if (isset(self::$apiConfig['java'][$api])) {
+            self::$apiConfig['java'][$api]['type'] = self::JAVA_TYPE;
+            return self::$apiConfig['java'][$api];
         } else {
-            $apiConfig['php']['type'] = self::PHP_TYPE;
-            return $apiConfig['php'];
+            self::$apiConfig['php']['type'] = self::PHP_TYPE;
+            return self::$apiConfig['php'];
         }
     }
 
