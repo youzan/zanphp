@@ -118,7 +118,7 @@ class Client implements Async
 
     private static function getApiConfig($api)
     {
-        $apiConfig = require_once(__DIR__ . '/ApiConfig.php');
+        $apiConfig = include(__DIR__ . '/ApiConfig.php');
 
         if (isset($apiConfig['java'][$api])) {
             $apiConfig['java'][$api]['type'] = self::JAVA_TYPE;
