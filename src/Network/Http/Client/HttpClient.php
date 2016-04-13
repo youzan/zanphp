@@ -22,7 +22,8 @@ class HttpClient
     private $uri;
     private $method;
 
-    private $params;
+    private $header = [];
+    private $body;
 
     /** @var  Parser */
     private $parser;
@@ -52,9 +53,19 @@ class HttpClient
         return $this;
     }
 
-    public function setParams($params)
+    public function getMethod()
     {
-        $this->params = http_build_query($params);
+        return $this->method;
+    }
+
+    public function setHeader(array $header)
+    {
+        $this->header = array_merge($this->header, $header);
+    }
+
+    public function setBody($body)
+    {
+        $this->body = $body;
         return $this;
     }
 
@@ -88,9 +99,13 @@ class HttpClient
         $header .= 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36' . self::EOF;
         $header .= 'Connection: close' . self::EOF;
 
-        if ($this->params) {
-            $header .= 'Content-Type: application/x-www-form-urlencoded' . self::EOF;
-            $header .= 'Content-Length: ' . strlen($this->params) . self::EOF;
+        if ($this->body) {
+            if (isset($this->header['content_type'])) {
+                $header .= 'Content-Type: ' . $this->header['content_type'] . self::EOF;
+            } else {
+                $header .= 'Content-Type: application/json' . self::EOF;
+            }
+            $header .= 'Content-Length: ' . strlen($this->body) . self::EOF;
         }
         return $header;
     }
@@ -105,12 +120,12 @@ class HttpClient
 
     public function onConnect()
     {
-        $this->client->send($this->buildHeader() . self::EOF . $this->params);
+        $this->client->send($this->buildHeader() . self::EOF . $this->body);
     }
 
     public function onReceive($cli, $data)
     {
-        if ($this->parser->parse($data) == Parser::FINISHED) {
+        if ($this->parser->parse($data) === Parser::FINISHED) {
 
             call_user_func($this->callback, $this->parser->getBody());
         }
