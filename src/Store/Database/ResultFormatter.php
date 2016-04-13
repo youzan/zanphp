@@ -12,6 +12,10 @@ use Zan\Framework\Contract\Store\Database\ResultTypeInterface;
 
 class ResultFormatter implements ResultFormatterInterface
 {
+    private $dbResult;
+
+    private $resultType;
+
     /**
      * ResultFormatterInterface constructor.
      * @param DbResultInterface $result
@@ -19,7 +23,8 @@ class ResultFormatter implements ResultFormatterInterface
      */
     public function __construct(DbResultInterface $result, $resultType = ResultTypeInterface::RAW)
     {
-
+        $this->dbResult = $result;
+        $this->resultType = $resultType;
     }
 
     /**
@@ -27,6 +32,85 @@ class ResultFormatter implements ResultFormatterInterface
      */
     public function format()
     {
+        switch ($this->resultType) {
+            case ResultTypeInterface::INSERT :
+                $result = $this->insert();
+                break;
+            case ResultTypeInterface::UPDATE:
+                $result = $this->update();
+                break;
+            case ResultTypeInterface::DELETE:
+                $result = $this->delete();
+                break;
+            case ResultTypeInterface::BATCH:
+                $result = $this->batch();
+                break;
+            case ResultTypeInterface::ROW:
+                $result = $this->row();
+                break;
+            case ResultTypeInterface::RAW:
+                $result = $this->raw();
+                break;
+            case ResultTypeInterface::SELECT:
+                $result = $this->select();
+                break;
+            case ResultTypeInterface::LAST_INSERT_ID:
+                $result = $this->lastInsertId();
+                break;
+            case ResultTypeInterface::AFFECTED_ROWS:
+                $result = $this->affectedRows();
+                break;
+            default :
+                $result = $this->raw();
+                break;
+        }
+        return $result;
+    }
 
+    private function select()
+    {
+        $rows = $this->dbResult->fetchRows();
+        return null == $rows || [] == $rows ? [] : $rows;
+    }
+
+    private function insert()
+    {
+        return $this->dbResult->fetchRows();
+    }
+
+    private function lastInsertId()
+    {
+        return $this->dbResult->getLastInsertId();
+    }
+
+    private function update()
+    {
+        return $this->dbResult->fetchRows();
+    }
+
+    private function delete()
+    {
+        return $this->dbResult->fetchRows();
+    }
+
+    private function affectedRows()
+    {
+        return $this->dbResult->getAffectedRows();
+    }
+
+    private function batch()
+    {
+        return $this->dbResult->fetchRows();
+    }
+
+    private function row()
+    {
+        $rows = $this->dbResult->fetchRows();
+        return isset($rows[0]) && [] != $rows[0] ? $rows[0] : null;
+    }
+
+    private function raw()
+    {
+        return $this->dbResult->fetchRows();
     }
 }

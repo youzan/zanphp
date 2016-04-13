@@ -9,16 +9,22 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
+use Zan\Framework\Store\Database\Mysql\Mysql;
 
-class DbResult implements DbResultInterface
+class MysqlResult implements DbResultInterface
 {
+    /**
+     * @var Mysql
+     */
+    private $driver;
+
     /**
      * FutureResult constructor.
      * @param DriverInterface $driver
      */
     public function __construct(DriverInterface $driver)
     {
-
+        $this->driver = $driver;
     }
 
     /**
@@ -26,7 +32,7 @@ class DbResult implements DbResultInterface
      */
     public function getLastInsertId()
     {
-
+        return $this->driver->getConnection()->getSocket()->insert_id;
     }
 
     /**
@@ -34,7 +40,7 @@ class DbResult implements DbResultInterface
      */
     public function getAffectedRows()
     {
-
+        return $this->driver->getConnection()->getSocket()->affected_rows;
     }
 
     /**
@@ -42,6 +48,6 @@ class DbResult implements DbResultInterface
      */
     public function fetchRows()
     {
-
+        return $this->driver->getResult();
     }
 }

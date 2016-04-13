@@ -17,12 +17,12 @@ interface ResultTypeInterface
     const RAW               = 0;
 
     /**
-     * return one row : [<k=>v>]
+     * return one row : [<k=>v>] or null
      */
     const ROW               = 1;
 
     /**
-     * return Table : [ [<k=>v>] ]
+     * return Table : [ [<k=>v>] ] or []
      */
     const SELECT            = 2;
 

@@ -40,5 +40,5 @@ interface DriverInterface extends Async
     /**
      * @return DbResultInterface
      */
-    public function onSqlReady(); 
+    public function onSqlReady($link, $result);
 }
