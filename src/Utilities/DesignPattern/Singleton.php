@@ -37,7 +37,4 @@ trait Singleton {
         static::$_instance = $instance;
     }
 
-    final private function __construct()
-    {
-    }
 }

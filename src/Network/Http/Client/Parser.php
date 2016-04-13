@@ -25,6 +25,7 @@ class Parser
     public function parse($data)
     {
         $lines = explode("\r\n", $data);
+
         foreach ($lines  as $key => $line) {
             if (strlen($line) == 0 and $this->current == self::HEADER) {
                 $this->current = self::BODY;

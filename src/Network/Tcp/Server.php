@@ -2,15 +2,24 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Server\ServerBase;
 
-class Server {
+class Server extends ServerBase {
 
+    protected $serverStartItems = [
+    ];
+
+    protected $workerStartItems = [
+        InitializeConnectionPool::class
+    ];
+    
     /**
      * @var SwooleServer
      */
@@ -40,6 +49,9 @@ class Server {
 
         $this->init();
         $this->registerServices();
+        
+        $this->bootServerStartItem();
+        
         $this->swooleServer->start();
     }
 
@@ -89,6 +101,8 @@ class Server {
 
     public function onWorkerStart($swooleServer, $workerId)
     {
+        $this->bootWorkerStartItem($workerId);
+        
         echo "worker starting .....\n";
     }
 
