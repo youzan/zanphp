@@ -48,7 +48,7 @@ class Dispatcher {
 
         return [
             'controller' => $controller,
-            'action' => $action
+            'action' => $action,
         ];
     }
 }

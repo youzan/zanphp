@@ -43,6 +43,9 @@ class Router {
     public function route(Request $request)
     {
         $requestUri = $request->server->get('REQUEST_URI');
+        if(preg_match('/\.ico$/i', $requestUri)){
+            $requestUri = '';
+        }
         $this->prepare($requestUri);
         $this->parseRequestFormat($requestUri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
@@ -50,6 +53,14 @@ class Router {
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
         $this->setParameters($this->parameters);
+    }
+
+    public function parseRoute()
+    {
+        $parts = explode($this->separator, trim($this->route, $this->separator));
+        $route['action_name'] = array_pop($parts);
+        $route['controller_name'] = join('\\', $parts);
+        return $route;
     }
 
     private function parseRequestFormat($requestUri)
@@ -78,6 +89,7 @@ class Router {
                 $this->setDefaultAction();
                 break;
         }
+        $this->route = strtolower($this->route);
     }
 
     private function parseRegexRoute()

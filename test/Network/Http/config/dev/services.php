@@ -7,7 +7,11 @@ return [
         'timeout' => 2
     ],
     'java' => [
-        'account.team'
+        'courier.push.sendMessage' => [
+            'host' => '192.168.66.204',
+            'port' => 8011,
+            'timeout' => 3
+        ]
     ],
 
 ];

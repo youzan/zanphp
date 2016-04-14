@@ -25,9 +25,10 @@ class Parser
     public function parse($data)
     {
         $lines = explode("\r\n", $data);
-        foreach ($lines  as $line) {
-            if (strlen($line) == 0) {
-                $this->current++;
+
+        foreach ($lines  as $key => $line) {
+            if (strlen($line) == 0 and $this->current == self::HEADER) {
+                $this->current = self::BODY;
                 continue;
             }
 
@@ -37,6 +38,10 @@ class Parser
 
             if ($this->current == self::BODY) {
                 $this->parseBody($line);
+            }
+
+            if ($this->current == self::FINISHED) {
+                break;
             }
         }
 
@@ -77,14 +82,18 @@ class Parser
     {
         if (isset($this->header['Transfer-Encoding']) and $this->header['Transfer-Encoding'] == 'chunked') {
             if (!$this->chunkdLength) {
-                $this->chunkdLength = hexdec($data);
+                $sizeInfo = explode(' ', $data, 1);
+                $this->chunkdLength = hexdec($sizeInfo[0]);
+                if ($data === '0'){
+                    $this->current = self::FINISHED;
+                }
             } else {
                 $this->body .= $data;
                 $this->chunkdLength = 0;
             }
         } else {
             $this->body .= $data;
-            $this->current++;
+            $this->current = self::FINISHED;
         }
     }
 
