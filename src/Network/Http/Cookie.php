@@ -52,7 +52,7 @@ class Cookie
             return false;
         }
         $path = (null !== $path) ? $path : $this->config['path'];
-        $domain = (null !== $domain) ? $domain : $this->config['domain'];
+        $domain = (null !== $domain) ? $domain : $this->request->getHost();
         $secure = (null !== $secure) ? $secure : $this->config['secure'];
         $httpOnly = (null !== $httpOnly) ? $httpOnly : $this->config['httponly'];
 
