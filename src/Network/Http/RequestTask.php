@@ -49,7 +49,6 @@ class RequestTask
             return;
         }
 
-
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
 

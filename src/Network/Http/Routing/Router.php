@@ -55,6 +55,14 @@ class Router {
         $this->setParameters($this->parameters);
     }
 
+    public function parseRoute()
+    {
+        $parts = explode($this->separator, trim($this->route, $this->separator));
+        $route['action_name'] = array_pop($parts);
+        $route['controller_name'] = join('\\', $parts);
+        return $route;
+    }
+
     private function parseRequestFormat($requestUri)
     {
         if(false === strpos($requestUri, '.')) {
@@ -81,6 +89,7 @@ class Router {
                 $this->setDefaultAction();
                 break;
         }
+        $this->route = strtolower($this->route);
     }
 
     private function parseRegexRoute()
