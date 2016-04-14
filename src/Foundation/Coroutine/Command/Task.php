@@ -123,7 +123,7 @@ function cookieGet($key, $default = null)
     });
 }
 
-function cookieSet($key, $value = null, $expire, $path, $domain, $secure, $httpOnly)
+function cookieSet($key, $value = null, $expire = 0, $path = null, $domain = null, $secure = null, $httpOnly = null)
 {
     $args = func_get_args();
     return new SysCall(function (Task $task) use ($args) {
