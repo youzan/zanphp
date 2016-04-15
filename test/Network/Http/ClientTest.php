@@ -37,7 +37,7 @@ class ClientTest extends TaskTest {
     private function makeCoroutine($context)
     {
          $result = (yield Client::call('fenxiao.supplier.goods.getGoodsByKdtGoodsId', [
-            'kdt_goods_id' => 1111
+            'kdt_goods_id' => 1500107
         ]));
         $context->set('result', $result);
 

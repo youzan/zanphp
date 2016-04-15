@@ -126,13 +126,50 @@ class Client implements Async
             self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : $allApiConfig['dev'];
         }
 
-        if (isset(self::$apiConfig['java'][$api])) {
-            self::$apiConfig['java'][$api]['type'] = self::JAVA_TYPE;
-            return self::$apiConfig['java'][$api];
-        } else {
-            self::$apiConfig['php']['type'] = self::PHP_TYPE;
-            return self::$apiConfig['php'];
+        $pos = stripos ($api, ".");
+        if (false === $pos) {
+            return false;
         }
+        $mod = substr ($api, 0, $pos);
+        $target = isset (self::$apiConfig[$mod]) ? self::$apiConfig[$mod] : ['type' => 'php'];
+        if (isset($target['sub']) && $target['sub']) {
+            $target = static::getSubTarget($target, $api);
+        }
+        if (!empty($target['host'])) {
+            $hostInfo = explode(':', $target['host']);
+        } else {
+            $hostInfo = null;
+        }
+
+        $host = isset($hostInfo[0]) ? $hostInfo[0] : 'api.koudaitong.com';
+        $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
+        $type = isset($target['type']) ? $target['type'] : 'php';
+        $timeout = isset($target['timeout']) ? $target['timeout'] : 3;
+
+        return [
+            'host' => $host,
+            'port' => $port,
+            'timeout' => $timeout,
+            'type' => $type
+        ];
+
+    }
+
+    private static function getSubTarget($target, $path) {
+        $sub = $target ['sub'];
+        while(true) {
+            foreach ( $sub as $item ) {
+                if ($item ['mod'] == $path) {
+                    return $item;
+                }
+            }
+            $cursor = strrpos ( $path, "." );
+            if (!$cursor) {
+                break;
+            }
+            $path = substr ( $path, 0, $cursor );
+        }
+        return $target;
     }
 
     private static function filterParams($params, $type)

@@ -9,6 +9,7 @@ use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Tcp\RequestExceptionHandlerChain; 
 use Zan\Framework\Network\Server\ServerBase;
 
 class Server extends ServerBase {
@@ -123,7 +124,11 @@ class Server extends ServerBase {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
+        try{
+            (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
+        } catch (\Exception $e) {
+            RequestExceptionHandlerChain::getInstance()->handle($e);
+        }
     }
 
 }
