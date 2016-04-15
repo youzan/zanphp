@@ -11,7 +11,7 @@ namespace Zan\Framework\Network\Http;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
-use Zan\Framework\Network\http\Dispatcher;
+use Zan\Framework\Network\Http\Dispatcher;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Foundation\Container\Di;
 
