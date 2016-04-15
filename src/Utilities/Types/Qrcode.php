@@ -44,11 +44,11 @@ class Qrcode {
 
         if ($response && 200 == $response->status_code) {
             if (false === $base64){
-                return $response->body;
+                yield $response->body;
             } else {
-                return 'data:image/png;base64,' . base64_encode($response->body);
+                yield 'data:image/png;base64,' . base64_encode($response->body);
             }
         }
-        return '';
+        yield '';
     }
 }
