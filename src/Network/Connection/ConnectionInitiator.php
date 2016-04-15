@@ -34,9 +34,8 @@ class ConnectionInitiator
     public function init(array $config)
     {
         //读取配置文件
-        //$configs = Config::get('xxxx');
-        $configs = $this->configFile();
-        $this->initConfig($configs);
+        $config = $this->configFile();
+        $this->initConfig($config);
 
     }
 
@@ -51,10 +50,10 @@ class ConnectionInitiator
                     continue;
                 }
                 //创建连接池
-                $drive = $cf['engine'];
-                if (in_array($drive, $this->engineMap)) {
-                    $drive = ucfirst($drive);
-                    $this->initPool($drive, $cf['pool']);
+                $factoryType = $cf['engine'];
+                if (in_array($factoryType, $this->engineMap)) {
+                    $factoryType = ucfirst($factoryType);
+                    $this->initPool($factoryType, $cf['pool']);
                 }
             }
 
@@ -62,12 +61,12 @@ class ConnectionInitiator
     }
 
     /**
-     * @param $driver
-     * 初始化连接池
+     * @param $factoryType
+     * @param $config
      */
-    private function initPool($driver, $config)
+    private function initPool($factoryType, $config)
     {
-        switch ($driver) {
+        switch ($factoryType) {
             case 'Redis':
                 $factory = new Redis($config);
             case 'Syslog':
@@ -77,9 +76,11 @@ class ConnectionInitiator
             case 'Mysqli':
                 $factory = new Mysqli($config);
             default:
-                $connectionPool = new Pool($factory, $config, $driver);
+            {
+                $connectionPool = new Pool($factory, $config, $factoryType);
                 $connectionManage = new ConnectionManager();
                 $connectionManage->addPool($config['pool_name'], $connectionPool);
+            }
         }
     }
 

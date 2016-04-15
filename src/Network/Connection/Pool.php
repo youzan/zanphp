@@ -51,21 +51,33 @@ class Pool implements ConnectionPool
         $this->activeConnection = new ObjectArray();
         for ($i=0; $i<$initConnection; $i++) {
             //todo 创建链接,存入数组
-            $mysqlConnection = $this->factory->create();
-            switch($this->type) {
-                case 'Mysqli':
-                    $connection = new Mysqli();
-                case 'Http':
-                    $connection = new Http();
-                case 'Redis':
-                    $connection = new Redis();
-                case 'Syslog':
-                    $connection = new Syslog();
-            }
-            $connection->setPool($this);
-            $connection->setSocket($mysqlConnection);
-            $this->freeConnection->push($connection);
+            $this->createConnect($this);
         }
+
+    }
+
+    //创建连接
+    private function createConnect($this)
+    {
+        //todo 创建链接,存入数组
+        $mysqlConnection = $this->factory->create();
+        switch($this->type) {
+            case 'Mysqli':
+                $connection = new Mysqli();
+            case 'Http':
+                $connection = new Http();
+            case 'Redis':
+                $connection = new Redis();
+            case 'Syslog':
+                $connection = new Syslog();
+            default:
+            {
+                //do nothing
+            }
+        }
+        $connection->setSocket($mysqlConnection);
+        $this->freeConnection->push($connection);
+        $connection->setPool($this);
     }
     
     public function reload(array $config)
@@ -104,5 +116,8 @@ class Pool implements ConnectionPool
     {
         $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
+        //补充删除被删除连接
+        $this->createConnect($this);
+
     }
 }
