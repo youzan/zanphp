@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Common;
 
-use Zan\Framework\Network\Http\Client\HttpClient as Client;
+use Zan\Framework\Network\Http\Client\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
 class HttpClient implements Async
@@ -10,7 +10,7 @@ class HttpClient implements Async
     const GET = 'GET';
     const POST = 'POST';
 
-    /** @var  Client */
+    /** @var  HClient */
     private $client;
 
     private $host;
@@ -66,6 +66,9 @@ class HttpClient implements Async
 
     private function setUri($uri)
     {
+        if (empty($uri)) {
+            $uri .= '/';
+        }
         $this->uri = $uri;
     }
 
@@ -81,7 +84,7 @@ class HttpClient implements Async
 
     private function build()
     {
-        $this->client = new Client($this->host, $this->port);
+        $this->client = new HClient($this->host, $this->port);
 
         $this->client->setTimeout($this->timeout);
         $this->client->setMethod($this->method);
