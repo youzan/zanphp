@@ -23,7 +23,6 @@ class InitializeRunMode implements Bootable
     }
 
     private function getRunMode(){
-        return 'dev';
         $key = 'kdt.' . $this->runModeKey;
         $value = get_cfg_var($key);
         if(!$value && isset($_SERVER[$key])){
