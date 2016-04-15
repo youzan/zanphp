@@ -17,11 +17,10 @@ class RedirectHandler implements ExceptionHandler
 {
     public function handle(\Exception $e)
     {
-        if(!isset($e->redirectUrl) && !is_a($e, RedirectException::class)){
+        if (!isset($e->redirectUrl) && !is_a($e, RedirectException::class)) {
             return null;
         }
 
-        RedirectResponse::create($e->redirectUrl, BaseResponse::HTTP_FOUND);
-        return true;
+        return RedirectResponse::create($e->redirectUrl, BaseResponse::HTTP_FOUND);
     }
 }

@@ -10,6 +10,8 @@ namespace Zan\Framework\Foundation\Exception;
 
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Exception\Handler\ExceptionLogger;
+use Zan\Framework\Network\Http\Response\BaseResponse;
+use swoole_http_response as SwooleHttpResponse;
 
 class ExceptionHandlerChain
 {
@@ -32,7 +34,9 @@ class ExceptionHandlerChain
     public function handle(\Exception $e)
     {
         if (empty($this->handlerChain)) {
-            throw $e;
+            //@TODO 输出到console
+            return;
+            // throw $e;
         }
 
         //at less one handler handle the exception
@@ -40,14 +44,23 @@ class ExceptionHandlerChain
         $exceptionHandled = false;
         foreach ($this->handlerChain as $handler) {
             $status = $handler->handle($e);
-            if (true === $status) {
+            if ($status) {
                 $exceptionHandled = true;
+                break;
             }
+        }
+        if (is_a($status, BaseResponse::class)) {
+            $swooleResponse = (yield getContext('response'));
+            yield $status->sendBy($swooleResponse);
+            return;
         }
 
         if (false === $exceptionHandled) {
-            throw $e;
+            //@TODO 输出到console
+            return;
+            // throw $e;
         }
+        yield null;
     }
 
     public function addHandler(ExceptionHandler $handler)

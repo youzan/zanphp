@@ -20,7 +20,7 @@ class PageNotFoundHandler implements ExceptionHandler
 
     public function handle(\Exception $e)
     {
-        if(!is_a($e, PageNotFoundException::class)){
+        if (!is_a($e, PageNotFoundException::class)) {
             return false;
         }
         $config = Config::get($this->configKey, null);
@@ -28,7 +28,6 @@ class PageNotFoundHandler implements ExceptionHandler
             return false;
         }
         // 跳转到配置的404页面
-        RedirectResponse::create($config['404'], BaseResponse::HTTP_NOT_FOUND);
-        return true;
+        return RedirectResponse::create($config['404'], BaseResponse::HTTP_FOUND);
     }
 }

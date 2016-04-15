@@ -46,6 +46,36 @@ function getTaskId()
     });
 }
 
+function getContext($key, $default = null)
+{
+    return new SysCall(function (Task $task) use ($key, $default) {
+        $context = $task->getContext();
+        $task->send($context->get($key, $default));
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function setContext($key, $value)
+{
+    return new SysCall(function (Task $task) use ($key, $value) {
+        $context = $task->getContext();
+        $task->send($context->set($key, $value));
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function getContextObject()
+{
+    return new SysCall(function (Task $task) {
+        $context = $task->getContext();
+        $task->send($context);
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
 function getTaskResult()
 {
     return new SysCall(function (Task $task) {
