@@ -15,19 +15,8 @@ use Zan\Framework\Foundation\Core\RunMode;
 
 class InitializeRunMode implements Bootable
 {
-    private $runModeKey = 'RUN_MODE';
-
     public function bootstrap(Application $app)
     {
-        RunMode::set($this->getRunMode());
-    }
-
-    private function getRunMode(){
-        $key = 'kdt.' . $this->runModeKey;
-        $value = get_cfg_var($key);
-        if(!$value && isset($_SERVER[$key])){
-            $value = $_SERVER[$key];
-        }
-        return $value;
+        RunMode::detect();
     }
 }
