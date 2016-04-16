@@ -23,16 +23,14 @@ class ConnectionPoolTest extends TaskTest {
 
     public function taskPoolWork()
     {
-        $m = new ConnectionInitiator();
-        $m->init([]);
-        $cm = new ConnectionManager();
+        ConnectionInitiator::getInstance()->init([]);
 
 
-        $pool = (yield $cm->get('pifa'));
+        $pool = (yield ConnectionManager::getInstance()->get('pifa'));
         $pool->close();
 
         for ($i=0; $i<5;$i++) {
-        $pool = (yield $cm->get('pifa'));
+        $pool = (yield ConnectionManager::getInstance()->get('pifa'));
 
         var_dump($pool->getSocket());
         }
