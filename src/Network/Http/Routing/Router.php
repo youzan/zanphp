@@ -8,6 +8,7 @@ namespace Zan\Framework\Network\Http\Routing;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Router {
 
@@ -36,7 +37,7 @@ class Router {
         if(empty($url)) {
             return;
         }
-        $this->url = ltrim($url, $this->separator);
+        $this->url = strtolower(ltrim($url, $this->separator));
         $this->removeIllegalString();
     }
 
@@ -57,7 +58,7 @@ class Router {
 
     public function parseRoute()
     {
-        $parts = explode($this->separator, trim($this->route, $this->separator));
+        $parts = array_filter(explode($this->separator, trim($this->route, $this->separator)));
         $route['action_name'] = array_pop($parts);
         $route['controller_name'] = join('\\', $parts);
         return $route;
@@ -89,7 +90,6 @@ class Router {
                 $this->setDefaultAction();
                 break;
         }
-        $this->route = strtolower($this->route);
     }
 
     private function parseRegexRoute()
