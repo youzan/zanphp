@@ -9,5 +9,5 @@
 namespace Zan\Framework\Contract\Network;
 
 interface Bootable {
-    public function bootstrap(Server $server);
+    public function bootstrap($server);
 }
