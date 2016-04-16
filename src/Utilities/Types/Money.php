@@ -18,4 +18,24 @@ class Money {
     {
 
     }
+
+    public function toYuan()
+    {
+        return number_format(round($this->num / 100, 2, PHP_ROUND_HALF_EVEN), 2, '.', '');
+    }
+
+    public function rmDot()
+    {
+        return intval(number_format(round($this->num * 100, 0, PHP_ROUND_HALF_EVEN), 0, '.', ''));
+    }
+
+    public function addZero()
+    {
+        return number_format($this->num, 2, '.', '');
+    }
+
+    public function rmDecimalAndAddZero()
+    {
+        return number_format(intval(round($this->num / 100, 2, PHP_ROUND_HALF_EVEN)), 2, '.', '');
+    }
 }
