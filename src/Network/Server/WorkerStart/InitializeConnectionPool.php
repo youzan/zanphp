@@ -6,6 +6,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Contract\Network\Bootable;
 use Zan\Framework\Contract\Network\Server;
+
 class InitializeConnectionPool implements Bootable
 {
     /**
