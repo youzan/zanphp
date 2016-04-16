@@ -79,7 +79,7 @@ class HttpClient
     {
         $this->client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_ASYNC);
 
-        $this->parser = new parser();
+        $this->parser = new Parser();
 
         $this->bindEvent();
 
