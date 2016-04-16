@@ -19,7 +19,7 @@ class Money {
 
     }
 
-    public function addDot()
+    public function toYuan()
     {
         return number_format(round($this->num / 100, 2, PHP_ROUND_HALF_EVEN), 2, '.', '');
     }
