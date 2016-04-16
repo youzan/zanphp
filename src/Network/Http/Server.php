@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
+use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
@@ -15,7 +16,8 @@ use Zan\Framework\Network\Server\ServerBase;
 class Server extends ServerBase implements ServerContract
 {
     protected $serverStartItems = [
-        InitializeRouter::class
+        InitializeRouter::class,
+        InitializeExceptionHandlerChain::class
     ];
 
     protected $workerStartItems = [
@@ -60,7 +62,7 @@ class Server extends ServerBase implements ServerContract
 
     public function onStart($swooleServer)
     {
-        
+
     }
 
     public function onShutdown($swooleServer)
@@ -85,11 +87,11 @@ class Server extends ServerBase implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
-        try{
+//        try {
             (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
-        }catch(\Exception $e){
-            RequestExceptionHandlerChain::getInstance()->handle($e);
-        }
+//        } catch (\Exception $e) {
+//            RequestExceptionHandlerChain::getInstance()->handle($e, $swooleHttpRequest, $swooleHttpResponse);
+//        }
     }
 
     private function routerSelfCheck()
