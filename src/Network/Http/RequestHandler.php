@@ -22,16 +22,16 @@ class RequestHandler
     {
         try {
 
+            $request = Request::createFromSwooleHttpRequest($swooleRequest);
+            $this->context->set('request', $request);
+            $this->context->set('response', $swooleResponse);
+
             $router = Router::getInstance();
             $router->route($request);
             $route = $router->parseRoute();
 
             $this->context->set('controller_name', $route['controller_name']);
             $this->context->set('action_name', $route['action_name']);
-
-            $request = Request::createFromSwooleHttpRequest($swooleRequest);
-            $this->context->set('request', $request);
-            $this->context->set('response', $swooleResponse);
 
             $cookie = new Cookie($request, $swooleResponse);
             $this->context->set('cookie', $cookie);
