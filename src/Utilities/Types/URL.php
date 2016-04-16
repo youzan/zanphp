@@ -10,7 +10,8 @@ namespace Zan\Framework\Utilities\Types;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Sdk\Cdn\Qiniu;
 
-class Url{
+class URL
+{
 
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTPS = 'https';
@@ -22,7 +23,8 @@ class Url{
 
     private static $config;
 
-    public static function setConfig(array &$config){
+    public static function setConfig(array &$config)
+    {
         self::$config = &$config;
     }
 
@@ -34,28 +36,27 @@ class Url{
      */
     public static function base($index = FALSE, $scheme = false)
     {
-        if(false !== $scheme && !self::_checkScheme($scheme)){
-            throw new InvalidArgumentException('Invalid scheme for Url');
+        if (false !== $scheme && !self::_checkScheme($scheme)) {
+            throw new InvalidArgumentException('Invalid scheme for URL');
         }
-        $base_url = '/';
-        $site_domain = '';
-        $scheme = (false === $scheme) ? self::SCHEME_HTTP:$scheme;
+        $baseUrl = '/';
+        $siteDomain = '';
+        $scheme = (false === $scheme) ? self::SCHEME_HTTP : $scheme;
 
-        if( is_string($index) || strlen($index)) {
-            $site_domain    = isset(self::$config[$index])?self::$config[$index]:null;
-            if(empty(($site_domain))){
-                $site_domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
-                $site_domain = $scheme . '://' . $site_domain ;
+        if (is_string($index) || strlen($index)) {
+            $siteDomain = isset(self::$config[$index]) ? self::$config[$index] : null;
+            if (empty(($siteDomain))) {
+                $siteDomain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+                $siteDomain = $scheme . '://' . $siteDomain;
             }
         }
 
-        if (true === $index)
-        {
-            $site_domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
-            $site_domain = $scheme . '://' . $site_domain ;
+        if (true === $index) {
+            $siteDomain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+            $siteDomain = $scheme . '://' . $siteDomain;
         }
 
-        return rtrim($site_domain . $base_url, '/').'/';
+        return rtrim($siteDomain . $baseUrl, '/') . '/';
     }
 
     /**
@@ -67,27 +68,27 @@ class Url{
      */
     public static function site($url = '', $index = TRUE, $scheme = false)
     {
-        if(false !== $scheme && !self::_checkScheme($scheme)){
-            throw new InvalidArgumentException('Invalid scheme for Url::site');
+        if (false !== $scheme && !self::_checkScheme($scheme)) {
+            throw new InvalidArgumentException('Invalid scheme for URL::site');
         }
 
         $urlAnalysis = parse_url($url);
-        $host = isset($urlAnalysis['host'])?$urlAnalysis['host']:'';
-        $path =  isset($urlAnalysis['path'])?trim($urlAnalysis['path'], '/'):'';
-        $query = isset($urlAnalysis['query'])?'?'.$urlAnalysis['query']:'';
-        $fragment = isset($urlAnalysis['fragment'])?'#'.$urlAnalysis['fragment']:'';
+        $host = isset($urlAnalysis['host']) ? $urlAnalysis['host'] : '';
+        $path = isset($urlAnalysis['path']) ? trim($urlAnalysis['path'], '/') : '';
+        $query = isset($urlAnalysis['query']) ? '?' . $urlAnalysis['query'] : '';
+        $fragment = isset($urlAnalysis['fragment']) ? '#' . $urlAnalysis['fragment'] : '';
 
-        if(!empty($host)){
-            $scheme = isset($urlAnalysis['scheme'])?$urlAnalysis['scheme']:'';
-            if(!self::_checkScheme($scheme)){
-                throw new InvalidArgumentException('Invalid url for Url::site');
+        if (!empty($host)) {
+            $scheme = isset($urlAnalysis['scheme']) ? $urlAnalysis['scheme'] : '';
+            if (!self::_checkScheme($scheme)) {
+                throw new InvalidArgumentException('Invalid url for URL::site');
             }
-            $base_url = $scheme . '://' . $host . '/';
-        }else{
-            $base_url = URL::base($index, $scheme);
+            $baseUrl = $scheme . '://' . $host . '/';
+        } else {
+            $baseUrl = URL::base($index, $scheme);
         }
 
-        $url = $base_url.$path.$query.$fragment;
+        $url = $baseUrl . $path . $query . $fragment;
 
         return $url;
     }
@@ -103,9 +104,10 @@ class Url{
      * @return string
      * @throws InvalidArgumentException
      */
-    public static function cdnSite($url , $imgExt , $scheme = false, $removeImgExt = false){
-        if(false !== $scheme && !self::_checkScheme($scheme)){
-            throw new InvalidArgumentException('Invalid scheme for Url::site');
+    public static function cdnSite($url, $imgExt, $scheme = false, $removeImgExt = false)
+    {
+        if (false !== $scheme && !self::_checkScheme($scheme)) {
+            throw new InvalidArgumentException('Invalid scheme for URL::cdnSite');
         }
 
         if ($removeImgExt && ($pos = strrpos($url, '!'))) {
@@ -130,7 +132,7 @@ class Url{
      */
     private static function _checkScheme($scheme)
     {
-        return in_array($scheme,self::$schemes);
+        return in_array($scheme, self::$schemes);
     }
 
     /**
@@ -140,7 +142,8 @@ class Url{
      * @param $canWebp
      * @return string
      */
-    private static function _convertWebp($imgSrc, $canWebp = false){
+    private static function _convertWebp($imgSrc, $canWebp = false)
+    {
         $multiple = 1;
         $pattern = '/\.([^.!]+)\!([0-9]{1,4})x([0-9]{1,4})(\+2x)?\.(.*)/';
         preg_match($pattern, $imgSrc, $matches);

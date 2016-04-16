@@ -46,6 +46,36 @@ function getTaskId()
     });
 }
 
+function getContext($key, $default = null)
+{
+    return new SysCall(function (Task $task) use ($key, $default) {
+        $context = $task->getContext();
+        $task->send($context->get($key, $default));
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function setContext($key, $value)
+{
+    return new SysCall(function (Task $task) use ($key, $value) {
+        $context = $task->getContext();
+        $task->send($context->set($key, $value));
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function getContextObject()
+{
+    return new SysCall(function (Task $task) {
+        $context = $task->getContext();
+        $task->send($context);
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
 function getTaskResult()
 {
     return new SysCall(function (Task $task) {
@@ -123,7 +153,7 @@ function cookieGet($key, $default = null)
     });
 }
 
-function cookieSet($key, $value = null, $expire, $path, $domain, $secure, $httpOnly)
+function cookieSet($key, $value = null, $expire = 0, $path = null, $domain = null, $secure = null, $httpOnly = null)
 {
     $args = func_get_args();
     return new SysCall(function (Task $task) use ($args) {

@@ -19,7 +19,8 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Foundation\Application;
 
-class MiddlewareManager {
+class MiddlewareManager
+{
 
     use Singleton;
 
@@ -29,7 +30,7 @@ class MiddlewareManager {
     public function loadConfig($path = '')
     {
         $this->config = empty($path) ? Config::get($this->conKey) : ConfigLoader::getInstance()->load($path, true);
-        $this->config['match'] = isset($this->config['match']) ? array_reverse($this->config['match']) : [];
+        $this->config['match'] = isset($this->config['match']) ? $this->config['match'] : [];
     }
 
     public function optimize()
@@ -45,14 +46,14 @@ class MiddlewareManager {
     public function executeFilters(Request $request, Context $context)
     {
         $filters = $this->getGroupValue($request);
-        foreach($filters as $filter){
+        foreach ($filters as $filter) {
             $filterObjectName = $this->getObject($filter);
             $filterObject = new $filterObjectName();
-            if($filterObject instanceof RequestFilter){
+            if ($filterObject instanceof RequestFilter) {
                 $response = (yield $filterObject->doFilter($request, $context));
-                if(null !== $response) {
+                if (null !== $response) {
                     yield $response;
-                    return ;
+                    return;
                 }
             }
             unset($filterObject);
@@ -68,32 +69,37 @@ class MiddlewareManager {
     public function executeTerminators(Request $request, Response $response, Context $context)
     {
         $terminators = $this->getGroupValue($request);
-        foreach($terminators as $terminator){
+        foreach ($terminators as $terminator) {
             $terminatorObjectName = $this->getObject($terminator);
             $terminatorObject = new $terminatorObjectName();
-            if($terminatorObject instanceof RequestTerminator){
-                yield $terminatorObject->terminate($request, $response ,$context);
+            if ($terminatorObject instanceof RequestTerminator) {
+                yield $terminatorObject->terminate($request, $response, $context);
             }
             unset($terminatorObject);
         }
     }
 
-    public function getGroupValue(Request $request){
+    public function getGroupValue(Request $request)
+    {
         $route = $request->getRoute();
         $groupKey = null;
 
-        foreach($this->config['match'] as $match){
+        for ($i = 0; ; $i++) {
+            if (!isset($this->config['match'][$i])) {
+                break;
+            }
+            $match = $this->config['match'][$i];
             $pattern = $match[0];
-            if($this->match($pattern,$route)){
+            if ($this->match($pattern, $route)) {
                 $groupKey = $match[1];
                 break;
             }
         }
 
-        if(null === $groupKey){
+        if (null === $groupKey) {
             return null;
         }
-        if(!isset($this->config['group'][$groupKey])){
+        if (!isset($this->config['group'][$groupKey])) {
             throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
         }
 
@@ -102,7 +108,7 @@ class MiddlewareManager {
 
     public function match($pattern, $route)
     {
-        if(preg_match($pattern, $route)) {
+        if (preg_match($pattern, $route)) {
             return true;
         }
         return false;

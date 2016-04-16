@@ -48,7 +48,6 @@ class QueryExecutor
     {
         $key = $this->database . '.' . $this->sqlMap['table'];
         $connectionManager = ConnectionManager::getInstance();
-        $connectionManager->init();
         $this->connection = (yield $connectionManager->get($this->database));
     }
 
@@ -61,7 +60,11 @@ class QueryExecutor
     private function onQuery()
     {
         $connection = $this->connection->getSocket();
-//        $this->sql = $connection->real_escape_string($this->sql);
+        if (!($connection instanceof \mysqli)) {
+            $this->connection->close();
+            throw new MysqlException('数据库链接错误');
+        }
+
         $result = $connection->query($this->sql, MYSQLI_ASYNC);
         if ($result === false) {
             if (in_array($connection->errno, [2013, 2006])) {

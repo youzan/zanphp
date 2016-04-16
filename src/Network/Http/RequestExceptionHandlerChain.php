@@ -9,21 +9,23 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Exception\ExceptionHandlerChain;
+use Zan\Framework\Network\Http\Exception\Handler\InvalidRouteHandler;
 use Zan\Framework\Network\Http\Exception\Handler\PageNotFoundHandler;
 use Zan\Framework\Network\Http\Exception\Handler\RedirectHandler;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-class RequestExceptionHandlerChain extends ExceptionHandlerChain 
+class RequestExceptionHandlerChain extends ExceptionHandlerChain
 {
     use Singleton;
-    
+
     private $handles = [
         RedirectHandler::class,
         PageNotFoundHandler::class,
+        InvalidRouteHandler::class,
     ];
 
     public function init()
-    {   
+    {
         $this->addHandlersByName($this->handles);
     }
 }
