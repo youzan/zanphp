@@ -31,11 +31,14 @@ class ConnectionInitiator
     /**
      * @param array $config(=Config::get('connection'))
      */
-    public function init(array $config)
+    public function init($config)
     {
         //读取配置文件
 //        $config = $this->configFile();
-        $this->initConfig($config);
+        if (is_array($config)) {
+            $this->initConfig($config);
+        }
+
 
     }
 
