@@ -22,12 +22,21 @@ class HttpClientTest extends TaskTest
 
     private function makeCoroutine($context)
     {
-        $result = (yield HttpClient::newInstance('api.koudaitong.com', 80)->get('/fenxiao/supplier/goods/getGoodsByKdtGoodsId', [
-            'kdt_goods_id' => 1313150,
-            'debug' => 'json'
-        ]));
+        $params = [
+            'txt' => 'aaa',
+            'size' => 200,
+            'margin' => 20,
+            'level' => 0,
+            'hint' => 2,
+            'case' => 1,
+            'ver' => 1,
+            'fg_color' => '000000',
+            'bg_color' => 'ffffff',
+        ];
+        $result = (yield HttpClient::newInstance('192.168.66.202', 8888)->get('', $params));
 
-        var_dump($result);exit;
+        var_dump($result);
+        exit;
 
         yield 'success';
     }

@@ -1,22 +1,21 @@
 <?php
 /**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/3/16
- * Time: 21:40
+ * Created by PhpStorm.
+ * User: chenfan
+ * Date: 16/4/15
+ * Time: 下午10:48
  */
 
 namespace Zan\Framework\Foundation\Booting;
 
-
 use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
-use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Foundation\Core\Debug;
 
-class InitializeRunMode implements Bootable
+class InitializeDebug implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        RunMode::detect();
+        Debug::detect();
     }
-}
+} 
