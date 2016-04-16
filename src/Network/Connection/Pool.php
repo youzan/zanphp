@@ -51,13 +51,13 @@ class Pool implements ConnectionPool
         $this->activeConnection = new ObjectArray();
         for ($i=0; $i<$initConnection; $i++) {
             //todo 创建链接,存入数组
-            $this->createConnect($this);
+            $this->createConnect();
         }
 
     }
 
     //创建连接
-    private function createConnect($this)
+    private function createConnect()
     {
         //todo 创建链接,存入数组
         $mysqlConnection = $this->factory->create();
@@ -75,7 +75,7 @@ class Pool implements ConnectionPool
                 //do nothing
             }
         }
-        $connection->setSocket($mysqlConnection);
+        $connection->setSocket($mysqlConnection . $i);
         $this->freeConnection->push($connection);
         $connection->setPool($this);
     }
@@ -117,7 +117,7 @@ class Pool implements ConnectionPool
         $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
         //补充删除被删除连接
-        $this->createConnect($this);
+        $this->createConnect();
 
     }
 }
