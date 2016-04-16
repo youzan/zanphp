@@ -13,7 +13,6 @@ use Zan\Framework\Store\Database\Mysql\SqlMap;
 use Zan\Framework\Store\Database\Mysql\QueryResult;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 use Zan\Framework\Store\Database\Mysql\Table;
-use mysqli;
 class QueryExecutor
 {
     /**
@@ -61,7 +60,7 @@ class QueryExecutor
     private function onQuery()
     {
         $connection = $this->connection->getSocket();
-        if (!($connection instanceof mysqli)) {
+        if (!($connection instanceof \mysqli)) {
             $this->connection->close();
             throw new MysqlException('数据库链接错误');
         }
