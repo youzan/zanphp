@@ -4,7 +4,6 @@ namespace Zan\Framework\Network\Server;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
-use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 
 class ServerBase
 {
@@ -12,7 +11,6 @@ class ServerBase
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class,
     ];
 
     protected function bootServerStartItem()

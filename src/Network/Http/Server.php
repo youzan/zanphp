@@ -21,7 +21,7 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
-//        InitializeConnectionPool::class
+        InitializeConnectionPool::class
     ];
 
     /**
