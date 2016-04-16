@@ -104,7 +104,7 @@ class URL
      * @return string
      * @throws InvalidArgumentException
      */
-    public static function cdnSite($url, $imgExt, $scheme = false, $removeImgExt = false)
+    public static function cdnSite($url, $imgExt = null, $scheme = false, $removeImgExt = false)
     {
         if (false !== $scheme && !self::_checkScheme($scheme)) {
             throw new InvalidArgumentException('Invalid scheme for URL::cdnSite');
