@@ -64,15 +64,20 @@ class Pool implements ConnectionPool
         switch($this->type) {
             case 'Mysqli':
                 $connection = new Mysqli();
+                break;
             case 'Http':
                 $connection = new Http();
+                break;
             case 'Redis':
                 $connection = new Redis();
+                break;
             case 'Syslog':
                 $connection = new Syslog();
+                break;
             default:
             {
                 //do nothing
+                break;
             }
         }
         $connection->setSocket($mysqlConnection);
