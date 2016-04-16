@@ -76,12 +76,11 @@ class ConnectionInitiator
             case 'Mysqli':
                 $factory = new Mysqli($config);
             default:
-            {
-                $connectionPool = new Pool($factory, $config, $factoryType);
-                $connectionManage = new ConnectionManager();
-                $connectionManage->addPool($config['pool_name'], $connectionPool);
-            }
+            {}
         }
+        $connectionPool = new Pool($factory, $config, $factoryType);
+        $connectionManage = new ConnectionManager();
+        $connectionManage->addPool($config['pool_name'], $connectionPool);
     }
 
     private function configFile()
