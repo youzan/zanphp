@@ -41,13 +41,13 @@ class Qrcode {
         ];
         $config = Config::get('url.qrcode');
         $response = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/',$params));
-
-        if ($response && 200 == $response->status_code) {
+        if ($response) {
             if (false === $base64){
-                yield $response->body;
+                yield $response;
             } else {
-                yield 'data:image/png;base64,' . base64_encode($response->body);
+                yield 'data:image/png;base64,' . base64_encode($response);
             }
+            return;
         }
         yield '';
     }
