@@ -17,7 +17,6 @@ class InitializeRunMode implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        RunMode::set('dev');
-        //RunMode::detect();
+        RunMode::detect();
     }
 }
