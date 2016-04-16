@@ -75,7 +75,7 @@ class Pool implements ConnectionPool
                 //do nothing
             }
         }
-        $connection->setSocket($mysqlConnection . $i);
+        $connection->setSocket($mysqlConnection);
         $this->freeConnection->push($connection);
         $connection->setPool($this);
     }
