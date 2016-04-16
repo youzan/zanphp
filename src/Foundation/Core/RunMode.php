@@ -30,7 +30,7 @@ class RunMode {
     public static function set($runMode)
     {
         if (!isset(self::$modeMap[$runMode])) {
-            throw new InvalidArgumentException('invalid $runMode in RunMode::set');
+            throw new InvalidArgumentException('invalid runMode in RunMode::set');
         }
         self::$runMode = $runMode;
     }
