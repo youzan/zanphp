@@ -47,7 +47,9 @@ class ConnectionInitiator
     {
         foreach ($config as $cf) {
             if (!isset($cf['engine'])) {
-                $this->initConfig($cf);
+                if (is_array($config)) {
+                    $this->initConfig($cf);
+                }
             } else {
                 if (empty($cf['pool'])) {
                     continue;
