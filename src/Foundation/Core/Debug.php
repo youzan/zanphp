@@ -20,7 +20,7 @@ class Debug {
 
     public static function setCliInput($mode)
     {
-        self::$cliInput = $mode ? true : false;
+        self::$cliInput == $mode ? true : false;
     }
 
     public static function detect()

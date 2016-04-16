@@ -3,6 +3,7 @@
 namespace Zan\Framework\Sdk\Sms;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Network\Common\Client;
 
 class SmsService
 {
@@ -17,7 +18,7 @@ class SmsService
     public function send(MessageContext $messageContext, array $recipients)
     {
         if (!$messageContext instanceof MessageContext) {
-            return false;
+            yield false;
         }
 
         $params = [];
@@ -40,8 +41,7 @@ class SmsService
         }
         $params['recipientRequests'] = $recipientRequests;
 
-        return true;
-//        return \Client::call("courier.push.sendMessage", $params, null, 'post');
+        yield Client::call("courier.push.sendMessage", $params, 'POST');
     }
 
 }

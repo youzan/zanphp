@@ -8,36 +8,42 @@ class Parser
     const BODY = 2;
     const FINISHED = 3;
 
-    private $header;
+    private $header = [];
     private $body;
 
     private $current;
-    private $chunkdLength;
+    private $chunkdLength = null;
 
     public function __construct()
     {
         $this->current = self::HEADER;
         $this->header = '';
         $this->body = '';
-        $this->chunkdLength = 0;
+        $this->chunkdLength = null;
     }
 
     public function parse($data)
     {
-        $lines = explode("\r\n", $data);
-        foreach ($lines  as $line) {
-            if (strlen($line) == 0) {
-                $this->current++;
-                continue;
-            }
+        if ($this->current === self::HEADER) {
+            for(;;) {
+                $pos = stripos($data, "\r\n");
+                if ($pos === false) {
+                    break;
+                }
+                if ($pos === 0) {
+                    $this->current = self::BODY;
+                    $data = substr($data, $pos+2);
+                    break;
+                }
+                $pre = substr($data, 0, $pos);
 
-            if ($this->current == self::HEADER) {
-                $this->parseHeader($line);
+                $this->parseHeader($pre);
+                $data = substr($data, $pos+2);
             }
+        }
 
-            if ($this->current == self::BODY) {
-                $this->parseBody($line);
-            }
+        if ($this->current === self::BODY) {
+            $this->parseBody($data);
         }
 
         return $this->current;
@@ -76,15 +82,43 @@ class Parser
     private function parseBody($data)
     {
         if (isset($this->header['Transfer-Encoding']) and $this->header['Transfer-Encoding'] == 'chunked') {
-            if (!$this->chunkdLength) {
-                $this->chunkdLength = hexdec($data);
-            } else {
-                $this->body .= $data;
-                $this->chunkdLength = 0;
+            for(;;) {
+                if (is_null($this->chunkdLength)) {
+                    $pos = stripos($data, "\r\n");
+                    if ($pos === false) {
+                        break;
+                    }
+                    $pre = substr($data, 0, $pos);
+                    if ($pre === '') {
+                        break;
+                    }
+                    $sizeInfo = explode(' ', $pre, 1);
+                    $this->chunkdLength = hexdec($sizeInfo[0]);
+                    $data = substr($data, $pos+2);
+                    if ($this->chunkdLength === 0) {
+                        $this->current = self::FINISHED;
+                    }
+                } else {
+                    if (strlen($data) >= $this->chunkdLength) {
+                        $this->body .= substr($data, 0, $this->chunkdLength);
+                        $data = substr($data, $this->chunkdLength+2);
+                        $this->chunkdLength = null;
+                    } else {
+                        $this->body .= $data;
+                        $this->chunkdLength = $this->chunkdLength - strlen($data);
+                    }
+
+                }
+            }
+
+        } elseif (isset($this->header['Content-Length'])) {
+            $this->body .= substr($data, 0, $this->header['Content-Length']);
+            if (strlen($this->body) >= $this->header['Content-Length']) {
+                $this->current = self::FINISHED;
             }
         } else {
             $this->body .= $data;
-            $this->current++;
+            $this->current = self::FINISHED;
         }
     }
 
