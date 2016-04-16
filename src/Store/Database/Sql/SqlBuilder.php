@@ -22,17 +22,57 @@ class SqlBuilder
         return $this->sql;
     }
 
-    public function builder($data)
+    public function builder($data, $require, $limit)
     {
-
+        if (!isset($this->sql['sql_type']) || '' == $this->sql['sql_type']) {
+            //todo throw can't find sql_type when sql builder
+        }
+        switch ($this->sql['sql_type']) {
+            case 'select' :
+                $this->select($data, $require, $limit);
+                break;
+            case 'insert' :
+                $this->insert($data);
+                break;
+            case 'update' :
+                $this->update($data, $require, $limit);
+                break;
+            case 'delete' :
+                $this->delete($data, $require, $limit);
+                break;
+        }
+        return $this;
     }
 
-    private function select($data)
+    private function select($data, $require, $limit)
     {
+        $this->checkRequire($data, $require, $limit);
+        $this->parseColumn($data);
+        if (isset($data['count'])) {
+            $this->parseCount($data);
+        }
+        $this->parseVars($data);
+        $this->parseWhere($data);
+        $this->parseAnds($data);
+        $this->parseOr($data);
 
+        $this->parseGroupBy($data);
+        $this->parseOrderBy($data);
+        $this->parseLimit($data);
+        return $this;
     }
 
-    private function insert()
+    private function parseCount($data)
+    {
+        if (!$data || !isset($data['count']) || '' == $data['count']) {
+            //todo throw 'what field do you want count?'
+        }
+        $count = 'count(' . $data['count'] . ') as count_sql_rows';
+        $this->sql = $this->replaceSqlLabel($this->sql, 'count', $count);
+        return $this;
+    }
+
+    private function insert($data)
     {
         if (isset($data['inserts'])) {
             return $this->batchInserts($data);
@@ -46,8 +86,8 @@ class SqlBuilder
         $columns = [];
         $values = [];
         foreach ($insert as $column => $value) {
-            $columns[] = $this->quotaColumn($column);
-            $values[] = $this->parseValueType($value);
+            $columns[] = $this->formatColumn($column);
+            $values[] = $this->formatValue($value);
         }
         $replace = '(' . implode(',', $columns) . ') values(';
         $replace .= implode(',', $values) . ')';
@@ -69,7 +109,7 @@ class SqlBuilder
         foreach ($inserts as $insert) {
             $values = [];
             foreach ($insert as $value) {
-                $values[] = $this->parseValueType($value);
+                $values[] = $this->formatValue($value);
             }
             $insertsArr[] = '(' . implode(',', $values) . ')';
         }
@@ -78,13 +118,10 @@ class SqlBuilder
         return $this;
     }
 
-    private function update($data)
+    private function update($data, $require, $limit)
     {
         $this->parseUpdateData($data);
-        if (isset($data['where'])) {
-            $this->checkRequire($data['where']);
-        }
-
+        $this->checkRequire($data, $require, $limit);
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
@@ -96,51 +133,60 @@ class SqlBuilder
         return $this;
     }
 
-    private function delete($data)
+    private function delete($data, $require, $limit)
     {
-        if (isset($data['where'])) {
-            $this->checkRequire($data['where']);
-        }
+        $this->checkRequire($data, $require, $limit);
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
         $this->parseOr($data);
+
         $this->parseGroupBy($data);
         $this->parseOrderBy($data);
         $this->parseLimit($data);
         return $this;
     }
 
-    private function quotaColumn($column)
+    private function formatColumn($column)
     {
         return '`'. str_replace('.', '`.`', $column) . '`';
     }
 
-
-    private function checkRequire($where)
+    private function formatValue($value)
     {
+        return is_int($value) ? $value : "'" . $value . "'";
+    }
+
+    private function checkRequire($data, $require, $limit)
+    {
+        if (!isset($data['where']) && !isset($data['and']) && !isset($data['or'])) {
+            return true;
+        }
+        $where = isset($data['where']) ? $data['where'] : [];
+        $where = isset($data['and']) ? array_merge($where, $data['and']) : $where;
+        $where = isset($data['or']) ? array_merge($where, $data['or']) : $where;
+
         $requireMap = [];
         $limitMap = [];
-        if ($this->sqlMap['require']) {
-            $requireMap = array_flip($this->sqlMap['require']);
+        if (is_array($require) && [] != $require) {
+            $requireMap = array_flip($require);
         }
-        if ($this->sqlMap['limit']) {
-            $limitMap = array_flip($this->sqlMap['limit']);
+        if (is_array($limit) && [] != $limit) {
+            $limitMap = array_flip($limit);
         }
-
-        if (count($requireMap) == 0 && count($limitMap) == 0) {
+        if ([] == $requireMap && [] == $limitMap) {
             return true;
         }
 
         foreach($where as $row) {
             $col = $row[0];
             if (count($requireMap) > 0) {
-                if (isset($requireMap[$col]) ) {
+                if (isset($requireMap[$col])) {
                     unset($requireMap[$col]);
                 }
             }
             if (count($limitMap) > 0) {
-                if (!isset($limitMap[$col]) ) {
+                if (!isset($limitMap[$col])) {
                     //todo throw sql map limit error
                 }
             }
@@ -149,6 +195,18 @@ class SqlBuilder
             //todo throw 'sql map require error'
         }
         return true;
+    }
+
+    private function parseColumn($data)
+    {
+        if (!$data || !isset($data['column']) || [] == $data['column'] || '' == $data['column']) {
+            $column = '*';
+        } else {
+            $column = $data['column'];
+        }
+        $column = is_array($column) ? implode(',', $column) : $column;
+        $this->sql = $this->replaceSqlLabel($this->sql, 'column', $column);
+        return $this;
     }
 
     private function parseUpdateData($data)
@@ -178,40 +236,12 @@ class SqlBuilder
                 $expr = $row[2];
             }
             list($column, $value) = $row;
-            $clause = ' ' . $this->quotaColumn($column);
+            $clause = ' ' . $this->formatColumn($column);
             $clause .= false === $expr ? " = '" . $value . "'" : " = " . $expr . " ";
             $clauses[] = $clause;
         }
         $replace = implode(',', $clauses);
         $this->sql = $this->replaceSqlLabel($this->sql, 'data', $replace);
-        return $this;
-    }
-
-    private function parseColumn($data)
-    {
-        if (!$data || !isset($data['column']) || count($data['column']) == 0) {
-            $column = '*';
-        } else {
-            $column = $data['column'];
-        }
-        if (is_array($column)) {
-            $column = implode(',', $column);
-        }
-        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'column', $column);
-        return $this;
-    }
-
-    private function parseCount($data)
-    {
-        if (!$data || !isset($data['count']) || '' == $data['count']) {
-            throw new MysqlException('what field do you want count?');
-        }
-        if (!is_string($data['count'])) {
-            $count = 'count(*) as count_sql_rows';
-        } else {
-            $count = 'count(' . $data['count'] .') as count_sql_rows';
-        }
-        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
         return $this;
     }
 
@@ -228,9 +258,9 @@ class SqlBuilder
             $firstLabels[] = '#' . strtoupper($key) . '#';
             $secLabels[] = '#{' . strtolower($key) . '}';
             if (is_array($value)) {
-                $replaces[] = '(' . implode(',', array_map([$this, 'parseValueType'], $value)) . ')';
+                $replaces[] = '(' . implode(',', array_map([$this, 'formatValue'], $value)) . ')';
             } else {
-                $replaces[] = $this->parseValueType($value);
+                $replaces[] = $this->formatValue($value);
             }
         }
         $this->sql = str_replace($firstLabels, $replaces, $this->sql);
@@ -238,74 +268,57 @@ class SqlBuilder
         return $this;
     }
 
-    private function parseValueType($value)
-    {
-        return is_int($value) ? $value : "'" . $value . "'";
-    }
 
-    private function parseWhere($data, $or = false, $andLabel = '')
+
+    private function parseWhere($data)
     {
-        $where = (isset($data['where'])) ? $data['where'] : [];
-        if (!is_array($where) || count($where) == 0) {
-            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', '');
+        $where = isset($data['where']) ? $data['where'] : [];
+        if (!is_array($where) || [] == $where) {
+            $this->sql = $this->replaceSqlLabel($this->sql, 'where', '');
             return $this;
         }
+        $parseWhere = $this->parseWhereStyleData($where, 'and');
+        $this->sql = $this->replaceSqlLabel($this->sql, 'where', $parseWhere);
+        return $this;
+    }
 
-        $conditionWord = 'and';
-        if (true === $or && '' === $andLabel) {
-            $conditionWord = 'or';
-        }
+    private function parseWhereStyleData($where, $andOr = 'and')
+    {
         $clauses = [];
         foreach ($where as $row) {
             $expr = false;
-            if (isset($row[3]) && $row[3]) {
+            if (isset($row[3]) && '' != $row[3]) {
                 $expr = $row[3];
             }
             list($column, $condition, $value) = $row;
             $condition = strtolower(trim($condition));
             $column = trim($column);
             if ('like' === $condition && '%%%' === trim($value)) {
-                throw new MysqlException('sql like can not contain %%%');
+                //todo throw 'sql like can not contain %%%'
             }
-
-            if (false === $expr) {
-                if('in' === $condition || 'not in' === $condition) {
-                    $clause = $this->parseWhereIn($condition, $column, $value);
-                } else {
-                    $clause = self::quotaColumn($column) . ' ' . $condition . " '" . Validator::validate($value) . "' ";
-                }
-            } else {
-                $clause = self::quotaColumn($column) . ' ' . $condition . ' ' . $expr . ' ';
+            if (false !== $expr || '' != $expr) {
+                $clauses[] = $this->formatColumn($column) . ' ' . $condition . ' ' . $expr . ' ';
+                continue;
             }
-            $clauses[] = $clause;
+            if ('in' == $condition || 'not in' == $condition) {
+                $clauses[] = $this->parseWhereIn($column, $condition, $value);
+                continue;
+            }
+            $clauses[] = $this->formatColumn($column) . ' ' . $condition . $this->formatValue($value);
         }
-
-        $parseWhere = '';
-        if ('' === $andLabel) {
-            $parseWhere .= " $conditionWord ";
-        }
-        $parseWhere .= implode(" $conditionWord ", $clauses);
-
-        if (false === $or) {
-            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', $parseWhere);
-        } elseif ('' !== $andLabel) {
-            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], $andLabel, $parseWhere);
-        } else {
-            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'or', trim($parseWhere, ' or'));
-        }
-        return $this;
+        return implode(" $andOr ", $clauses);
     }
 
-    private function parseWhereIn($condition, $column, $value)
+    private function parseWhereIn($column, $condition, $value)
     {
-        $value = is_string($value) ? explode(',',$value) : $value;
-        if (!is_array($value) || count($value) == 0) {
-            throw new MysqlException('sql where条件中in为空');
+        $value = is_string($value) ? explode(',', $value) : $value;
+        if (!is_array($value) || [] == $value) {
+            //todo throw 'sql where条件中in为空'
         }
-        $clause = $this->quotaColumn($column) . ' ' . $condition . ' (';
+        $clause = $this->formatColumn($column) . ' ' . $condition . ' (';
         $tmp = [];
         foreach ($value as $v) {
-            $tmp[] = "'" . Validator::validate($v) . "'";
+            $tmp[] = $this->formatValue($v);
         }
         $clause .= implode(',', $tmp) . ') ';
         return $clause;
@@ -313,32 +326,38 @@ class SqlBuilder
 
     private function parseAnds($data)
     {
-        for ($i = 0; $i < $this->andNum; $i++) {
-            $andLabel = ($i === 0) ? "and" : "and" . $i;
-            if (isset($data[$andLabel])) {
-                $this->parseAnd($data[$andLabel], $andLabel);
-            } else {
+        for ($i = 0; $i < 20; $i++) {
+            $andLabel = $i == 0 ? "and" : "and" . $i;
+            if (!isset($data[$andLabel])) {
                 break;
             }
+            $this->parseAnd($data[$andLabel], $andLabel);
         }
-        return $this->removeAnd();
+        $this->sql = preg_replace('/#and\d#/i', '', $this->sql);
+        return $this;
     }
 
-    private function parseAnd($andData, $andLabel = "")
+    private function parseAnd($andData, $andLabel)
     {
-        return $this->parseWhere(['where' => $andData], true, $andLabel);
-    }
-
-    private function removeAnd()
-    {
-        $this->sqlMap['sql'] = preg_replace('/#and\d#/i', '', $this->sqlMap['sql']);
+        if (!is_array($andData) || [] == $andData) {
+            $this->sql = $this->replaceSqlLabel($this->sql, 'and', '');
+            return $this;
+        }
+        $replace = $this->parseWhereStyleData($andData, 'and');
+        $this->sql = $this->replaceSqlLabel($this->sql, $andLabel, $replace);
         return $this;
     }
 
     private function parseOr($data)
     {
-        $or = (isset($data['or'])) ? $data['or'] : [];
-        return $this->parseWhere(['where' => $or], true);
+        $or = isset($data['or']) ? $data['or'] : [];
+        if (!is_array($or) || [] == $or) {
+            $this->sql = $this->replaceSqlLabel($this->sql, 'or', '');
+            return $this;
+        }
+        $replace = $this->parseWhereStyleData($or, 'or');
+        $this->sql = $this->replaceSqlLabel($this->sql, 'or', trim($replace, ' or'));
+        return $this;
     }
 
     private function parseOrderBy($data)
@@ -350,7 +369,7 @@ class SqlBuilder
         if ('' != $order) {
             $order = ' order by ' . $order . ' ';
         }
-        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'order', $order);
+        $this->sql = $this->replaceSqlLabel($this->sql, 'order', $order);
         return $this;
     }
 
@@ -364,7 +383,7 @@ class SqlBuilder
             $group = ' group by ' . $group . ' ';
         }
 
-        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'group', $group);
+        $this->sql = $this->replaceSqlLabel($this->sql, 'group', $group);
         return $this;
     }
 
@@ -377,19 +396,23 @@ class SqlBuilder
         if ('' != $limit) {
             $limit = ' limit ' . $limit . ' ';
         }
-        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'limit', $limit);
+        $this->sql = $this->replaceSqlLabel($this->sql, 'limit', $limit);
         return $this;
-    }
-
-
-    //判断该表是否需要分表
-    private function splitTable($data)
-    {
-        //todo
     }
 
     private function replaceSqlLabel($sql, $label, $string)
     {
         return str_replace('#' . strtoUpper($label) . '#', $string, $sql);
     }
+
+    private function addSqlLint($options)
+    {
+        $this->sqlMap = array_merge($this->sqlMap, $options);
+
+        if (isset($this->sqlMap['use_master']) && $this->sqlMap['use_master']) {
+            $this->sql = "/*master*/" . $this->sql;
+        }
+        return $this;
+    }
+
 }
