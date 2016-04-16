@@ -45,23 +45,25 @@ class ConnectionInitiator
 
     private function initConfig($config)
     {
-        foreach ($config as $cf) {
-            if (!isset($cf['engine'])) {
-                if (is_array($config)) {
-                    $this->initConfig($cf);
+        if (is_array($config)) {
+            foreach ($config as $cf) {
+                if (!isset($cf['engine'])) {
+                    if (is_array($config)) {
+                        $this->initConfig($cf);
+                    }
+                } else {
+                    if (empty($cf['pool'])) {
+                        continue;
+                    }
+                    //创建连接池
+                    $factoryType = $cf['engine'];
+                    if (in_array($factoryType, $this->engineMap)) {
+                        $factoryType = ucfirst($factoryType);
+                        $this->initPool($factoryType, $cf['pool']);
+                    }
                 }
-            } else {
-                if (empty($cf['pool'])) {
-                    continue;
-                }
-                //创建连接池
-                $factoryType = $cf['engine'];
-                if (in_array($factoryType, $this->engineMap)) {
-                    $factoryType = ucfirst($factoryType);
-                    $this->initPool($factoryType, $cf['pool']);
-                }
-            }
 
+            }
         }
     }
 
