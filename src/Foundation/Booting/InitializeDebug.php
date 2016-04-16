@@ -17,6 +17,5 @@ class InitializeDebug implements Bootable
     public function bootstrap(Application $app)
     {
         Debug::detect();
-        var_dump(Debug::get());exit;
     }
 } 
