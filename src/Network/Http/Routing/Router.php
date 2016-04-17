@@ -37,7 +37,7 @@ class Router {
         if(empty($url)) {
             return;
         }
-        $this->url = strtolower(ltrim($url, $this->separator));
+        $this->url = ltrim($url, $this->separator);
         $this->removeIllegalString();
     }
 
