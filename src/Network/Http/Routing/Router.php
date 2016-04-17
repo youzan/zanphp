@@ -60,7 +60,7 @@ class Router {
     {
         $parts = array_filter(explode($this->separator, trim($this->route, $this->separator)));
         $route['action_name'] = array_pop($parts);
-        $route['controller_name'] = join('\\', $parts);
+        $route['controller_name'] = join($this->separator, $parts);
         return $route;
     }
 

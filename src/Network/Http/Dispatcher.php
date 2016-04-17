@@ -35,6 +35,8 @@ class Dispatcher
 
     private function getControllerClass($controllerName)
     {
+        $parts = array_filter(explode('/', $controllerName));
+        $controllerName = join('\\', array_map('ucfirst', $parts));
         $app = Application::getInstance();
         return $app->getNamespace() . 'Controller\\' .  $controllerName . 'Controller';
     }
