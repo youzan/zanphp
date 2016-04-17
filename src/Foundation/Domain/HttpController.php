@@ -33,6 +33,10 @@ class HttpController extends Controller
         $this->jsVar->setShare('desc', trim($desc));
     }
 
+    public function setDomains(array $domains){
+        $this->jsVar->setDomain($domains);
+    }
+
     public function getJsVars()
     {
         return $this->jsVar->get();
