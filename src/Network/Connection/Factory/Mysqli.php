@@ -33,4 +33,9 @@ class Mysqli implements ConnectionFactory
         return $this->conn;
     }
 
+    public function close()
+    {
+        mysqli_close($this->conn);
+    }
+
 }

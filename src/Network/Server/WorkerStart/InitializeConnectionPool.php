@@ -2,10 +2,18 @@
 
 namespace Zan\Framework\Network\Server\WorkerStart;
 
-class InitializeConnectionPool
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Connection\ConnectionInitiator;
+use Zan\Framework\Contract\Network\Bootable;
+
+class InitializeConnectionPool implements Bootable
 {
-    public function bootstrap($server, $workerId)
+    /**
+     * @param
+     */
+    public function bootstrap($server)
     {
-        
+        $config = Config::get('connection');
+        ConnectionInitiator::getInstance()->init($config);
     }
 }

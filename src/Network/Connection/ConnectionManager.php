@@ -10,7 +10,6 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Network\Common\ConnectionPool;
 use Zan\Framework\Network\Connection\FutureConnection;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
@@ -25,20 +24,19 @@ class ConnectionManager
     private static $mysqlConfig=null;
     private static $registry=[];
 
-    public function __construct() {
-        $this->configDemo();
-        $this->mysqlConfig();
-    }
-
-    public function init()
+    public function __construct()
     {
-        $factory = new Mysqli(self::$mysqlConfig);
-        $connectionPool = new Pool($factory, self::$poolConfig);
-        $key = self::$poolConfig['pool_name'];
-        self::$registry[] = $key;//注册连接池
-        self::$poolMap[$key] = $connectionPool;
-        return $this;
     }
+//
+//    public function init()
+//    {
+//        $factory = new Mysqli(self::$mysqlConfig);
+//        $connectionPool = new Pool($factory, self::$poolConfig);
+//        $key = self::$poolConfig['pool_name'];
+//        self::$registry[] = $key;//注册连接池
+//        self::$poolMap[$key] = $connectionPool;
+//        return $this;
+//    }
     
     /**
      * @param string $connKey
@@ -67,7 +65,7 @@ class ConnectionManager
      * @param $poolKey
      * @param ConnectionPool $pool
      */
-    public function addPool($poolKey, ConnectionPool $pool)
+    public function addPool($poolKey, Pool $pool)
     {
         self::$poolMap[$poolKey] = $pool;
     }

@@ -14,6 +14,9 @@ use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Network\Connection\Driver\Mysqli;
+use Zan\Framework\Network\Connection\Driver\Http;
+use Zan\Framework\Network\Connection\Driver\Redis;
+use Zan\Framework\Network\Connection\Driver\Syslog;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
 class Pool implements ConnectionPool
@@ -27,13 +30,16 @@ class Pool implements ConnectionPool
 
     private $factory = null;
 
+    private $type = null;
 
 
 
-    public function __construct(ConnectionFactory $connectionFactory, array $config)
+
+    public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
         $this->poolConfig = $config;
         $this->factory = $connectionFactory;
+        $this->type = $type;
         $this->init();
     }
 
@@ -45,12 +51,38 @@ class Pool implements ConnectionPool
         $this->activeConnection = new ObjectArray();
         for ($i=0; $i<$initConnection; $i++) {
             //todo 创建链接,存入数组
-            $mysqlConnection = $this->factory->create();
-            $connection = new Mysqli();
-            $connection->setPool($this);
-            $connection->setSocket($mysqlConnection);
-            $this->freeConnection->push($connection);
+            $this->createConnect();
         }
+
+    }
+
+    //创建连接
+    private function createConnect()
+    {
+        //todo 创建链接,存入数组
+        $mysqlConnection = $this->factory->create();
+        switch($this->type) {
+            case 'Mysqli':
+                $connection = new Mysqli();
+                break;
+            case 'Http':
+                $connection = new Http();
+                break;
+            case 'Redis':
+                $connection = new Redis();
+                break;
+            case 'Syslog':
+                $connection = new Syslog();
+                break;
+            default:
+            {
+                //do nothing
+                break;
+            }
+        }
+        $connection->setSocket($mysqlConnection);
+        $this->freeConnection->push($connection);
+        $connection->setPool($this);
     }
     
     public function reload(array $config)
@@ -89,5 +121,8 @@ class Pool implements ConnectionPool
     {
         $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
+        //补充删除被删除连接
+        $this->createConnect();
+
     }
 }

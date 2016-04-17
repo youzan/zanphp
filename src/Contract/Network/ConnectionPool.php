@@ -15,7 +15,7 @@ interface ConnectionPool
      * @param \Zan\Framework\Contract\Network\ConnectionFactory $connectionFactory
      * @param array $config
      */
-    public function __construct(ConnectionFactory $connectionFactory, array $config);
+    public function __construct(ConnectionFactory $connectionFactory, array $config, $type);
 
     /**
      * @param array $config

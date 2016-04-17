@@ -25,6 +25,11 @@ abstract class Base implements Connection
         $this->pool = $pool;
     }
 
+    public function getPool()
+    {
+        return $this->pool;
+    }
+
     public function getSocket()
     {
         return $this->socket;

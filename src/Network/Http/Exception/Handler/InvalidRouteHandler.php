@@ -1,26 +1,25 @@
 <?php
 /**
  * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/4/11
- * Time: 11:00
+ * User: nuomi
+ * Date: 16/4/14
+ * Time: 上午10:59
  */
 
 namespace Zan\Framework\Network\Http\Exception\Handler;
 
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Http\Exception\PageNotFoundException;
+use Zan\Framework\Network\Http\Exception\InvalidRouteException;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 
-class PageNotFoundHandler implements ExceptionHandler
+class InvalidRouteHandler implements ExceptionHandler
 {
     private $configKey = 'error';
 
     public function handle(\Exception $e)
     {
-        if (!is_a($e, PageNotFoundException::class)) {
+        if (!is_a($e, InvalidRouteException::class)) {
             return false;
         }
         $config = Config::get($this->configKey, null);
@@ -28,6 +27,6 @@ class PageNotFoundHandler implements ExceptionHandler
             return false;
         }
         // 跳转到配置的404页面
-        return RedirectResponse::create($config['404'], BaseResponse::HTTP_FOUND);
+        return RedirectResponse::create($config['404'], BaseResponse::HTTP_NOT_FOUND);
     }
 }

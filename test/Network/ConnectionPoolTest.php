@@ -11,35 +11,30 @@ namespace Zan\Framework\Test\Network;
 
 
 use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Network\Common\ConnectionManager;
+use Zan\Framework\Network\Connection\ConnectionInitiator;
+use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 use Zan\Framework\Test\Network\Task\ConnectPoolJob;
+use Zan\Framework\Testing\TaskTest;
 
 
-class ConnectionPoolTest extends \TestCase {
+class ConnectionPoolTest extends TaskTest {
 
 
-    public function testPoolWork()
+    public function taskPoolWork()
     {
-        $m = new ConnectionManager(null);
+        ConnectionInitiator::getInstance()->init([]);
 
-        $pools = (yield $m::get('p_zan'));
 
-        var_dump($pools);
-        exit;
-//
-//        $context = new Context();
-//
-//        $job = new ConnectPoolJob($context);
-//        $coroutine = $job->run();
-//
-//
-//        $task = new Task($coroutine);
-//        $task->run();
-//
-//
-//        $result = $context->show();
-//        var_dump($result);exit;
+        $pool = (yield ConnectionManager::getInstance()->get('pifa'));
+        $pool->close();
+
+        for ($i=0; $i<5;$i++) {
+        $pool = (yield ConnectionManager::getInstance()->get('pifa'));
+
+        var_dump($pool->getSocket());
+        }
+
     }
 
 }

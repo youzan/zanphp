@@ -9,16 +9,19 @@
 namespace Zan\Framework\Test\Network\Task;
 
 
-use Zan\Framework\Network\Common\ConnectionManager;
+use Zan\Framework\Network\Connection\ConnectionInitiator;
+use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Job;
 
 class ConnectPoolJob extends Job{
 
     public function run()
     {
-        $m = new ConnectionManager(null);
+        $m = new ConnectionInitiator();
+        $m->init([]);
+        $cm = new ConnectionManager();
 
-        $pools = (yield $m::get('p_zan'));
+        $pools = (yield $cm->get('pifa'));
 
         swoole_event_exit();
 

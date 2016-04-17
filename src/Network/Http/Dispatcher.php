@@ -13,19 +13,19 @@ use Zan\Framework\Foundation\Application;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-class Dispatcher {
+class Dispatcher
+{
     public function dispatch(Request $request, Context $context)
     {
-        $route = $request->getRoute();
-        $route = $this->parseRoute($route);
+        $controllerName = $context->get('controller_name');
+        $action = $context->get('action_name');
 
-        $controller = $route['controller'];
+        $controller = $this->getControllerClass($controllerName);
         if(!class_exists($controller)) {
             throw new RuntimeException("controller:{$controller} not found");
         }
 
         $controller = new $controller($request, $context);
-        $action = $route['action'];
         if(!is_callable([$controller, $action])) {
             throw new RuntimeException("action:{$action} is not callable in controller:" . get_class($controller));
         }
@@ -33,22 +33,11 @@ class Dispatcher {
         yield $controller->$action();
     }
 
-    private function parseRoute($route)
+    private function getControllerClass($controllerName)
     {
-        $route = trim($route, ' /');
-        $parts = explode('/', $route);
-
-        $action = array_pop($parts);
-
-        $parts = array_map('ucfirst', $parts);
-        $controller = join('\\', $parts);
-
+        $parts = array_filter(explode('/', $controllerName));
+        $controllerName = join('\\', array_map('ucfirst', $parts));
         $app = Application::getInstance();
-        $controller = $app->getNamespace() . 'Controller\\' .  $controller . 'Controller';
-
-        return [
-            'controller' => $controller,
-            'action' => $action,
-        ];
+        return $app->getNamespace() . 'Controller\\' .  $controllerName . 'Controller';
     }
 }

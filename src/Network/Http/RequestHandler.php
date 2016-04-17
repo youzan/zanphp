@@ -11,7 +11,7 @@ use Zan\Framework\Network\Http\Request\Request;
 
 class RequestHandler
 {
-    private $context  = null;
+    private $context = null;
 
     public function __construct()
     {
@@ -20,23 +20,29 @@ class RequestHandler
 
     public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
-        $request  = Request::createFromSwooleHttpRequest($swooleRequest);
-        $this->context->set('request', $request);
-        $this->context->set('response', $swooleResponse);
-        
-        $cookie = new Cookie($request, $swooleResponse);
-        $this->context->set('cookie', $cookie);
+        try {
 
-        $router = Router::getInstance();
-        $router->route($request);
-        $route = $router->parseRoute();
+            $request = Request::createFromSwooleHttpRequest($swooleRequest);
+            $this->context->set('request', $request);
+            $this->context->set('response', $swooleResponse);
 
-        $this->context->set('controller_name', $route['controller_name']);
-        $this->context->set('action_name', $route['action_name']);
+            $router = Router::getInstance();
+            $router->route($request);
+            $route = $router->parseRoute();
+            $this->context->set('controller_name', $route['controller_name']);
+            $this->context->set('action_name', $route['action_name']);
 
-        $task = new RequestTask($request, $swooleResponse, $this->context);
-        $coroutine = $task->run();
+            $cookie = new Cookie($request, $swooleResponse);
+            $this->context->set('cookie', $cookie);
 
-        Task::execute($coroutine, $this->context);
+            $task = new RequestTask($request, $swooleResponse, $this->context);
+            $coroutine = $task->run();
+            Task::execute($coroutine, $this->context);
+
+        } catch (\Exception $e) {
+            $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
+            Task::execute($coroutine, $this->context);
+        }
+
     }
 }
