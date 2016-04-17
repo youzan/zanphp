@@ -54,6 +54,12 @@ class HttpController extends Controller
         return $this->output($content);
     }
 
+    public function render($tpl)
+    {
+        $this->viewData['_js_var'] = $this->getJsVars();
+        return View::display($tpl, $this->viewData);
+    }
+
     public function assign($key, $value)
     {
         $this->viewData[$key] = $value;
