@@ -97,7 +97,7 @@ class MiddlewareManager
         }
 
         if (null === $groupKey) {
-            return null;
+            return [];
         }
         if (!isset($this->config['group'][$groupKey])) {
             throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
