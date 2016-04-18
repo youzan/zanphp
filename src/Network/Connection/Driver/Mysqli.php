@@ -29,6 +29,7 @@ class Mysqli extends Base implements Connection
                 if (isset($this->pool->freeConnection[$key])) {
                     $this->pool->freeConnection->remove($this->getSocket());
                     $result = $this->getSocket()->query('select 1');
+                    var_dump(time().$result);
                     if (!$result) {
                         $this->close();
                     } else {
