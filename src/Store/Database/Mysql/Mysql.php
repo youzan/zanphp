@@ -68,7 +68,10 @@ class Mysql implements DriverInterface
     public function onSqlReady($link, $result)
     {
         if ($result == false) {
-            //todo throw error
+            if (in_array($link->errno, [2013, 2006])) {
+                $this->connection->close();
+                call_user_func($this->callback, false);
+            }
         }
         $this->connection->release();
         $this->result = $result;
