@@ -66,35 +66,10 @@ class Pool implements ConnectionPool
         $connection->setEngine($this->type);
     }
 
-//    //创建连接
-//    private function createConnect()
-//    {
-//        //todo 创建链接,存入数组
-//        $mysqlConnection = $this->factory->create();
-//        switch($this->type) {
-//            case 'Mysqli':
-//                $connection = new Mysqli();
-//                break;
-//            case 'Http':
-//                $connection = new Http();
-//                break;
-//            case 'Redis':
-//                $connection = new Redis();
-//                break;
-//            case 'Syslog':
-//                $connection = new Syslog();
-//                break;
-//            default:
-//            {
-//                //do nothing
-//                break;
-//            }
-//        }
-//
-//        $connection->setSocket($mysqlConnection);
-//        $this->freeConnection->push($connection);
-//        $connection->setPool($this);
-//    }
+    public function getFreeConnection()
+    {
+        return $this->freeConnection;
+    }
 
 
     public function reload(array $config)

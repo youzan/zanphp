@@ -38,4 +38,9 @@ class ObjectArray {
         return count($this->map);
     }
 
+    public function get($key)
+    {
+        return isset($this->map[$key]) ? $this->map[$key] : null;
+    }
+
 }
