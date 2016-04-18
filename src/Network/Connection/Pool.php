@@ -85,7 +85,7 @@ class Pool implements ConnectionPool
         }
         $conn = $this->freeConnection->pop();
         if (null != $this->activeConnection->get(spl_object_hash($conn))) {
-            echo '链接被重用了,链接被重用了,链接被重用了,链接被重用了,链接被重用了,链接被重用了';
+//            echo '链接被重用了,链接被重用了,链接被重用了,链接被重用了,链接被重用了,链接被重用了';
         }
         $this->activeConnection->push($conn);
 
