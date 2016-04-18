@@ -9,17 +9,17 @@
 namespace Zan\Framework\Contract\Store\Database;
 
 
-interface ResultFormater
+interface ResultFormatterInterface
 {
     /**
-     * ResultFormater constructor.
-     * @param DbResult $result
+     * ResultFormatterInterface constructor.
+     * @param DbResultInterface $result
      * @param int $resultType
      */
-    public function __construct(DbResult $result, $resultType=ResultType::RAW);
+    public function __construct(DbResultInterface $result, $resultType = ResultTypeInterface::RAW);
 
     /**
      * @return mixed(base on ResultType)
      */
-    public function format(); 
+    public function format();
 }
