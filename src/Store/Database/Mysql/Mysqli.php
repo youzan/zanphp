@@ -68,7 +68,6 @@ class Mysqli implements DriverInterface
                 call_user_func($this->callback, false);
             }
         }
-        $this->connection->release();
         $this->result = $result;
         call_user_func($this->callback, new MysqliResult($this));
     }
