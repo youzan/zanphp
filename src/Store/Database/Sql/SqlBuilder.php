@@ -22,12 +22,9 @@ class SqlBuilder
         return $this->sql;
     }
 
-    public function builder($data, $require, $limit)
+    public function builder($data, $sqlType, $require, $limit)
     {
-        if (!isset($this->sql['sql_type']) || '' == $this->sql['sql_type']) {
-            //todo throw can't find sql_type when sql builder
-        }
-        switch ($this->sql['sql_type']) {
+        switch ($sqlType) {
             case 'select' :
                 $this->select($data, $require, $limit);
                 break;

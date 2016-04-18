@@ -19,26 +19,20 @@ class SqlMap
 
     public function getSql($sid, $data = [], $options = [])
     {
-//        $this->sqlMap = $this->getSqlMapBySid($sid);
-//        $type = strtolower($this->getSqlType());
-//        $this->sqlMap['sql_type'] = $this->getSqlType();
+        $sqlMap = $this->getSqlMapBySid($sid);
+        $sqlMap['sql'] = $this->builder($sqlMap['sql'], $data, $sqlMap['sql_type'], $sqlMap['require'], $sqlMap['limit']);
+        return $sqlMap;
     }
 
-    private function parse($sqlMap)
+    private function builder($sql, $data, $sqlType, $require, $limit)
     {
-        return (new SqlParser())->setSqlMap($sqlMap)->parse()->getSqlMap();
-    }
-
-    private function builder($sql, $data, $require, $limit)
-    {
-        return (new SqlBuilder())->setSql($sql)->builder($data, $require, $limit)->getSql();
+        return (new SqlBuilder())->setSql($sql)->builder($data, $sqlType, $require, $limit)->getSql();
     }
 
     private function getSqlMapBySid($sid)
     {
         $sidData = $this->parseSid($sid);
         $base = $sidData['base'];
-        $filePath = $sidData['file_path'] ;
         $mapKey = $sidData['key'];
         $sqlMap = [];
         foreach ($base as $route) {
@@ -47,21 +41,10 @@ class SqlMap
             }
             $sqlMap = [] == $sqlMap ? $this->sqlMaps[$route] : $sqlMap[$route];
         }
-        if ([] != $sqlMap && isset($sqlMap[$mapKey])) {
-            return $sqlMap[$mapKey];
+        if (!isset($sqlMap[$mapKey]) || [] == $sqlMap[$mapKey]) {
+            //todo throw no suck sql map
         }
-
-        $sqlMap = $this->getSqlFile($filePath);
-        if (!$sqlMap || !isset($sqlMap[$mapKey])) {
-            //todo throw 'no such sql: ' . $sid
-        }
-        $this->sqlMaps[$filePath] = $this->parse($sqlMap);
-        return $this->sqlMaps[$filePath][$mapKey];
-    }
-
-    private function getSqlFile($filePath)
-    {
-        return require Path::getSqlPath() . $filePath . '.php';
+        return $sqlMap[$mapKey];
     }
 
     private function parseSid($sid)
@@ -81,33 +64,6 @@ class SqlMap
             'key'       => substr($sid, $pos + 1),
         ];
     }
-
-
-    //判断该表是否需要分表
-    private function splitTable($data)
-    {
-        //todo
-    }
-
-    private function formatSql()
-    {
-        $sql = trim($this->sqlMap['sql']);
-        $sql = str_replace("\n", NULL, $sql);
-        $sql = str_replace("\r", NULL, $sql);
-
-        $this->sqlMap['sql'] = $sql;
-        return $this;
-    }
-
-
-
-
-
-
-
-
-
-
 }
 
 

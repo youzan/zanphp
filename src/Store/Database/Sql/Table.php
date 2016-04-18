@@ -5,7 +5,7 @@
  * Date: 16/3/25
  * Time: 下午5:47
  */
-namespace Zan\Framework\Store\Database\Mysql;
+namespace Zan\Framework\Store\Database\Sql;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;

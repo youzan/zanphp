@@ -8,19 +8,21 @@
 namespace Zan\Framework\Store\Database;
 
 use Zan\Framework\Store\Database\Mysql\Mysql;
-use Zan\Framework\Store\Database\ResultFormatter;
+use Zan\Framework\Store\Database\Sql\SqlMap;
+use Zan\Framework\Store\Database\Sql\Table;
+use Zan\Framework\Network\Connection\ConnectionManager;
+
 class Flow
 {
-
-    public function query($sid, $data)
+    public function query($sid, $data, $options)
     {
-        $sql = '';
-        $mysql = new Mysql();
-        $dbResult = (yield $mysql->query($sql));
+        $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
+        $database = Table::getInstance()->getDatabase($sqlMap['table']);
+        $connection = (yield ConnectionManager::getInstance()->get($database));
+        $mysql = new Mysql($connection);
+        $dbResult = (yield $mysql->query($sqlMap['sql']));
         $resultFormatter = new ResultFormatter($dbResult);
-        return $resultFormatter->format();
+        yield $resultFormatter->format();
+        return;
     }
-
-
-
 }
