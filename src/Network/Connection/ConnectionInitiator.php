@@ -76,18 +76,21 @@ class ConnectionInitiator
         switch ($factoryType) {
             case 'Redis':
                 $factory = new Redis($config);
+                break;
             case 'Syslog':
                 $factory = new Syslog($config);
+                break;
             case 'Http':
                 $factory = new Http($config);
+                break;
             case 'Mysqli':
                 $factory = new Mysqli($config);
+                break;
             default:
-            {}
+                break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
-        $connectionManage = new ConnectionManager();
-        $connectionManage->addPool($config['pool_name'], $connectionPool);
+        ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
     }
 
     private function configFile()
