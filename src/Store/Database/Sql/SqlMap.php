@@ -32,19 +32,16 @@ class SqlMap
     private function getSqlMapBySid($sid)
     {
         $sidData = $this->parseSid($sid);
-        $base = $sidData['base'];
-        $mapKey = $sidData['key'];
-        $sqlMap = [];
-        foreach ($base as $route) {
-            if ([] == $sqlMap && !isset($this->sqlMaps[$route])) {
-                break;
-            }
-            $sqlMap = [] == $sqlMap ? $this->sqlMaps[$route] : $sqlMap[$route];
-        }
-        if (!isset($sqlMap[$mapKey]) || [] == $sqlMap[$mapKey]) {
+        $key = $sidData['key'];
+        $filePath = $sidData['file_path'];
+        if (!isset($this->sqlMaps[$filePath]) || [] == $this->sqlMaps[$filePath]) {
             //todo throw no suck sql map
         }
-        return $sqlMap[$mapKey];
+        $sqlMap = $this->sqlMaps[$filePath];
+        if (!isset($sqlMap[$key]) || [] == $sqlMap[$key]) {
+            //todo throw no suck sql map
+        }
+        return $sqlMap[$key];
     }
 
     private function parseSid($sid)

@@ -25,47 +25,21 @@ class SqlParser
                 unset($this->sqlMap[$map]);
                 continue;
             }
+            $map['sql'] = trim($map['sql']);
+
+            $map['require'] = isset($map['require']) ? $map['require'] : [];
+            $map['limit'] = isset($map['limit']) ? $map['limit'] : [];
+            $map['rw'] = 'w';
+            if (preg_match('/^\s*select/i', $map['sql'])) {
+                $map[$key]['rw'] = 'r';
+            }
+
             $map['result_type'] = $this->checkResultType(strtolower($expKey[0]));
             $map['table']= $this->getTable($map);
             $map['sql_type'] = $this->getSqlType($map['sql']);
             $this->sqlMap[$key] = $map;
         }
         return $this;
-    }
-
-
-
-    private function parseSqlMap($sqlMap, $filePath)
-    {
-        foreach ($sqlMap as $key => $row) {
-            if ('table' === $key) {
-                continue;
-            }
-            if (!isset($row['require'])) {
-                $sqlMap[$key]['require'] = [];
-            }
-            if (!isset($row['limit'])) {
-                $sqlMap[$key]['limit'] = [];
-            }
-            if (!isset($row['distribute']) && isset($sqlMap['common']['distribute'])) {
-                $sqlMap[$key]['distribute'] = $sqlMap['common']['distribute'];
-            }
-
-            if (isset($row['join'])) {
-                foreach ($row['join'] as $k => $j) {
-                    if (false === strpos($j[1], '.')) {
-                        $path = str_replace('/', '.', $filePath);
-                        $sqlMap[$key]['join'][$k][1] = $path . '.' . $j[1];
-                    }
-                }
-            }
-            $sqlMap[$key]['rw']   = 'w';
-
-            if (preg_match('/^\s*select/i', $row['sql'])) {
-                $sqlMap[$key]['rw'] = 'r';
-            }
-        }
-        return $sqlMap;
     }
 
     public function getSqlMap()
@@ -79,7 +53,7 @@ class SqlParser
         if (!$match) {
             //todo throw 'sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一'
         }
-        return trim($match[0]);
+        return strtolower(trim($match[0]));
     }
 
     private function checkResultType($mapKey)
@@ -113,8 +87,7 @@ class SqlParser
                 $resultType = ResultTypeInterface::RAW;
                 break;
         }
-        $this->sqlMap['result_type'] = $resultType;
-        return $this;
+        return $resultType;
     }
 
     private function getTable($map)
