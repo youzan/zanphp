@@ -28,12 +28,12 @@ class Flow
             //todo throw
         }
         $engine = $this->parseEngine($connection->getEngine());
-        $db = new $engine($connection);
-        $dbResult = (yield $db->query($sqlMap['sql']));
+        $driver = new $engine($connection);
+        $dbResult = (yield $driver->query($sqlMap['sql']));
         if (false === $dbResult) {
-            $connection = (yield ConnectionManager::getInstance()->get($database));
-            $db = new $engine($connection);
-            $dbResult = (yield $db->query($sqlMap['sql']));
+            $engine = $this->parseEngine($connection->getEngine());
+            $driver = new $engine($connection);
+            $dbResult = (yield $driver->query($sqlMap['sql']));
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();

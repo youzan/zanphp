@@ -15,7 +15,8 @@ class Mysqli extends Base implements Connection
 {
     public function closeSocket()
     {
-        return $this->socket->close(); 
+//        $this->socket->close();
+        return true;
     }
     
     public function ping()
