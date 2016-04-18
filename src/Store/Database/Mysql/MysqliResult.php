@@ -9,12 +9,12 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
-use Zan\Framework\Store\Database\Mysql\Mysql;
+use Zan\Framework\Store\Database\Mysql\Mysqli;
 
-class MysqlResult implements DbResultInterface
+class MysqliResult implements DbResultInterface
 {
     /**
-     * @var Mysql
+     * @var Mysqli
      */
     private $driver;
 

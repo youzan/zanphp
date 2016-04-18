@@ -10,8 +10,8 @@ use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Store\Database\Mysql\MysqlResult;
 use Zan\Framework\Contract\Network\Connection;
-use mysqli;
-class Mysql implements DriverInterface
+
+class Mysqli implements DriverInterface
 {
     /**
      * @var Connection
@@ -34,10 +34,6 @@ class Mysql implements DriverInterface
 
     private function setConnection(Connection $connection)
     {
-        $mysql = $connection->getSocket();
-        if (!($mysql instanceof mysqli)) {
-            //todo throw error
-        }
         $this->connection = $connection;
     }
 

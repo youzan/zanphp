@@ -16,4 +16,5 @@ interface Connection
     public function close();
     
     public function ping();
+    public function getEngine();
 }

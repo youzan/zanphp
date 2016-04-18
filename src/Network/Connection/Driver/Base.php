@@ -17,6 +17,7 @@ abstract class Base implements Connection
     protected $config = null;
     protected $pool = null;
     protected $socket = null;
+    protected $engine = null;
 
     abstract protected function closeSocket();
 
@@ -61,5 +62,15 @@ abstract class Base implements Connection
     public function ping()
     {
         return null;
+    }
+
+    public function setEngine($engine)
+    {
+        $this->engine= $engine;
+    }
+
+    public function getEngine()
+    {
+        return $this->engine;
     }
 }
