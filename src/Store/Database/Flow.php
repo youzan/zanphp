@@ -15,6 +15,10 @@ use Zan\Framework\Contract\Network\Connection;
 
 class Flow
 {
+    private $engineMap = [
+        'Mysqli' => 'Zan\Framework\Store\Database\Mysql\Mysqli',
+    ];
+
     public function query($sid, $data, $options)
     {
         $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
@@ -23,7 +27,7 @@ class Flow
         if (!($connection instanceof Connection)) {
             //todo throw
         }
-        $engine = $connection->getEngine();
+        $engine = $this->parseEngine($connection->getEngine());
         $db = new $engine($connection);
         $dbResult = (yield $db->query($sqlMap['sql']));
         if (false === $dbResult) {
@@ -34,5 +38,13 @@ class Flow
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();
         return;
+    }
+
+    private function parseEngine($engine)
+    {
+        if (!isset($this->engineMap[$engine])) {
+            //todo throw can't find database engine : $engine
+        }
+        return $this->engineMap[$engine];
     }
 }
