@@ -36,28 +36,31 @@ class ResultFormatter implements ResultFormatterInterface
             case ResultTypeInterface::INSERT :
                 $result = $this->insert();
                 break;
-            case ResultTypeInterface::UPDATE:
+            case ResultTypeInterface::UPDATE :
                 $result = $this->update();
                 break;
-            case ResultTypeInterface::DELETE:
+            case ResultTypeInterface::DELETE :
                 $result = $this->delete();
                 break;
-            case ResultTypeInterface::BATCH:
+            case ResultTypeInterface::BATCH :
                 $result = $this->batch();
                 break;
-            case ResultTypeInterface::ROW:
+            case ResultTypeInterface::ROW :
                 $result = $this->row();
                 break;
-            case ResultTypeInterface::RAW:
+            case ResultTypeInterface::RAW :
                 $result = $this->raw();
                 break;
-            case ResultTypeInterface::SELECT:
+            case ResultTypeInterface::SELECT :
                 $result = $this->select();
                 break;
-            case ResultTypeInterface::LAST_INSERT_ID:
+            case ResultTypeInterface::COUNT :
+                $result = $this->count();
+                break;
+            case ResultTypeInterface::LAST_INSERT_ID :
                 $result = $this->lastInsertId();
                 break;
-            case ResultTypeInterface::AFFECTED_ROWS:
+            case ResultTypeInterface::AFFECTED_ROWS :
                 $result = $this->affectedRows();
                 break;
             default :
@@ -71,6 +74,12 @@ class ResultFormatter implements ResultFormatterInterface
     {
         $rows = $this->dbResult->fetchRows();
         return null == $rows || [] == $rows ? [] : $rows;
+    }
+
+    private function count()
+    {
+        $rows = $this->dbResult->fetchRows();
+        return isset($rows[0]['count_sql_rows']) ? 0 : $rows[0]['count_sql_rows'];
     }
 
     private function insert()
