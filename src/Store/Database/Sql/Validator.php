@@ -14,6 +14,6 @@ class Validator
         if (null != $callback && is_object($callback)) {
             return call_user_func($callback, $value);
         }
-
+        return addslashes($value);
     }
 }
