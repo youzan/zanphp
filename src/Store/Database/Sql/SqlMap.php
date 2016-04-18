@@ -20,13 +20,13 @@ class SqlMap
     public function getSql($sid, $data = [], $options = [])
     {
         $sqlMap = $this->getSqlMapBySid($sid);
-        $sqlMap['sql'] = $this->builder($sqlMap['sql'], $data, $sqlMap['sql_type'], $sqlMap['require'], $sqlMap['limit']);
+        $sqlMap = $this->builder($sqlMap, $data, $options);
         return $sqlMap;
     }
 
-    private function builder($sql, $data, $sqlType, $require, $limit)
+    private function builder($sqlMap, $data, $options)
     {
-        return (new SqlBuilder())->setSql($sql)->builder($data, $sqlType, $require, $limit)->getSql();
+        return (new SqlBuilder())->setSqlMap($sqlMap)->builder($data, $options)->getSqlMap();
     }
 
     private function getSqlMapBySid($sid)

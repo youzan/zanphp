@@ -9,41 +9,42 @@ namespace Zan\Framework\Store\Database\Sql;
 
 class SqlBuilder
 {
-    private $sql;
+    private $sqlMap;
 
-    public function setSql($sql)
+    public function setSqlMap($sqlMap)
     {
-        $this->sql = $sql;
+        $this->sqlMap = $sqlMap;
         return $this;
     }
 
-    public function getSql()
+    public function getSqlMap()
     {
-        return $this->sql;
+        return $this->sqlMap;
     }
 
-    public function builder($data, $sqlType, $require, $limit)
+    public function builder($data, $options)
     {
-        switch ($sqlType) {
+        switch ($this->sqlMap['sql_type']) {
             case 'select' :
-                $this->select($data, $require, $limit);
+                $this->select($data);
                 break;
             case 'insert' :
                 $this->insert($data);
                 break;
             case 'update' :
-                $this->update($data, $require, $limit);
+                $this->update($data);
                 break;
             case 'delete' :
-                $this->delete($data, $require, $limit);
+                $this->delete($data);
                 break;
         }
+        $this->addSqlLint($options);
         return $this;
     }
 
-    private function select($data, $require, $limit)
+    private function select($data)
     {
-        $this->checkRequire($data, $require, $limit);
+        $this->checkRequire($data);
         $this->parseColumn($data);
         if (isset($data['count'])) {
             $this->parseCount($data);
@@ -65,7 +66,7 @@ class SqlBuilder
             //todo throw 'what field do you want count?'
         }
         $count = 'count(' . $data['count'] . ') as count_sql_rows';
-        $this->sql = $this->replaceSqlLabel($this->sql, 'count', $count);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
         return $this;
     }
 
@@ -76,7 +77,7 @@ class SqlBuilder
         }
         $insert = isset($data['insert']) ? $data['insert'] : [];
         if (!is_array($insert) || count($insert) == 0) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'insert', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
             return $this;
         }
 
@@ -88,7 +89,7 @@ class SqlBuilder
         }
         $replace = '(' . implode(',', $columns) . ') values(';
         $replace .= implode(',', $values) . ')';
-        $this->sql = $this->replaceSqlLabel($this->sql, 'insert', $replace);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', $replace);
         return $this;
     }
 
@@ -96,7 +97,7 @@ class SqlBuilder
     {
         $inserts = isset($data['inserts']) ? $data['inserts'] : [];
         if (!is_array($inserts) || count($inserts) == 0) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'inserts', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
             return $this;
         }
 
@@ -111,14 +112,14 @@ class SqlBuilder
             $insertsArr[] = '(' . implode(',', $values) . ')';
         }
         $replace .= implode(',', $insertsArr);
-        $this->sql = $this->replaceSqlLabel($this->sql, 'inserts', $replace);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', $replace);
         return $this;
     }
 
-    private function update($data, $require, $limit)
+    private function update($data)
     {
         $this->parseUpdateData($data);
-        $this->checkRequire($data, $require, $limit);
+        $this->checkRequire($data);
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
@@ -130,9 +131,9 @@ class SqlBuilder
         return $this;
     }
 
-    private function delete($data, $require, $limit)
+    private function delete($data)
     {
-        $this->checkRequire($data, $require, $limit);
+        $this->checkRequire($data);
         $this->parseVars($data);
         $this->parseWhere($data);
         $this->parseAnds($data);
@@ -154,7 +155,7 @@ class SqlBuilder
         return is_int($value) ? $value : "'" . $value . "'";
     }
 
-    private function checkRequire($data, $require, $limit)
+    private function checkRequire($data)
     {
         if (!isset($data['where']) && !isset($data['and']) && !isset($data['or'])) {
             return true;
@@ -165,11 +166,11 @@ class SqlBuilder
 
         $requireMap = [];
         $limitMap = [];
-        if (is_array($require) && [] != $require) {
-            $requireMap = array_flip($require);
+        if (is_array($this->sqlMap['require']) && [] != $this->sqlMap['require']) {
+            $requireMap = array_flip($this->sqlMap['require']);
         }
-        if (is_array($limit) && [] != $limit) {
-            $limitMap = array_flip($limit);
+        if (is_array($this->sqlMap['limit']) && [] != $this->sqlMap['limit']) {
+            $limitMap = array_flip($this->sqlMap['limit']);
         }
         if ([] == $requireMap && [] == $limitMap) {
             return true;
@@ -202,14 +203,14 @@ class SqlBuilder
             $column = $data['column'];
         }
         $column = is_array($column) ? implode(',', $column) : $column;
-        $this->sql = $this->replaceSqlLabel($this->sql, 'column', $column);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'column', $column);
         return $this;
     }
 
     private function parseUpdateData($data)
     {
         if (!$data || !isset($data['data']) || [] == $data['data']) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'data', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'data', '');
             return $this;
         }
 
@@ -222,7 +223,7 @@ class SqlBuilder
             $update = $tmp;
         }
         if (count($update) == 0) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'data', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'data', '');
             return $this;
         }
 
@@ -238,7 +239,7 @@ class SqlBuilder
             $clauses[] = $clause;
         }
         $replace = implode(',', $clauses);
-        $this->sql = $this->replaceSqlLabel($this->sql, 'data', $replace);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'data', $replace);
         return $this;
     }
 
@@ -260,8 +261,8 @@ class SqlBuilder
                 $replaces[] = $this->formatValue($value);
             }
         }
-        $this->sql = str_replace($firstLabels, $replaces, $this->sql);
-        $this->sql = str_replace($secLabels, $replaces, $this->sql);
+        $this->sqlMap['sql'] = str_replace($firstLabels, $replaces, $this->sqlMap['sql']);
+        $this->sqlMap['sql'] = str_replace($secLabels, $replaces, $this->sqlMap['sql']);
         return $this;
     }
 
@@ -271,11 +272,11 @@ class SqlBuilder
     {
         $where = isset($data['where']) ? $data['where'] : [];
         if (!is_array($where) || [] == $where) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'where', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', '');
             return $this;
         }
         $parseWhere = $this->parseWhereStyleData($where, 'and');
-        $this->sql = $this->replaceSqlLabel($this->sql, 'where', $parseWhere);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', $parseWhere);
         return $this;
     }
 
@@ -330,18 +331,18 @@ class SqlBuilder
             }
             $this->parseAnd($data[$andLabel], $andLabel);
         }
-        $this->sql = preg_replace('/#and\d#/i', '', $this->sql);
+        $this->sqlMap['sql'] = preg_replace('/#and\d#/i', '', $this->sqlMap['sql']);
         return $this;
     }
 
     private function parseAnd($andData, $andLabel)
     {
         if (!is_array($andData) || [] == $andData) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'and', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'and', '');
             return $this;
         }
         $replace = $this->parseWhereStyleData($andData, 'and');
-        $this->sql = $this->replaceSqlLabel($this->sql, $andLabel, $replace);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], $andLabel, $replace);
         return $this;
     }
 
@@ -349,11 +350,11 @@ class SqlBuilder
     {
         $or = isset($data['or']) ? $data['or'] : [];
         if (!is_array($or) || [] == $or) {
-            $this->sql = $this->replaceSqlLabel($this->sql, 'or', '');
+            $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'or', '');
             return $this;
         }
         $replace = $this->parseWhereStyleData($or, 'or');
-        $this->sql = $this->replaceSqlLabel($this->sql, 'or', trim($replace, ' or'));
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'or', trim($replace, ' or'));
         return $this;
     }
 
@@ -366,7 +367,7 @@ class SqlBuilder
         if ('' != $order) {
             $order = ' order by ' . $order . ' ';
         }
-        $this->sql = $this->replaceSqlLabel($this->sql, 'order', $order);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'order', $order);
         return $this;
     }
 
@@ -380,20 +381,20 @@ class SqlBuilder
             $group = ' group by ' . $group . ' ';
         }
 
-        $this->sql = $this->replaceSqlLabel($this->sql, 'group', $group);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'group', $group);
         return $this;
     }
 
     private function parseLimit($data)
     {
-        $limit = '';
+        $this->sqlMap['limit'] = '';
         if(isset($data['limit']) && '' !== $data['limit']) {
-            $limit = trim($data['limit']);
+            $this->sqlMap['limit'] = trim($data['limit']);
         }
-        if ('' != $limit) {
-            $limit = ' limit ' . $limit . ' ';
+        if ('' != $this->sqlMap['limit']) {
+            $this->sqlMap['limit'] = ' limit ' . $this->sqlMap['limit'] . ' ';
         }
-        $this->sql = $this->replaceSqlLabel($this->sql, 'limit', $limit);
+        $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'limit', $this->sqlMap['limit']);
         return $this;
     }
 
@@ -407,7 +408,7 @@ class SqlBuilder
         $this->sqlMap = array_merge($this->sqlMap, $options);
 
         if (isset($this->sqlMap['use_master']) && $this->sqlMap['use_master']) {
-            $this->sql = "/*master*/" . $this->sql;
+            $this->sqlMap['sql'] = "/*master*/" . $this->sqlMap['sql'];
         }
         return $this;
     }
