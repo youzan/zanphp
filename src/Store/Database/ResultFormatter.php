@@ -79,7 +79,7 @@ class ResultFormatter implements ResultFormatterInterface
     private function count()
     {
         $rows = $this->dbResult->fetchRows();
-        return isset($rows[0]['count_sql_rows']) ? 0 : $rows[0]['count_sql_rows'];
+        return !isset($rows[0]['count_sql_rows']) ? 0 : $rows[0]['count_sql_rows'];
     }
 
     private function insert()
