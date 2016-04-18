@@ -89,7 +89,7 @@ class QueryResult implements Async
             }
             return $return;
         } else {
-            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
+            throw new MysqlException($this->connection->getSocket()->error . 'sql:' . $this->sqlMap['sql'], $this->connection->getSocket()->errno);
         }
     }
 
@@ -97,7 +97,7 @@ class QueryResult implements Async
     {
         $result = $this->connection->getSocket()->reap_async_query();
         if (!$result) {
-            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
+            throw new MysqlException($this->connection->getSocket()->error . 'sql:' . $this->sqlMap['sql'], $this->connection->getSocket()->errno);
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_INSERT) {
             return $this->connection->getSocket()->insert_id;
@@ -111,7 +111,7 @@ class QueryResult implements Async
     {
         $result = $this->connection->getSocket()->reap_async_query();
         if (!$result) {
-            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
+            throw new MysqlException($this->connection->getSocket()->error . 'sql:' . $this->sqlMap['sql'], $this->connection->getSocket()->errno);
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_UPDATE) {
             return $result ? true : false;
@@ -123,7 +123,7 @@ class QueryResult implements Async
     {
         $result = $this->connection->getSocket()->reap_async_query();
         if (!$result) {
-            throw new MysqlException($this->connection->getSocket()->error, $this->connection->getSocket()->errno);
+            throw new MysqlException($this->connection->getSocket()->error . 'sql:' . $this->sqlMap['sql'], $this->connection->getSocket()->errno);
         }
         if ($this->sqlMap['result_type'] == SqlMap::RESULT_TYPE_DELETE) {
             return $result ? true : false;
