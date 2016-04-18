@@ -50,7 +50,6 @@ class Mysql implements DriverInterface
     {
         $this->callback = $callback;
         swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
-        call_user_func($this->callback, new MysqlResult($this));
     }
 
     /**
@@ -73,6 +72,7 @@ class Mysql implements DriverInterface
         }
         $this->connection->release();
         $this->result = $result;
+        call_user_func($this->callback, new MysqlResult($this));
     }
 
     public function getResult()
