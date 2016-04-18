@@ -38,7 +38,7 @@ class SqlBuilder
                 $this->delete($data);
                 break;
         }
-        $this->addSqlLint($options);
+        $this->addSqlLint($options)->formatSql();
         return $this;
     }
 
@@ -413,4 +413,12 @@ class SqlBuilder
         return $this;
     }
 
+    private function formatSql()
+    {
+        $sql = trim($this->sqlMap['sql']);
+        $sql = str_replace("\n", NULL, $sql);
+        $sql = str_replace("\r", NULL, $sql);
+        $this->sqlMap['sql'] = $sql;
+        return $this;
+    }
 }
