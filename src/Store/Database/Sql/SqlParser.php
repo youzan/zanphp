@@ -63,7 +63,7 @@ class SqlParser
     {
         switch ($mapKey) {
             case 'insert' :
-                $resultType = ResultTypeInterface::INSERT;
+                $resultType = ResultTypeInterface::LAST_INSERT_ID;
                 break;
             case 'update' :
                 $resultType = ResultTypeInterface::UPDATE;
