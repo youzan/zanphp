@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 class Mysqli extends Base implements Connection
 {

@@ -12,7 +12,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Network\Connection\Pool;
-use Zan\Framework\Network\Server\Timer\Timer;
+
 
 abstract class Base implements Connection
 {
