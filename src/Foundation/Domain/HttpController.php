@@ -33,6 +33,10 @@ class HttpController extends Controller
         $this->jsVar->setShare('desc', trim($desc));
     }
 
+    public function setDomains(array $domains){
+        $this->jsVar->setDomain($domains);
+    }
+
     public function getJsVars()
     {
         return $this->jsVar->get();
@@ -48,6 +52,12 @@ class HttpController extends Controller
         $this->viewData['_js_var'] = $this->getJsVars();
         $content = View::display($tpl, $this->viewData);
         return $this->output($content);
+    }
+
+    public function render($tpl)
+    {
+        $this->viewData['_js_var'] = $this->getJsVars();
+        return View::display($tpl, $this->viewData);
     }
 
     public function assign($key, $value)

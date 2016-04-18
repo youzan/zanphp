@@ -29,7 +29,6 @@ class RequestHandler
             $router = Router::getInstance();
             $router->route($request);
             $route = $router->parseRoute();
-
             $this->context->set('controller_name', $route['controller_name']);
             $this->context->set('action_name', $route['action_name']);
 

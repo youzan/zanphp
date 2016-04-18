@@ -31,32 +31,39 @@ class ConnectionInitiator
     /**
      * @param array $config(=Config::get('connection'))
      */
-    public function init(array $config)
+    public function init($config)
     {
         //读取配置文件
 //        $config = $this->configFile();
-        $this->initConfig($config);
+        if (is_array($config)) {
+            $this->initConfig($config);
+        }
+
 
     }
 
 
     private function initConfig($config)
     {
-        foreach ($config as $cf) {
-            if (!isset($cf['engine'])) {
-                $this->initConfig($cf);
-            } else {
-                if (empty($cf['pool'])) {
-                    continue;
+        if (is_array($config)) {
+            foreach ($config as $cf) {
+                if (!isset($cf['engine'])) {
+                    if (is_array($config)) {
+                        $this->initConfig($cf);
+                    }
+                } else {
+                    if (empty($cf['pool'])) {
+                        continue;
+                    }
+                    //创建连接池
+                    $factoryType = $cf['engine'];
+                    if (in_array($factoryType, $this->engineMap)) {
+                        $factoryType = ucfirst($factoryType);
+                        $this->initPool($factoryType, $cf['pool']);
+                    }
                 }
-                //创建连接池
-                $factoryType = $cf['engine'];
-                if (in_array($factoryType, $this->engineMap)) {
-                    $factoryType = ucfirst($factoryType);
-                    $this->initPool($factoryType, $cf['pool']);
-                }
-            }
 
+            }
         }
     }
 

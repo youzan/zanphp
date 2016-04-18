@@ -39,7 +39,7 @@ class Qrcode {
             'fg_color' => isset($styles['fg_color']) ? $styles['fg_color'] : '000000',
             'bg_color' => isset($styles['bg_color']) ? $styles['bg_color'] : 'ffffff',
         ];
-        $config = Config::get('url.qrcode');
+        $config = Config::get('qrcode');
         $response = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/',$params));
         if ($response) {
             if (false === $base64){
