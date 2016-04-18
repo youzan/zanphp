@@ -26,6 +26,4 @@ interface ConnectionFactory
 
     public function close();
 
-    public function heart();
-
 }
