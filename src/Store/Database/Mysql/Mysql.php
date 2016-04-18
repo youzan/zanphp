@@ -68,6 +68,7 @@ class Mysql implements DriverInterface
         if ($result == false) {
             //todo throw error
         }
+        $this->connection->release();
         $this->result = $result;
     }
 
