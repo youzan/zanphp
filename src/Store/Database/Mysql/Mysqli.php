@@ -8,7 +8,6 @@
 namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
-use Zan\Framework\Store\Database\Mysql\MysqlResult;
 use Zan\Framework\Contract\Network\Connection;
 
 class Mysqli implements DriverInterface
@@ -71,7 +70,7 @@ class Mysqli implements DriverInterface
         }
         $this->connection->release();
         $this->result = $result;
-        call_user_func($this->callback, new MysqlResult($this));
+        call_user_func($this->callback, new MysqliResult($this));
     }
 
     public function getResult()

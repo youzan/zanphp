@@ -28,8 +28,8 @@ class Flow
         $dbResult = (yield $db->query($sqlMap['sql']));
         if (false === $dbResult) {
             $connection = (yield ConnectionManager::getInstance()->get($database));
-            $mysql = new $engine($connection);
-            $dbResult = (yield $mysql->query($sqlMap['sql']));
+            $db = new $engine($connection);
+            $dbResult = (yield $db->query($sqlMap['sql']));
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();
