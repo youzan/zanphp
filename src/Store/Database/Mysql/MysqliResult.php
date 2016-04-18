@@ -32,7 +32,7 @@ class MysqliResult implements DbResultInterface
      */
     public function getLastInsertId()
     {
-        $insertId = $this->driver->getConnection()->getSocket()->insert_id;
+        $insertId = $this->driver->getConnection()->getSocket()->_insert_id;
         $this->driver->getConnection()->release();
         return $insertId;
     }
@@ -42,7 +42,7 @@ class MysqliResult implements DbResultInterface
      */
     public function getAffectedRows()
     {
-        $affectedRows = $this->driver->getConnection()->getSocket()->affected_rows;
+        $affectedRows = $this->driver->getConnection()->getSocket()->_affected_rows;
         $this->driver->getConnection()->release();
         return $affectedRows;
     }
