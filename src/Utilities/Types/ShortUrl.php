@@ -34,12 +34,5 @@ class ShortUrl
         yield '';
     }
 
-    private static function format($url,$failReturnPre=false)
-    {
-        if(false === $failReturnPre){
-            return '';
-        }
-        return $url;
-    }
 
 }
