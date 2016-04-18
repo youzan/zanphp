@@ -18,6 +18,8 @@ class Mysql implements DriverInterface
      */
     private $connection;
 
+    private $sql;
+
     /**
      * @var callable
      */
@@ -47,6 +49,7 @@ class Mysql implements DriverInterface
     public function execute(callable $callback)
     {
         $this->callback = $callback;
+        swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
         call_user_func($this->callback, new MysqlResult($this));
     }
 
@@ -56,7 +59,7 @@ class Mysql implements DriverInterface
      */
     public function query($sql)
     {
-        swoole_mysql_query($this->connection->getSocket(), $sql, [$this, 'onSqlReady']);
+        $this->sql = $sql;
         yield $this;
     }
 
