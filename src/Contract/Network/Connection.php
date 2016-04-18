@@ -15,5 +15,6 @@ interface Connection
     public function release();
     public function close();
     
-    public function ping();
+    public function getEngine();
+    public function heartbeat();
 }

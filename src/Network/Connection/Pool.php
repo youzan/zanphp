@@ -56,35 +56,22 @@ class Pool implements ConnectionPool
 
     }
 
-    //创建连接
     private function createConnect()
     {
         //todo 创建链接,存入数组
-        $mysqlConnection = $this->factory->create();
-        switch($this->type) {
-            case 'Mysqli':
-                $connection = new Mysqli();
-                break;
-            case 'Http':
-                $connection = new Http();
-                break;
-            case 'Redis':
-                $connection = new Redis();
-                break;
-            case 'Syslog':
-                $connection = new Syslog();
-                break;
-            default:
-            {
-                //do nothing
-                break;
-            }
-        }
-        $connection->setSocket($mysqlConnection);
+        $connection = $this->factory->create();
         $this->freeConnection->push($connection);
         $connection->setPool($this);
+        $connection->heartbeat();
+        $connection->setEngine($this->type);
     }
-    
+
+    public function getFreeConnection()
+    {
+        return $this->freeConnection;
+    }
+
+
     public function reload(array $config)
     {
         
@@ -92,16 +79,16 @@ class Pool implements ConnectionPool
 
     public function get()
     {
-        if (count($this->activeConnection) < $this->poolConfig['maximum-connection-count']) {
-            if (count($this->freeConnection) > 0) {
-                $conn = $this->freeConnection->pop();
-            }
-        } else {
+
+        if (empty($this->freeConnection)) {
             return null;
         }
-        if ($conn) {
-            $this->activeConnection->push($conn);
+        $conn = $this->freeConnection->pop();
+        if (null != $this->activeConnection->get(spl_object_hash($conn))) {
+//            echo '链接被重用了,链接被重用了,链接被重用了,链接被重用了,链接被重用了,链接被重用了';
         }
+        $this->activeConnection->push($conn);
+
 //        deferRelease($conn);
         return $conn;
     }

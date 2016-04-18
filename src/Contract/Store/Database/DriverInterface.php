@@ -11,34 +11,34 @@ namespace Zan\Framework\Contract\Store\Database;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 
-interface Driver extends Async
+interface DriverInterface extends Async
 {
     public function __construct(Connection $conn);
 
     /**
      * @param $sql
-     * @return DbResult
+     * @return DbResultInterface
      */
     public function query($sql);
 
     /**
      * @param bool $autoHandleException
-     * @return DbResult
+     * @return DbResultInterface
      */
     public function beginTransaction();
 
     /**
-     * @return DbResult
+     * @return DbResultInterface
      */
     public function commit();
 
     /**
-     * @return DbResult
+     * @return DbResultInterface
      */
     public function rollback();
 
     /**
-     * @return DbResult
+     * @return DbResultInterface
      */
-    public function onSqlReady(); 
+    public function onSqlReady($link, $result);
 }

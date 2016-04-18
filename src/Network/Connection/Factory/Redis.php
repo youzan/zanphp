@@ -27,4 +27,14 @@ class Redis implements ConnectionFactory
     {
         
     }
+
+    public function close()
+    {
+
+    }
+
+    public function heart()
+    {
+    }
+
 }

@@ -11,10 +11,12 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Tcp\RequestExceptionHandlerChain; 
 use Zan\Framework\Network\Server\ServerBase;
+use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 
 class Server extends ServerBase {
 
     protected $serverStartItems = [
+        InitializeSqlMap::class
     ];
 
     protected $workerStartItems = [

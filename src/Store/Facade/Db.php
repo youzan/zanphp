@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Store\Facade;
 
-use Zan\Framework\Store\Database\Mysql\QueryExecutor;
+use Zan\Framework\Store\Database\Flow;
 
 class Db {
     const RETURN_AFFECTED_ROWS  = true;
@@ -17,9 +17,8 @@ class Db {
     
     public static function execute($sid, $data, $options = [])
     {
-        $executor = new QueryExecutor();
-        yield $executor->init($sid, $data, $options);
-        yield $executor->execute($sid, $data, $options);
+        $flow = new Flow();
+        yield $flow->query($sid, $data, $options);
         return;
     }
  
