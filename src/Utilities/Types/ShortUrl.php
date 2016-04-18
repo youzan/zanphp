@@ -21,17 +21,11 @@ class ShortUrl
         }
         $config = Config::get('shorturl');
         $response = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/shorten?longUrl='.$url));
-        $data = json_decode($response,true);
-        if(!isset($data['status_code']) || !isset($data['data'])){
+        if(!isset($response['status_code']) || 200 != $response['status_code']){
             yield '';
             return;
         }
-
-        if(200 == $data['status_code'] && isset($data['data']) && isset($data['data']['url'])){
-            yield $data['data']['url'];
-            return;
-        }
-        yield '';
+        yield $response['data']['url'];
     }
 
 
