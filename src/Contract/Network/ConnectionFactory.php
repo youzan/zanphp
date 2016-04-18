@@ -23,4 +23,9 @@ interface ConnectionFactory
      * @throws \Zan\Framework\Network\Connection\Exception\ConnectTimeoutException        
      */ 
     public function create();
+
+    public function close();
+
+    public function heart();
+
 }

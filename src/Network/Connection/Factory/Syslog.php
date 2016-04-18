@@ -27,4 +27,13 @@ class Syslog implements ConnectionFactory
     {
         
     }
+
+    public function close()
+    {
+
+    }
+
+    public function heart()
+    {
+    }
 }
