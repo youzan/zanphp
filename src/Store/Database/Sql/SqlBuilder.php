@@ -152,6 +152,7 @@ class SqlBuilder
 
     private function formatValue($value)
     {
+        $value = Validator::realEscape($value);
         return is_int($value) ? $value : "'" . $value . "'";
     }
 
