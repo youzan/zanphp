@@ -74,7 +74,6 @@ trait ResponseTrait
     {
         $this->sendHeadersBy($swooleHttpResponse);
         $this->sendContentBy($swooleHttpResponse);
-        $swooleHttpResponse->end();
     }
 
     /**
