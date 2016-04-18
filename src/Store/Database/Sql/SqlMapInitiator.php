@@ -12,7 +12,7 @@ use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\ConfigLoader;
 use Zan\Framework\Store\Database\Sql\SqlMap;
 
-class Initiator
+class SqlMapInitiator
 {
     use Singleton;
 
