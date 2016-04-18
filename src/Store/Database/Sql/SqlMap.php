@@ -53,7 +53,6 @@ class SqlMap
 
         $filePath = substr($sid, 0, $pos);
         $base = explode('.', $filePath);
-        $filePath = str_replace('.', '/', $filePath);
 
         return [
             'file_path' => $filePath,
