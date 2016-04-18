@@ -129,6 +129,7 @@ class HttpClient
 
             call_user_func($this->callback, $this->parser->getBody());
         }
+        $this->client->close();
     }
 
     public function OnError()
