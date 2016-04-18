@@ -31,6 +31,7 @@ class Flow
         $driver = new $engine($connection);
         $dbResult = (yield $driver->query($sqlMap['sql']));
         if (false === $dbResult) {
+            $connection = (yield ConnectionManager::getInstance()->get($database));
             $engine = $this->parseEngine($connection->getEngine());
             $driver = new $engine($connection);
             $dbResult = (yield $driver->query($sqlMap['sql']));
