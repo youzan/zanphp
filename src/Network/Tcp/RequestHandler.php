@@ -42,6 +42,11 @@ class RequestHandler {
             if (nova_decode($data, $serviceName, $methodName,
                     $remoteIP, $remotePort, $seqNo, $attachData, $novaData)) {
 
+                if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
+                    $this->swooleServer->send($this->fd, $data);
+                    return;
+                }
+                
                 $request = new Request($serviceName, $methodName, $novaData);
                 $request->setFd($this->fd)
                         ->setRemote($remoteIP, $remotePort)
