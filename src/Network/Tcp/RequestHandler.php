@@ -39,28 +39,28 @@ class RequestHandler {
         $outputBuffer = $sendState = $reqState = null;
 
         //try {
-            if (nova_decode($data, $serviceName, $methodName,
-                    $remoteIP, $remotePort, $seqNo, $attachData, $novaData)) {
+        if (nova_decode($data, $serviceName, $methodName,
+                $remoteIP, $remotePort, $seqNo, $attachData, $novaData)) {
 
-                if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
-                    $this->swooleServer->send($this->fd, $data);
-                    return;
-                }
-                
-                $request = new Request($serviceName, $methodName, $novaData);
-                $request->setFd($this->fd)
-                        ->setRemote($remoteIP, $remotePort)
-                        ->setFromId($this->fromId)
-                        ->setSeqNo($seqNo)
-                        ->setAttachData($attachData);
-
-                $response = new Response($this->swooleServer, $request);
-
-                $requestTask = new RequestTask($request, $response, $this->context);
-                $coroutine = $requestTask->run();
-
-                Task::execute($coroutine, $this->context);
+            if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
+                $this->swooleServer->send($this->fd, $data);
+                return;
             }
+
+            $request = new Request($serviceName, $methodName, $novaData);
+            $request->setFd($this->fd)
+                    ->setRemote($remoteIP, $remotePort)
+                    ->setFromId($this->fromId)
+                    ->setSeqNo($seqNo)
+                    ->setAttachData($attachData);
+
+            $response = new Response($this->swooleServer, $request);
+
+            $requestTask = new RequestTask($request, $response, $this->context);
+            $coroutine = $requestTask->run();
+
+            Task::execute($coroutine, $this->context);
+        }
         //} catch (\Exception $e) {
 
         //    echo "\n\nexception\n\n";

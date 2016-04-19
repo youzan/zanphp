@@ -10,10 +10,14 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Store\Database\Mysql\Mysqli as Engine;
+use Zan\Framework\Store\Database\Mysql\MysqliConnectionLostException;
 
 class Mysqli extends Base implements Connection
 {
+    private $classHash = null;
     public function closeSocket()
     {
 //        $this->socket->close();
@@ -23,18 +27,39 @@ class Mysqli extends Base implements Connection
     public function heartbeat()
     {
         //绑定心跳检测事件
-        $key = spl_object_hash($this);
-        Timer::tick($this->config['keeping-sleep-time'], $key ,
-            function($key) {
-                if ($this->pool->getFreeConnection()->get($key)) {
-                    $this->pool->getFreeConnection()->remove($this);
-                    $result = $this->getSocket()->query('select 1');
-                    if (!$result) {
-                        $this->close();
-                    } else {
-                        $this->release();
-                    }
-                }
-            });
+        $this->classHash = spl_object_hash($this);
+        $this->heartbeatLater();
     }
+
+    public function heartbeatLater()
+    {
+        Timer::after($this->config['keeping-sleep-time'], $this->classHash,[$this,'heartbeating']);
+    }
+    
+    public function heartbeating()
+    {
+        if (!$this->pool->getFreeConnection()->get($this->classHash)) {
+            $this->heartbeatLater();
+            return ;
+        }
+
+        $this->pool->getFreeConnection()->remove($this);
+        $coroutine = $this->ping();
+        Task::execute($coroutine);
+    }
+    
+    public function ping()
+    {
+        $engine = new Engine($this);
+        try{
+            $result = (yield $engine->query('select 1'));
+        } catch (MysqliConnectionLostException $e){
+            return; 
+        }
+
+        $this->release();
+        $this->heartbeatLater();
+    }
+    
+    
 }
