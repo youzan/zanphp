@@ -80,6 +80,7 @@ class Application
             InitializeRunMode::class,
             InitializeDebug::class,
             InitializePathes::class,
+            InitializeEnv::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
             RegisterClassAliases::class,
