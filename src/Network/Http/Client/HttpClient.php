@@ -128,6 +128,7 @@ class HttpClient
         if ($this->parser->parse($data) === Parser::FINISHED) {
             $this->client->close();
             call_user_func($this->callback, $this->parser->getBody());
+            unset($this->parser);
         }
     }
 
