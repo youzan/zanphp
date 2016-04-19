@@ -27,15 +27,12 @@ class Flow
         if (!($connection instanceof Connection)) {
             throw new Exception('get connection error');
         }
+        
         $engine = $this->parseEngine($connection->getEngine());
         $driver = new $engine($connection);
         $dbResult = (yield $driver->query($sqlMap['sql']));
-        if (null === $dbResult) {
-            throw new Exception('获取链接失败');
-        }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();
-        return;
     }
 
     private function parseEngine($engine)

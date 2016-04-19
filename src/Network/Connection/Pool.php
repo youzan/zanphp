@@ -99,7 +99,7 @@ class Pool implements ConnectionPool
         $this->activeConnection->remove($conn);
         if (count($this->freeConnection) == 1) {
             //唤醒等待事件
-            $evtName = '' . '_free';
+            $evtName = $this->poolConfig['pool_name'] . '_free';
             Event::fire($evtName, [], false);
         }
     }
