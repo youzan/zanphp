@@ -30,11 +30,8 @@ class Flow
         $engine = $this->parseEngine($connection->getEngine());
         $driver = new $engine($connection);
         $dbResult = (yield $driver->query($sqlMap['sql']));
-        if (false === $dbResult) {
-            $connection = (yield ConnectionManager::getInstance()->get($database));
-            $engine = $this->parseEngine($connection->getEngine());
-            $driver = new $engine($connection);
-            $dbResult = (yield $driver->query($sqlMap['sql']));
+        if (null === $dbResult) {
+            throw new Exception('获取链接失败');
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();
