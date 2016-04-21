@@ -66,6 +66,8 @@ class Mysqli implements DriverInterface
             if (in_array($link->errno, [2013, 2006])) {
                 $this->connection->close();
                 throw new MysqliConnectionLostException();
+            } else {
+                throw new MysqliQueryErrorException($link->error, $link->errno);
             }
         }
         $this->result = $result;
