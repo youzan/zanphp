@@ -33,7 +33,7 @@ class Mysqli extends Base implements Connection
 
     public function heartbeatLater()
     {
-        Timer::after($this->config['keeping-sleep-time'], $this->classHash,[$this,'heartbeating']);
+        Timer::after($this->config['heartbeat-time'], $this->classHash,[$this,'heartbeating']);
     }
     
     public function heartbeating()
