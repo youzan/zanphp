@@ -11,7 +11,7 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class MysqliQueryErrorException extends ZanException
+class MysqliQueryException extends ZanException
 {
 
 }

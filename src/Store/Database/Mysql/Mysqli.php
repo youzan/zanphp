@@ -63,11 +63,13 @@ class Mysqli implements DriverInterface
     public function onSqlReady($link, $result)
     {
         if ($result == false) {
-            if (in_array($link->errno, [2013, 2006])) {
+            if (in_array($link->_errno, [2013, 2006])) {
                 $this->connection->close();
                 throw new MysqliConnectionLostException();
+            } elseif ($link->_errno == 1064) {
+                throw new MysqliSqlSyntaxException($link->_error, $link->_errno);
             } else {
-                throw new MysqliQueryErrorException($link->error, $link->errno);
+                throw new MysqliQueryException($link->_error, $link->_errno);
             }
         }
         $this->result = $result;
