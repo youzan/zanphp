@@ -67,9 +67,13 @@ class Mysqli implements DriverInterface
                 $this->connection->close();
                 throw new MysqliConnectionLostException();
             } elseif ($link->_errno == 1064) {
-                throw new MysqliSqlSyntaxException($link->_error, $link->_errno);
+                $error = $link->_error;
+                $this->connection->release();
+                throw new MysqliSqlSyntaxException($error);
             } else {
-                throw new MysqliQueryException($link->_error, $link->_errno);
+                $error = $link->_error;
+                $this->connection->release();
+                throw new MysqliQueryException($error);
             }
         }
         $this->result = $result;
