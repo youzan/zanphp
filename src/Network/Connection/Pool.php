@@ -13,10 +13,6 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Connection\Driver\Mysqli;
-use Zan\Framework\Network\Connection\Driver\Http;
-use Zan\Framework\Network\Connection\Driver\Redis;
-use Zan\Framework\Network\Connection\Driver\Syslog;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
 class Pool implements ConnectionPool
