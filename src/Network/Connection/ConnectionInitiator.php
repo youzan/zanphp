@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
@@ -21,7 +22,7 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog'];
+    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
 
 
     public function __construct()
@@ -85,6 +86,9 @@ class ConnectionInitiator
                 break;
             case 'Mysqli':
                 $factory = new Mysqli($config);
+                break;
+            case 'NovaClient':
+                $factory = new NovaClient($config);
                 break;
             default:
                 break;

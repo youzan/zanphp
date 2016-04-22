@@ -17,6 +17,7 @@ use Zan\Framework\Network\Connection\Driver\Mysqli;
 use Zan\Framework\Network\Connection\Driver\Http;
 use Zan\Framework\Network\Connection\Driver\Redis;
 use Zan\Framework\Network\Connection\Driver\Syslog;
+use Zan\Framework\Network\Connection\Driver\NovaClient;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
 class Pool implements ConnectionPool
@@ -60,7 +61,11 @@ class Pool implements ConnectionPool
     {
         //todo 创建链接,存入数组
         $connection = $this->factory->create();
-        $this->freeConnection->push($connection);
+        if ($connection->getIsAsync()) {
+            $this->activeConnection->push($connection);
+        } else {
+            $this->freeConnection->push($connection);
+        }
         $connection->setPool($this);
         $connection->heartbeat();
         $connection->setEngine($this->type);
@@ -79,7 +84,6 @@ class Pool implements ConnectionPool
 
     public function get()
     {
-
         if ($this->freeConnection->isEmpty()) {
             return null;
         }
@@ -94,6 +98,7 @@ class Pool implements ConnectionPool
     {
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
+
         if (count($this->freeConnection) == 1) {
             //唤醒等待事件
             $evtName = $this->poolConfig['pool_name'] . '_free';

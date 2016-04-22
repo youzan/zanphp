@@ -20,6 +20,7 @@ abstract class Base implements Connection
     protected $pool = null;
     protected $socket = null;
     protected $engine = null;
+    protected $isAsync = false;
 
     abstract protected function closeSocket();
 
@@ -83,5 +84,13 @@ abstract class Base implements Connection
     public function getEngine()
     {
         return $this->engine;
+    }
+
+    public function setIsAsync($isAsync) {
+        $this->isAsync = $isAsync;
+    }
+
+    public function getIsAsync() {
+        return $this->isAsync;
     }
 }
