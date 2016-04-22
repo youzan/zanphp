@@ -23,8 +23,6 @@ class NovaClient implements ConnectionFactory
 
     public function create()
     {
-        //$clientFlags = $this->config['persistent'] ? SWOOLE_SOCK_TCP | SWOOLE_KEEP : SWOOLE_SOCK_TCP;
-        //咨询了swoole的作者,得知swoole_keep只是为了php-fpm设计的,并不适用于我们的cli常驻内存模型(蚩尤注)
         $clientFlags = SWOOLE_SOCK_TCP;
         $this->conn = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
         $this->conn->set($this->config['config']);
