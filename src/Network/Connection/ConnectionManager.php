@@ -27,17 +27,7 @@ class ConnectionManager
     public function __construct()
     {
     }
-//
-//    public function init()
-//    {
-//        $factory = new Mysqli(self::$mysqlConfig);
-//        $connectionPool = new Pool($factory, self::$poolConfig);
-//        $key = self::$poolConfig['pool_name'];
-//        self::$registry[] = $key;//注册连接池
-//        self::$poolMap[$key] = $connectionPool;
-//        return $this;
-//    }
-    
+   
     /**
      * @param string $connKey
      * @param int $timeout
@@ -57,8 +47,7 @@ class ConnectionManager
             yield $connection;
             return;
         }
-        
-        yield new FutureConnection($this, $connKey, $timeout);
+        yield (new FutureConnection($this, $connKey, $timeout));
     }
 
     /**
