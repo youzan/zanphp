@@ -56,7 +56,12 @@ class Pool implements ConnectionPool
     {
         //todo 创建链接,存入数组
         $connection = $this->factory->create();
-        $this->freeConnection->push($connection);
+        if ($connection->getIsAsync()) {
+            $this->activeConnection->push($connection);
+        } else {
+            $this->freeConnection->push($connection);
+        }
+        
         $connection->setPool($this);
         $connection->heartbeat();
         $connection->setEngine($this->type);
