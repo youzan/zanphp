@@ -37,6 +37,7 @@ class NovaClient extends Base implements Connection
     }
 
     public function onClose(SwooleClient $cli){
+        $this->close();
         echo "nova client close\n";
     }
 
@@ -45,6 +46,7 @@ class NovaClient extends Base implements Connection
     }
 
     public function onError(SwooleClient $cli){
+        $this->close();
         echo 'nova client error\n';
     }
 
