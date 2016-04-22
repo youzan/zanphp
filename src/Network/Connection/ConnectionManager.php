@@ -27,7 +27,6 @@ class ConnectionManager
     public function __construct()
     {
     }
-   
     /**
      * @param string $connKey
      * @param int $timeout
@@ -47,7 +46,8 @@ class ConnectionManager
             yield $connection;
             return;
         }
-        yield (new FutureConnection($this, $connKey, $timeout));
+        
+        yield new FutureConnection($this, $connKey, $timeout);
     }
 
     /**
@@ -59,25 +59,4 @@ class ConnectionManager
         self::$poolMap[$poolKey] = $pool;
     }
 
-
-    public function configDemo() {
-        self::$poolConfig['host']= '192.168.66.202:3306';
-        self::$poolConfig['user'] = 'test_koudaitong';
-        self::$poolConfig['pool_name'] = 'pifa';
-        self::$poolConfig['maximum-connection-count'] ='100';
-        self::$poolConfig['minimum-connection-count'] = '10';
-        self::$poolConfig['keeping-sleep-time'] = '10';//等待时间
-        self::$poolConfig['maximum-new-connections'] = '5';
-        self::$poolConfig['prototype-count'] = '5';
-        self::$poolConfig['init-connection'] = '10';
-    }
-
-    public function mysqlConfig()
-    {
-        self::$mysqlConfig['host'] = '192.168.66.202';
-        self::$mysqlConfig['user'] = 'test_koudaitong';
-        self::$mysqlConfig['password'] = 'nPMj9WWpZr4zNmjz';
-        self::$mysqlConfig['database'] = 'pf';
-        self::$mysqlConfig['port'] = '3306';
-    }
 }

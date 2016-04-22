@@ -35,7 +35,6 @@ class ConnectionInitiator
     public function init($config)
     {
         //读取配置文件
-//        $config = $this->configFile();
         if (is_array($config)) {
             $this->initConfig($config);
         }
