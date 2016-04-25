@@ -35,7 +35,7 @@ class Server extends ServerBase {
 
     public function start()
     {
-        $config = Config::get('nova.server');
+        $config = Config::get('server');
         $this->swooleServer->set($config);
 
         $this->swooleServer->on('start', [$this, 'onStart']);
