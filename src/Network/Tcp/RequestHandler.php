@@ -29,32 +29,6 @@ class RequestHandler {
 
     private function doRequest($data)
     {
-//        $serviceName = $methodName = null;
-//        $remoteIP = $remotePort = null;
-//        $seqNo = $novaData = null;
-//        $attachData = $execResult = null;
-//        $reqState = null;
-
-//        if (nova_decode($data, $serviceName, $methodName,
-//                $remoteIP, $remotePort, $seqNo, $attachData, $novaData)) {
-//
-//            if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
-//                $this->swooleServer->send($this->fd, $data);
-//                return;
-//            }
-//
-//            $request = new Request($serviceName, $methodName, $novaData);
-//            $request->setFd($this->fd)
-//                    ->setRemote($remoteIP, $remotePort)
-//                    ->setFromId($this->fromId)
-//                    ->setSeqNo($seqNo)
-//                    ->setAttachData($attachData);
-//
-//            $response = new Response($this->swooleServer, $request);
-//
-//
-//        }
-
         $request = new Request($this->fd, $this->fromId, $data);
         $response = new Response($this->swooleServer, $request);
 
@@ -66,7 +40,9 @@ class RequestHandler {
                 return;
             }
         } catch(\Exception $e) {
-            //TODO: send TApplicationException because decode failed
+            //send TApplicationException because decode failed
+            //TApplication
+            $response->sendException($e);
             return;
         }
 
@@ -75,7 +51,8 @@ class RequestHandler {
             $coroutine = $requestTask->run();
             Task::execute($coroutine, $this->context);
         } catch(\Exception $e) {
-            //TODO: send bizException
+            //send bizException
+            //TREPLY
             $response->sendException($e);
         }
     }
