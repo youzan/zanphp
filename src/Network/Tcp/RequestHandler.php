@@ -34,28 +34,18 @@ class RequestHandler {
 
         try {
             $request->decode();
-
             if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $data);
                 return;
             }
-        } catch(\Exception $e) {
-            //send TApplicationException because decode failed
-            //TApplication
-            $response->sendException($e);
-            return;
-        }
-
-        try {
+            
             $requestTask = new RequestTask($request, $response, $this->context);
             $coroutine = $requestTask->run();
             Task::execute($coroutine, $this->context);
         } catch(\Exception $e) {
-            //send bizException
-            //TREPLY
             $response->sendException($e);
+            return;
         }
     }
-
 
 }
