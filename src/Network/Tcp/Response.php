@@ -57,13 +57,13 @@ class Response implements BaseResponse {
 
 
             $swooleServer = $this->getSwooleServer();
-            $sendState = $swooleServer->send(
+            $swooleServer->send(
                 $this->request->getFd(),
                 $outputBuffer
             );
         }
 
-        $this->swooleServer->close($this->request->getFd());
+//        $this->swooleServer->close($this->request->getFd());
     }
 
     public function send($content)

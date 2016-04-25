@@ -66,12 +66,18 @@ class Task
                         return null;
                 }
             } catch (\Exception $e) {
-                if ($this->scheduler->isStackEmpty()) {
-                    $this->coroutine->throw($e);
-                }
                 $this->scheduler->throwException($e);
             }
         }
+    }
+
+    public function sendException($e)
+    {
+        if ($this->scheduler->isStackEmpty()) {
+            $this->coroutine->throw($e);
+        }
+
+        $this->scheduler->throwException($e);
     }
 
     public function send($value)

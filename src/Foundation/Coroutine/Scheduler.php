@@ -48,18 +48,38 @@ class Scheduler
         return $this->stack->isEmpty();
     }
 
-    public function throwException($e)
+    public function throwException($e, $isFirstCall = false)
     {
-        $coroutine = $this->stack->pop();
-        $coroutine->throw($e);
+        if ($this->isStackEmpty()) {
+            $this->task->getCoroutine()->throw($e);
+            return;
+        }
 
-        $this->task->setCoroutine($coroutine);
+        try{
+            if ($isFirstCall) {
+                $coroutine = $this->task->getCoroutine();
+            } else {
+                $coroutine = $this->stack->pop();
+            }
+
+            $this->task->setCoroutine($coroutine);
+            $coroutine->throw($e);
+
+            $this->task->run();
+        }catch (\Exception $e){
+            $this->throwException($e);
+        }
     }
 
-    public function asyncCallback($response)
+    public function asyncCallback($response, $exception = null)
     {
-        $this->task->send($response);
-        $this->task->run();
+        if ($exception !== null
+            && $exception instanceof \Exception) {
+                $this->throwException($exception, true);
+        } else {
+            $this->task->send($response);
+            $this->task->run();
+        }
     }
 
     //TODO:  move handlers out of this class
