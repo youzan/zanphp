@@ -3,7 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\RunMode;
-use Zan\Framework\Network\Http\Client\HttpClient;
+use Zan\Framework\Network\Http\Client\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
 class Client implements Async
@@ -84,7 +84,7 @@ class Client implements Async
 
     private function build()
     {
-        $this->httpClient = new HttpClient($this->host, $this->port);
+        $this->httpClient = new HClient($this->host, $this->port);
 
         $this->httpClient->setTimeout($this->timeout);
         $this->httpClient->setMethod($this->method);

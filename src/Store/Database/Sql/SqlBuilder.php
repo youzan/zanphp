@@ -7,6 +7,8 @@
  */
 namespace Zan\Framework\Store\Database\Sql;
 
+use Zan\Framework\Store\Database\Mysql\Exception;
+
 class SqlBuilder
 {
     private $sqlMap;
@@ -63,7 +65,7 @@ class SqlBuilder
     private function parseCount($data)
     {
         if (!$data || !isset($data['count']) || '' == $data['count']) {
-            //todo throw 'what field do you want count?'
+            throw new Exception('what field do you want count?');
         }
         $count = 'count(' . $data['count'] . ') as count_sql_rows';
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
@@ -152,6 +154,7 @@ class SqlBuilder
 
     private function formatValue($value)
     {
+        $value = Validator::realEscape($value);
         return is_int($value) ? $value : "'" . $value . "'";
     }
 
@@ -185,12 +188,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    //todo throw sql map limit error
+                    throw new Exception('sql map limit error');
                 }
             }
         }
         if (count($requireMap) > 0) {
-            //todo throw 'sql map require error'
+            throw new Exception('sql map require error');
         }
         return true;
     }
@@ -292,7 +295,7 @@ class SqlBuilder
             $condition = strtolower(trim($condition));
             $column = trim($column);
             if ('like' === $condition && '%%%' === trim($value)) {
-                //todo throw 'sql like can not contain %%%'
+                throw new Exception('sql like can not contain %%%');
             }
             if (false !== $expr || '' != $expr) {
                 $clauses[] = $this->formatColumn($column) . ' ' . $condition . ' ' . $expr . ' ';
@@ -311,7 +314,7 @@ class SqlBuilder
     {
         $value = is_string($value) ? explode(',', $value) : $value;
         if (!is_array($value) || [] == $value) {
-            //todo throw 'sql where条件中in为空'
+            throw new Exception('sql where条件中in为空');
         }
         $clause = $this->formatColumn($column) . ' ' . $condition . ' (';
         $tmp = [];

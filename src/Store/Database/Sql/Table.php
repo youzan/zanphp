@@ -7,7 +7,6 @@
  */
 namespace Zan\Framework\Store\Database\Sql;
 use Zan\Framework\Foundation\Core\Path;
-use Zan\Framework\Store\Database\Mysql\Exception as MysqlException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Core\ConfigLoader;
 class Table
@@ -20,7 +19,7 @@ class Table
         if (!isset($this->tables[$tableName])) {
             $this->setTables();
             if (!isset($this->tables[$tableName])) {
-                throw new MysqlException('无法获取数' . $tableName . '表所在的数据库配置');
+                throw new Exception('无法获取数' . $tableName . '表所在的数据库配置');
             }
         }
         return $this->tables[$tableName];

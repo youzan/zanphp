@@ -13,10 +13,6 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Connection\Driver\Mysqli;
-use Zan\Framework\Network\Connection\Driver\Http;
-use Zan\Framework\Network\Connection\Driver\Redis;
-use Zan\Framework\Network\Connection\Driver\Syslog;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
 class Pool implements ConnectionPool
@@ -56,36 +52,27 @@ class Pool implements ConnectionPool
 
     }
 
-    //创建连接
     private function createConnect()
     {
         //todo 创建链接,存入数组
-        $mysqlConnection = $this->factory->create();
-        switch($this->type) {
-            case 'Mysqli':
-                $connection = new Mysqli();
-                break;
-            case 'Http':
-                $connection = new Http();
-                break;
-            case 'Redis':
-                $connection = new Redis();
-                break;
-            case 'Syslog':
-                $connection = new Syslog();
-                break;
-            default:
-            {
-                //do nothing
-                break;
-            }
+        $connection = $this->factory->create();
+        if ($connection->getIsAsync()) {
+            $this->activeConnection->push($connection);
+        } else {
+            $this->freeConnection->push($connection);
         }
-        $connection->setSocket($mysqlConnection);
-        $connection->setEngine($this->type);
-        $this->freeConnection->push($connection);
+        
         $connection->setPool($this);
+        $connection->heartbeat();
+        $connection->setEngine($this->type);
     }
-    
+
+    public function getFreeConnection()
+    {
+        return $this->freeConnection;
+    }
+
+
     public function reload(array $config)
     {
         
@@ -93,16 +80,13 @@ class Pool implements ConnectionPool
 
     public function get()
     {
-        if (count($this->activeConnection) < $this->poolConfig['maximum-connection-count']) {
-            if (count($this->freeConnection) > 0) {
-                $conn = $this->freeConnection->pop();
-            }
-        } else {
+
+        if ($this->freeConnection->isEmpty()) {
             return null;
         }
-        if ($conn) {
-            $this->activeConnection->push($conn);
-        }
+        $conn = $this->freeConnection->pop();
+        $this->activeConnection->push($conn);
+
 //        deferRelease($conn);
         return $conn;
     }
@@ -113,7 +97,7 @@ class Pool implements ConnectionPool
         $this->activeConnection->remove($conn);
         if (count($this->freeConnection) == 1) {
             //唤醒等待事件
-            $evtName = '' . '_free';
+            $evtName = $this->poolConfig['pool_name'] . '_free';
             Event::fire($evtName, [], false);
         }
     }

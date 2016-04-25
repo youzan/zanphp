@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
@@ -21,7 +22,7 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog'];
+    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
 
 
     public function __construct()
@@ -34,7 +35,6 @@ class ConnectionInitiator
     public function init($config)
     {
         //读取配置文件
-//        $config = $this->configFile();
         if (is_array($config)) {
             $this->initConfig($config);
         }
@@ -76,18 +76,24 @@ class ConnectionInitiator
         switch ($factoryType) {
             case 'Redis':
                 $factory = new Redis($config);
+                break;
             case 'Syslog':
                 $factory = new Syslog($config);
+                break;
             case 'Http':
                 $factory = new Http($config);
+                break;
             case 'Mysqli':
                 $factory = new Mysqli($config);
+                break;
+            case 'NovaClient':
+                $factory = new NovaClient($config);
+                break;
             default:
-            {}
+                break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
-        $connectionManage = new ConnectionManager();
-        $connectionManage->addPool($config['pool_name'], $connectionPool);
+        ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
     }
 
     private function configFile()

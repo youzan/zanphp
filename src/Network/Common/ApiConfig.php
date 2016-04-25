@@ -689,7 +689,7 @@ return [
     'online' => [
         'account' => [
             'type' => 'php',
-            'host' => 'usercenter.s.qima-inc.com',
+            'host' => 'api.koudaitong.com:80',
             'sub' => [
                 [
                     'mod' => 'account.admin',

@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Response\JsonResponse;
@@ -33,7 +34,8 @@ class HttpController extends Controller
         $this->jsVar->setShare('desc', trim($desc));
     }
 
-    public function setDomains(array $domains){
+    public function setDomains(array $domains)
+    {
         $this->jsVar->setDomain($domains);
     }
 
@@ -47,8 +49,15 @@ class HttpController extends Controller
         return new Response($content);
     }
 
+    private function setupQiniu()
+    {
+        $this->jsVar->setConfig('qn_public', Config::get('qiniu.scope.public', null));
+        $this->jsVar->setConfig('qn_private', Config::get('qiniu.scope.private', null));
+    }
+
     public function display($tpl)
     {
+        $this->setupQiniu();
         $this->viewData['_js_var'] = $this->getJsVars();
         $content = View::display($tpl, $this->viewData);
         return $this->output($content);
@@ -56,6 +65,7 @@ class HttpController extends Controller
 
     public function render($tpl)
     {
+        $this->setupQiniu();
         $this->viewData['_js_var'] = $this->getJsVars();
         return View::display($tpl, $this->viewData);
     }
@@ -68,20 +78,21 @@ class HttpController extends Controller
     public function r($code, $msg, $data)
     {
         $data = [
-            'code'  => $code,
-            'msg'   => $msg,
-            'data'  => $data,
+            'code' => $code,
+            'msg'  => $msg,
+            'data' => $data,
         ];
         return new JsonResponse($data);
     }
 
-    public function redirect($url,$code = 302){
+    public function redirect($url, $code = 302)
+    {
         return RedirectResponse::create($url, $code);
     }
 
-    protected function dispatch($action,$mode=0)
+    protected function dispatch($action, $mode = 0)
     {
-        switch($mode){
+        switch ($mode) {
         }
     }
 

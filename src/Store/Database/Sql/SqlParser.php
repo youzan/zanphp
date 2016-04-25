@@ -54,7 +54,7 @@ class SqlParser
     {
         preg_match('/^\s*(INSERT|SELECT|UPDATE|DELETE)/is', $sql, $match);
         if (!$match) {
-            //todo throw 'sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一'
+            throw new Exception('sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一');
         }
         return strtolower(trim($match[0]));
     }
@@ -63,7 +63,7 @@ class SqlParser
     {
         switch ($mapKey) {
             case 'insert' :
-                $resultType = ResultTypeInterface::INSERT;
+                $resultType = ResultTypeInterface::LAST_INSERT_ID;
                 break;
             case 'update' :
                 $resultType = ResultTypeInterface::UPDATE;
@@ -110,11 +110,11 @@ class SqlParser
         $type = strtoupper(substr($sql, 0, strpos($sql, ' ')));
         $matches = null;
         if (!isset($tablePregMap[$type])) {
-            //todo throw 'Can not find table name, please check your sql type'
+            throw new Exception('Can not find table name, please check your sql type');
         }
         preg_match($tablePregMap[$type], $sql, $matches);
         if (!is_array($matches) || !isset($matches[0])) {
-            //todo throw 'Can not find table name, please check your sql type'
+            throw new Exception('Can not find table name, please check your sql type');
         }
         $table = $matches[0];
         //去除`符合和库名
@@ -123,7 +123,7 @@ class SqlParser
         }
         $table = trim($table, '`');
         if ('' == $table || !strlen($table)) {
-            //todo throw "Can't get table name"
+            throw new Exception('Can\'t get table name');
         }
         return $table;
     }

@@ -21,6 +21,16 @@ function taskSleep()
     });
 }
 
+function taskWait()
+{
+    return new SysCall(function (Task $task) {
+        $task->send(null);
+
+        return Signal::TASK_WAIT;
+    });
+}
+
+
 function newTask(\Generator $gen = null)
 {
     return new SysCall(function (Task $task) use ($gen) {

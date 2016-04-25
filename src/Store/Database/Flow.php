@@ -25,26 +25,20 @@ class Flow
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield ConnectionManager::getInstance()->get($database));
         if (!($connection instanceof Connection)) {
-            //todo throw
+            throw new Exception('get connection error');
         }
+        
         $engine = $this->parseEngine($connection->getEngine());
         $driver = new $engine($connection);
         $dbResult = (yield $driver->query($sqlMap['sql']));
-        if (false === $dbResult) {
-            $connection = (yield ConnectionManager::getInstance()->get($database));
-            $engine = $this->parseEngine($connection->getEngine());
-            $driver = new $engine($connection);
-            $dbResult = (yield $driver->query($sqlMap['sql']));
-        }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();
-        return;
     }
 
     private function parseEngine($engine)
     {
         if (!isset($this->engineMap[$engine])) {
-            //todo throw can't find database engine : $engine
+            throw new Exception('can\'t find database engine : '.$engine);
         }
         return $this->engineMap[$engine];
     }

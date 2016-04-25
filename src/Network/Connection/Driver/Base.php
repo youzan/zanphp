@@ -11,6 +11,8 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\ConnectionPool;
+use Zan\Framework\Network\Connection\Pool;
+
 
 abstract class Base implements Connection
 {
@@ -18,6 +20,7 @@ abstract class Base implements Connection
     protected $pool = null;
     protected $socket = null;
     protected $engine = null;
+    protected $isAsync = false;
 
     abstract protected function closeSocket();
 
@@ -29,6 +32,16 @@ abstract class Base implements Connection
     public function getPool()
     {
         return $this->pool;
+    }
+
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    public function getConfig()
+    {
+        return $this->config;
     }
 
     public function getSocket()
@@ -59,9 +72,8 @@ abstract class Base implements Connection
         $this->closeSocket();
     }
 
-    public function ping()
+    public function heartbeat()
     {
-        return null;
     }
 
     public function setEngine($engine)
@@ -72,5 +84,13 @@ abstract class Base implements Connection
     public function getEngine()
     {
         return $this->engine;
+    }
+
+    public function setIsAsync($isAsync) {
+        $this->isAsync = $isAsync;
+    }
+
+    public function getIsAsync() {
+        return $this->isAsync;
     }
 }

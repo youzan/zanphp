@@ -126,8 +126,9 @@ class HttpClient
     public function onReceive($cli, $data)
     {
         if ($this->parser->parse($data) === Parser::FINISHED) {
-
+            $this->client->close();
             call_user_func($this->callback, $this->parser->getBody());
+            unset($this->parser);
         }
     }
 
