@@ -34,8 +34,7 @@ class Server extends ServerBase implements ServerContract
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
-        $this->swooleServer->
-        set(['worker_num' => $config['worker_num']]);
+        $this->swooleServer->set(['worker_num' => $config['worker_num']]);
     }
 
     public function start()
@@ -81,7 +80,7 @@ class Server extends ServerBase implements ServerContract
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-
+        echo "#################workerId:".$workerId."\t close\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
