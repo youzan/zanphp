@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Http\Client;
 
-class HttpClient
+class OldHttpClient
 {
     const EOF = "\r\n";
     const DEFAULT_PORT = 80;
@@ -77,35 +77,19 @@ class HttpClient
 
     public function handle()
     {
+        $this->client = new \swoole_client(SWOOLE_TCP, SWOOLE_SOCK_ASYNC);
+
+        $this->parser = new Parser();
+
+        $this->bindEvent();
+
         swoole_async_dns_lookup($this->host, function($host, $ip) {
-            $this->request($ip);
+            $this->client->connect($ip, $this->port, $this->timeout);
         });
     }
 
 
-    public function request($ip)
-    {
-        $this->client = new \swoole_http_client($ip, $this->port);
-        $this->buildHeader();
-        
-        if('GET' === $this->method){
-            $this->client->get($this->uri, [$this,'onReceive']);
-        }elseif('POST' === $this->method){
-            $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
-        }
-
-    }
-
     private function buildHeader()
-    {
-        if (!isset($this->header['Content-Type'])) {
-            $this->header['Content-Type'] = 'application/json';
-        }
-        $this->client->setHeaders($this->header);
-    }
-
-
-    private function _buildHeader()
     {
         $header  = $this->method.' '. $this->uri .' HTTP/1.1'. self::EOF;
         $header .= 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' . self::EOF;
@@ -139,9 +123,13 @@ class HttpClient
         $this->client->send($this->buildHeader() . self::EOF . $this->body);
     }
 
-    public function onReceive($cli)
+    public function onReceive($cli, $data)
     {
-        call_user_func($this->callback, $cli->body);
+        if ($this->parser->parse($data) === Parser::FINISHED) {
+            $this->client->close();
+            call_user_func($this->callback, $this->parser->getBody());
+            unset($this->parser);
+        }
     }
 
     public function OnError()

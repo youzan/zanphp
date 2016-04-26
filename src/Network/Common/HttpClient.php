@@ -97,7 +97,7 @@ class HttpClient implements Async
             $body = json_encode($this->params);
             $contentType = 'application/json';
             $this->client->setHeader([
-                'content_type' => $contentType
+                'Content-Type' => $contentType
             ]);
             $this->client->setBody($body);
         }
