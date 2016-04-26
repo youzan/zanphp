@@ -126,11 +126,7 @@ class Server extends ServerBase {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        try{
-            (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
-        } catch (\Exception $e) {
-            RequestExceptionHandlerChain::getInstance()->handle($e);
-        }
+        (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
 
 }

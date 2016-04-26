@@ -12,9 +12,6 @@ class RequestHandler {
     private $fd = null;
     private $fromId = null;
 
-    private $attachmentContent = '{}';
-    private $processorExceptionB64 = 'gAEAAwAAABBzZXJ2ZXIucHJvY2Vzc29yAAAAAAsAAQAAABpzZXJ2ZXIucHJvY2Vzc29yLmV4Y2VwdGlvbggAAgAAAAAA';
-    private $processTitlePrefix = 'php-nova: ';
 
     public function __construct()
     {
@@ -27,53 +24,28 @@ class RequestHandler {
         $this->fd = $fd;
         $this->fromId = $fromId;
 
-        return $this->doReuest($data);
+        $this->doRequest($data);
     }
 
-    private function doReuest($data)
+    private function doRequest($data)
     {
-        $serviceName = $methodName = null;
-        $remoteIP = $remotePort = null;
-        $seqNo = $novaData = null;
-        $attachData = $execResult = null;
-        $outputBuffer = $sendState = $reqState = null;
+        $request = new Request($this->fd, $this->fromId, $data);
+        $response = new Response($this->swooleServer, $request);
 
-        //try {
-        if (nova_decode($data, $serviceName, $methodName,
-                $remoteIP, $remotePort, $seqNo, $attachData, $novaData)) {
-
-            if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
+        try {
+            $request->decode();
+            if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $data);
                 return;
             }
-
-            $request = new Request($serviceName, $methodName, $novaData);
-            $request->setFd($this->fd)
-                    ->setRemote($remoteIP, $remotePort)
-                    ->setFromId($this->fromId)
-                    ->setSeqNo($seqNo)
-                    ->setAttachData($attachData);
-
-            $response = new Response($this->swooleServer, $request);
-
+            
             $requestTask = new RequestTask($request, $response, $this->context);
             $coroutine = $requestTask->run();
-
             Task::execute($coroutine, $this->context);
+        } catch(\Exception $e) {
+            $response->sendException($e);
+            return;
         }
-        //} catch (\Exception $e) {
-
-        //    echo "\n\nexception\n\n";
-        //    if ($seqNo) {
-        //        $execResult = base64_decode($this->processorExceptionB64);
-        //        if (nova_encode($serviceName, $methodName, $remoteIP,
-        //                    $remotePort, $seqNo, $this->attachmentContent,
-        //                    $execResult, $outputBuffer)) {
-        //            $sendState = $this->swooleServer->send($this->fd, $outputBuffer);
-        //        }
-        //    }
-        //}
     }
-
 
 }
