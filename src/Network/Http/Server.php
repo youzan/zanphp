@@ -34,6 +34,8 @@ class Server extends ServerBase implements ServerContract
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
+        $this->swooleServer->
+        set(['worker_num' => $config['worker_num']]);
     }
 
     public function start()

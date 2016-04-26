@@ -10,13 +10,14 @@ namespace Zan\Framework\Network\Server\WorkerStart;
 
 use Zan\Framework\Contract\Network\Bootable;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\WorkerMonitor\Initiator;
 
 class InitializeWorkerMonitor implements Bootable
 {
     public function bootstrap($server,$workerId)
     {
-        echo "InitializeWorkerMonitor:\n";
-        var_dump($server);
+        $config = Config::get('connection');
+        Initiator::getInstance()->init($config);
     }
 
 }
