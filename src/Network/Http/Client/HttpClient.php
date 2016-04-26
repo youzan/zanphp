@@ -98,60 +98,13 @@ class HttpClient
 
     private function buildHeader()
     {
-        if (!isset($this->header['Content-Type'])) {
-            $this->header['Content-Type'] = 'application/json';
-        }
+        $this->header['Host'] = $this->host; 
         $this->client->setHeaders($this->header);
-    }
-
-
-    private function _buildHeader()
-    {
-        $header  = $this->method.' '. $this->uri .' HTTP/1.1'. self::EOF;
-        $header .= 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8' . self::EOF;
-        $header .= 'Accept-Encoding: gzip,deflate' . self::EOF;
-        $header .= 'Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4,ja;q=0.2' . self::EOF;
-        $header .= 'Host: '. $this->host . self::EOF;
-        $header .= 'User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/34.0.1847.116 Safari/537.36' . self::EOF;
-        $header .= 'Connection: close' . self::EOF;
-
-        if ($this->body) {
-            if (isset($this->header['content_type'])) {
-                $header .= 'Content-Type: ' . $this->header['content_type'] . self::EOF;
-            } else {
-                $header .= 'Content-Type: application/json' . self::EOF;
-            }
-            $header .= 'Content-Length: ' . strlen($this->body) . self::EOF;
-        }
-        return $header;
-    }
-
-    private function bindEvent()
-    {
-        $this->client->on('connect', [$this, 'onConnect']);
-        $this->client->on('receive', [$this, 'onReceive']);
-        $this->client->on('error',   [$this, 'onError']);
-        $this->client->on('close',   [$this, 'onClose']);
-    }
-
-    public function onConnect()
-    {
-        $this->client->send($this->buildHeader() . self::EOF . $this->body);
     }
 
     public function onReceive($cli)
     {
         call_user_func($this->callback, $cli->body);
-    }
-
-    public function OnError()
-    {
-        call_user_func($this->callback, "Connect to server failed.");
-    }
-
-    public function onClose()
-    {
-//        $this->client->close();
     }
 
 }
