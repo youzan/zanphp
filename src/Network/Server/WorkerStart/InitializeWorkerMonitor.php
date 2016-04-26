@@ -13,7 +13,7 @@ use Zan\Framework\Foundation\Core\Config;
 
 class InitializeWorkerMonitor implements Bootable
 {
-    public function bootstrap($server)
+    public function bootstrap($server,$workerId)
     {
         echo "InitializeWorkerMonitor:\n";
         var_dump($server);

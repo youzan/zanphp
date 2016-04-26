@@ -16,7 +16,7 @@ class InitializeSqlMap implements Bootable
     /**
      * @param
      */
-    public function bootstrap($server)
+    public function bootstrap($server,$workerId)
     {
 
         SqlMapInitiator::getInstance()->init();
