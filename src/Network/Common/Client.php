@@ -100,7 +100,7 @@ class Client implements Async
                 $contentType = 'application/json';
             }
             $this->httpClient->setHeader([
-                'content_type' => $contentType
+                'Content-Type' => $contentType
             ]);
             $this->httpClient->setBody($body);
         }
