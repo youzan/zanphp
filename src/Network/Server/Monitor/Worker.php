@@ -7,7 +7,7 @@
  * Time: 下午4:57
  */
 
-namespace Zan\Framework\Network\Monitor;
+namespace Zan\Framework\Network\Server\Monitor;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use  Zan\Framework\Network\Http\Server;
@@ -19,7 +19,7 @@ class Worker
 {
     use Singleton;
 
-    const GAP_TIME = 3000;
+    const GAP_TIME = 100;//180000;
 
     public $classHash;
     public $workerId;
@@ -43,16 +43,15 @@ class Worker
 
     public function restart()
     {
-        $time = isset($this->config['live_time'])?$this->config['live_time']:0;
+        $time = isset($this->config['live_time'])?$this->config['live_time']:1800000;
+        $time += $this->workerId * self::GAP_TIME;
 
-        if($time){
-            $time += $this->workerId * self::GAP_TIME;
-            Timer::after($time, $this->classHash.'_restart',[$this,'closeWorker']);
-        }
+        Timer::after($time, $this->classHash.'_restart',[$this,'closeWorker']);
     }
 
     public function checkStart(){
-        $time = $this->config['check_time'];
+        $time = isset($this->config['check_time'])?$this->config['check_time']:5000;
+
         Timer::tick($time, $this->classHash.'_check',[$this,'check']);
     }
 
@@ -65,8 +64,10 @@ class Worker
 //        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
 //        echo "\n\n\n\n\n\n\n";
 
-        $memory_limit = isset($this->config['memory_limit'])?$this->config['memory_limit']:0;
-        if($memory_limit && $memory > $memory_limit){
+        $memory_limit = isset($this->config['memory_limit'])
+                ? $this->config['memory_limit']
+                : 1024 * 1024 * 1024 * 1.5;
+        if($memory > $memory_limit){
             $this->closeWorker();
         }
     }
@@ -77,7 +78,7 @@ class Worker
 //        echo "close:workerId:{$this->workerId}\n";
 
         /* @var $this->server Server */
-        $this->server->swooleServer->stop();
+        $this->server->swooleServer->exit();
     }
 
 }
