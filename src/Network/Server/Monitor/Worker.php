@@ -19,12 +19,14 @@ class Worker
 {
     use Singleton;
 
-    const GAP_TIME = 100;//180000;
+    const GAP_TIME = 180000;
 
     public $classHash;
     public $workerId;
     public $server;
     public $config;
+
+    public static $requestNum = 0;
 
     /* @var $server Server */
     public function init($server,$config){
@@ -59,10 +61,11 @@ class Worker
         $memory =  memory_get_usage();
 //        $cpuInfo = getrusage();
 
-//        echo "###########################\n";
-//        echo 'time:'.time()."\n";
-//        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
-//        echo "\n\n\n\n\n\n\n";
+        echo "###########################\n";
+        echo 'time:'.time()."\n";
+        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
+        echo "request number:".self::$requestNum."\n";
+        echo "\n\n\n\n\n\n\n";
 
         $memory_limit = isset($this->config['memory_limit'])
                 ? $this->config['memory_limit']
@@ -79,6 +82,15 @@ class Worker
 
         /* @var $this->server Server */
         $this->server->swooleServer->exit();
+    }
+
+
+    public static function add(){
+        self::$requestNum ++;
+    }
+
+    public static function minus(){
+        self::$requestNum --;
     }
 
 }

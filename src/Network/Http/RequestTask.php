@@ -56,9 +56,9 @@ class RequestTask
             throw new ZanException('');
         } else {
             yield $response->sendBy($this->swooleResponse);
-            return;
         }
 
         //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
+        \Zan\Framework\Network\Server\Monitor\Worker::minus();
     }
 }

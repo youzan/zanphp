@@ -89,6 +89,7 @@ class Server extends ServerBase implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
+        \Zan\Framework\Network\Server\Monitor\Worker::add();
 //        try {
             (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
 //        } catch (\Exception $e) {
