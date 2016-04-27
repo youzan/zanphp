@@ -19,19 +19,22 @@ class Worker
 {
     use Singleton;
 
+    const GAP_TIME = 3000;
+
     public $classHash;
     public $workerId;
-    public $service;
+    public $server;
     public $config;
 
-    public function init($workerId,$service,$config){
+    /* @var $server Server */
+    public function init($server,$config){
         if(!is_array($config)){
             return ;
         }
-        echo "init WorkerMonitor workerId:{$workerId}\n";
+
         $this->classHash = spl_object_hash($this);
-        $this->workerId = $workerId;
-        $this->service = $service;
+        $this->server = $server;
+        $this->workerId = $server->swooleServer->worker_id;
         $this->config = $config;
 
         $this->restart();
@@ -40,24 +43,30 @@ class Worker
 
     public function restart()
     {
-        $time = isset($this->config['max_live_time'])?$this->config['max_live_time']:0;
+        $time = isset($this->config['live_time'])?$this->config['live_time']:0;
 
         if($time){
-            Timer::after($time, $this->classHash,[$this,'closeWorker']);
+            $time += $this->workerId * self::GAP_TIME;
+            Timer::after($time, $this->classHash.'_restart',[$this,'closeWorker']);
         }
     }
 
     public function checkStart(){
-        $checkInfo = $this->config['check'];
-        $time = $checkInfo['time'];
-        Timer::tick($time, $this->classHash.'check',[$this,'check']);
+        $time = $this->config['check_time'];
+        Timer::tick($time, $this->classHash.'_check',[$this,'check']);
     }
 
     public function check(){
-        $memory_limit = $this->config['check']['memory_limit'];
         $memory =  memory_get_usage();
-        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
-        if($memory > $memory_limit){
+//        $cpuInfo = getrusage();
+
+//        echo "###########################\n";
+//        echo 'time:'.time()."\n";
+//        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
+//        echo "\n\n\n\n\n\n\n";
+
+        $memory_limit = isset($this->config['memory_limit'])?$this->config['memory_limit']:0;
+        if($memory_limit && $memory > $memory_limit){
             $this->closeWorker();
         }
     }
@@ -65,9 +74,10 @@ class Worker
 
     public function closeWorker()
     {
-        echo "close:workerId:{$this->workerId}\n";
-        /* @var $this->service Server */
-        $this->service->swooleServer->stop();
+//        echo "close:workerId:{$this->workerId}\n";
+
+        /* @var $this->server Server */
+        $this->server->swooleServer->stop();
     }
 
 }

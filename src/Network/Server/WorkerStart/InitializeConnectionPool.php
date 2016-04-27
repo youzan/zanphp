@@ -11,7 +11,7 @@ class InitializeConnectionPool implements Bootable
     /**
      * @param
      */
-    public function bootstrap($server, $workerId)
+    public function bootstrap($server)
     {
         $config = Config::get('connection');
         ConnectionInitiator::getInstance()->init($config);

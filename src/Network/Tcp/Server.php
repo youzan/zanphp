@@ -31,13 +31,11 @@ class Server extends ServerBase {
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
+        $this->swooleServer->set($config);
     }
 
     public function start()
     {
-        $config = Config::get('server');
-        $this->swooleServer->set($config);
-
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
 

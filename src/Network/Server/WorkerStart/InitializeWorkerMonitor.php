@@ -14,10 +14,10 @@ use Zan\Framework\Network\Monitor\Worker;
 
 class InitializeWorkerMonitor implements Bootable
 {
-    public function bootstrap($server,$workerId)
+    public function bootstrap($server)
     {
-        $config = Config::get('monitor.worker');
-        Worker::getInstance()->init($workerId,$server,$config);
+        $config = Config::get('server.monitor');
+        Worker::getInstance()->init($server,$config);
     }
 
 }
