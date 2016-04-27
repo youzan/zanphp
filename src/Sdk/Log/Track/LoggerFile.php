@@ -18,7 +18,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     private $track;
 
-    public function __constract($config){
+    public function __construct($config){
         $this->init($config);
         $this->track = new TrackFile($this->app, $this->module, $this->type, $this->path);
     }
@@ -35,7 +35,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function error($message, array $context = array()){
         if($this->checkLevel(LogLevel::ERROR)){
-            $this->track->doWrite($message, LogLevel::ERROR);
+            return $this->track->doWrite($message, LogLevel::ERROR);
         }
     }
 
@@ -47,7 +47,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function warning($message, array $context = array()){
         if($this->checkLevel(LogLevel::WARNING)){
-            $this->track->doWrite($message, LogLevel::WARNING);
+            return $this->track->doWrite($message, LogLevel::WARNING);
         }
     }
 
@@ -59,7 +59,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function notice($message, array $context = array()){
         if($this->checkLevel(LogLevel::NOTICE)){
-            $this->track->doWrite($message, LogLevel::NOTICE);
+            return $this->track->doWrite($message, LogLevel::NOTICE);
         }
     }
 
@@ -71,7 +71,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function info($message, array $context = array()){
         if($this->checkLevel(LogLevel::INFO)){
-            $this->track->doWrite($message, LogLevel::INFO);
+            return $this->track->doWrite($message, LogLevel::INFO);
         }
     }
 
@@ -83,7 +83,7 @@ class LoggerFile extends LoggerBase implements LoggerInterface {
      */
     public function debug($message, array $context = array()){
         if($this->checkLevel(LogLevel::DEBUG)){
-            $this->track->doWrite($message, LogLevel::DEBUG);
+            return $this->track->doWrite($message, LogLevel::DEBUG);
         }
     }
 

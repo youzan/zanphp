@@ -47,6 +47,10 @@ class Path {
         self::$configPath = $configPath;
     }
 
+    public static function setLogPath($logPath){
+        self::$logPath = $logPath;
+    }
+
     public static function getSqlPath()
     {
         return self::$sqlPath;

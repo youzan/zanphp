@@ -7,7 +7,7 @@ use Zan\Framework\Sdk\Log\Track\LoggerSystem;
 use Psr\Log\LoggerInterface;
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class LoggerFactory
+class Logger
 {
     private $config = [
         'factory'   => '',
@@ -51,9 +51,10 @@ class LoggerFactory
 
         $this->config['factory']    = $config['scheme'];
         $this->config['level']      = $config['host'];
+        $this->config['path']       = isset($config['path']) ? $config['path'] : $this->config['path'];
         $this->config['module']     = isset($ps['module']) ? $ps['module'] : $this->config['module'];
         $this->config['type']       = isset($ps['type']) ? $ps['type'] : $this->config['type'];
-        $this->config['path']       = isset($ps['path']) ? $ps['path'] : $this->config['path'];
+
     }
 
     /**
