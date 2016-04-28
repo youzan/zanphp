@@ -28,7 +28,7 @@ class Server extends ServerBase {
     /**
      * @var SwooleServer
      */
-    private $swooleServer;
+    public $swooleServer;
 
     public function __construct(SwooleServer $swooleServer, array $config)
     {
