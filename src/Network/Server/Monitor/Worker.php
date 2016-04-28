@@ -20,6 +20,7 @@ class Worker
     use Singleton;
 
     const GAP_TIME = 180000;
+    const GAP_REACTION_NUM = 3000;
 
     public $classHash;
     public $workerId;
@@ -51,7 +52,7 @@ class Worker
         $time = isset($this->config['live_time'])?$this->config['live_time']:1800000;
         $time += $this->workerId * self::GAP_TIME;
 
-        Timer::after($time, $this->classHash.'_restart',[$this,'preCloseWorker']);
+        Timer::after($time, $this->classHash.'_restart',[$this,'closePre']);
     }
 
     public function checkStart(){
@@ -61,43 +62,59 @@ class Worker
     }
 
     public function check(){
+        $this->output('check');
+
         $memory =  memory_get_usage();
-//        $cpuInfo = getrusage();
-
-//        echo "###########################\n";
-//        echo 'time:'.time()."\n";
-//        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
-//        echo "request number:".$this->reactionNum."\n";
-//        echo "total request number:".$this->totalReactionNum."\n";
-//        echo "\n\n\n\n\n\n\n";
-
         $memory_limit = isset($this->config['memory_limit'])
                 ? $this->config['memory_limit']
                 : 1024 * 1024 * 1024 * 1.5;
 
-        if($memory > $memory_limit){
-            $this->preCloseWorker();
+        $reaction_limit = isset($this->config['reaction_limit'])
+                ? $this->config['reaction_limit']
+                : 100000;
+        $reaction_limit = $reaction_limit + $this->workerId * self::GAP_REACTION_NUM;
+
+        if($memory > $memory_limit
+            || $this->totalReactionNum > $reaction_limit
+        ){
+            $this->closePre();
         }
     }
 
 
-    public function preCloseWorker()
+    public function closePre()
     {
-//        echo "close:workerId:{$this->workerId}\n";
+        $this->output('ClosePre');
 
         Timer::clearTickJob($this->classHash.'_check');
 
         /* @var $this->server Server */
         $this->server->swooleServer->deny_request($this->workerId);
-        $this->closeWorker();
+        
+        $this->closeCheck();
     }
 
-    public function closeWorker(){
-        if($this->reactionNum >= 0){
+    public function closeCheck(){
+        $this->output('CloseCheck');
+
+        if($this->reactionNum > 0){
+            Timer::after(500,$this->classHash.'_closeCheck',[$this,'CloseCheck']);
+        }else{
+            $this->close();
+        }
+    }
+
+    public function close(){
+        $this->output('Close');
+
+        if($this->reactionNum > 0){
             Timer::after(500,$this->classHash.'close',[$this,'closeWorker']);
+            return ;
         }
         $this->server->swooleServer->exit();
     }
+    
+    
 
 
     public function reactionReceive(){
@@ -107,6 +124,16 @@ class Worker
 
     public function reactionRelease(){
         $this->reactionNum --;
+    }
+
+
+    public function output($str){
+        echo "###########################\n";
+        echo $str.":workerId->".$this->workerId."\n";
+        echo 'time:'.time()."\n";
+        echo "request number:".$this->reactionNum."\n";
+        echo "total request number:".$this->totalReactionNum."\n";
+        echo "###########################\n\n";
     }
 
 }
