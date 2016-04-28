@@ -26,7 +26,8 @@ class Worker
     public $server;
     public $config;
 
-    public static $requestNum = 0;
+    public $reactionNum;
+    public $totalReactionNum;
 
     /* @var $server Server */
     public function init($server,$config){
@@ -38,6 +39,8 @@ class Worker
         $this->server = $server;
         $this->workerId = $server->swooleServer->worker_id;
         $this->config = $config;
+        $this->reactionNum = 0;
+        $this->totalReactionNum = 0;
 
         $this->restart();
         $this->checkStart();
@@ -48,7 +51,7 @@ class Worker
         $time = isset($this->config['live_time'])?$this->config['live_time']:1800000;
         $time += $this->workerId * self::GAP_TIME;
 
-        Timer::after($time, $this->classHash.'_restart',[$this,'closeWorker']);
+        Timer::after($time, $this->classHash.'_restart',[$this,'preCloseWorker']);
     }
 
     public function checkStart(){
@@ -61,36 +64,49 @@ class Worker
         $memory =  memory_get_usage();
 //        $cpuInfo = getrusage();
 
-        echo "###########################\n";
-        echo 'time:'.time()."\n";
-        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
-        echo "request number:".self::$requestNum."\n";
-        echo "\n\n\n\n\n\n\n";
+//        echo "###########################\n";
+//        echo 'time:'.time()."\n";
+//        echo "check:workerId:{$this->workerId},memory:{$memory}\n";
+//        echo "request number:".$this->reactionNum."\n";
+//        echo "total request number:".$this->totalReactionNum."\n";
+//        echo "\n\n\n\n\n\n\n";
 
         $memory_limit = isset($this->config['memory_limit'])
                 ? $this->config['memory_limit']
                 : 1024 * 1024 * 1024 * 1.5;
+
         if($memory > $memory_limit){
-            $this->closeWorker();
+            $this->preCloseWorker();
         }
     }
 
 
-    public function closeWorker()
+    public function preCloseWorker()
     {
 //        echo "close:workerId:{$this->workerId}\n";
 
+        Timer::clearTickJob($this->classHash.'_check');
+
         /* @var $this->server Server */
+        $this->server->swooleServer->deny_request($this->workerId);
+        $this->closeWorker();
+    }
+
+    public function closeWorker(){
+        if($this->reactionNum >= 0){
+            Timer::after(500,$this->classHash.'close',[$this,'closeWorker']);
+        }
         $this->server->swooleServer->exit();
     }
 
 
-    public static function add(){
-        self::$requestNum ++;
+    public function reactionReceive(){
+        $this->totalReactionNum++;
+        $this->reactionNum ++;
     }
 
-    public static function minus(){
-        self::$requestNum --;
+    public function reactionRelease(){
+        $this->reactionNum --;
     }
 
 }
