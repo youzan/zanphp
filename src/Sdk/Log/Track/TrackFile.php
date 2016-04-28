@@ -34,9 +34,14 @@ class TrackFile implements Async {
         $this->callback = $callback;
     }
 
+    public function write_callback($file, $write){
+        call_user_func($this->callback, $write);
+    }
+
     public function doWrite($log, $level){
         $this->getLogData($log, $level);
-        return swoole_async_write($this->path, $this->postData, -1);
+        swoole_async_write($this->path, $this->postData, -1, [$this, 'write_callback']);
+        yield $this;
     }
 
     private function getLogData($log, $level){

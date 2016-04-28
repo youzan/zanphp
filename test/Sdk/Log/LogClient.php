@@ -19,7 +19,7 @@ class LogClient extends TaskTest {
         Path::setLogPath($path);
         $log = Logger::getInstance('trade');
 
-        $data = ['name'=>'hht', 'context'=>'test'];
+        $data = ['name'=>'hht', 'context'=>'test1'];
         $ret = (yield $log->info($data));
         var_dump($ret);
     }
