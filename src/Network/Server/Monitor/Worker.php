@@ -20,7 +20,7 @@ class Worker
     use Singleton;
 
     const GAP_TIME = 180000;
-    const GAP_REACTION_NUM = 3000;
+    const GAP_REACTION_NUM = 100;
 
     public $classHash;
     public $workerId;
