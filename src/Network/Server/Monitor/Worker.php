@@ -123,13 +123,15 @@ class Worker
 
 
     public function output($str){
-//        $output = "###########################\n";
-//        $output .= $str.":workerId->".$this->workerId."\n";
-//        $output .= 'time:'.time()."\n";
-//        $output .= "request number:".$this->reactionNum."\n";
-//        $output .= "total request number:".$this->totalReactionNum."\n";
-//        $output .= "###########################\n\n";
-//        echo $output;
+        if(isset($this->config['debug']) || true == $this->config['debug']){
+            $output = "###########################\n";
+            $output .= $str.":workerId->".$this->workerId."\n";
+            $output .= 'time:'.time()."\n";
+            $output .= "request number:".$this->reactionNum."\n";
+            $output .= "total request number:".$this->totalReactionNum."\n";
+            $output .= "###########################\n\n";
+            echo $output;
+        }
     }
 
 }
