@@ -40,9 +40,9 @@ class RequestHandler
             Task::execute($coroutine, $this->context);
 
         } catch (\Exception $e) {
+            \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
             $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
             Task::execute($coroutine, $this->context);
-            \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
         }
 
     }
