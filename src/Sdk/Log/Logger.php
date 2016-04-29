@@ -38,8 +38,8 @@ class Logger
         if(!$key){
             throw new ZanException('Configuration key cannot be null');
         }
-        
-        $logUrl = Config::get('log'.$key);
+
+        $logUrl = Config::get('log.'.$key);
         if(!$logUrl){
             throw new ZanException('Configuration cannot be null');
         }
