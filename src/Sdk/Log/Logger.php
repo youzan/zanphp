@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Sdk\Log;
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Sdk\Log\Track\LoggerFile;
 use Zan\Framework\Sdk\Log\Track\LoggerSystem;
 use Psr\Log\LoggerInterface;
@@ -37,7 +38,7 @@ class Logger
         if(!$key){
             throw new ZanException('Configuration key cannot be null');
         }
-
+        
         $logUrl = Config::get('log'.$key);
         if(!$logUrl){
             throw new ZanException('Configuration cannot be null');
