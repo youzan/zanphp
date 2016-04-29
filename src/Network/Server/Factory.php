@@ -24,6 +24,7 @@ class Factory
 
         $host = $config['host'];
         $port = $config['port'];
+        $config = $config['config'];
         if (empty($host) || empty($port)) {
             throw new RuntimeException('http server config error: empty ip/port');
         }
@@ -47,6 +48,7 @@ class Factory
 
         $host = $config['host'];
         $port = $config['port'];
+        $config = $config['config'];
         if (empty($host) || empty($port)) {
             throw new RuntimeException('tcp server config error: empty ip/port');
         }

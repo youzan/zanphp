@@ -36,6 +36,7 @@ class RequestHandler {
             $request->decode();
             if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $data);
+                \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
                 return;
             }
             
@@ -43,6 +44,7 @@ class RequestHandler {
             $coroutine = $requestTask->run();
             Task::execute($coroutine, $this->context);
         } catch(\Exception $e) {
+            \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
             $response->sendException($e);
             return;
         }

@@ -63,14 +63,13 @@ class RequestTask
 
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
-
         if (null === $response) {
             throw new ZanException('');
         } else {
             yield $response->sendBy($this->swooleResponse);
-            return;
         }
 
         //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
     }
 }

@@ -12,6 +12,7 @@ use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Tcp\RequestExceptionHandlerChain; 
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
+use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 
 class Server extends ServerBase {
 
@@ -20,24 +21,23 @@ class Server extends ServerBase {
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class
+        InitializeConnectionPool::class,
+        InitializeWorkerMonitor::class
     ];
     
     /**
      * @var SwooleServer
      */
-    private $swooleServer;
+    public $swooleServer;
 
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
+        $this->swooleServer->set($config);
     }
 
     public function start()
     {
-        $config = Config::get('server');
-        $this->swooleServer->set($config);
-
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
 
@@ -126,7 +126,7 @@ class Server extends ServerBase {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
-
 }
