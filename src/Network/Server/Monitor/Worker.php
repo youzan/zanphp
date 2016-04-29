@@ -127,7 +127,7 @@ class Worker
 
 
     public function output($str){
-        if(isset($this->config['debug']) || true == $this->config['debug']){
+        if(isset($this->config['debug']) && true == $this->config['debug']){
             $output = "###########################\n";
             $output .= $str.":workerId->".$this->workerId."\n";
             $output .= 'time:'.time()."\n";
