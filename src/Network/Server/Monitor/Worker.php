@@ -108,7 +108,7 @@ class Worker
     public function close(){
         $this->output('Close');
 
-        echo "close:workerId->".$this->workerId.",time".Time::current(true)."\n";
+        echo "close:workerId->".$this->workerId.",time:".Time::current(true)."\n";
 
         $this->server->swooleServer->exit();
     }
