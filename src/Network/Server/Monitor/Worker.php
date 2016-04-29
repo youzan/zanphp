@@ -98,7 +98,7 @@ class Worker
         $this->output('CloseCheck');
 
         if($this->reactionNum > 0){
-            Timer::after(500,$this->classHash.'_closeCheck',[$this,'CloseCheck']);
+            Timer::after(500,$this->classHash.'_closeCheck',[$this,'closeCheck']);
         }else{
             $this->close();
         }
@@ -106,11 +106,6 @@ class Worker
 
     public function close(){
         $this->output('Close');
-
-        if($this->reactionNum > 0){
-            Timer::after(500,$this->classHash.'close',[$this,'closeWorker']);
-            return ;
-        }
         $this->server->swooleServer->exit();
     }
     
