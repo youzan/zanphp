@@ -13,6 +13,7 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 use  Zan\Framework\Network\Http\Server;
 
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Utilities\Types\Time;
 
 
 class Worker
@@ -98,7 +99,7 @@ class Worker
         $this->output('CloseCheck');
 
         if($this->reactionNum > 0){
-            Timer::after(500,$this->classHash.'_closeCheck',[$this,'closeCheck']);
+            Timer::after(1000,$this->classHash.'_closeCheck',[$this,'closeCheck']);
         }else{
             $this->close();
         }
@@ -106,6 +107,9 @@ class Worker
 
     public function close(){
         $this->output('Close');
+
+        echo "close:workerId->".$this->workerId.",time".Time::current(true)."\n";
+
         $this->server->swooleServer->exit();
     }
     
