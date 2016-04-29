@@ -123,12 +123,13 @@ class Worker
 
 
     public function output($str){
-        echo "###########################\n";
-        echo $str.":workerId->".$this->workerId."\n";
-        echo 'time:'.time()."\n";
-        echo "request number:".$this->reactionNum."\n";
-        echo "total request number:".$this->totalReactionNum."\n";
-        echo "###########################\n\n";
+        $output = "###########################\n";
+        $output .= $str.":workerId->".$this->workerId."\n";
+        $output .= 'time:'.time()."\n";
+        $output .= "request number:".$this->reactionNum."\n";
+        $output .= "total request number:".$this->totalReactionNum."\n";
+        $output .= "###########################\n\n";
+        echo $output;
     }
 
 }
