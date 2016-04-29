@@ -20,7 +20,7 @@ class Worker
     use Singleton;
 
     const GAP_TIME = 180000;
-    const GAP_REACTION_NUM = 100;
+    const GAP_REACTION_NUM = 1500;
 
     public $classHash;
     public $workerId;
@@ -123,13 +123,13 @@ class Worker
 
 
     public function output($str){
-        $output = "###########################\n";
-        $output .= $str.":workerId->".$this->workerId."\n";
-        $output .= 'time:'.time()."\n";
-        $output .= "request number:".$this->reactionNum."\n";
-        $output .= "total request number:".$this->totalReactionNum."\n";
-        $output .= "###########################\n\n";
-        echo $output;
+//        $output = "###########################\n";
+//        $output .= $str.":workerId->".$this->workerId."\n";
+//        $output .= 'time:'.time()."\n";
+//        $output .= "request number:".$this->reactionNum."\n";
+//        $output .= "total request number:".$this->totalReactionNum."\n";
+//        $output .= "###########################\n\n";
+//        echo $output;
     }
 
 }
