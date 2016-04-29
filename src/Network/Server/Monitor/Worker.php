@@ -49,14 +49,14 @@ class Worker
 
     public function restart()
     {
-        $time = isset($this->config['live_time'])?$this->config['live_time']:1800000;
+        $time = isset($this->config['max_live_time'])?$this->config['max_live_time']:1800000;
         $time += $this->workerId * self::GAP_TIME;
 
         Timer::after($time, $this->classHash.'_restart',[$this,'closePre']);
     }
 
     public function checkStart(){
-        $time = isset($this->config['check_time'])?$this->config['check_time']:5000;
+        $time = isset($this->config['check_interval'])?$this->config['check_interval']:5000;
 
         Timer::tick($time, $this->classHash.'_check',[$this,'check']);
     }
@@ -69,8 +69,8 @@ class Worker
                 ? $this->config['memory_limit']
                 : 1024 * 1024 * 1024 * 1.5;
 
-        $reaction_limit = isset($this->config['reaction_limit'])
-                ? $this->config['reaction_limit']
+        $reaction_limit = isset($this->config['max_request'])
+                ? $this->config['max_request']
                 : 100000;
         $reaction_limit = $reaction_limit + $this->workerId * self::GAP_REACTION_NUM;
 
