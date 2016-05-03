@@ -115,7 +115,7 @@ class Flow
         $connectionStack = (yield getContext(self::CONNECTION_STACK, null));
         if (null !== $connectionStack && $connectionStack instanceof \SplStack) {
             $connectionStack->push($connection);
-            yield getContext(self::CONNECTION_STACK, $connectionStack);
+            yield setContext(self::CONNECTION_STACK, $connectionStack);
             return;
         }
         yield $this->resetConnectionStack($connection);
@@ -125,7 +125,7 @@ class Flow
     {
         $connectionStack = new \SplStack();
         $connectionStack->push($connection);
-        yield getContext(self::CONNECTION_STACK, $connectionStack);
+        yield setContext(self::CONNECTION_STACK, $connectionStack);
     }
 
 }
