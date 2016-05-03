@@ -14,6 +14,7 @@ use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Http\Dispatcher;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Coroutine\Task;
 
 use swoole_http_response as SwooleHttpResponse;
 
@@ -41,7 +42,18 @@ class RequestTask
 
     public function run()
     {
+        try{
+            yield $this->doRun();
+        } catch (\Exception $e) {
+            $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
+            Task::execute($coroutine, $this->context);
+        }
+    }
+
+    public function doRun()
+    {
         $middlewareManager = MiddlewareManager::getInstance();
+        //TODO: move to server Start
         $middlewareManager->loadConfig();
         $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
         if(null !== $response){
@@ -51,14 +63,13 @@ class RequestTask
 
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
-
         if (null === $response) {
             throw new ZanException('');
         } else {
             yield $response->sendBy($this->swooleResponse);
-            return;
         }
 
         //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
     }
 }

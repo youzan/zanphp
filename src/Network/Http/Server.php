@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Http;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
+use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
@@ -21,7 +22,8 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class
+        InitializeConnectionPool::class,
+        InitializeWorkerMonitor::class
     ];
 
     /**
@@ -32,6 +34,7 @@ class Server extends ServerBase implements ServerContract
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
+        $this->swooleServer->set($config);
     }
 
     public function start()
@@ -77,7 +80,6 @@ class Server extends ServerBase implements ServerContract
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
@@ -87,6 +89,7 @@ class Server extends ServerBase implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionReceive();
 //        try {
             (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
 //        } catch (\Exception $e) {

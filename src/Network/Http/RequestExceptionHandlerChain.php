@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Exception\ExceptionHandlerChain;
+use Zan\Framework\Network\Http\Exception\Handler\InternalErrorHandler;
 use Zan\Framework\Network\Http\Exception\Handler\InvalidRouteHandler;
 use Zan\Framework\Network\Http\Exception\Handler\PageNotFoundHandler;
 use Zan\Framework\Network\Http\Exception\Handler\RedirectHandler;
@@ -22,6 +23,7 @@ class RequestExceptionHandlerChain extends ExceptionHandlerChain
         RedirectHandler::class,
         PageNotFoundHandler::class,
         InvalidRouteHandler::class,
+        InternalErrorHandler::class,
     ];
 
     public function init()
