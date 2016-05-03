@@ -91,7 +91,7 @@ class Mysqli implements DriverInterface
      */
     public function beginTransaction()
     {
-        $beginTransaction = (yield $this->connection->getSocket()->begin_transaction(MYSQLI_TRANS_START_READ_ONLY));
+        $beginTransaction = (yield $this->connection->getSocket()->begin_transaction(MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT));
         if (!$beginTransaction) {
             throw new MysqliTransactionException('mysqli begin transaction error');
         }
