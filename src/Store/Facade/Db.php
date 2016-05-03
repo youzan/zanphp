@@ -22,18 +22,24 @@ class Db {
         return;
     }
  
-    public static function beginTransaction($table, $autoHandleException=false)
+    public static function beginTransaction()
     {
-        
+        yield setContext('begin_transaction', true);
     }
     
     public static function commit()
     {
-        
+        $flow = new Flow();
+        yield $flow->commit();
+        yield setContext('begin_transaction', false);
+        return;
     }
     
     public static function rollback()
     {
-        
+        $flow = new Flow();
+        yield $flow->rollback();
+        yield setContext('begin_transaction', false);
+        return;
     }
 }

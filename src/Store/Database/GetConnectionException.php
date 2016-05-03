@@ -10,7 +10,7 @@ namespace Zan\Framework\Store\Database;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class Exception extends ZanException
+class GetConnectionException extends ZanException
 {
 
 }

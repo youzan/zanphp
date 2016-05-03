@@ -91,7 +91,11 @@ class Mysqli implements DriverInterface
      */
     public function beginTransaction()
     {
-
+        $beginTransaction = (yield $this->connection->getSocket()->begin_transaction(MYSQLI_TRANS_START_READ_ONLY));
+        if (!$beginTransaction) {
+            throw new MysqliTransactionException('mysqli begin transaction error');
+        }
+        yield $beginTransaction;
     }
 
     /**
@@ -99,7 +103,11 @@ class Mysqli implements DriverInterface
      */
     public function commit()
     {
-
+        $commit = (yield $this->connection->getSocket()->commit());
+        if (!$commit) {
+            throw new MysqliTransactionException('mysqli commit error');
+        }
+        yield $commit;
     }
 
     /**
@@ -107,6 +115,10 @@ class Mysqli implements DriverInterface
      */
     public function rollback()
     {
-
+        $rollback = (yield $this->connection->getSocket()->rollback());
+        if (!$rollback) {
+            throw new MysqliTransactionException('mysqli rollback error');
+        }
+        yield $rollback;
     }
 }
