@@ -24,22 +24,19 @@ class Db {
  
     public static function beginTransaction()
     {
-        yield setContext('begin_transaction', true);
+        $flow = new Flow();
+        yield $flow->beginTransaction();
     }
     
     public static function commit()
     {
         $flow = new Flow();
         yield $flow->commit();
-        yield setContext('begin_transaction', false);
-        return;
     }
     
     public static function rollback()
     {
         $flow = new Flow();
         yield $flow->rollback();
-        yield setContext('begin_transaction', false);
-        return;
     }
 }

@@ -15,6 +15,9 @@ use Zan\Framework\Contract\Network\Connection;
 
 class Flow
 {
+    const CONNECTION_CONTEXT = 'connection_context';
+    const CONNECTION_STACK = 'connection_stack';
+
     private $engineMap = [
         'Mysqli' => 'Zan\Framework\Store\Database\Mysql\Mysqli',
     ];
@@ -30,11 +33,18 @@ class Flow
         yield $resultFormatter->format();
     }
 
+    public function beginTransaction()
+    {
+        yield setContext('begin_transaction', true);
+    }
+
     public function commit()
     {
         $connection = (yield $this->getConnection());
         $driver = $this->getDriver($connection);
         yield $driver->commit();
+        yield setContext('begin_transaction', false);
+        return;
     }
 
     public function rollback()
@@ -42,6 +52,8 @@ class Flow
         $connection = (yield $this->getConnection());
         $driver = $this->getDriver($connection);
         yield $driver->rollback();
+        yield setContext('begin_transaction', false);
+        return;
     }
 
     private function getDriver(Connection $connection)
@@ -58,6 +70,7 @@ class Flow
         return $this->engineMap[$engine];
     }
 
+
     private function getConnection($database = '')
     {
         $beginTransaction = (yield getContext('begin_transaction', false));
@@ -69,9 +82,17 @@ class Flow
             yield $connection;
             return;
         }
+        if('' === $database) {
+            $connectionStack = (yield getContext(self::CONNECTION_STACK, null));
+            if (null == $connectionStack) {
+                throw new GetConnectionException('commit or rollback get connection error');
+            }
+            $connection = $connectionStack->pop();
+            yield $connection;
+            return;
+        }
 
-        $conKey = 'connection_object';
-        $connection = (yield getContext($conKey, null));
+        $connection = (yield getContext(self::CONNECTION_CONTEXT . '_' . $database, null));
         if (null !== $connection && $connection instanceof Connection) {
             yield $connection;
             return;
@@ -81,10 +102,30 @@ class Flow
         if (!($connection instanceof Connection)) {
             throw new GetConnectionException('get connection error database:'.$database);
         }
-        $driver = $this->getDriver($connection);
-        yield $driver->beginTransaction();
-        yield setContext($conKey, $connection);
+        yield $this->setTransaction($database, $connection);
         yield $connection;
         return;
     }
+
+    private function setTransaction($database, $connection)
+    {
+        $driver = $this->getDriver($connection);
+        yield $driver->beginTransaction();
+        yield setContext(self::CONNECTION_CONTEXT . '_' . $database, $connection);
+        $connectionStack = (yield getContext(self::CONNECTION_STACK, null));
+        if (null !== $connectionStack && $connectionStack instanceof \SplStack) {
+            $connectionStack->push($connection);
+            yield getContext(self::CONNECTION_STACK, $connectionStack);
+            return;
+        }
+        yield $this->resetConnectionStack($connection);
+    }
+
+    private function resetConnectionStack($connection)
+    {
+        $connectionStack = new \SplStack();
+        $connectionStack->push($connection);
+        yield getContext(self::CONNECTION_STACK, $connectionStack);
+    }
+
 }
