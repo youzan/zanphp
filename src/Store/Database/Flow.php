@@ -88,6 +88,7 @@ class Flow
                 throw new GetConnectionException('commit or rollback get connection error');
             }
             $connection = $connectionStack->pop();
+            yield setContext(self::CONNECTION_STACK, $connectionStack);
             yield $connection;
             return;
         }
