@@ -24,7 +24,6 @@ class ConnectionInitiator
 
     private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
 
-
     public function __construct()
     {
     }
@@ -32,14 +31,16 @@ class ConnectionInitiator
     /**
      * @param array $config(=Config::get('connection'))
      */
-    public function init($config)
+    public function init($config, $server)
     {
         //读取配置文件
         if (is_array($config)) {
             $this->initConfig($config);
         }
 
-
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
+        $connectionManager->monitor();
     }
 
 

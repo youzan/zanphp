@@ -3,7 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\RunMode;
-use Zan\Framework\Network\Http\Client\HttpClient as HClient;
+use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
 class Client implements Async
