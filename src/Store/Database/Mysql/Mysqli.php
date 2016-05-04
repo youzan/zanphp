@@ -107,7 +107,7 @@ class Mysqli implements DriverInterface
         if (!$commit) {
             throw new MysqliTransactionException('mysqli commit error');
         }
-        $this->releaseConnection();
+        yield $this->releaseConnection();
         yield $commit;
     }
 
@@ -120,7 +120,7 @@ class Mysqli implements DriverInterface
         if (!$rollback) {
             throw new MysqliTransactionException('mysqli rollback error');
         }
-        $this->releaseConnection();
+        yield $this->releaseConnection();
         yield $rollback;
     }
 
@@ -130,6 +130,6 @@ class Mysqli implements DriverInterface
         if ($beginTransaction === false) {
             $this->connection->release();
         }
-        return;
+        yield true;
     }
 }

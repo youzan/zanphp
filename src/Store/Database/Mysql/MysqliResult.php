@@ -33,8 +33,8 @@ class MysqliResult implements DbResultInterface
     public function getLastInsertId()
     {
         $insertId = $this->driver->getConnection()->getSocket()->_insert_id;
-        $this->driver->releaseConnection();
-        return $insertId;
+        yield $this->driver->releaseConnection();
+        yield $insertId;
     }
 
     /**
@@ -43,8 +43,8 @@ class MysqliResult implements DbResultInterface
     public function getAffectedRows()
     {
         $affectedRows = $this->driver->getConnection()->getSocket()->_affected_rows;
-        $this->driver->releaseConnection();
-        return $affectedRows;
+        yield $this->driver->releaseConnection();
+        yield $affectedRows;
     }
 
     /**
@@ -52,7 +52,7 @@ class MysqliResult implements DbResultInterface
      */
     public function fetchRows()
     {
-        $this->driver->releaseConnection();
-        return $this->driver->getResult();
+        yield $this->driver->releaseConnection();
+        yield $this->driver->getResult();
     }
 }
