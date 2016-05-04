@@ -40,7 +40,7 @@ class Flow
 
     public function commit()
     {
-        $connection = (yield $this->getConnection());
+        $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
         yield $driver->commit();
         yield setContext('begin_transaction', false);
@@ -49,7 +49,7 @@ class Flow
 
     public function rollback()
     {
-        $connection = (yield $this->getConnection());
+        $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
         yield $driver->rollback();
         yield setContext('begin_transaction', false);
@@ -70,26 +70,11 @@ class Flow
         return $this->engineMap[$engine];
     }
 
-
-    private function getConnection($database = '')
+    private function getConnection($database)
     {
         $beginTransaction = (yield getContext('begin_transaction', false));
         if (!$beginTransaction) {
-            $connection = (yield ConnectionManager::getInstance()->get($database));
-            if (!($connection instanceof Connection)) {
-                throw new GetConnectionException('get connection error database:'.$database);
-            }
-            yield $connection;
-            return;
-        }
-        if('' === $database) {
-            $connectionStack = (yield getContext(self::CONNECTION_STACK, null));
-            if (null == $connectionStack) {
-                throw new GetConnectionException('commit or rollback get connection error');
-            }
-            $connection = $connectionStack->pop();
-            yield setContext(self::CONNECTION_STACK, $connectionStack);
-            yield $connection;
+            yield $this->getConnectionByConnectionManager($database);
             return;
         }
 
@@ -99,13 +84,30 @@ class Flow
             return;
         }
 
+        $connection = (yield $this->getConnectionByConnectionManager($database));
+        yield $this->setTransaction($database, $connection);
+        yield $connection;
+        return;
+    }
+
+    private function getConnectionByStack()
+    {
+        $connectionStack = (yield getContext(self::CONNECTION_STACK, null));
+        if (null == $connectionStack) {
+            throw new GetConnectionException('commit or rollback get connection error');
+        }
+        $connection = $connectionStack->pop();
+        yield setContext(self::CONNECTION_STACK, $connectionStack->isEmpty() === true ? null : $connectionStack);
+        yield $connection;
+    }
+
+    private function getConnectionByConnectionManager($database)
+    {
         $connection = (yield ConnectionManager::getInstance()->get($database));
         if (!($connection instanceof Connection)) {
             throw new GetConnectionException('get connection error database:'.$database);
         }
-        yield $this->setTransaction($database, $connection);
         yield $connection;
-        return;
     }
 
     private function setTransaction($database, $connection)
@@ -128,5 +130,4 @@ class Flow
         $connectionStack->push($connection);
         yield setContext(self::CONNECTION_STACK, $connectionStack);
     }
-
 }
