@@ -54,7 +54,7 @@ class ConnectionInitiator
                         $this->initConfig($cf);
                     }
                 } else {
-                    if (empty($cf['pool'])) {
+                    if (!isset($cf['pool']) || empty($cf['pool'])) {
                         continue;
                     }
                     //创建连接池
@@ -63,7 +63,7 @@ class ConnectionInitiator
                     if (in_array($factoryType, $this->engineMap)) {
                         $factoryType = ucfirst($factoryType);
                         $cf['pool']['pool_name'] = $this->poolName;
-                        $this->initPool($factoryType, $cf['pool']);
+                        $this->initPool($factoryType, $cf);
                     }
                 }
 
