@@ -24,31 +24,33 @@ class ConnectionInitiator
 
     private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
 
+    public $poolName = '';
+
 
     public function __construct()
     {
     }
 
     /**
-     * @param array $config(=Config::get('connection'))
+     * @param $directory
      */
-    public function init($config)
+    public function init($directory)
     {
-        //读取配置文件
-        if (is_array($config)) {
-            $this->initConfig($config);
+        if(!empty($directory)) {
+            $this->poolName = $directory;
+            $this->initConfig();
         }
-
-
     }
 
 
-    private function initConfig($config)
+    private function initConfig()
     {
+        $config = Config::get($this->poolName);
         if (is_array($config)) {
-            foreach ($config as $cf) {
+            foreach ($config as $k=>$cf) {
                 if (!isset($cf['engine'])) {
                     if (is_array($config)) {
+                        $this->poolName = $this->poolName . '.' . $k;
                         $this->initConfig($cf);
                     }
                 } else {
@@ -56,9 +58,11 @@ class ConnectionInitiator
                         continue;
                     }
                     //创建连接池
+                    $this->poolName = $this->poolName . '.' . $k;
                     $factoryType = $cf['engine'];
                     if (in_array($factoryType, $this->engineMap)) {
                         $factoryType = ucfirst($factoryType);
+                        $cf['pool']['pool_name'] = $this->poolName;
                         $this->initPool($factoryType, $cf['pool']);
                     }
                 }
