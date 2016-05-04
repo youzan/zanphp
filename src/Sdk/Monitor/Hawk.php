@@ -22,6 +22,7 @@ class Hawk
     private $httpClient;
 
     const SUCCESS = 1001;
+    const APPLICATION_PREFIX = 'php_soa_';
 
     public function __construct()
     {
@@ -49,7 +50,7 @@ class Hawk
      */
     public function add($biz, array $metrics, array $tags)
     {
-        $tags['application'] = $this->application;
+        $tags['application'] = self::APPLICATION_PREFIX . $this->application;
         $tags['host'] = gethostname();
         $metricsArr = [];
         foreach ($metrics as $k => $v) {
