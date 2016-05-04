@@ -42,8 +42,8 @@ class Flow
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
-        yield $driver->commit();
         yield setContext('begin_transaction', false);
+        yield $driver->commit();
         return;
     }
 
@@ -51,8 +51,8 @@ class Flow
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
-        yield $driver->rollback();
         yield setContext('begin_transaction', false);
+        yield $driver->rollback();
         return;
     }
 

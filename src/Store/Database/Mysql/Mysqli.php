@@ -26,8 +26,6 @@ class Mysqli implements DriverInterface
 
     private $result;
 
-    private $transaction = false;
-
     public function __construct(Connection $connection)
     {
         $this->setConnection($connection);
@@ -97,7 +95,6 @@ class Mysqli implements DriverInterface
         if (!$beginTransaction) {
             throw new MysqliTransactionException('mysqli begin transaction error');
         }
-        $this->transaction = true;
         yield $beginTransaction;
     }
 
@@ -110,7 +107,6 @@ class Mysqli implements DriverInterface
         if (!$commit) {
             throw new MysqliTransactionException('mysqli commit error');
         }
-        $this->transaction = false;
         $this->releaseConnection();
         yield $commit;
     }
@@ -124,14 +120,14 @@ class Mysqli implements DriverInterface
         if (!$rollback) {
             throw new MysqliTransactionException('mysqli rollback error');
         }
-        $this->transaction = false;
         $this->releaseConnection();
         yield $rollback;
     }
 
     public function releaseConnection()
     {
-        if ($this->transaction === false) {
+        $beginTransaction = (yield getContext('begin_transaction', false));
+        if ($beginTransaction === false) {
             $this->connection->release();
         }
         return;
