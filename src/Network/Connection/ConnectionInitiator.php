@@ -22,7 +22,13 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
+    private $engineMap = [
+        'mysqli', 
+        'http', 
+        'redis', 
+        'syslog', 
+        'novaClient',
+    ];
 
     public function __construct()
     {
@@ -53,7 +59,6 @@ class ConnectionInitiator
                 if (is_array($config)) {
                     $this->initConfig($cf);
                 }
-                
                 continue;
             } 
             
@@ -97,40 +102,4 @@ class ConnectionInitiator
         $connectionPool = new Pool($factory, $config, $factoryType);
         ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
     }
-
-    private function configFile()
-    {
-        $config = [
-            'mysql' => [
-                'default_write' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [
-                        'pool_name' => 'pifa',
-                        'maximum-connection-count' => '50',
-                        'minimum-connection-count' => '10',
-                        'keeping-sleep-time' => '10',
-                        'init-connection'=> '10',
-                        'host' => '192.168.66.202',
-                        'user' => 'test_koudaitong',
-                        'password' => 'nPMj9WWpZr4zNmjz',
-                        'database' => 'pf',
-                        'port' => '3306'
-                    ],
-                ],
-                'default_read' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [],
-                ],
-            ],
-            'http' => [
-                'default' => [
-                    'engine' => 'http',
-                    'pool' => []
-                ]
-            ]
-        ];
-        return $config;
-    }
-
-
 }
