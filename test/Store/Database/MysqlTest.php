@@ -12,6 +12,16 @@ use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Store\Facade\Db;
 class MysqlTest extends TaskTest
 {
+    public function testInit()
+    {
+        //sql map
+        //table
+        //connection
+
+
+
+
+    }
 
     public function testInsert()
     {
