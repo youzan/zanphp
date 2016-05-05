@@ -28,98 +28,98 @@ class ResultFormatter implements ResultFormatterInterface
     }
 
     /**
-     * @return mixed(base on ResultType)
+     * @yield mixed(base on ResultType)
      */
     public function format()
     {
         switch ($this->resultType) {
             case ResultTypeInterface::INSERT :
-                $result = $this->insert();
+                $result = (yield $this->insert());
                 break;
             case ResultTypeInterface::UPDATE :
-                $result = $this->update();
+                $result = (yield $this->update());
                 break;
             case ResultTypeInterface::DELETE :
-                $result = $this->delete();
+                $result = (yield $this->delete());
                 break;
             case ResultTypeInterface::BATCH :
-                $result = $this->batch();
+                $result = (yield $this->batch());
                 break;
             case ResultTypeInterface::ROW :
-                $result = $this->row();
+                $result = (yield $this->row());
                 break;
             case ResultTypeInterface::RAW :
-                $result = $this->raw();
+                $result = (yield $this->raw());
                 break;
             case ResultTypeInterface::SELECT :
-                $result = $this->select();
+                $result = (yield $this->select());
                 break;
             case ResultTypeInterface::COUNT :
-                $result = $this->count();
+                $result = (yield $this->count());
                 break;
             case ResultTypeInterface::LAST_INSERT_ID :
-                $result = $this->lastInsertId();
+                $result = (yield $this->lastInsertId());
                 break;
             case ResultTypeInterface::AFFECTED_ROWS :
-                $result = $this->affectedRows();
+                $result = (yield $this->affectedRows());
                 break;
             default :
-                $result = $this->raw();
+                $result = (yield $this->raw());
                 break;
         }
-        return $result;
+        yield $result;
     }
 
     private function select()
     {
         $rows = $this->dbResult->fetchRows();
-        return null == $rows || [] == $rows ? [] : $rows;
+        yield null == $rows || [] == $rows ? [] : $rows;
     }
 
     private function count()
     {
         $rows = $this->dbResult->fetchRows();
-        return !isset($rows[0]['count_sql_rows']) ? 0 : (int)$rows[0]['count_sql_rows'];
+        yield !isset($rows[0]['count_sql_rows']) ? 0 : (int)$rows[0]['count_sql_rows'];
     }
 
     private function insert()
     {
-        return $this->dbResult->fetchRows();
+        yield $this->dbResult->fetchRows();
     }
 
     private function lastInsertId()
     {
-        return $this->dbResult->getLastInsertId();
+        yield $this->dbResult->getLastInsertId();
     }
 
     private function update()
     {
-        return $this->dbResult->fetchRows();
+        yield $this->dbResult->fetchRows();
     }
 
     private function delete()
     {
-        return $this->dbResult->fetchRows();
+        yield $this->dbResult->fetchRows();
     }
 
     private function affectedRows()
     {
-        return $this->dbResult->getAffectedRows();
+        yield $this->dbResult->getAffectedRows();
     }
 
     private function batch()
     {
-        return $this->dbResult->fetchRows();
+        yield $this->dbResult->fetchRows();
     }
 
     private function row()
     {
         $rows = $this->dbResult->fetchRows();
-        return isset($rows[0]) && [] != $rows[0] ? $rows[0] : null;
+        yield isset($rows[0]) && [] != $rows[0] ? $rows[0] : null;
     }
 
     private function raw()
     {
-        return $this->dbResult->fetchRows();
+        yield $this->dbResult->fetchRows();
     }
 }

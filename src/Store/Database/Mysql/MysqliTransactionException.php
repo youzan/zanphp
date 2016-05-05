@@ -2,15 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: xiaoniu
- * Date: 16/3/21
- * Time: 下午5:10
+ * Date: 16/4/19
+ * Time: 上午12:54
  */
 namespace Zan\Framework\Store\Database\Mysql;
 
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class Exception extends ZanException
+class MysqliTransactionException extends ZanException
 {
 
 }
