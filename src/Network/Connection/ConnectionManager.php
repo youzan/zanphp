@@ -9,9 +9,14 @@
 namespace Zan\Framework\Network\Connection;
 
 
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\FutureConnection;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Monitor\Constant;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class ConnectionManager
@@ -23,6 +28,8 @@ class ConnectionManager
     private static $poolConfig=null;
     private static $mysqlConfig=null;
     private static $registry=[];
+
+    private static $server;
 
     public function __construct()
     {
@@ -59,4 +66,44 @@ class ConnectionManager
         self::$poolMap[$poolKey] = $pool;
     }
 
+    public function monitor()
+    {
+        $config = Config::get('hawk');
+        if (!$config['run']) {
+            return;
+        }
+        $time = $config['time'];
+        Timer::tick($time, spl_object_hash($this) . '_hawk_monitor', [$this, 'monitorTick']);
+    }
+
+    public function monitorTick() {
+        $hawk = new Hawk();
+
+        foreach (self::$poolMap as $poolKey => $pool) {
+            $activeNums = $pool->getActiveConnection()->length();
+            $freeNums = $pool->getFreeConnection()->length();
+
+            $hawk->add(Constant::BIZ_CONNECTION_POOL,
+                [
+                    'free'  => $freeNums,
+                    'active' => $activeNums,
+                ],
+                [
+                    'pool_name' => $poolKey,
+                    'worker_id' => self::$server->swooleServer->worker_id
+                ]
+            );
+        }
+
+        $coroutine = $this->runHawkTask($hawk);
+        Task::execute($coroutine);
+    }
+
+    public function runHawkTask($hawk) {
+        yield $hawk->send();
+    }
+
+    public function setServer($server) {
+        self::$server = $server;
+    }
 }

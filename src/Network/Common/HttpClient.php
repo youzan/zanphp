@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Common;
 
-use Zan\Framework\Network\Http\Client\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
 class HttpClient implements Async
@@ -10,7 +9,7 @@ class HttpClient implements Async
     const GET = 'GET';
     const POST = 'POST';
 
-    /** @var  HClient */
+    /** @var  swoole_http_client */
     private $client;
 
     private $host;
@@ -22,14 +21,18 @@ class HttpClient implements Async
     private $method;
 
     private $params;
+    private $header = [];
+    private $body;
 
-    private function __construct($host, $port)
+    private $callback;
+
+    public function __construct($host, $port = 80)
     {
         $this->host = $host;
         $this->port = $port;
     }
 
-    public static function newInstance($host, $port)
+    public static function newInstance($host, $port = 80)
     {
         return new static($host, $port);
     }
@@ -56,39 +59,50 @@ class HttpClient implements Async
 
     public function execute(callable $callback)
     {
-        $this->client->setCallback($this->getCallback($callback))->handle();
+        $this->setCallback($this->getCallback($callback))->handle();
     }
 
-    private function setMethod($method)
+    public function setMethod($method)
     {
         $this->method = $method;
+        return $this;
     }
 
-    private function setUri($uri)
+    public function setUri($uri)
     {
         if (empty($uri)) {
             $uri .= '/';
         }
         $this->uri = $uri;
+        return $this;
     }
 
-    private function setTimeout($timeout)
+    public function setTimeout($timeout)
     {
         $this->timeout = $timeout;
+        return $this;
     }
 
-    private function setParams($params)
+    public function setParams($params)
     {
         $this->params = $params;
+        return $this;
+    }
+
+    public function setHeader(array $header)
+    {
+        $this->header = array_merge($this->header, $header);
+        return $this;
+    }
+
+    public function setBody($body)
+    {
+        $this->body = $body;
+        return $this;
     }
 
     private function build()
     {
-        $this->client = new HClient($this->host, $this->port);
-
-        $this->client->setTimeout($this->timeout);
-        $this->client->setMethod($this->method);
-
         if ($this->method != 'POST' and $this->method != 'PUT') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -96,14 +110,50 @@ class HttpClient implements Async
         } else {
             $body = json_encode($this->params);
             $contentType = 'application/json';
-            $this->client->setHeader([
+            $this->setHeader([
                 'Content-Type' => $contentType
             ]);
-            $this->client->setBody($body);
+            $this->setBody($body);
         }
-        $this->client->setUri($this->uri);
 
         return $this;
+    }
+
+    public function setCallback(Callable $callback)
+    {
+        $this->callback = $callback;
+        return $this;
+    }
+
+    public function handle()
+    {
+        swoole_async_dns_lookup($this->host, function($host, $ip) {
+            $this->request($ip);
+        });
+    }
+
+
+    public function request($ip)
+    {
+        $this->client = new \swoole_http_client($ip, $this->port);
+        $this->buildHeader();
+
+        if('GET' === $this->method){
+            $this->client->get($this->uri, [$this,'onReceive']);
+        }elseif('POST' === $this->method){
+            $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
+        }
+    }
+
+    private function buildHeader()
+    {
+        $this->header['Host'] = $this->host;
+        $this->client->setHeaders($this->header);
+    }
+
+    public function onReceive($cli)
+    {
+        call_user_func($this->callback, $cli->body);
     }
 
     private function getCallback(callable $callback)

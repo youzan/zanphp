@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Connection\Factory\KVStore;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
@@ -22,8 +23,7 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
-
+    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient', 'kVStore'];
 
     public function __construct()
     {
@@ -32,14 +32,16 @@ class ConnectionInitiator
     /**
      * @param array $config(=Config::get('connection'))
      */
-    public function init($config)
+    public function init($config, $server)
     {
         //读取配置文件
         if (is_array($config)) {
             $this->initConfig($config);
         }
 
-
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
+        $connectionManager->monitor();
     }
 
 
@@ -88,6 +90,9 @@ class ConnectionInitiator
                 break;
             case 'NovaClient':
                 $factory = new NovaClient($config);
+                break;
+            case 'KVStore':
+                $factory = new KVStore($config);
                 break;
             default:
                 break;
