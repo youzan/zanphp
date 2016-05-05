@@ -26,7 +26,6 @@ class ConnectionInitiator
 
     public $poolName = '';
 
-
     public function __construct()
     {
     }
@@ -34,12 +33,15 @@ class ConnectionInitiator
     /**
      * @param $directory
      */
-    public function init($directory)
+    public function init($directory, $server)
     {
         if(!empty($directory)) {
             $this->poolName = $directory;
             $this->initConfig();
         }
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
+        $connectionManager->monitor();
     }
 
 

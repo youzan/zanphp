@@ -72,6 +72,11 @@ class Pool implements ConnectionPool
         return $this->freeConnection;
     }
 
+    public function getActiveConnection()
+    {
+        return $this->activeConnection;
+    }
+
 
     public function reload(array $config)
     {

@@ -13,6 +13,6 @@ class InitializeConnectionPool implements Bootable
      */
     public function bootstrap($server)
     {
-        ConnectionInitiator::getInstance()->init('connection');
+        ConnectionInitiator::getInstance()->init('connection', $server);
     }
 }
