@@ -33,37 +33,38 @@ class ConnectionInitiator
      */
     public function init($config, $server)
     {
-        //读取配置文件
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
+        
         if (is_array($config)) {
             $this->initConfig($config);
         }
-
-        $connectionManager = ConnectionManager::getInstance();
-        $connectionManager->setServer($server);
+        
         $connectionManager->monitor();
     }
 
-
     private function initConfig($config)
     {
-        if (is_array($config)) {
-            foreach ($config as $cf) {
-                if (!isset($cf['engine'])) {
-                    if (is_array($config)) {
-                        $this->initConfig($cf);
-                    }
-                } else {
-                    if (empty($cf['pool'])) {
-                        continue;
-                    }
-                    //创建连接池
-                    $factoryType = $cf['engine'];
-                    if (in_array($factoryType, $this->engineMap)) {
-                        $factoryType = ucfirst($factoryType);
-                        $this->initPool($factoryType, $cf['pool']);
-                    }
+        if (!is_array($config)) {
+            return false; 
+        }
+        foreach ($config as $cf) {
+            if (!isset($cf['engine'])) {
+                if (is_array($config)) {
+                    $this->initConfig($cf);
                 }
-
+                
+                continue;
+            } 
+            
+            if (empty($cf['pool'])) {
+                continue;
+            }
+            
+            $factoryType = $cf['engine'];
+            if (in_array($factoryType, $this->engineMap)) {
+                $factoryType = ucfirst($factoryType);
+                $this->initPool($factoryType, $cf['pool']);
             }
         }
     }

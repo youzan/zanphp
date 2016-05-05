@@ -59,13 +59,13 @@ class Worker
         $time = isset($this->config['max_live_time'])?$this->config['max_live_time']:1800000;
         $time += $this->workerId * self::GAP_TIME;
 
-        Timer::after($time, $this->classHash.'_restart',[$this,'closePre']);
+        Timer::after($time, [$this,'closePre'], $this->classHash.'_restart');
     }
 
     public function checkStart(){
         $time = isset($this->config['check_interval'])?$this->config['check_interval']:5000;
 
-        Timer::tick($time, $this->classHash.'_check',[$this,'check']);
+        Timer::tick($time, [$this,'check'], $this->classHash.'_check');
     }
 
     public function check(){
@@ -105,7 +105,7 @@ class Worker
         $this->output('CloseCheck');
 
         if($this->reactionNum > 0){
-            Timer::after(1000,$this->classHash.'_closeCheck',[$this,'closeCheck']);
+            Timer::after(1000,[$this,'closeCheck']);
         }else{
             $this->close();
         }
@@ -122,7 +122,7 @@ class Worker
     public function hawk(){
         $time = Config::get('hawk.time');
 
-        Timer::tick($time, $this->classHash.'_hawk',[$this,'callHawk']);
+        Timer::tick($time, [$this,'callHawk']);
     }
 
     public function callHawk() {

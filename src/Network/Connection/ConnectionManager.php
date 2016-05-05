@@ -59,7 +59,7 @@ class ConnectionManager
 
     /**
      * @param $poolKey
-     * @param ConnectionPool $pool
+     * @param Pool $pool
      */
     public function addPool($poolKey, Pool $pool)
     {
@@ -69,7 +69,7 @@ class ConnectionManager
     public function monitor()
     {
         $time = Config::get('hawk.time');
-        Timer::tick($time, spl_object_hash($this) . '_hawk_monitor', [$this, 'monitorTick']);
+        Timer::tick($time, [$this, 'monitorTick']);
     }
 
     public function monitorTick() {
@@ -80,13 +80,11 @@ class ConnectionManager
             $freeNums = $pool->getFreeConnection()->length();
             $total = $activeNums + $freeNums;
 
-            $hawk->add(Constant::BIZ_CONNECTION_POOL,
-                [
+            $hawk->add(Constant::BIZ_CONNECTION_POOL, [
                     'total' => $total,
                     'free'  => $freeNums,
                     'active' => $activeNums,
-                ],
-                [
+                ], [
                     'pool_name' => $poolKey,
                     'worker_id' => self::$server->swooleServer->worker_id
                 ]
