@@ -103,7 +103,7 @@ class ConnectionInitiator
                 break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
-        ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
+        ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
 
     private function configFile()
