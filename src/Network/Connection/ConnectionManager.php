@@ -68,7 +68,11 @@ class ConnectionManager
 
     public function monitor()
     {
-        $time = Config::get('hawk.time');
+        $config = Config::get('hawk');
+        if (!$config['run']) {
+            return;
+        }
+        $time = $config['time'];
         Timer::tick($time, spl_object_hash($this) . '_hawk_monitor', [$this, 'monitorTick']);
     }
 
@@ -78,11 +82,9 @@ class ConnectionManager
         foreach (self::$poolMap as $poolKey => $pool) {
             $activeNums = $pool->getActiveConnection()->length();
             $freeNums = $pool->getFreeConnection()->length();
-            $total = $activeNums + $freeNums;
 
             $hawk->add(Constant::BIZ_CONNECTION_POOL,
                 [
-                    'total' => $total,
                     'free'  => $freeNums,
                     'active' => $activeNums,
                 ],
