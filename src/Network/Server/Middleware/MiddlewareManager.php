@@ -25,17 +25,15 @@ class MiddlewareManager
     use Singleton;
 
     private $config = null;
-    private $conKey = 'middleware';
-
-    public function loadConfig($path = '')
-    {
-        $this->config = empty($path) ? Config::get($this->conKey) : ConfigLoader::getInstance()->load($path, true);
-        $this->config['match'] = isset($this->config['match']) ? $this->config['match'] : [];
-    }
 
     public function optimize()
     {
 
+    }
+
+    public function setConfig($config)
+    {
+        $this->config = $config;
     }
 
     /**

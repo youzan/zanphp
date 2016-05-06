@@ -53,8 +53,6 @@ class RequestTask
     public function doRun()
     {
         $middlewareManager = MiddlewareManager::getInstance();
-        //TODO: move to server Start
-        $middlewareManager->loadConfig();
         $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
         if(null !== $response){
             yield $response->sendBy($this->swooleResponse);
