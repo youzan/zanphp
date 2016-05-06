@@ -72,13 +72,13 @@ class ResultFormatter implements ResultFormatterInterface
 
     private function select()
     {
-        $rows = $this->dbResult->fetchRows();
+        $rows = (yield $this->dbResult->fetchRows());
         yield null == $rows || [] == $rows ? [] : $rows;
     }
 
     private function count()
     {
-        $rows = $this->dbResult->fetchRows();
+        $rows = (yield $this->dbResult->fetchRows());
         yield !isset($rows[0]['count_sql_rows']) ? 0 : (int)$rows[0]['count_sql_rows'];
     }
 
@@ -114,7 +114,7 @@ class ResultFormatter implements ResultFormatterInterface
 
     private function row()
     {
-        $rows = $this->dbResult->fetchRows();
+        $rows = (yield $this->dbResult->fetchRows());
         yield isset($rows[0]) && [] != $rows[0] ? $rows[0] : null;
     }
 
