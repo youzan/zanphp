@@ -25,10 +25,10 @@ class KV
 
     final public static function getInstance($namespace)
     {
-        if (null === self::$_instance) {
-            self::$_instance = new KV($namespace);
+        if (null === self::$_instance[$namespace]) {
+            self::$_instance[$namespace] = new KV($namespace);
         }
-        return self::$_instance;
+        return self::$_instance[$namespace];
     }
 
     /**

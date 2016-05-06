@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Store\NoSQL\KV;
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Utilities\Encode\LZ4;
 
 /**
  * Created by IntelliJ IDEA.
@@ -19,8 +20,12 @@ class KVStore implements Async
 
     private $callback;
 
-    const DEFAULT_BIN_NAME = 'z_dft';
+    const DEFAULT_BIN_NAME = '_z_dft';
     const AEROSPIKE_OK = 'AEROSPIKE_OK';
+
+    //压缩阀值
+    const COMPRESS_LEN = 1024;
+   
 
     public function __construct($namespace, $setName, $connection)
     {
@@ -33,6 +38,15 @@ class KVStore implements Async
     public function set($key, $value, $ttl = 0)
     {
         $this->policy['ttl'] = $ttl;
+
+        if (!is_string($value) && !is_numeric($value)) {
+            yield false;
+            return;
+        }
+
+        if (strlen($value) > self::COMPRESS_LEN) {
+            $value = LZ4::getInstance()->encode($value);
+        }
 
         $this->conn->getSocket()->put_simple_async(
             $this->namespace,
@@ -90,9 +104,15 @@ class KVStore implements Async
             call_user_func($this->callback, null);
         }
 
+        $LZ4 = LZ4::getInstance();
         //set的情况
         if (isset($rec[self::DEFAULT_BIN_NAME])) {
-            call_user_func($this->callback, $rec[self::DEFAULT_BIN_NAME]);
+            if ($LZ4->isLZ4($rec[self::DEFAULT_BIN_NAME])) {
+                $value = $LZ4->decode($rec[self::DEFAULT_BIN_NAME]);
+            } else {
+                $value = $rec[self::DEFAULT_BIN_NAME];
+            }
+            call_user_func($this->callback, $value);
         } else {
             call_user_func($this->callback, $rec);
         }
