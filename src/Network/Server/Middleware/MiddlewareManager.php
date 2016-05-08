@@ -44,6 +44,7 @@ class MiddlewareManager
     public function executeFilters(Request $request, Context $context)
     {
         $filters = $this->getGroupValue($request);
+        $filters = $this->addBaseFilters($filters);
         foreach ($filters as $filter) {
             $filterObjectName = $this->getObject($filter);
             $filterObject = new $filterObjectName();
@@ -67,6 +68,7 @@ class MiddlewareManager
     public function executeTerminators(Request $request, Response $response, Context $context)
     {
         $terminators = $this->getGroupValue($request);
+        $terminators = $this->addBaseTerminators($terminators);
         foreach ($terminators as $terminator) {
             $terminatorObjectName = $this->getObject($terminator);
             $terminatorObject = new $terminatorObjectName();
@@ -115,5 +117,21 @@ class MiddlewareManager
     private function getObject($objectName)
     {
         return $objectName;
+    }
+
+    private function addBaseFilters($filters)
+    {
+        $baseFilters = [
+
+        ];
+        return array_merge($filters, $baseFilters);
+    }
+
+    private function addBaseTerminators($terminators)
+    {
+        $baseTerminators = [
+            \Zan\Framework\Network\Server\Middleware\BaseTerminator::class,
+        ];
+        return array_merge($terminators, $baseTerminators);
     }
 }

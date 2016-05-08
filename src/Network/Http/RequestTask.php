@@ -67,7 +67,6 @@ class RequestTask
             yield $response->sendBy($this->swooleResponse);
         }
 
-        //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
-        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
+        yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
     }
 }
