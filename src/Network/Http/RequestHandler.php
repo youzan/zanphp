@@ -35,6 +35,9 @@ class RequestHandler
             $cookie = new Cookie($request, $swooleResponse);
             $this->context->set('cookie', $cookie);
 
+            $session = new Session($request, $cookie);
+            $this->context->set('session', $session);
+
             $task = new RequestTask($request, $swooleResponse, $this->context);
             $coroutine = $task->run();
             Task::execute($coroutine, $this->context);
