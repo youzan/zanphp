@@ -93,6 +93,29 @@ class URL
         return $url;
     }
 
+    public static function getRequestUri($exclude='', $params=false)
+    {
+        $uri = $_SERVER['REQUEST_URI'];
+        $host = 'http://' . $_SERVER['HTTP_HOST'];
+        $request_uri = $host . $uri;
+        if($exclude) {
+            $request_uri = preg_replace($exclude, '', $request_uri);
+        }
+
+        $pPos   = strpos($request_uri,'?');
+        if(false === $params){
+            if(false !== $pPos){
+                $request_uri = substr($request_uri,0,$pPos);
+            }
+        }
+
+        if(false !== $params && !$pPos){
+            $request_uri .= '?';
+        }
+
+        return $request_uri;
+    }
+
 
     /**
      * This method returns cdn url.
