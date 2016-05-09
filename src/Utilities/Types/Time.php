@@ -11,12 +11,12 @@ class Time
             return true;
         }
 
-        $this->timeStamp = time();
+        $this->timeStamp = nova_get_time();;
     }
 
     public static function current($format=false)
     {
-        $timeStamp = time();
+        $timeStamp = nova_get_time();
 
         if(true === $format){
             return $timeStamp;
