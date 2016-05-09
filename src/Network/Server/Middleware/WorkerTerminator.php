@@ -14,7 +14,7 @@ use Zan\Framework\Contract\Network\Response;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Network\Server\Monitor\Worker;
 
-class BaseTerminator implements RequestTerminator
+class WorkerTerminator implements RequestTerminator
 {
     public function terminate(Request $request, Response $response, Context $context)
     {

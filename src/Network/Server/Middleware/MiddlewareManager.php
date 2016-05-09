@@ -130,7 +130,7 @@ class MiddlewareManager
     private function addBaseTerminators($terminators)
     {
         $baseTerminators = [
-            \Zan\Framework\Network\Server\Middleware\BaseTerminator::class,
+            \Zan\Framework\Network\Server\Middleware\WorkerTerminator::class,
         ];
         return array_merge($terminators, $baseTerminators);
     }
