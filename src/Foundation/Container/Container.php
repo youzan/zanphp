@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation\Container;
 
 use ReflectionClass;
+use Zan\Framework\Testing\Stub;
 
 class Container
 {
@@ -39,6 +40,13 @@ class Container
         if (!isset($this->mockInstances[$abstract])) {
             $this->mockInstances[$abstract] = $instance;
         }
+    }
+    
+    public function addStub(Stub $stub)
+    {
+        $className = $stub->getRealClassName();
+        
+        $this->setMockInstance($className, $stub);
     }
     
     public function singleton($abstract, array $parameters=[])
