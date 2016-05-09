@@ -42,7 +42,6 @@ class Flow
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
-        yield setContext('begin_transaction', false);
         yield $driver->commit();
         return;
     }
@@ -51,7 +50,6 @@ class Flow
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
-        yield setContext('begin_transaction', false);
         yield $driver->rollback();
         return;
     }
@@ -98,6 +96,9 @@ class Flow
         }
         $connection = $connectionStack->pop();
         yield setContext(self::CONNECTION_STACK, $connectionStack->isEmpty() === true ? null : $connectionStack);
+        if (true === $connectionStack->isEmpty()) {
+            yield setContext('begin_transaction', false);
+        }
         yield $connection;
     }
 
