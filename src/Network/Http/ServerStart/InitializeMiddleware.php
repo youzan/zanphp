@@ -14,7 +14,7 @@ use Zan\Framework\Foundation\Core\Config;
 class InitializeMiddleware
 {
     /**
-     * @param \Zan\Framework\Network\Http\Server $server
+     * @param $server
      */
     public function bootstrap($server)
     {

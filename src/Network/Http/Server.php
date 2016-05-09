@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
+use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
@@ -19,8 +20,9 @@ class Server extends ServerBase implements ServerContract
 {
     protected $serverStartItems = [
         InitializeRouter::class,
-        InitializeExceptionHandlerChain::class,
-        InitializeMiddleware::class
+        InitializeUrlRule::class,
+        InitializeMiddleware::class,
+        InitializeExceptionHandlerChain::class
     ];
 
     protected $workerStartItems = [

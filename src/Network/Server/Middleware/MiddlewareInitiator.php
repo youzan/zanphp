@@ -14,11 +14,8 @@ class MiddlewareInitiator
 {
     use Singleton;
 
-    public function init($config)
+    public function init(array $config)
     {
-        if(!is_array($config) or empty($config)) {
-            $config = [];
-        }
         $config['match'] = isset($config['match']) ? $config['match'] : [];
         MiddlewareManager::getInstance()->setConfig($config);
     }
