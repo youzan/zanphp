@@ -25,7 +25,9 @@ class ConnectionInitiator
 
     private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient', 'kVStore'];
 
-    public $poolName = '';
+    public $directory = '';
+
+    public $poolName='';
 
     public function __construct()
     {
@@ -37,7 +39,7 @@ class ConnectionInitiator
     public function init($directory, $server)
     {
         if(!empty($directory)) {
-            $this->poolName = $directory;
+            $this->directory = $directory;
             $this->initConfig();
         }
         $connectionManager = ConnectionManager::getInstance();
@@ -48,7 +50,7 @@ class ConnectionInitiator
 
     private function initConfig()
     {
-        $config = Config::get($this->poolName);
+        $config = Config::get($this->directory);
         if (is_array($config)) {
             foreach ($config as $k=>$cf) {
                 if (!isset($cf['engine'])) {
@@ -65,8 +67,9 @@ class ConnectionInitiator
                     $factoryType = $cf['engine'];
                     if (in_array($factoryType, $this->engineMap)) {
                         $factoryType = ucfirst($factoryType);
-                        $cf['pool']['pool_name'] = $this->poolName;
+                        $cf['pool']['pool_name'] = $this->directory . $this->poolName;
                         $this->initPool($factoryType, $cf);
+                        $this->poolName='';
                     }
                 }
 
