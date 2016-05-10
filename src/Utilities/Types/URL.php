@@ -176,7 +176,7 @@ class URL
         return $prefix . '?' . http_build_query($pMap);
     }
 
-    public function redirect($url,$code=302){
+    public static function redirect($url,$code=302){
         return  new RedirectResponse($url,$code);
     }
 
