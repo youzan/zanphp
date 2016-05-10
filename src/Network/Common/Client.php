@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
@@ -120,6 +121,13 @@ class Client implements Async
         return function($response) use ($callback) {
             $jsonData = json_decode($response, true);
             $response = $jsonData ? $jsonData : $response;
+            if($this->format =='yar' && $this->type == self::PHP_TYPE && isset($response['code'])){
+                if($response['code']){
+                    $msg = $response['msg'] ? $response['msg'] : $response['data'];
+                    throw new ZanException($msg,$response['code']);
+                }
+                $response = $response['data'];
+            }
             call_user_func($callback, $response);
         };
     }
