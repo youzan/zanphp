@@ -25,17 +25,27 @@ class MiddlewareManager
     use Singleton;
 
     private $config = null;
-    private $conKey = 'middleware';
-
-    public function loadConfig($path = '')
-    {
-        $this->config = empty($path) ? Config::get($this->conKey) : ConfigLoader::getInstance()->load($path, true);
-        $this->config['match'] = isset($this->config['match']) ? $this->config['match'] : [];
-    }
+    private $extendFilters = [];
+    private $extendTerminators = [];
 
     public function optimize()
     {
 
+    }
+
+    public function setConfig($config)
+    {
+        $this->config = $config;
+    }
+
+    public function setExtendFilters(array $extendFilters)
+    {
+        $this->extendFilters = $extendFilters;
+    }
+
+    public function setExtendTerminators(array $extendTerminators)
+    {
+        $this->extendTerminators = $extendTerminators;
     }
 
     /**
@@ -46,6 +56,7 @@ class MiddlewareManager
     public function executeFilters(Request $request, Context $context)
     {
         $filters = $this->getGroupValue($request);
+        $filters = $this->addBaseFilters($filters);
         foreach ($filters as $filter) {
             $filterObjectName = $this->getObject($filter);
             $filterObject = new $filterObjectName();
@@ -69,6 +80,7 @@ class MiddlewareManager
     public function executeTerminators(Request $request, Response $response, Context $context)
     {
         $terminators = $this->getGroupValue($request);
+        $terminators = $this->addBaseTerminators($terminators);
         foreach ($terminators as $terminator) {
             $terminatorObjectName = $this->getObject($terminator);
             $terminatorObject = new $terminatorObjectName();
@@ -117,5 +129,21 @@ class MiddlewareManager
     private function getObject($objectName)
     {
         return $objectName;
+    }
+
+    private function addBaseFilters($filters)
+    {
+        $baseFilters = [
+
+        ];
+        return array_merge($filters, $this->extendFilters, $baseFilters);
+    }
+
+    private function addBaseTerminators($terminators)
+    {
+        $baseTerminators = [
+            \Zan\Framework\Network\Server\Middleware\WorkerTerminator::class,
+        ];
+        return array_merge($terminators, $this->extendTerminators, $baseTerminators);
     }
 }

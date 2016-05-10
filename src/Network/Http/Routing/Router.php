@@ -20,17 +20,7 @@ class Router {
     private $format = '';
     private $rules = [];
     private $parameters = [];
-    private $routeConKey = 'route';
     private $separator = '/';
-
-    public function __construct($config = [])
-    {
-        $this->config = $config;
-        if (!$this->config) {
-            $this->config = Config::get($this->routeConKey);
-        }
-        $this->rules = UrlRule::getRules();
-    }
 
     private function prepare($url)
     {
@@ -39,6 +29,12 @@ class Router {
         }
         $this->url = ltrim($url, $this->separator);
         $this->removeIllegalString();
+        $this->rules = UrlRule::getRules();
+    }
+
+    public function setConfig($config)
+    {
+        $this->config = $config;
     }
 
     public function route(Request $request)
