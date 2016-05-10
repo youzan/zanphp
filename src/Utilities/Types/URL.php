@@ -179,6 +179,7 @@ class URL
     public static function redirect($url,$code=302){
         return  new RedirectResponse($url,$code);
     }
+
     /**
      * check the scheme is valid
      *
