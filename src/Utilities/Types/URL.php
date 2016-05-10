@@ -93,29 +93,6 @@ class URL
         return $url;
     }
 
-    public static function getRequestUri($exclude='', $params=false)
-    {
-        $uri = $_SERVER['REQUEST_URI'];
-        $host = 'http://' . $_SERVER['HTTP_HOST'];
-        $request_uri = $host . $uri;
-        if($exclude) {
-            $request_uri = preg_replace($exclude, '', $request_uri);
-        }
-
-        $pPos   = strpos($request_uri,'?');
-        if(false === $params){
-            if(false !== $pPos){
-                $request_uri = substr($request_uri,0,$pPos);
-            }
-        }
-
-        if(false !== $params && !$pPos){
-            $request_uri .= '?';
-        }
-
-        return $request_uri;
-    }
-
 
     /**
      * This method returns cdn url.
@@ -146,6 +123,58 @@ class URL
 
         return self::_convertWebp($url);
     }
+
+    public static function getRequestUri($exclude='', $params=false)
+    {
+        $uri = $_SERVER['REQUEST_URI'];
+        $host = 'http://' . $_SERVER['HTTP_HOST'];
+        $request_uri = $host . $uri;
+        if($exclude) {
+            $request_uri = preg_replace($exclude, '', $request_uri);
+        }
+
+        $pPos   = strpos($request_uri,'?');
+        if(false === $params){
+            if(false !== $pPos){
+                $request_uri = substr($request_uri,0,$pPos);
+            }
+        }
+
+        if(false !== $params && !$pPos){
+            $request_uri .= '?';
+        }
+
+        return $request_uri;
+    }
+
+    public static function removeParams($ps=null,$url=null)
+    {
+        if(null === $url){
+            $url    = self::getRequestUri('',true);
+        }
+        if(!$ps ){
+            return $url;
+        }
+        $pos   = strpos($url,'?');
+        if(false === $pos){
+            return $url;
+        }
+        if(!is_array($ps)){
+            $ps = [$ps];
+        }
+        $prefix = substr($url,0,$pos);
+        $suffix = substr($url,$pos+1);
+        $pMap   = [];
+        parse_str($suffix,$pMap);
+        foreach($ps as $p){
+            if(isset($pMap[$p])){
+                unset($pMap[$p]);
+            }
+        }
+
+        return $prefix . '?' . http_build_query($pMap);
+    }
+
 
     /**
      * check the scheme is valid
