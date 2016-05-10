@@ -104,7 +104,7 @@ class KVStore implements Async
             [$this, 'readCallBack'],
             $this->policy
         );
-        
+
         yield $this;
     }
 
@@ -138,6 +138,7 @@ class KVStore implements Async
         if ($err != self::AEROSPIKE_OK) {
             //TODO: 日志记录err
             call_user_func($this->callback, null);
+            return;
         }
 
         $LZ4 = LZ4::getInstance();
