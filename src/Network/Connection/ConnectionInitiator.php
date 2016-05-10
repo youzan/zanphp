@@ -40,7 +40,8 @@ class ConnectionInitiator
     {
         if(!empty($directory)) {
             $this->directory = $directory;
-            $this->initConfig();
+            $config = Config::get($this->directory);
+            $this->initConfig($config);
         }
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->setServer($server);
@@ -48,9 +49,9 @@ class ConnectionInitiator
     }
 
 
-    private function initConfig()
+    private function initConfig($config)
     {
-        $config = Config::get($this->directory);
+
         if (is_array($config)) {
             foreach ($config as $k=>$cf) {
                 if (!isset($cf['engine'])) {
