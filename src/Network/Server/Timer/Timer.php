@@ -3,84 +3,83 @@
 namespace Zan\Framework\Network\Server\Timer;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Network\Server\Timer\Exceptions\TimerExistException;
 
 class Timer
 {
+    private static $tickMap = [];
+    private static $afterMap = [];
+    private static $counter = 0;
+    
     /**
      * 添加一个每隔 {$interval} 毫秒 执行一次的计时器任务
      * @param int        $interval  单位: 毫秒
-     * @param string     $jobId   标识任务的唯一标识符，必须唯一
      * @param callable   $callback
+     * @param string     $jobId   标识任务的唯一标识符，必须唯一
      *
      * @return string    $jobId   timer job id
-     *
      * @throws InvalidArgumentException
      * @throws TimerExistException
      */
-    public static function tick($interval, $jobId, Callable $callback)
+    public static function tick($interval, Callable $callback, $jobId='')
     {
         self::valid($interval);
+        $jobId = self::formatJobId($jobId);
 
-        $manager = TickTimerManager::getInstance();
-
-        if ($manager->isExist($jobId)) {
+        if (isset(self::$tickMap[$jobId])) {
             throw new TimerExistException('job name is exist!');
         }
 
-        $timerId = swoole_timer_tick($interval, TickTimerManager::getCallback($jobId, $callback));
-
-        return $manager->add($jobId, $timerId);
+        $timerId = swoole_timer_tick($interval, self::formateTickCallback($jobId, $callback));
+        self::$tickMap[$jobId] = $timerId;
+        
+        return $jobId;
     }
 
     /**
      * 添加一个 {$interval} 毫秒后仅执行一次的计时器任务
      * @param int        $interval  单位: 毫秒
-     * @param string     $jobId   标识任务的唯一标识符，必须唯一
      * @param callable   $callback
+     * @param string     $jobId   标识任务的唯一标识符，必须唯一
      *
      * @return string    $jobId timer job id
-     *
      * @throws InvalidArgumentException
      * @throws TimerExistException
      */
-    public static function after($interval, $jobId, Callable $callback)
+    public static function after($interval, Callable $callback, $jobId='')
     {
         self::valid($interval);
+        $jobId = self::formatJobId($jobId);
 
-        $manager = AfterTimerManager::getInstance();
-
-        if ($manager->isExist($jobId)) {
+        if (isset(self::$afterMap[$jobId])) {
             throw new TimerExistException('job name is exist!');
         }
 
-        $timerId = swoole_timer_after($interval, AfterTimerManager::getCallback($jobId, $callback));
+        $timerId = swoole_timer_after($interval, self::formateAfterCallback($jobId, $callback));
+        self::$afterMap[$jobId] = $timerId;
 
-        return $manager->add($jobId, $timerId);
+        return $jobId;
     }
 
     /**
      * 根据tick timer job id 清除一个计时器任务
      *
      * @param string $jobId
-     *
      * @return bool
      */
     public static function clearTickJob($jobId)
     {
-        $manager = TickTimerManager::getInstance();
-
-        if (!TickTimerManager::validJobName($jobId) or !$manager->isExist($jobId)) {
+        if(!isset(self::$tickMap[$jobId])){
             return false;
         }
 
-        $timerId = $manager->get($jobId);
-
+        $timerId = self::$tickMap[$jobId];
         $isCleared = swoole_timer_clear($timerId);
 
-        $isRemoved = $isCleared ? $manager->delete($jobId) : false;
+        if($isCleared){
+            unset(self::$tickMap[$jobId]);
+        }
 
-        return $isCleared and $isRemoved;
+        return $isCleared;
     }
 
     /**
@@ -92,25 +91,101 @@ class Timer
      */
     public static function clearAfterJob($jobId)
     {
-        $manager = AfterTimerManager::getInstance();
-
-        if (!AfterTimerManager::validJobName($jobId) or !$manager->isExist($jobId)) {
+        if(!isset(self::$afterMap[$jobId])){
             return false;
         }
 
-        $timerId = $manager->get($jobId);
-
+        $timerId = self::$afterMap[$jobId];
         $isCleared = swoole_timer_clear($timerId);
 
-        $isRemoved = $isCleared ? $manager->delete($jobId) : false;
+        if($isCleared){
+            unset(self::$afterMap[$jobId]);
+        }
 
-        return $isCleared and $isRemoved;
+        return $isCleared;
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
+    public static function clearTickMap($key)
+    {
+        if(!$key) return false;
+        
+        unset(self::$tickMap[$key]);
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public static function clearAfterMap($key)
+    {
+        if(!$key) return false;
+
+        unset(self::$afterMap[$key]);
+    }
+
+    /**
+     * @param $jobId
+     * @param callable $callback
+     * @return \Closure
+     */
+    private static function formateTickCallback($jobId, Callable $callback)
+    {
+        return function() use ($jobId, $callback) {
+            call_user_func($callback, $jobId);
+        };
+    }
+
+    /**
+     * @param $jobId
+     * @param callable $callback
+     * @return \Closure
+     */
+    private static function formateAfterCallback($jobId, Callable $callback)
+    {
+        return function() use ($jobId, $callback) {
+            call_user_func($callback, $jobId);
+
+            Timer::clearAfterMap($jobId);
+        };
+    }
+
+    /**
+     * @param $interval
+     * @throws InvalidArgumentException
+     */
     private static function valid($interval)
     {
-        if (!is_numeric($interval) or is_float($interval)) {
+        if (!is_int($interval)) {
             throw new InvalidArgumentException('interval must be a int!');
         }
+    }
+
+    /**
+     * @param $jobId
+     * @return string
+     */
+    private static function formatJobId($jobId){
+        if($jobId){
+            return $jobId;
+        }
+        return self::createJobId();
+    }
+
+
+    /**
+     * @return string
+     */
+    private static function createJobId()
+    {
+        if(self::$counter >= PHP_INT_MAX){
+            self::$counter = 0;
+        }
+
+        self::$counter++;
+        return 'j_' . self::$counter;
     }
 }

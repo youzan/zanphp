@@ -24,6 +24,16 @@ class Di
     }
 
     /**
+     * @param $abstract
+     * @param array $parameters
+     * @param bool $shared
+     * @return mixed|object
+     */
+    public static function make($abstract, array $parameters = [], $shared = false) {
+        return static::$instance->make($abstract, $parameters, $shared);
+    }
+
+    /**
      * Handle dynamic, static calls to the object.
      *
      * @param  string $method

@@ -23,7 +23,14 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient', 'kVStore'];
+    private $engineMap = [
+        'mysqli', 
+        'http', 
+        'redis', 
+        'syslog', 
+        'novaClient',
+        'kVStore',
+    ];
 
     public $directory = '';
 
@@ -48,10 +55,8 @@ class ConnectionInitiator
         $connectionManager->monitor();
     }
 
-
     private function initConfig($config)
     {
-
         if (is_array($config)) {
             foreach ($config as $k=>$cf) {
                 if (!isset($cf['engine'])) {
@@ -73,7 +78,6 @@ class ConnectionInitiator
                         $this->poolName='';
                     }
                 }
-
             }
         }
     }
@@ -109,40 +113,4 @@ class ConnectionInitiator
         $connectionPool = new Pool($factory, $config, $factoryType);
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
-
-    private function configFile()
-    {
-        $config = [
-            'mysql' => [
-                'default_write' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [
-                        'pool_name' => 'pifa',
-                        'maximum-connection-count' => '50',
-                        'minimum-connection-count' => '10',
-                        'keeping-sleep-time' => '10',
-                        'init-connection'=> '10',
-                        'host' => '192.168.66.202',
-                        'user' => 'test_koudaitong',
-                        'password' => 'nPMj9WWpZr4zNmjz',
-                        'database' => 'pf',
-                        'port' => '3306'
-                    ],
-                ],
-                'default_read' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [],
-                ],
-            ],
-            'http' => [
-                'default' => [
-                    'engine' => 'http',
-                    'pool' => []
-                ]
-            ]
-        ];
-        return $config;
-    }
-
-
 }
