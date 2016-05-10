@@ -6,8 +6,9 @@ use JsonSerializable;
 use InvalidArgumentException;
 use Zan\Framework\Contract\Foundation\Jsonable;
 use Zan\Framework\Contract\Foundation\Arrayable;
+use Zan\Framework\Contract\Network\Response as ResponseContract;
 
-class JsonResponse extends BaseJsonResponse
+class JsonResponse extends BaseJsonResponse implements ResponseContract
 {
     use ResponseTrait;
 
