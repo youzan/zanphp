@@ -23,7 +23,14 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient', 'kVStore'];
+    private $engineMap = [
+        'mysqli', 
+        'http', 
+        'redis', 
+        'syslog', 
+        'novaClient',
+        'kVStore',
+    ];
 
     public function __construct()
     {
@@ -34,37 +41,37 @@ class ConnectionInitiator
      */
     public function init($config, $server)
     {
-        //读取配置文件
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
+        
         if (is_array($config)) {
             $this->initConfig($config);
         }
-
-        $connectionManager = ConnectionManager::getInstance();
-        $connectionManager->setServer($server);
+        
         $connectionManager->monitor();
     }
 
-
     private function initConfig($config)
     {
-        if (is_array($config)) {
-            foreach ($config as $cf) {
-                if (!isset($cf['engine'])) {
-                    if (is_array($config)) {
-                        $this->initConfig($cf);
-                    }
-                } else {
-                    if (empty($cf['pool'])) {
-                        continue;
-                    }
-                    //创建连接池
-                    $factoryType = $cf['engine'];
-                    if (in_array($factoryType, $this->engineMap)) {
-                        $factoryType = ucfirst($factoryType);
-                        $this->initPool($factoryType, $cf['pool']);
-                    }
+        if (!is_array($config)) {
+            return false; 
+        }
+        foreach ($config as $cf) {
+            if (!isset($cf['engine'])) {
+                if (is_array($config)) {
+                    $this->initConfig($cf);
                 }
-
+                continue;
+            } 
+            
+            if (empty($cf['pool'])) {
+                continue;
+            }
+            
+            $factoryType = $cf['engine'];
+            if (in_array($factoryType, $this->engineMap)) {
+                $factoryType = ucfirst($factoryType);
+                $this->initPool($factoryType, $cf['pool']);
             }
         }
     }
@@ -100,40 +107,4 @@ class ConnectionInitiator
         $connectionPool = new Pool($factory, $config, $factoryType);
         ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
     }
-
-    private function configFile()
-    {
-        $config = [
-            'mysql' => [
-                'default_write' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [
-                        'pool_name' => 'pifa',
-                        'maximum-connection-count' => '50',
-                        'minimum-connection-count' => '10',
-                        'keeping-sleep-time' => '10',
-                        'init-connection'=> '10',
-                        'host' => '192.168.66.202',
-                        'user' => 'test_koudaitong',
-                        'password' => 'nPMj9WWpZr4zNmjz',
-                        'database' => 'pf',
-                        'port' => '3306'
-                    ],
-                ],
-                'default_read' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [],
-                ],
-            ],
-            'http' => [
-                'default' => [
-                    'engine' => 'http',
-                    'pool' => []
-                ]
-            ]
-        ];
-        return $config;
-    }
-
-
 }
