@@ -77,7 +77,7 @@ class LoggerFactory
 
     /**
      * 单例
-     * @var LoggerInterface
+     * @return LoggerInterface
      */
     public static function getInstance($config){
         if (!self::$instance) {
