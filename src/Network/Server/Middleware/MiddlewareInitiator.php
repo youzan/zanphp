@@ -14,9 +14,19 @@ class MiddlewareInitiator
 {
     use Singleton;
 
-    public function init(array $config)
+    public function initConfig(array $config = [])
     {
         $config['match'] = isset($config['match']) ? $config['match'] : [];
         MiddlewareManager::getInstance()->setConfig($config);
+    }
+
+    public function initExtendFilters(array $extendFilters = [])
+    {
+        MiddlewareManager::getInstance()->setExtendFilters($extendFilters);
+    }
+
+    public function initExtendTerminators(array $extendTerminators = [])
+    {
+        MiddlewareManager::getInstance()->setExtendTerminators($extendTerminators);
     }
 } 

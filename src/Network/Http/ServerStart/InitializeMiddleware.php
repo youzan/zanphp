@@ -13,11 +13,22 @@ use Zan\Framework\Foundation\Core\Config;
 
 class InitializeMiddleware
 {
+    private $extendFilters = [
+        'filter1', 'filter2'
+    ];
+
+    private $extendTerminators = [
+         'terminator1', 'terminator2'
+    ];
+
     /**
      * @param $server
      */
     public function bootstrap($server)
     {
-        MiddlewareInitiator::getInstance()->init(Config::get('middleware'));
+        $middlewareInitiator = MiddlewareInitiator::getInstance();
+        $middlewareInitiator->initConfig(Config::get('middleware'));
+        $middlewareInitiator->initExtendFilters($this->extendFilters);
+        $middlewareInitiator->initExtendTerminators($this->extendTerminators);
     }
-} 
+}

@@ -25,6 +25,8 @@ class MiddlewareManager
     use Singleton;
 
     private $config = null;
+    private $extendFilters = [];
+    private $extendTerminators = [];
 
     public function optimize()
     {
@@ -34,6 +36,16 @@ class MiddlewareManager
     public function setConfig($config)
     {
         $this->config = $config;
+    }
+
+    public function setExtendFilters(array $extendFilters)
+    {
+        $this->extendFilters = $extendFilters;
+    }
+
+    public function setExtendTerminators(array $extendTerminators)
+    {
+        $this->extendTerminators = $extendTerminators;
     }
 
     /**
@@ -124,7 +136,7 @@ class MiddlewareManager
         $baseFilters = [
 
         ];
-        return array_merge($filters, $baseFilters);
+        return array_merge($filters, $this->extendFilters, $baseFilters);
     }
 
     private function addBaseTerminators($terminators)
@@ -132,6 +144,6 @@ class MiddlewareManager
         $baseTerminators = [
             \Zan\Framework\Network\Server\Middleware\WorkerTerminator::class,
         ];
-        return array_merge($terminators, $baseTerminators);
+        return array_merge($terminators, $this->extendTerminators, $baseTerminators);
     }
 }
