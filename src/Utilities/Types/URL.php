@@ -8,6 +8,7 @@
 namespace Zan\Framework\Utilities\Types;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Sdk\Cdn\Qiniu;
 
 class URL
@@ -175,6 +176,9 @@ class URL
         return $prefix . '?' . http_build_query($pMap);
     }
 
+    public function redirect($url,$code=302){
+        return  new RedirectResponse($url,$code);
+    }
 
     /**
      * check the scheme is valid
