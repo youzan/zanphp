@@ -28,6 +28,8 @@ class Client implements Async
 
     private $params;
 
+    private $format = 'yar';
+
 
     private function __construct($host, $port)
     {
@@ -35,7 +37,7 @@ class Client implements Async
         $this->port = $port;
     }
 
-    public static function call($api, $params = [], $method = 'POST')
+    public static function call($api, $params = [],$callback = null, $method = 'POST',$format='yar')
     {
         $apiConfig = self::getApiConfig($api);
         $params = self::filterParams($params, $apiConfig['type']);
@@ -46,6 +48,7 @@ class Client implements Async
         $client->setMethod($method);
         $client->setUri($api);
         $client->setParams($params);
+        $client->setFormat($format);
 
         yield $client->build();
     }
@@ -82,6 +85,9 @@ class Client implements Async
        $this->params = $params;
     }
 
+    private function setFormat($format){
+        $this->format = $format;
+    }
     private function build()
     {
         $this->httpClient = new HClient($this->host, $this->port);
