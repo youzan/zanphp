@@ -24,6 +24,10 @@ class KV
     private static $_instance = null;
 
 
+    /**
+     * @param $namespace
+     * @return $this
+     */
     final public static function getInstance($namespace)
     {
         if (null === self::$_instance[$namespace]) {
@@ -60,6 +64,20 @@ class KV
         yield $kv->set($key, $value, $ttl);
     }
 
+    public function setList($key, array $value, $ttl = 0)
+    {
+        $conn = (yield $this->getConnection());
+        $kv = new KVStore($this->namespace, $this->setName, $conn);
+        yield $kv->setList($key, $value, $ttl);
+    }
+
+    public function setMap($key, array $value, $ttl = 0)
+    {
+        $conn = (yield $this->getConnection());
+        $kv = new KVStore($this->namespace, $this->setName, $conn);
+        yield $kv->setMap($key, $value, $ttl);
+    }
+
     /**
      * @param $key
      * @return \Generator
@@ -68,7 +86,6 @@ class KV
     public function get($key)
     {
         $conn = (yield $this->getConnection());
-
         $kv = new KVStore($this->namespace, $this->setName, $conn);
         yield $kv->get($key);
     }

@@ -2,7 +2,9 @@
 
 namespace Zan\Framework\Network\Http\Response;
 
-class RedirectResponse extends BaseRedirectResponse
+use Zan\Framework\Contract\Network\Response as ResponseContract;
+
+class RedirectResponse extends BaseRedirectResponse implements ResponseContract
 {
     use ResponseTrait;
 }

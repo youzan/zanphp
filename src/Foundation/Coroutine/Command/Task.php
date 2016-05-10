@@ -178,10 +178,30 @@ function cookieSet($key, $value = null, $expire = 0, $path = null, $domain = nul
     });
 }
 
+function sessionGet($key)
+{
+    return new SysCall(function (Task $task) use ($key) {
+        $context = $task->getContext();
+        $session = $context->get('session');
+        $value = null;
+        if ($session) {
+            $value = $session->get($key);
+        }
+        $task->send($value);
+        return Signal::TASK_CONTINUE;
+    });
+}
 
-
-
-
-
-
-
+function sessionSet($key, $value = null)
+{
+    return new SysCall(function (Task $task) use ($key, $value) {
+        $context = $task->getContext();
+        $session = $context->get('session');
+        $ret = false;
+        if ($session) {
+            $ret = $session->set($key, $value);
+        }
+        $task->send($ret);
+        return Signal::TASK_CONTINUE;
+    });
+}

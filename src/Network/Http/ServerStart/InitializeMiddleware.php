@@ -15,10 +15,12 @@ class InitializeMiddleware
 {
     private $extendFilters = [
         //'filter1', 'filter2'
+        \Zan\Framework\Network\Http\Middleware\SessionFilter::class,
     ];
 
     private $extendTerminators = [
          //'terminator1', 'terminator2'
+        \Zan\Framework\Network\Http\Middleware\SessionTerminator::class,
     ];
 
     /**
