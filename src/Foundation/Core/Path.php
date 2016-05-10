@@ -22,8 +22,8 @@ class Path {
     const DEFAULT_ROUTING_PATH  = 'init/routing';
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
-    const CONFIG_PATH_CONFIG_KEY  = 'path.routing';
-    const SQL_PATH_CONFIG_KEY     = 'path.config';
+    const CONFIG_PATH_CONFIG_KEY  = 'path.config';
+    const SQL_PATH_CONFIG_KEY     = 'path.sql';
     const LOG_PATH_CONFIG_KEY     = 'path.log';
     const CACHE_PATH_CONFIG_KEY   = 'path.cache';
     const MODEL_PATH_CONFIG_KEY   = 'path.model';
@@ -43,7 +43,7 @@ class Path {
     {
         self::setRootPath($rootPath);
         self::setOtherPathes();
-        //self::setInConfig();
+        self::setInConfig();
     }
 
     public static function getRootPath()

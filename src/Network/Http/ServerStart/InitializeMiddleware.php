@@ -14,11 +14,11 @@ use Zan\Framework\Foundation\Core\Config;
 class InitializeMiddleware
 {
     private $extendFilters = [
-        'filter1', 'filter2'
+        //'filter1', 'filter2'
     ];
 
     private $extendTerminators = [
-         'terminator1', 'terminator2'
+         //'terminator1', 'terminator2'
     ];
 
     /**

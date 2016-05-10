@@ -8,7 +8,7 @@ namespace Zan\Framework\Network\Http\Routing;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Dir;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-use Zan\Framework\Foundation\Core\Path;
+use Zan\Framework\Foundation\Core\Config;
 
 class UrlRule {
 
@@ -18,7 +18,7 @@ class UrlRule {
 
     public static function loadRules()
     {
-        $routeFiles = Dir::glob(Path::getRoutingPath(), '*.routing.php');
+        $routeFiles = Dir::glob(Config::get('path.routing'), '*.routing.php');
 
         if (!$routeFiles) return false;
 
