@@ -23,6 +23,10 @@ class KV
     private static $_instance = null;
 
 
+    /**
+     * @param $namespace
+     * @return $this
+     */
     final public static function getInstance($namespace)
     {
         if (null === self::$_instance[$namespace]) {

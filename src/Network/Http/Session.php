@@ -17,48 +17,65 @@ use Zan\Framework\Utilities\Encrpt\Uuid;
 class Session
 {
     const YZ_SESSION_KEY = '__yz_session_id';
-    const CONFIG_KEY = 'session';
+    const CONFIG_KEY = 'server.session';
 
     private $request;
     private $cookie;
     private $session_id;
+    private $session_map = array();
     private $config;
     private $kv;
     private $ttl;
+    private $isChanged = false;
 
     public function __construct(Request $request, $cookie)
     {
         $this->config = Config::get(self::CONFIG_KEY);
-        if (!$this->config['run']) {
-            return;
-        }
 
         $this->request = $request;
         $this->cookie = $cookie;
-        $this->kv = KV::getInstance($this->config['kv_name']);
+        $this->kv = KV::getInstance($this->config['kv']);
         $this->ttl = $this->config['ttl'];
 
-        $this->init();
     }
 
-    private function init()
+    public function init()
     {
-        $session_id = $this->request->cookie(self::YZ_SESSION_KEY);
-        if (isset($session_id) && !empty($session_id)) {
+        if (!$this->config['run']) {
+            yield false;
             return;
         }
 
-        $this->session_id = Uuid::get();
-        $this->cookie->set(self::YZ_SESSION_KEY, $this->session_id);
+        $session_id = $this->request->cookie(self::YZ_SESSION_KEY);
+        if (isset($session_id) && !empty($session_id)) {
+            $this->session_id = $session_id;
+        } else {
+            $this->session_id = Uuid::get();
+            $this->cookie->set(self::YZ_SESSION_KEY, $this->session_id);
+        }
+
+        $session = (yield $this->kv->get($this->session_id));
+        if ($session) {
+            $this->session_map = unserialize($session);
+        }
+        yield true;
     }
 
     public function set($key, $value)
     {
-        //yield $this->kv->set($key, $value, $this->ttl);
+        $this->session_map[$key] = $value;
+        $this->isChanged = true;
+        return true;
     }
 
-    public function get()
+    public function get($key)
     {
+        return isset($this->session_map[$key]) ? $this->session_map[$key] : null;
+    }
 
+    public function writeBack() {
+        if ($this->isChanged) {
+            yield $this->kv->set($this->session_id, serialize($this->session_map), $this->ttl);
+        }
     }
 }
