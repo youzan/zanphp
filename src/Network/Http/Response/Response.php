@@ -6,8 +6,9 @@ use Exception;
 use ArrayObject;
 use JsonSerializable;
 use Zan\Framework\Contract\Foundation\Jsonable;
+use Zan\Framework\Contract\Network\Response as ResponseContract;
 
-class Response extends BaseResponse
+class Response extends BaseResponse implements ResponseContract
 {
     use ResponseTrait;
 
