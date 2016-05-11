@@ -16,7 +16,7 @@ use Zan\Framework\Utilities\Encrpt\Uuid;
 
 class Session
 {
-    const YZ_SESSION_KEY = '__yz_session_id';
+    const YZ_SESSION_KEY = 'KDTSESSIONID';
     const CONFIG_KEY = 'server.session';
 
     private $request;
@@ -71,6 +71,30 @@ class Session
     public function get($key)
     {
         return isset($this->session_map[$key]) ? $this->session_map[$key] : null;
+    }
+
+    public function delete($key)
+    {
+        unset($this->session_map[$key]);
+        $this->isChanged = true;
+        return true;
+    }
+
+    public function destory()
+    {
+        $ret = (yield $this->kv->remove($this->session_id));
+        if (!$ret) {
+            yield false;
+            return;
+        }
+        $this->cookie->set($this->session_id, null, time() - 3600);
+        $this->isChanged = false;
+        yield true;
+    }
+
+    public function getSessionId()
+    {
+        return $this->session_id;
     }
 
     public function writeBack() {
