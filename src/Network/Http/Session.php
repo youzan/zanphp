@@ -18,6 +18,7 @@ class Session
 {
     const YZ_SESSION_KEY = 'KDTSESSIONID';
     const CONFIG_KEY = 'server.session';
+    const SESSION_PREFIX = 'YZ_SESSION:';
 
     private $request;
     private $cookie;
@@ -52,9 +53,11 @@ class Session
         } else {
             $this->session_id = Uuid::get();
             $this->cookie->set(self::YZ_SESSION_KEY, $this->session_id);
+            yield true;
+            return;
         }
 
-        $session = (yield $this->kv->get($this->session_id));
+        $session = (yield $this->kv->get(self::SESSION_PREFIX.$this->session_id));
         if ($session) {
             $this->session_map = unserialize($session);
         }
@@ -82,7 +85,7 @@ class Session
 
     public function destory()
     {
-        $ret = (yield $this->kv->remove($this->session_id));
+        $ret = (yield $this->kv->remove(self::SESSION_PREFIX . $this->session_id));
         if (!$ret) {
             yield false;
             return;
@@ -99,7 +102,7 @@ class Session
 
     public function writeBack() {
         if ($this->isChanged) {
-            yield $this->kv->set($this->session_id, serialize($this->session_map), $this->ttl);
+            yield $this->kv->set(self::SESSION_PREFIX . $this->session_id, serialize($this->session_map), $this->ttl);
         }
     }
 }
