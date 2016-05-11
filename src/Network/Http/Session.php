@@ -16,7 +16,7 @@ use Zan\Framework\Utilities\Encrpt\Uuid;
 
 class Session
 {
-    const YZ_SESSION_KEY = '__yz_session_id';
+    const YZ_SESSION_KEY = 'KDTSESSIONID';
     const CONFIG_KEY = 'server.session';
 
     private $request;
