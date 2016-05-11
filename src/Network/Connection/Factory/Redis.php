@@ -10,6 +10,8 @@
 namespace Zan\Framework\Network\Connection\Factory;
 
 use Zan\Framework\Contract\Network\ConnectionFactory;
+use \Zan\Framework\Network\Connection\Driver\Redis as Client;
+use Zan\Framework\Store\NoSQL\Redis\RedisClient;
 
 class Redis implements ConnectionFactory
 {
@@ -17,6 +19,7 @@ class Redis implements ConnectionFactory
      * @var array
      */
     private $config;
+    private $conn;
 
     public function __construct(array $config)
     {
@@ -25,15 +28,14 @@ class Redis implements ConnectionFactory
     
     public function create()
     {
-        
+        $this->conn = new RedisClient($this->config['server_ip'], $this->config['port']);
+        $redis = new Client();
+        $redis->setSocket($this->conn);
+        $redis->setConfig($this->config);
+        return $redis;
     }
 
     public function close()
-    {
-
-    }
-
-    public function heart()
     {
     }
 

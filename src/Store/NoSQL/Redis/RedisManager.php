@@ -16,31 +16,24 @@ class RedisManager {
 
     use Singleton;
 
-    private static $redis = null;
+    private $conn = null;
 
-//    public function __construct($serverIp='localhost', $port=6379) {
-//        self::$redis = new RedisClient($serverIp, $port);
-//    }
+    public function __construct($connection) {
+        $this->conn = $connection;
+    }
 
     public function get($key) {
         $result = new RedisResult();
-        self::$redis->get($key, [$result, 'response']);
+        $this->conn->get($key, [$result, 'response']);
 
         yield $result;
     }
 
     public function set($key, $value) {
         $result = new RedisResult();
-        self::$redis->set($key, $value, [$result, 'response']);
+        $this->conn->set($key, $value, [$result, 'response']);
 
         yield $result;
     }
-
-    public function setRedis($redis)
-    {
-        self::$redis = $redis;
-    }
-
-
 
 }
