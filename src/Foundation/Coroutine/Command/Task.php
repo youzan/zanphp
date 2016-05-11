@@ -205,3 +205,17 @@ function sessionSet($key, $value = null)
         return Signal::TASK_CONTINUE;
     });
 }
+
+function getSessionId()
+{
+    return new SysCall(function (Task $task) {
+        $context = $task->getContext();
+        $session = $context->get('session');
+        $ret = null;
+        if ($session) {
+            $ret = $session->getSessionId();
+        }
+        $task->send($ret);
+        return Signal::TASK_CONTINUE;
+    });
+}
