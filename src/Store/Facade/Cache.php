@@ -12,11 +12,17 @@ use Zan\Framework\Store\NoSQL\Redis\RedisManager;
 
 class Cache {
 
+    private $redis=null;
+
+    public function __construct($connection) {
+        $this->redis = new RedisManager($connection);
+    }
+
     public function get($key)
     {
         $realKey = Config::get($key);
         if (!empty($realKey)) {
-            $result = (yield RedisManager::getInstance()->get($realKey['key']));
+            $result = (yield $this->redis->get($realKey['key']));
             yield $result;
         }
     }
@@ -25,7 +31,7 @@ class Cache {
     {
         $realKey = Config::get($key);
         if (!empty($realKey)) {
-            $result = (yield RedisManager::getInstance()->set($realKey['key'], $value));
+            $result = (yield $this->redis->set($realKey['key'], $value));
             yield $result;
         }
     }

@@ -14,8 +14,6 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class RedisManager {
 
-    use Singleton;
-
     private $conn = null;
 
     public function __construct($connection) {
