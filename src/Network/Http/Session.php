@@ -73,6 +73,11 @@ class Session
         return isset($this->session_map[$key]) ? $this->session_map[$key] : null;
     }
 
+    public function getSessionId()
+    {
+        return $this->session_id;
+    }
+
     public function writeBack() {
         if ($this->isChanged) {
             yield $this->kv->set($this->session_id, serialize($this->session_map), $this->ttl);
