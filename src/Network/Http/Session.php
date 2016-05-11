@@ -77,7 +77,7 @@ class Session
     {
         unset($this->session_map[$key]);
         $this->isChanged = true;
-        return true;
+        yield true;
     }
 
     public function destory()
