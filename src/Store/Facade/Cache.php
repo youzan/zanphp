@@ -7,6 +7,7 @@
  */
 namespace Zan\Framework\Store\Facade;
 
+use RuntimeException;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Redis\RedisManager;
@@ -46,6 +47,9 @@ class Cache {
         $pos= strrpos($path, '.');
         $subPath = substr($path,0, $pos);
         $config = Config::get($subPath);
+        if(!isset($config['connection'])) {
+            throw new RuntimeException('connection path config not found');
+        }
         return $config['connection'];
     }
 }
