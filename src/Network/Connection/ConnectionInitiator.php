@@ -30,6 +30,7 @@ class ConnectionInitiator
         'syslog', 
         'novaClient',
         'kVStore',
+        'es',
     ];
 
     public $directory = '';
