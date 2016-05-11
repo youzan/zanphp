@@ -29,7 +29,9 @@ class InitializeMiddleware
     public function bootstrap($server)
     {
         $middlewareInitiator = MiddlewareInitiator::getInstance();
-        $middlewareInitiator->initConfig(Config::get('middleware'));
+        $middlewareConfig = Config::get('middleware');
+        $middlewareConfig = !is_array($middlewareConfig) || [] == $middlewareConfig ? [] : $middlewareConfig;
+        $middlewareInitiator->initConfig($middlewareConfig);
         $middlewareInitiator->initExtendFilters($this->extendFilters);
         $middlewareInitiator->initExtendTerminators($this->extendTerminators);
     }
