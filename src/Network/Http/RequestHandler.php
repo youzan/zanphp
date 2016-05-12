@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Http;
 
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Utilities\DesignPattern\Context;
@@ -41,6 +42,10 @@ class RequestHandler
 
         } catch (\Exception $e) {
             \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
+            //TODO: 格式化exception输出
+            if (Debug::get()) {
+                var_dump($e);
+            }
             $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
             Task::execute($coroutine, $this->context);
         }

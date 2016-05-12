@@ -17,12 +17,17 @@ use Zan\Framework\Store\NoSQL\KV\KVStore;
 class KV
 {
     const DELIMITER = '.';
+    const POOL_PREFIX = 'connection.kvstore.';
     private $namespace;
     private $setName;
 
     private static $_instance = null;
 
 
+    /**
+     * @param $namespace
+     * @return $this
+     */
     final public static function getInstance($namespace)
     {
         if (null === self::$_instance[$namespace]) {
@@ -59,6 +64,20 @@ class KV
         yield $kv->set($key, $value, $ttl);
     }
 
+    public function setList($key, array $value, $ttl = 0)
+    {
+        $conn = (yield $this->getConnection());
+        $kv = new KVStore($this->namespace, $this->setName, $conn);
+        yield $kv->setList($key, $value, $ttl);
+    }
+
+    public function setMap($key, array $value, $ttl = 0)
+    {
+        $conn = (yield $this->getConnection());
+        $kv = new KVStore($this->namespace, $this->setName, $conn);
+        yield $kv->setMap($key, $value, $ttl);
+    }
+
     /**
      * @param $key
      * @return \Generator
@@ -67,7 +86,6 @@ class KV
     public function get($key)
     {
         $conn = (yield $this->getConnection());
-
         $kv = new KVStore($this->namespace, $this->setName, $conn);
         yield $kv->get($key);
     }
@@ -91,7 +109,7 @@ class KV
      */
     public function getConnection()
     {
-        $conn = (yield ConnectionManager::getInstance()->get($this->namespace));
+        $conn = (yield ConnectionManager::getInstance()->get(self::POOL_PREFIX . $this->namespace));
         if (!$conn instanceof Connection) {
             throw new Exception('KV get connection error');
         }

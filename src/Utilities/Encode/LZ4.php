@@ -33,7 +33,7 @@ class LZ4
 
     public function isLZ4($str)
     {
-        return 0 === stripos($str, self::LZ4_PREFIX);
+        return is_string($str) && (0 === stripos($str, self::LZ4_PREFIX));
     }
 
     private function getDataSize($str)

@@ -42,7 +42,7 @@ class Pool implements ConnectionPool
     public function init()
     {
         //todo 读取配置文件
-        $initConnection = $this->poolConfig['init-connection'];
+        $initConnection = $this->poolConfig['pool']['init-connection'];
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
         for ($i=0; $i<$initConnection; $i++) {
@@ -102,7 +102,7 @@ class Pool implements ConnectionPool
         $this->activeConnection->remove($conn);
         if (count($this->freeConnection) == 1) {
             //唤醒等待事件
-            $evtName = $this->poolConfig['pool_name'] . '_free';
+            $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
         }
     }

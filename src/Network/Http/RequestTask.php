@@ -54,8 +54,6 @@ class RequestTask
     public function doRun()
     {
         $middlewareManager = MiddlewareManager::getInstance();
-        //TODO: move to server Start
-        $middlewareManager->loadConfig();
         $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
         if(null !== $response){
             yield $response->sendBy($this->swooleResponse);
@@ -70,7 +68,6 @@ class RequestTask
             yield $response->sendBy($this->swooleResponse);
         }
 
-        //yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
-        Worker::instance()->reactionRelease();
+        yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
     }
 }
