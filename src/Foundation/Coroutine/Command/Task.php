@@ -17,21 +17,12 @@ function taskSleep($ms)
     return new SysCall(function (Task $task) use ($ms) {
         \Zan\Framework\Network\Server\Timer\Timer::after($ms, function() use ($task) {
             $task->send(null);
+            $task->run();
         });
 
         return Signal::TASK_SLEEP;
     });
 }
-
-function taskWait()
-{
-    return new SysCall(function (Task $task) {
-        $task->send(null);
-
-        return Signal::TASK_WAIT;
-    });
-}
-
 
 function newTask(\Generator $gen = null)
 {
