@@ -16,21 +16,28 @@ class Cache {
 
     private static $redis=null;
 
-    public static function get($configKey, $key)
+    private static $cacheMap = null;
+
+    public static function init(array $cacheMap)
+    {
+        self::$cacheMap = $cacheMap;
+    }
+
+    public static function get($configKey, $keys)
     {
         yield self::getRedisManager($configKey);
-        $cacheKey = Config::getCache($configKey);
-        $realKey = self::getRealKey($cacheKey, $key);
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $keys);
         if (!empty($realKey)) {
             $result = (yield self::$redis->get($realKey));
             yield $result;
         }
     }
 
-    public static function  expire($configKey, $key, $expire=0)
+    public static function expire($configKey, $key, $expire=0)
     {
         yield self::getRedisManager($configKey);
-        $cacheKey = Config::getCache($configKey);
+        $cacheKey = self::getConfigCacheKey($configKey);
         $realKey = self::getRealKey($cacheKey, $key);
         if (!empty($realKey)) {
             $result = (yield self::$redis->expire($realKey, $expire));
@@ -38,11 +45,11 @@ class Cache {
         }
     }
 
-    public static function set($configKey, $value, $key)
+    public static function set($configKey, $value, $keys)
     {
         yield self::getRedisManager($configKey);
-        $cacheKey = Config::getCache($configKey);
-        $realKey = self::getRealKey($cacheKey, $key);
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $keys);
         if (!empty($realKey)) {
             $result = (yield self::$redis->set($realKey, $value, $cacheKey['exp']));
             yield $result;
@@ -76,5 +83,21 @@ class Cache {
         }
         $key = call_user_func_array('sprintf', array_merge([$format], $keys));
         return $key;
+    }
+
+    private static function getConfigCacheKey($configKey)
+    {
+        $result = self::$cacheMap;
+        $routes = explode('.',$configKey);
+        if(empty($routes)){
+            return null;
+        }
+        foreach($routes as $route){
+            if(!isset($result[$route])){
+                return null;
+            }
+            $result = &$result[$route];
+        }
+        return $result;
     }
 }
