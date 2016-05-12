@@ -34,6 +34,10 @@ class RequestHandler {
         $response = new Response($this->swooleServer, $request);
 
         try {
+            $this->context->set('request_time', Time::stamp());
+            $request_timeout = Config::get('server.request_timeout');
+            $this->context->set('request_timeout', $request_timeout);
+
             $request->decode();
             if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $data);
