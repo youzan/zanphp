@@ -16,43 +16,43 @@ class Cache {
 
     private static $redis=null;
 
-    public static function get($config, $key)
+    public static function get($configKey, $key)
     {
-        yield self::getRedisManager($config);
-        $configKey = Config::getCache($config);
-        $realKey = str_replace('%s', $key, $configKey);
+        yield self::getRedisManager($configKey);
+        $cacheKey = Config::getCache($configKey);
+        $realKey = self::getRealKey($cacheKey, $key);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->get($realKey['key']));
+            $result = (yield self::$redis->get($realKey));
             yield $result;
         }
     }
 
-    public static function  expire($config, $key, $expire=0)
+    public static function  expire($configKey, $key, $expire=0)
     {
-        yield self::getRedisManager($config);
-        $configKey = Config::getCache($config);
-        $realKey = str_replace('%s', $key, $configKey);
+        yield self::getRedisManager($configKey);
+        $cacheKey = Config::getCache($configKey);
+        $realKey = self::getRealKey($cacheKey, $key);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->expire($realKey['key'], $expire));
+            $result = (yield self::$redis->expire($realKey, $expire));
             yield $result;
         }
     }
 
-    public static function set($config, $value, $key)
+    public static function set($configKey, $value, $key)
     {
-        yield self::getRedisManager($config);
-        $configKey = Config::getCache($config);
-        $realKey = str_replace('%s', $key, $configKey);
+        yield self::getRedisManager($configKey);
+        $cacheKey = Config::getCache($configKey);
+        $realKey = self::getRealKey($cacheKey, $key);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->set($realKey['key'], $value, $realKey['exp']));
+            $result = (yield self::$redis->set($realKey, $value, $cacheKey['exp']));
             yield $result;
         }
     }
 
-    private static function getRedisConnByConfigKey($path)
+    private static function getRedisConnByConfigKey($configKey)
     {
-        $pos= strrpos($path, '.');
-        $subPath = substr($path,0, $pos);
+        $pos= strrpos($configKey, '.');
+        $subPath = substr($configKey,0, $pos);
         $config = Config::getCache($subPath);
         if(!isset($config['common'])) {
             throw new RuntimeException('connection path config not found');
@@ -60,9 +60,21 @@ class Cache {
         return $config['common']['connection'];
     }
 
-    public static function getRedisManager($config)
+    public static function getRedisManager($configKey)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::getRedisConnByConfigKey($config)));
+        $conn = (yield ConnectionManager::getInstance()->get(self::getRedisConnByConfigKey($configKey)));
         self::$redis = new RedisManager($conn);
+    }
+
+    private static function getRealKey($config, $keys){
+        $format = $config['key'];
+        if($keys === null){
+            return $format;
+        }
+        if(!is_array($keys)){
+            $keys = [$keys];
+        }
+        $key = call_user_func_array('sprintf', array_merge([$format], $keys));
+        return $key;
     }
 }

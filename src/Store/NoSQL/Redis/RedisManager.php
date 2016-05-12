@@ -26,8 +26,8 @@ class RedisManager {
     public function get($key) {
         $result = new RedisResult();
         $this->client->get($key, [$result, 'response']);
-        yield $result;
         $this->release();
+        yield $result;
     }
 
     public function expire($key, $expire=0)
@@ -38,8 +38,8 @@ class RedisManager {
         }
         $result = new RedisResult();
         $this->client->EXPIRE($key, $expire, [$result, 'response']);
-        yield $result;
         $this->release();
+        yield $result;
     }
 
     public function set($key, $value, $expire=0) {
@@ -48,8 +48,8 @@ class RedisManager {
         if ($expire >0) {
             $this->client->EXPIRE($key, $expire, [$result, 'response']);
         }
-        yield $result;
         $this->release();
+        yield $result;
     }
 
     public function release()
