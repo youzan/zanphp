@@ -55,4 +55,24 @@ class Config
     {
         self::$configMap = [];
     }
+
+    public function getCache($key)
+    {
+        $result = ConfigLoader::getInstance()->load(Path::getCachePath());
+
+        $routes = explode('.',$key);
+        if(empty($routes)){
+            return null;
+        }
+
+        foreach($routes as $route){
+            if(!isset($result[$route])){
+                return null;
+            }
+
+            $result = &$result[$route];
+        }
+
+        return $result;
+    }
 }
