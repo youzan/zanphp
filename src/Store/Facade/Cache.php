@@ -16,56 +16,88 @@ class Cache {
 
     private static $redis=null;
 
-    public static function get($config, $key)
+    private static $cacheMap = null;
+
+    public static function init(array $cacheMap)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
-        $configKey = Config::getCache($config);
-        $realKey = str_replace('%s', $key, $configKey);
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->get($realKey['key']));
-            yield $result;
-        }
-        $conn->release();
+        self::$cacheMap = $cacheMap;
     }
 
-    public static function  expire($config, $key, $expire=0)
+    public static function get($configKey, $keys)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
-        $configKey = Config::getCache($config);
-        $realKey = str_replace('%s', $key, $configKey);
+        yield self::getRedisManager($configKey);
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $keys);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->expire($realKey['key'], $expire));
+            $result = (yield self::$redis->get($realKey));
             yield $result;
         }
-        $conn->release();
     }
 
-    public static function set($config, $value, $key)
+    public static function expire($configKey, $key, $expire=0)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
-        $configKey = Config::getCache($config);
-        $realKey = str_replace('%s', $key, $configKey);
+        yield self::getRedisManager($configKey);
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $key);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->set($realKey['key'], $value, $realKey['exp']));
+            $result = (yield self::$redis->expire($realKey, $expire));
             yield $result;
         }
-        $conn->release();
     }
 
-    private static function connectionPath($path)
+    public static function set($configKey, $value, $keys)
     {
-        $pos= strrpos($path, '.');
-        $subPath = substr($path,0, $pos);
-        $config = Config::getCache($subPath);
+        yield self::getRedisManager($configKey);
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $keys);
+        if (!empty($realKey)) {
+            $result = (yield self::$redis->set($realKey, $value, $cacheKey['exp']));
+            yield $result;
+        }
+    }
+
+    private static function getRedisConnByConfigKey($configKey)
+    {
+        $pos= strrpos($configKey, '.');
+        $subPath = substr($configKey,0, $pos);
+        $config = self::getConfigCacheKey($subPath);
         if(!isset($config['common'])) {
             throw new RuntimeException('connection path config not found');
         }
         return $config['common']['connection'];
+    }
+
+    public static function getRedisManager($configKey)
+    {
+        $conn = (yield ConnectionManager::getInstance()->get(self::getRedisConnByConfigKey($configKey)));
+        self::$redis = new RedisManager($conn);
+    }
+
+    private static function getRealKey($config, $keys){
+        $format = $config['key'];
+        if($keys === null){
+            return $format;
+        }
+        if(!is_array($keys)){
+            $keys = [$keys];
+        }
+        $key = call_user_func_array('sprintf', array_merge([$format], $keys));
+        return $key;
+    }
+
+    private static function getConfigCacheKey($configKey)
+    {
+        $result = self::$cacheMap;
+        $routes = explode('.',$configKey);
+        if(empty($routes)){
+            return null;
+        }
+        foreach($routes as $route){
+            if(!isset($result[$route])){
+                return null;
+            }
+            $result = &$result[$route];
+        }
+        return $result;
     }
 }
