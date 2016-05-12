@@ -63,9 +63,9 @@ class Cache {
         $pos= strrpos($path, '.');
         $subPath = substr($path,0, $pos);
         $config = Config::getCache($subPath);
-        if(!isset($config['connection'])) {
+        if(!isset($config['common'])) {
             throw new RuntimeException('connection path config not found');
         }
-        return $config['connection'];
+        return $config['common']['connection'];
     }
 }
