@@ -16,15 +16,18 @@ class RedisManager {
 
     private $conn = null;
 
+    private $client = null;
+
     public function __construct($connection) {
         $this->conn = $connection;
+        $this->client = $connection->getSocket();
     }
 
     public function get($key) {
         $result = new RedisResult();
-        $this->conn->get($key, [$result, 'response']);
-
+        $this->client->get($key, [$result, 'response']);
         yield $result;
+        $this->release();
     }
 
     public function expire($key, $expire=0)
@@ -34,17 +37,24 @@ class RedisManager {
             return;
         }
         $result = new RedisResult();
-        $this->conn->EXPIRE($key, $expire, [$result, 'response']);
+        $this->client->EXPIRE($key, $expire, [$result, 'response']);
         yield $result;
+        $this->release();
     }
 
     public function set($key, $value, $expire=0) {
         $result = new RedisResult();
-        $this->conn->set($key, $value, [$result, 'response']);
+        $this->client->set($key, $value, [$result, 'response']);
         if ($expire >0) {
-            $this->conn->EXPIRE($key, $expire, [$result, 'response']);
+            $this->client->EXPIRE($key, $expire, [$result, 'response']);
         }
         yield $result;
+        $this->release();
+    }
+
+    public function release()
+    {
+        $this->conn->release();
     }
 
 }

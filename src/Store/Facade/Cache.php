@@ -18,47 +18,38 @@ class Cache {
 
     public static function get($config, $key)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
+        yield self::getRedisManager($config);
         $configKey = Config::getCache($config);
         $realKey = str_replace('%s', $key, $configKey);
         if (!empty($realKey)) {
             $result = (yield self::$redis->get($realKey['key']));
             yield $result;
         }
-        $conn->release();
     }
 
     public static function  expire($config, $key, $expire=0)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
+        yield self::getRedisManager($config);
         $configKey = Config::getCache($config);
         $realKey = str_replace('%s', $key, $configKey);
         if (!empty($realKey)) {
             $result = (yield self::$redis->expire($realKey['key'], $expire));
             yield $result;
         }
-        $conn->release();
     }
 
     public static function set($config, $value, $key)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
+        yield self::getRedisManager($config);
         $configKey = Config::getCache($config);
         $realKey = str_replace('%s', $key, $configKey);
         if (!empty($realKey)) {
             $result = (yield self::$redis->set($realKey['key'], $value, $realKey['exp']));
             yield $result;
         }
-        $conn->release();
     }
 
-    private static function connectionPath($path)
+    private static function getRedisConnByConfigKey($path)
     {
         $pos= strrpos($path, '.');
         $subPath = substr($path,0, $pos);
@@ -67,5 +58,11 @@ class Cache {
             throw new RuntimeException('connection path config not found');
         }
         return $config['common']['connection'];
+    }
+
+    public static function getRedisManager($config)
+    {
+        $conn = (yield ConnectionManager::getInstance()->get(self::getRedisConnByConfigKey($config)));
+        self::$redis = new RedisManager($conn);
     }
 }
