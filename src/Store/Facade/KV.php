@@ -17,6 +17,7 @@ use Zan\Framework\Store\NoSQL\KV\KVStore;
 class KV
 {
     const DELIMITER = '.';
+    const POOL_PREFIX = 'connection.kvstore.';
     private $namespace;
     private $setName;
 
@@ -108,7 +109,7 @@ class KV
      */
     public function getConnection()
     {
-        $conn = (yield ConnectionManager::getInstance()->get($this->namespace));
+        $conn = (yield ConnectionManager::getInstance()->get(self::POOL_PREFIX . $this->namespace));
         if (!$conn instanceof Connection) {
             throw new Exception('KV get connection error');
         }

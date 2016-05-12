@@ -30,48 +30,55 @@ class ConnectionInitiator
         'syslog', 
         'novaClient',
         'kVStore',
+        'es',
     ];
+
+    public $directory = '';
+
+    public $poolName='';
 
     public function __construct()
     {
     }
 
     /**
-     * @param array $config(=Config::get('connection'))
+     * @param $directory
      */
-    public function init($config, $server)
+    public function init($directory, $server)
     {
-        $connectionManager = ConnectionManager::getInstance();
-        $connectionManager->setServer($server);
-        
-        if (is_array($config)) {
+        if(!empty($directory)) {
+            $this->directory = $directory;
+            $config = Config::get($this->directory);
             $this->initConfig($config);
         }
-        
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
         $connectionManager->monitor();
     }
 
     private function initConfig($config)
     {
         if (!is_array($config)) {
-            return false; 
+            return;
         }
-        foreach ($config as $cf) {
+        foreach ($config as $k=>$cf) {
             if (!isset($cf['engine'])) {
-                if (is_array($config)) {
-                    $this->initConfig($cf);
-                }
-                continue;
-            } 
-            
-            if (empty($cf['pool'])) {
+                $this->poolName = $this->poolName . '.' . $k;
+                $this->initConfig($cf);
                 continue;
             }
-            
+            if (!isset($cf['pool']) || empty($cf['pool'])) {
+                $this->poolName = '';
+                continue;
+            }
+            //创建连接池
+            $this->poolName = $this->poolName . '.' . $k;
             $factoryType = $cf['engine'];
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
-                $this->initPool($factoryType, $cf['pool']);
+                $cf['pool']['pool_name'] = $this->directory . $this->poolName;
+                $this->initPool($factoryType, $cf);
+                $this->poolName = '';
             }
         }
     }
@@ -105,6 +112,6 @@ class ConnectionInitiator
                 break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
-        ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
+        ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
 }
