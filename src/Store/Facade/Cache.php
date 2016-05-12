@@ -29,14 +29,27 @@ class Cache {
         $conn->release();
     }
 
-    public static function set($key, $value)
+    public static function  expire($key, $expire=0)
     {
         $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($key)));
         $socket = $conn->getSocket();
         self::$redis = new RedisManager($socket);
         $realKey = Config::getCache($key);
         if (!empty($realKey)) {
-            $result = (yield self::$redis->set($realKey['key'], $value));
+            $result = (yield self::$redis->expire($realKey['key'], $expire));
+            yield $result;
+        }
+        $conn->release();
+    }
+
+    public static function set($key, $value, $expire=0)
+    {
+        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($key)));
+        $socket = $conn->getSocket();
+        self::$redis = new RedisManager($socket);
+        $realKey = Config::getCache($key);
+        if (!empty($realKey)) {
+            $result = (yield self::$redis->set($realKey['key'], $value, $expire));
             yield $result;
         }
         $conn->release();

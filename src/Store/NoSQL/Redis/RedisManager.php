@@ -27,10 +27,23 @@ class RedisManager {
         yield $result;
     }
 
-    public function set($key, $value) {
+    public function expire($key, $expire=0)
+    {
+        if ($expire<=0) {
+            yield null;
+            return;
+        }
+        $result = new RedisResult();
+        $this->conn->EXPIRE($key, $expire, [$result, 'response']);
+        yield $result;
+    }
+
+    public function set($key, $value, $expire=0) {
         $result = new RedisResult();
         $this->conn->set($key, $value, [$result, 'response']);
-
+        if ($expire >0) {
+            $this->conn->EXPIRE($key, $expire, [$result, 'response']);
+        }
         yield $result;
     }
 
