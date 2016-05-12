@@ -162,6 +162,10 @@ class Timer
         if (!is_int($interval)) {
             throw new InvalidArgumentException('interval must be a int!');
         }
+        
+        if ($interval <= 0) {
+            throw new InvalidArgumentException('interval must be greater than 0!');
+        }
     }
 
     /**
