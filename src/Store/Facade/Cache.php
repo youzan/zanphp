@@ -18,35 +18,44 @@ class Cache {
 
     public static function get($config, $key)
     {
-        self::getRedisManager($config);
+        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
+        $socket = $conn->getSocket();
+        self::$redis = new RedisManager($socket);
         $configKey = Config::getCache($config);
         $realKey = str_replace('%s', $key, $configKey);
         if (!empty($realKey)) {
             $result = (yield self::$redis->get($realKey['key']));
             yield $result;
         }
+        $conn->release();
     }
 
     public static function  expire($config, $key, $expire=0)
     {
-        self::getRedisManager($config);
+        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
+        $socket = $conn->getSocket();
+        self::$redis = new RedisManager($socket);
         $configKey = Config::getCache($config);
         $realKey = str_replace('%s', $key, $configKey);
         if (!empty($realKey)) {
             $result = (yield self::$redis->expire($realKey['key'], $expire));
             yield $result;
         }
+        $conn->release();
     }
 
     public static function set($config, $value, $key)
     {
-        self::getRedisManager($config);
+        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
+        $socket = $conn->getSocket();
+        self::$redis = new RedisManager($socket);
         $configKey = Config::getCache($config);
         $realKey = str_replace('%s', $key, $configKey);
         if (!empty($realKey)) {
             $result = (yield self::$redis->set($realKey['key'], $value, $realKey['exp']));
             yield $result;
         }
+        $conn->release();
     }
 
     private static function connectionPath($path)
@@ -58,13 +67,5 @@ class Cache {
             throw new RuntimeException('connection path config not found');
         }
         return $config['connection'];
-    }
-
-    private static function getRedisManager($config)
-    {
-        $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($config)));
-        $socket = $conn->getSocket();
-        self::$redis = new RedisManager($socket);
-        $conn->release();
     }
 }
