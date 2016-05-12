@@ -21,7 +21,7 @@ class Cache {
         $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($key)));
         $socket = $conn->getSocket();
         self::$redis = new RedisManager($socket);
-        $realKey = Config::get($key);
+        $realKey = Config::getCache($key);
         if (!empty($realKey)) {
             $result = (yield self::$redis->get($realKey['key']));
             yield $result;
@@ -34,7 +34,7 @@ class Cache {
         $conn = (yield ConnectionManager::getInstance()->get(self::connectionPath($key)));
         $socket = $conn->getSocket();
         self::$redis = new RedisManager($socket);
-        $realKey = Config::get($key);
+        $realKey = Config::getCache($key);
         if (!empty($realKey)) {
             $result = (yield self::$redis->set($realKey['key'], $value));
             yield $result;
@@ -46,7 +46,7 @@ class Cache {
     {
         $pos= strrpos($path, '.');
         $subPath = substr($path,0, $pos);
-        $config = Config::get($subPath);
+        $config = Config::getCache($subPath);
         if(!isset($config['connection'])) {
             throw new RuntimeException('connection path config not found');
         }
