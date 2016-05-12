@@ -28,7 +28,7 @@ class Redis implements ConnectionFactory
     
     public function create()
     {
-        $this->conn = new RedisClient($this->config['server_ip'], $this->config['port']);
+        $this->conn = new RedisClient($this->config['host'], $this->config['port']);
         $redis = new Client();
         $redis->setSocket($this->conn);
         $redis->setConfig($this->config);
