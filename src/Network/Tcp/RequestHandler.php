@@ -3,8 +3,11 @@
 namespace Zan\Framework\Network\Tcp;
 
 use \swoole_server as SwooleServer;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Types\Time;
 
 class RequestHandler {
     private $swooleServer = null;
@@ -32,6 +35,11 @@ class RequestHandler {
         $request = new Request($this->fd, $this->fromId, $data);
         $response = new Response($this->swooleServer, $request);
 
+        $this->context->set('request_time', Time::stamp());
+        $request_timeout = Config::get('server.request_timeout');
+        $request_timeout = $request_timeout ? $request_timeout : 30;
+        $this->context->set('request_timeout', $request_timeout);
+
         try {
             $request->decode();
             if ($request->getIsHeartBeat()) {
@@ -45,6 +53,10 @@ class RequestHandler {
             Task::execute($coroutine, $this->context);
         } catch(\Exception $e) {
             \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
+            //TODO: 格式化exception输出
+            if (Debug::get()) {
+                var_dump($e);
+            }
             $response->sendException($e);
             return;
         }

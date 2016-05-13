@@ -8,9 +8,13 @@
 
 namespace Zan\Framework\Network\Common;
 
+use Zan\Framework\Utilities\DesignPattern\Singleton;
+
 
 
 class RedisManager {
+
+    use Singleton;
 
     private static $redis = null;
 

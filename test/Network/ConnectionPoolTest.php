@@ -23,7 +23,7 @@ class ConnectionPoolTest extends TaskTest {
 
     public function taskPoolWork()
     {
-        ConnectionInitiator::getInstance()->init([]);
+        ConnectionInitiator::getInstance()->init([], null);
 
 
         $pool = (yield ConnectionManager::getInstance()->get('pifa'));

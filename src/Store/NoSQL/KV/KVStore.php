@@ -57,6 +57,40 @@ class KVStore implements Async
             [$this, 'writeCallBack'],
             $this->policy
         );
+        
+        yield $this;
+    }
+
+    public function setList($key, array $value, $ttl = 0)
+    {
+        $this->policy['ttl'] = $ttl;
+
+        $this->conn->getSocket()->put_list_async(
+            $this->namespace,
+            $this->setName,
+            $key,
+            self::DEFAULT_BIN_NAME,
+            $value,
+            [$this, 'writeCallBack'],
+            $this->policy
+        );
+
+        yield $this;
+    }
+
+    public function setMap($key, array $value, $ttl = 0)
+    {
+        $this->policy['ttl'] = $ttl;
+
+        $this->conn->getSocket()->put_map_async(
+            $this->namespace,
+            $this->setName,
+            $key,
+            self::DEFAULT_BIN_NAME,
+            $value,
+            [$this, 'writeCallBack'],
+            $this->policy
+        );
 
         yield $this;
     }
@@ -70,6 +104,7 @@ class KVStore implements Async
             [$this, 'readCallBack'],
             $this->policy
         );
+
         yield $this;
     }
 
@@ -82,6 +117,7 @@ class KVStore implements Async
             [$this, 'writeCallBack'],
             $this->policy
         );
+
         yield $this;
     }
 
@@ -102,6 +138,7 @@ class KVStore implements Async
         if ($err != self::AEROSPIKE_OK) {
             //TODO: 日志记录err
             call_user_func($this->callback, null);
+            return;
         }
 
         $LZ4 = LZ4::getInstance();
