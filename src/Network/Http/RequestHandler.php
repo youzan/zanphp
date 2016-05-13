@@ -40,6 +40,7 @@ class RequestHandler
 
             $this->context->set('request_time', Time::stamp());
             $request_timeout = Config::get('server.request_timeout');
+            $request_timeout = $request_timeout ? $request_timeout : 30;
             $this->context->set('request_timeout', $request_timeout);
 
             $task = new RequestTask($request, $swooleResponse, $this->context);
