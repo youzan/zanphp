@@ -79,7 +79,7 @@ class Scheduler
         $request_time = $context->get('request_time');
         $request_timeout = $context->get('request_timeout');
         $now_time = Time::stamp();
-        
+
         //超时处理
         if (($now_time - $request_time > $request_timeout) && !$exception) {
             $exception = new ServerTimeoutException('Maximum execution time of '
