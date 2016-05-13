@@ -71,7 +71,7 @@ class Logger
                 return new LoggerFile($this->config);
                 break;
             default:
-                throw new ZanException('Cannot support this pattern');
+                throw new InvalidArgumentException('Cannot support this pattern');
         }
     }
 
