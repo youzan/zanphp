@@ -34,6 +34,12 @@ class HttpController extends Controller
         $this->jsVar->setShare('desc', trim($desc));
     }
 
+    public function share(array $shareItems){
+        foreach($shareItems as $key=>$item){
+            $this->jsVar->setShare($key, $item);
+        }
+    }
+
     public function setDomains(array $domains)
     {
         $this->jsVar->setDomain($domains);
