@@ -96,6 +96,7 @@ class RequestHandler
     {
         $this->task->setStatus(Signal::TASK_KILLED);
         $response = new InternalErrorResponse('服务器超时', 504);
+        $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);
         $this->event->fire($this->getRequestFinishJobId());
