@@ -6,6 +6,8 @@ namespace Zan\Framework\Testing;
 
 use Zan\Framework\Foundation\Coroutine\Event;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Types\Time;
 
 class TaskTest extends UnitTest
 {
@@ -26,7 +28,11 @@ class TaskTest extends UnitTest
 
         $this->scanTasks(); 
         $taskCoroutine = $this->runTaskTests();
-        Task::execute($taskCoroutine);
+        $context = new Context();
+        $context->set('request_time', Time::stamp());
+        $request_timeout = 30;
+        $context->set('request_timeout', $request_timeout);
+        Task::execute($taskCoroutine, $context);
     }
     
     protected function scanTasks()

@@ -36,6 +36,7 @@ class RequestTask {
         $dispatcher = new Dispatcher();
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
         $this->output($result);
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
     }
 
     private function output($execResult)

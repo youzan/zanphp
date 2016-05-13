@@ -27,6 +27,7 @@ class ConfigLoader
             }
             if(!$ignoreStructure){
                 $keyString = substr($configFile, strlen($path), -4);
+                $loadedConfig = $this->handleCommon($loadedConfig);
                 $loadedConfig = Arr::createTreeByList(explode('/',$keyString),$loadedConfig);
             }
 
@@ -59,5 +60,16 @@ class ConfigLoader
         return $configMap;
     }
 
-
+    private function handleCommon(array $config)
+    {
+        $common = array();
+        foreach ($config as $k => $v) {
+            if ($k == 'common') {
+                $common = $v;
+            } else if ($common) {
+                $config[$k] = Arr::merge($common, $config[$k]);
+            }
+        }
+        return $config;
+    }
 }

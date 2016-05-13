@@ -3,7 +3,8 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\RunMode;
-use Zan\Framework\Network\Http\Client\HttpClient as HClient;
+use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
 class Client implements Async
@@ -28,6 +29,8 @@ class Client implements Async
 
     private $params;
 
+    private $format = 'yar';
+
 
     private function __construct($host, $port)
     {
@@ -35,7 +38,7 @@ class Client implements Async
         $this->port = $port;
     }
 
-    public static function call($api, $params = [], $method = 'POST')
+    public static function call($api, $params = [],$callback = null, $method = 'POST',$format='yar')
     {
         $apiConfig = self::getApiConfig($api);
         $params = self::filterParams($params, $apiConfig['type']);
@@ -46,6 +49,7 @@ class Client implements Async
         $client->setMethod($method);
         $client->setUri($api);
         $client->setParams($params);
+        $client->setFormat($format);
 
         yield $client->build();
     }
@@ -82,6 +86,9 @@ class Client implements Async
        $this->params = $params;
     }
 
+    private function setFormat($format){
+        $this->format = $format;
+    }
     private function build()
     {
         $this->httpClient = new HClient($this->host, $this->port);
@@ -114,6 +121,13 @@ class Client implements Async
         return function($response) use ($callback) {
             $jsonData = json_decode($response, true);
             $response = $jsonData ? $jsonData : $response;
+            if($this->format =='yar' && $this->type == self::PHP_TYPE && isset($response['code'])){
+                if($response['code']){
+                    $msg = $response['msg'] ? $response['msg'] : $response['data'];
+                    throw new ZanException($msg,$response['code']);
+                }
+                $response = $response['data'];
+            }
             call_user_func($callback, $response);
         };
     }

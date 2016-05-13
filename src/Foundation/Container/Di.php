@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation\Container;
 
 use RuntimeException;
+use Zan\Framework\Testing\Stub;
 
 class Di
 {
@@ -21,6 +22,21 @@ class Di
     public static function resolveFacadeInstance(Container $instance)
     {
         static::$instance = $instance;
+    }
+
+    /**
+     * @param $abstract
+     * @param array $parameters
+     * @param bool $shared
+     * @return mixed|object
+     */
+    public static function make($abstract, array $parameters = [], $shared = false) {
+        return static::$instance->make($abstract, $parameters, $shared);
+    }
+    
+    public static function addStub(Stub $stub)
+    {
+        return static::$instance->addStub($stub);
     }
 
     /**

@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Connection\Factory\KVStore;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
@@ -22,47 +23,62 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    private $engineMap =['mysqli', 'http', 'redis', 'syslog', 'novaClient'];
+    private $engineMap = [
+        'mysqli', 
+        'http', 
+        'redis', 
+        'syslog', 
+        'novaClient',
+        'kVStore',
+        'es',
+    ];
 
+    public $directory = '';
+
+    public $poolName='';
 
     public function __construct()
     {
     }
 
     /**
-     * @param array $config(=Config::get('connection'))
+     * @param $directory
      */
-    public function init($config)
+    public function init($directory, $server)
     {
-        //读取配置文件
-        if (is_array($config)) {
+        if(!empty($directory)) {
+            $this->directory = $directory;
+            $config = Config::get($this->directory);
             $this->initConfig($config);
         }
-
-
+        $connectionManager = ConnectionManager::getInstance();
+        $connectionManager->setServer($server);
+        $connectionManager->monitor();
     }
-
 
     private function initConfig($config)
     {
-        if (is_array($config)) {
-            foreach ($config as $cf) {
-                if (!isset($cf['engine'])) {
-                    if (is_array($config)) {
-                        $this->initConfig($cf);
-                    }
-                } else {
-                    if (empty($cf['pool'])) {
-                        continue;
-                    }
-                    //创建连接池
-                    $factoryType = $cf['engine'];
-                    if (in_array($factoryType, $this->engineMap)) {
-                        $factoryType = ucfirst($factoryType);
-                        $this->initPool($factoryType, $cf['pool']);
-                    }
-                }
-
+        if (!is_array($config)) {
+            return;
+        }
+        foreach ($config as $k=>$cf) {
+            if (!isset($cf['engine'])) {
+                $this->poolName = $this->poolName . '.' . $k;
+                $this->initConfig($cf);
+                continue;
+            }
+            if (!isset($cf['pool']) || empty($cf['pool'])) {
+                $this->poolName = '';
+                continue;
+            }
+            //创建连接池
+            $this->poolName = $this->poolName . '.' . $k;
+            $factoryType = $cf['engine'];
+            if (in_array($factoryType, $this->engineMap)) {
+                $factoryType = ucfirst($factoryType);
+                $cf['pool']['pool_name'] = $this->directory . $this->poolName;
+                $this->initPool($factoryType, $cf);
+                $this->poolName = '';
             }
         }
     }
@@ -89,46 +105,13 @@ class ConnectionInitiator
             case 'NovaClient':
                 $factory = new NovaClient($config);
                 break;
+            case 'KVStore':
+                $factory = new KVStore($config);
+                break;
             default:
                 break;
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
-        ConnectionManager::getInstance()->addPool($config['pool_name'], $connectionPool);
+        ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
-
-    private function configFile()
-    {
-        $config = [
-            'mysql' => [
-                'default_write' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [
-                        'pool_name' => 'pifa',
-                        'maximum-connection-count' => '50',
-                        'minimum-connection-count' => '10',
-                        'keeping-sleep-time' => '10',
-                        'init-connection'=> '10',
-                        'host' => '192.168.66.202',
-                        'user' => 'test_koudaitong',
-                        'password' => 'nPMj9WWpZr4zNmjz',
-                        'database' => 'pf',
-                        'port' => '3306'
-                    ],
-                ],
-                'default_read' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [],
-                ],
-            ],
-            'http' => [
-                'default' => [
-                    'engine' => 'http',
-                    'pool' => []
-                ]
-            ]
-        ];
-        return $config;
-    }
-
-
 }
