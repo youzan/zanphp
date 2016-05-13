@@ -6,6 +6,7 @@ use \swoole_server as SwooleServer;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -44,7 +45,7 @@ class RequestHandler {
             $request->decode();
             if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $data);
-                \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
+                Worker::instance()->reactionRelease();
                 return;
             }
             
@@ -52,7 +53,7 @@ class RequestHandler {
             $coroutine = $requestTask->run();
             Task::execute($coroutine, $this->context);
         } catch(\Exception $e) {
-            \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionRelease();
+            Worker::instance()->reactionRelease();
             //TODO: 格式化exception输出
             if (Debug::get()) {
                 var_dump($e);

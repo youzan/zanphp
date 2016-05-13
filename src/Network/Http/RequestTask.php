@@ -9,7 +9,10 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Http\Response\BaseResponse;
+use Zan\Framework\Network\Http\Response\InternalErrorResponse;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Http\Dispatcher;
 use Zan\Framework\Utilities\DesignPattern\Context;
@@ -34,11 +37,14 @@ class RequestTask
      */
     private $context;
 
-    public function __construct(Request $request, SwooleHttpResponse $swooleResponse, Context $context)
+    private $middleWareManager;
+
+    public function __construct(Request $request, SwooleHttpResponse $swooleResponse, Context $context, MiddlewareManager $middlewareManager)
     {
         $this->request = $request;
         $this->swooleResponse = $swooleResponse;
         $this->context = $context;
+        $this->middleWareManager = $middlewareManager;
     }
 
     public function run()
@@ -53,9 +59,9 @@ class RequestTask
 
     public function doRun()
     {
-        $middlewareManager = MiddlewareManager::getInstance();
-        $response = (yield $middlewareManager->executeFilters($this->request, $this->context));
+        $response = (yield $this->middleWareManager->executeFilters());
         if(null !== $response){
+            $this->context->set('response', $response);
             yield $response->sendBy($this->swooleResponse);
             return;
         }
@@ -63,11 +69,12 @@ class RequestTask
         $Dispatcher = Di::make(Dispatcher::class);
         $response = (yield $Dispatcher->dispatch($this->request, $this->context));
         if (null === $response) {
-            throw new ZanException('');
-        } else {
-            yield $response->sendBy($this->swooleResponse);
+            $response = new InternalErrorResponse('网络错误', BaseResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
 
-        yield $middlewareManager->executeTerminators($this->request, $response, $this->context);
+        $this->context->set('response', $response);
+        yield $response->sendBy($this->swooleResponse);
+
+        $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
     }
 }
