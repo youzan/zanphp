@@ -4,11 +4,13 @@ namespace Zan\Framework\Network\Http;
 
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Utilities\Types\Time;
 
 class RequestHandler
 {
@@ -35,6 +37,11 @@ class RequestHandler
 
             $cookie = new Cookie($request, $swooleResponse);
             $this->context->set('cookie', $cookie);
+
+            $this->context->set('request_time', Time::stamp());
+            $request_timeout = Config::get('server.request_timeout');
+            $request_timeout = $request_timeout ? $request_timeout : 30;
+            $this->context->set('request_timeout', $request_timeout);
 
             $task = new RequestTask($request, $swooleResponse, $this->context);
             $coroutine = $task->run();

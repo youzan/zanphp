@@ -29,4 +29,9 @@ class Time
         return date($format,$timeStamp);
     }
 
+    public static function stamp()
+    {
+        return self::current(true);
+    }
+
 }
