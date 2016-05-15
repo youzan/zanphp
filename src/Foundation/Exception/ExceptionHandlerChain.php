@@ -50,7 +50,7 @@ class ExceptionHandlerChain
             }
         }
         if (is_a($status, BaseResponse::class)) {
-            $swooleResponse = (yield getContext('response'));
+            $swooleResponse = (yield getContext('swoole_response'));
             yield $status->sendBy($swooleResponse);
             return;
         }

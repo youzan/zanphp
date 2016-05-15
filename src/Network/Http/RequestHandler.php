@@ -9,6 +9,7 @@ use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\InternalErrorResponse;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
@@ -24,6 +25,8 @@ class RequestHandler
     private $middleWareManager = null;
     private $task = null;
     private $event = null;
+
+    const DEFAULT_TIMEOUT = 30 * 1000;
 
     public function __construct()
     {
@@ -79,7 +82,7 @@ class RequestHandler
 
         $this->context->set('request_time', Time::stamp());
         $request_timeout = Config::get('server.request_timeout');
-        $request_timeout = $request_timeout ? $request_timeout : 30;
+        $request_timeout = $request_timeout ? $request_timeout : self::DEFAULT_TIMEOUT;
         $this->context->set('request_timeout', $request_timeout);
 
         $this->context->set('request_end_event_name', $this->getRequestFinishJobId());
@@ -95,7 +98,7 @@ class RequestHandler
     public function handleTimeout()
     {
         $this->task->setStatus(Signal::TASK_KILLED);
-        $response = new InternalErrorResponse('服务器超时', 504);
+        $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
         $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);
