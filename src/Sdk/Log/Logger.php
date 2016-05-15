@@ -27,7 +27,7 @@ class Logger
 
     public function __construct($config){
         $this->configParser($config);
-        $this->adapter();
+        return $this->adapter();
     }
 
     /**
@@ -65,24 +65,25 @@ class Logger
         $factory = $this->config['factory'];
         switch($factory){
             case "syslog":
-                self::$instance = new LoggerSystem($this->config);
+                return new LoggerSystem($this->config);
                 break;
             case "log":
-                self::$instance = new LoggerFile($this->config);
+                return new LoggerFile($this->config);
                 break;
             default:
-                throw new ZanException('Cannot support this pattern');
+                throw new InvalidArgumentException('Cannot support this pattern');
         }
     }
 
     /**
-     * 单例
+     * 多实例
      * @return LoggerInterface
      */
-    public static function getInstance($config){
-        if (!self::$instance) {
-           new self($config);
+    public static function getInstance($key){
+        if (isset(self::$instance[$key])) {
+           return self::$instance[$key];
         }
-        return self::$instance;
+        self::$instance[$key] = new self($key);
+        return self::$instance[$key];
     }
 }
