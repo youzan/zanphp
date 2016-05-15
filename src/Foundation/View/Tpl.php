@@ -56,6 +56,7 @@ class Tpl
             return $path;
         }
         $pathArr = $this->_parsePath($path);
+        $pathArr = array_map([$this, '_pathUcfirst'], $pathArr);
         $module = array_shift($pathArr);
         $fullPath = $this->_rootPath . DIRECTORY_SEPARATOR .
                 'src' . DIRECTORY_SEPARATOR .
