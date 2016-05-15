@@ -13,6 +13,7 @@ class LoggerBase {
     protected $module;
     protected $type;
     protected $level;
+    protected $leveNum = 0;
     protected $path;
     protected $logMap =[
         'debug'     => 0,
@@ -34,6 +35,7 @@ class LoggerBase {
         $this->module   = $config['module'];
         $this->type     = $config['type'];
         $this->level    = $config['level'];
+        $this->levelNum = $this->getLevelNum($this->level);
         $this->path     = $config['path'];
     }
 
@@ -43,9 +45,8 @@ class LoggerBase {
      * @return bool
      */
     public function checkLevel($funcLevel){
-        $cofingLevelNum = $this->getLevelNum($this->level);
         $funcLevelNum   = $this->getLevelNum($funcLevel);
-        if($cofingLevelNum >= $funcLevelNum){
+        if($this->leveNum >= $funcLevelNum){
             return true;
         }
         return false;
