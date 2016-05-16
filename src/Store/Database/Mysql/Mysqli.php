@@ -9,6 +9,12 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliSqlSyntaxException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 
 class Mysqli implements DriverInterface
 {
@@ -25,6 +31,8 @@ class Mysqli implements DriverInterface
     private $callback;
 
     private $result;
+
+    const DEFAULT_QUERY_TIMEOUT = 3 * 1000;
 
     public function __construct(Connection $connection)
     {
@@ -52,8 +60,13 @@ class Mysqli implements DriverInterface
      */
     public function query($sql)
     {
+        $config = $this->connection->getConfig();
+        $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_QUERY_TIMEOUT;
         $this->sql = $sql;
+
         swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
+        Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
+
         yield $this;
     }
 
@@ -62,22 +75,31 @@ class Mysqli implements DriverInterface
      */
     public function onSqlReady($link, $result)
     {
+        Timer::clearAfterJob(spl_object_hash($this));
+        $exception = null;
         if ($result === false) {
             if (in_array($link->_errno, [2013, 2006])) {
                 $this->connection->close();
-                throw new MysqliConnectionLostException();
+                $exception = new MysqliConnectionLostException();
             } elseif ($link->_errno == 1064) {
                 $error = $link->_error;
                 $this->connection->release();
-                throw new MysqliSqlSyntaxException($error);
+                $exception = new MysqliSqlSyntaxException($error);
             } else {
                 $error = $link->_error;
                 $this->connection->release();
-                throw new MysqliQueryException($error);
+                $exception = new MysqliQueryException($error);
             }
         }
         $this->result = $result;
-        call_user_func($this->callback, new MysqliResult($this));
+        call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+    }
+
+    public function onQueryTimeout()
+    {
+        $this->connection->close();
+        //TODO: sql记入日志
+        call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException()]);
     }
 
     public function getResult()
@@ -85,10 +107,6 @@ class Mysqli implements DriverInterface
         return $this->result;
     }
 
-    /**
-     * @param bool $autoHandleException
-     * @return DbResultInterface
-     */
     public function beginTransaction()
     {
         $beginTransaction = (yield $this->connection->getSocket()->begin_transaction(MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT));
@@ -98,9 +116,6 @@ class Mysqli implements DriverInterface
         yield $beginTransaction;
     }
 
-    /**
-     * @return DbResultInterface
-     */
     public function commit()
     {
         $commit = (yield $this->connection->getSocket()->commit());
@@ -111,9 +126,6 @@ class Mysqli implements DriverInterface
         yield $commit;
     }
 
-    /**
-     * @return DbResultInterface
-     */
     public function rollback()
     {
         $rollback = (yield $this->connection->getSocket()->rollback());
