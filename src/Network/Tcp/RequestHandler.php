@@ -83,7 +83,7 @@ class RequestHandler {
 
     public function handleRequestFinish()
     {
-        Timer::clearTickJob($this->getRequestTimeoutJobId());
+        Timer::clearAfterJob($this->getRequestTimeoutJobId());
         $coroutine = $this->middleWareManager->executeTerminators($this->response);
         Task::execute($coroutine, $this->context);
     }
