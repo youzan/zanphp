@@ -6,7 +6,7 @@
  * Time: 05:21
  */
 
-namespace Zan\Framework\Store\Database\Mysql;
+namespace Zan\Framework\Store\Database\Mysql\Exception;
 
 
 use Zan\Framework\Foundation\Exception\ZanException;

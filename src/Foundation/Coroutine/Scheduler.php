@@ -73,6 +73,7 @@ class Scheduler
         }
     }
 
+    //TODO: 规范化response
     public function asyncCallback($response, $exception = null)
     {
         if ($exception !== null
