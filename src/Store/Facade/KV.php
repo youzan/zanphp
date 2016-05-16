@@ -56,7 +56,7 @@ class KV
      * @return \Generator|void
      * @throws Exception
      */
-    public static function set($config, $key, $value, $ttl = 0)
+    public static function set($key, $value, $ttl = 0, $config = 'session')
     {
         $config = Config::get('kvstore.' . $config);
         if (!self::validConfig($config)) {
@@ -76,7 +76,7 @@ class KV
      * @param int $ttl
      * @return \Generator|void
      */
-    public static function setList($config, $key, array $value, $ttl = 0)
+    public static function setList($key, array $value, $ttl = 0, $config = 'session')
     {
         $config = Config::get('kvstore.' . $config);
         if (!self::validConfig($config)) {
@@ -96,7 +96,7 @@ class KV
      * @param int $ttl
      * @return \Generator|void
      */
-    public static function setMap($config, $key, array $value, $ttl = 0)
+    public static function setMap($key, array $value, $ttl = 0, $config = 'session')
     {
         $config = Config::get('kvstore.' . $config);
         if (!self::validConfig($config)) {
@@ -111,10 +111,10 @@ class KV
 
     /**
      * @param $key
-     * @return \Generator
-     * @throws Exception
+     * @param string $config
+     * @return \Generator|void
      */
-    public static function get($config, $key)
+    public static function get($key, $config = 'session')
     {
         $config = Config::get('kvstore.' . $config);
         if (!self::validConfig($config)) {
@@ -132,7 +132,7 @@ class KV
      * @return \Generator
      * @throws Exception
      */
-    public static function remove($config, $key)
+    public static function remove($key, $config = 'session')
     {
         $config = Config::get('kvstore.' . $config);
         if (!self::validConfig($config)) {
