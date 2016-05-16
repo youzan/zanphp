@@ -32,7 +32,7 @@ class Mysqli implements DriverInterface
 
     private $result;
 
-    const DEFAULT_QUERY_TIMEOUT = 3 * 1000;
+    const DEFAULT_QUERY_TIMEOUT = 3000;
 
     public function __construct(Connection $connection)
     {
