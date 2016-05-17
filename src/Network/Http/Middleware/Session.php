@@ -6,7 +6,7 @@
  * Time: 上午9:46
  */
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Middleware;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
