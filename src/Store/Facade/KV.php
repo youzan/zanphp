@@ -166,7 +166,7 @@ class KV
      * @param $config
      * @return bool
      */
-    private function validConfig($config)
+    private static function validConfig($config)
     {
         if (!$config) {
             return false;
