@@ -85,6 +85,6 @@ class MiddlewareConfig
         $baseTerminators = [
             \Zan\Framework\Network\Server\Middleware\WorkerTerminator::class,
         ];
-        return array_merge($baseTerminators, $this->extendTerminators, $terminators);
+        return array_merge($terminators, $this->extendTerminators, $baseTerminators);
     }
 }
