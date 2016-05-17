@@ -31,7 +31,7 @@ class Dispatcher
         }
 
         if(method_exists($controller,'init')){
-            yield $controller->init($request,$context);
+            yield $controller->init();
         }
         yield $controller->$action();
     }
