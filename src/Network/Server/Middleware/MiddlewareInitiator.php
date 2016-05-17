@@ -17,16 +17,16 @@ class MiddlewareInitiator
     public function initConfig(array $config = [])
     {
         $config['match'] = isset($config['match']) ? $config['match'] : [];
-        MiddlewareManager::getInstance()->setConfig($config);
+        MiddlewareConfig::getInstance()->setConfig($config);
     }
 
     public function initExtendFilters(array $extendFilters = [])
     {
-        MiddlewareManager::getInstance()->setExtendFilters($extendFilters);
+        MiddlewareConfig::getInstance()->setExtendFilters($extendFilters);
     }
 
     public function initExtendTerminators(array $extendTerminators = [])
     {
-        MiddlewareManager::getInstance()->setExtendTerminators($extendTerminators);
+        MiddlewareConfig::getInstance()->setExtendTerminators($extendTerminators);
     }
 } 
