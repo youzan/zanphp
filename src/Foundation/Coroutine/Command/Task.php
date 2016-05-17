@@ -182,6 +182,17 @@ function getSessionHandler()
     });
 }
 
+function getServerHandler()
+{
+    return new SysCall(function (Task $task) {
+        $context = $task->getContext();
+        $request = $context->get('request');
+        $value = $request ? $request->server : null;
+        $task->send($value);
+        return Signal::TASK_CONTINUE;
+    });
+}
+
 function getRequestUri($exclude='', $params=false){
     return new SysCall(function (Task $task) use ($exclude,$params) {
         $context = $task->getContext();
@@ -207,3 +218,5 @@ function getRequestUri($exclude='', $params=false){
         return Signal::TASK_CONTINUE;
     });
 }
+
+
