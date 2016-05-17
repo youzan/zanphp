@@ -77,7 +77,7 @@ class MiddlewareConfig
         $baseFilters = [
 
         ];
-        return array_merge($filters, $this->extendFilters, $baseFilters);
+        return array_merge($baseFilters, $this->extendFilters, $filters);
     }
 
     public function addBaseTerminators($terminators)
