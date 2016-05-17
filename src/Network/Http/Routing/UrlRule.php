@@ -7,27 +7,26 @@ namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Dir;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Foundation\Core\Config;
 
 class UrlRule {
 
-    const ROUTE_KEY = 'rewrite';
+    use Singleton;
 
     private static $rules = [];
 
-    public static function loadRules($routingPath)
+    public static function loadRules()
     {
-        $routeFiles = Dir::glob($routingPath, '*.php');
+        $routeFiles = Dir::glob(Config::get('path.routing'), '*.routing.php');
 
         if (!$routeFiles) return false;
 
         foreach ($routeFiles as $file)
         {
             $route = include $file;
-
-            if (!isset($route[self::ROUTE_KEY]))  continue;
-            if (!is_array($route[self::ROUTE_KEY])) continue;
-
-            self::$rules = Arr::merge(self::$rules, $route[self::ROUTE_KEY]);
+            if (!is_array($route)) continue;
+            self::$rules = Arr::merge(self::$rules, $route);
         }
     }
 
@@ -35,5 +34,4 @@ class UrlRule {
     {
         return self::$rules;
     }
-
 }

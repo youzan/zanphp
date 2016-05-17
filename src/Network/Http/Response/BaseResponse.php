@@ -83,7 +83,7 @@ class BaseResponse
     const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;                             // RFC6585
 
     /**
-     * @var \Zan\Framework\Network\Http\Response\ResponseHeaderBag
+     * @var ResponseHeaderBag
      */
     public $headers;
 

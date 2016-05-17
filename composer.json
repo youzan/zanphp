@@ -10,12 +10,26 @@
             "url": "http://git.qima-inc.com/php-3rd-lib/symfony-console.git"
         },
         {
+            "type": "git",
+            "url": "http://gitlab.qima-inc.com/php-3rd-lib/yz-elasticsearch.git"
+        },
+        {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/psr-log.git"
+        },
+        {
             "packagist": false
+        },
+        {
+            "type": "composer",
+            "url": "https://packagist.phpcomposer.com"
         }
     ],
     "require": {
         "qiniu/php-sdk": "7.0.0",
-        "symfony/console": "3.1"
+        "symfony/console": "3.1",
+        "elasticsearch/yz-elasticsearch-client": "dev-master",
+        "psr/log": "1.0.0"
     },
     "autoload": {
         "psr-4": {
@@ -37,7 +51,8 @@
         ]
     },
     "config": {
-        "preferred-install": "dist"
+        "preferred-install": "dist",
+        "secure-http": false
     },
     "minimum-stability": "stable",
     "prefer-stable": true

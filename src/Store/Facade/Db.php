@@ -8,20 +8,35 @@
 
 namespace Zan\Framework\Store\Facade;
 
-
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Network\Contract\Connection;
-use Zan\Framework\Store\Database\Mysql\FutureQuery;
-use Zan\Framework\Store\Database\Mysql\QueryExecuter;
+use Zan\Framework\Store\Database\Flow;
 
 class Db {
+    const RETURN_AFFECTED_ROWS  = true;
+    const USE_MASTER            = true;
+    const RETURN_INSERT_ID      = false;
+    
     public static function execute($sid, $data, $options = [])
     {
-        $executer = new QueryExecuter() ;
-        yield $executer->setConnection();
-
-        $response = (yield $executer->execute($sid, $data, $options));
-        yield $response;
+        $flow = new Flow();
+        yield $flow->query($sid, $data, $options);
+        return;
     }
-
+ 
+    public static function beginTransaction()
+    {
+        $flow = new Flow();
+        yield $flow->beginTransaction();
+    }
+    
+    public static function commit()
+    {
+        $flow = new Flow();
+        yield $flow->commit();
+    }
+    
+    public static function rollback()
+    {
+        $flow = new Flow();
+        yield $flow->rollback();
+    }
 }

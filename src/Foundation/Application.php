@@ -7,6 +7,8 @@ use Zan\Framework\Foundation\Container\Container;
 use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
 use Zan\Framework\Foundation\Booting\InitializePathes;
 use Zan\Framework\Foundation\Booting\InitializeRunMode;
+use Zan\Framework\Foundation\Booting\InitializeDebug;
+use Zan\Framework\Foundation\Booting\InitializeEnv;
 use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
 use Zan\Framework\Utilities\Types\Arr;
@@ -77,7 +79,9 @@ class Application
 
         $bootstrapItems = [
             InitializeRunMode::class,
+            InitializeDebug::class,
             InitializePathes::class,
+            InitializeEnv::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
             RegisterClassAliases::class,

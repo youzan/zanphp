@@ -10,7 +10,6 @@ namespace Zan\Framework\Test\Foundation\Coroutine\Task;
 
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Network\Contract\Response;
 
 class AsyncTest implements  Async
 {

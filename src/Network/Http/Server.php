@@ -2,13 +2,36 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
+use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
+use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
+use Zan\Framework\Network\Http\ServerStart\InitializeCache;
+use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
+use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
+use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Server as ServerContract;
+use Zan\Framework\Network\Http\Routing\RouterSelfCheck;
+use Zan\Framework\Foundation\Application;
+use Zan\Framework\Network\Server\ServerBase;
 
-class Server implements ServerContract
+class Server extends ServerBase implements ServerContract
 {
+    protected $serverStartItems = [
+        InitializeRouter::class,
+        InitializeUrlRule::class,
+        InitializeMiddleware::class,
+        InitializeExceptionHandlerChain::class,
+        InitializeCache::class
+    ];
+
+    protected $workerStartItems = [
+        InitializeConnectionPool::class,
+        InitializeWorkerMonitor::class
+    ];
+
     /**
      * @var swooleServer
      */
@@ -17,6 +40,7 @@ class Server implements ServerContract
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
+        $this->swooleServer->set($config);
     }
 
     public function start()
@@ -29,6 +53,8 @@ class Server implements ServerContract
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
+
+        $this->bootServerStartItem();
 
         $this->swooleServer->start();
     }
@@ -55,12 +81,11 @@ class Server implements ServerContract
 
     public function onWorkerStart($swooleServer, $workerId)
     {
-
+        $this->bootWorkerStartItem($workerId);
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
@@ -70,6 +95,19 @@ class Server implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
-        (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionReceive();
+//        try {
+            (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
+//        } catch (\Exception $e) {
+//            RequestExceptionHandlerChain::getInstance()->handle($e, $swooleHttpRequest, $swooleHttpResponse);
+//        }
+    }
+
+    private function routerSelfCheck()
+    {
+        $basePath = Application::getInstance()->getBasePath();
+        $urlRulesPath = $checkListPath = $basePath . '/init/routing/';
+        $routerSelfCheck = new RouterSelfCheck($urlRulesPath, $checkListPath);
+        $routerSelfCheck->check();
     }
 }

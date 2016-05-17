@@ -2,30 +2,42 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Tcp\RequestExceptionHandlerChain; 
+use Zan\Framework\Network\Server\ServerBase;
+use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
+use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 
-class Server {
+class Server extends ServerBase {
 
+    protected $serverStartItems = [
+        InitializeSqlMap::class
+    ];
+
+    protected $workerStartItems = [
+        InitializeConnectionPool::class,
+        InitializeWorkerMonitor::class
+    ];
+    
     /**
      * @var SwooleServer
      */
-    private $swooleServer;
+    public $swooleServer;
 
     public function __construct(SwooleServer $swooleServer, array $config)
     {
         $this->swooleServer = $swooleServer;
+        $this->swooleServer->set($config);
     }
 
     public function start()
     {
-        $config = Config::get('nova.server');
-        $this->swooleServer->set($config);
-
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
 
@@ -40,6 +52,9 @@ class Server {
 
         $this->init();
         $this->registerServices();
+        
+        $this->bootServerStartItem();
+        
         $this->swooleServer->start();
     }
 
@@ -89,6 +104,8 @@ class Server {
 
     public function onWorkerStart($swooleServer, $workerId)
     {
+        $this->bootWorkerStartItem($workerId);
+        
         echo "worker starting .....\n";
     }
 
@@ -109,7 +126,7 @@ class Server {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
+        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
-
 }

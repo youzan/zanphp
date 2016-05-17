@@ -38,4 +38,14 @@ class ObjectArray {
         return count($this->map);
     }
 
+    public function get($key)
+    {
+        return isset($this->map[$key]) ? $this->map[$key] : null;
+    }
+
+    public function isEmpty()
+    {
+        return empty($this->map);
+    }
+
 }

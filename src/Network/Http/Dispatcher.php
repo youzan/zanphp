@@ -8,62 +8,39 @@
 
 namespace Zan\Framework\Network\Http;
 
-
-use Mockery\CountValidator\Exception;
+use RuntimeException;
 use Zan\Framework\Foundation\Application;
-use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-class Dispatcher {
+class Dispatcher
+{
     public function dispatch(Request $request, Context $context)
     {
+        $controllerName = $context->get('controller_name');
+        $action = $context->get('action_name');
 
-        $route = $request->getRoute();
-        $route = $this->parseRoute($route);
+        $controller = $this->getControllerClass($controllerName);
+        if(!class_exists($controller)) {
+            throw new RuntimeException("controller:{$controller} not found");
+        }
 
-        $controller = $route['controller'];
         $controller = new $controller($request, $context);
-        $action = $route['action'];
+        if(!is_callable([$controller, $action])) {
+            throw new RuntimeException("action:{$action} is not callable in controller:" . get_class($controller));
+        }
 
+        if(method_exists($controller,'init')){
+            yield $controller->init();
+        }
         yield $controller->$action();
     }
 
-    private function parseRoute($route)
+    private function getControllerClass($controllerName)
     {
-        $route = trim($route, ' /');
-        $parts = explode('/', $route);
-
-        $action = array_pop($parts);
-        $action = $this->parseAction($action);
-
-        $parts = array_map('ucfirst', $parts);
-        $controller = join('\\', $parts);
-
+        $parts = array_filter(explode('/', $controllerName));
+        $controllerName = join('\\', array_map('ucfirst', $parts));
         $app = Application::getInstance();
-        $controller = $app->getNamespace() . 'Controller\\' .  $controller . 'Controller';
-
-        return [
-            'controller' => $controller,
-            'action' => $action['action'],
-            'format' => $action['format'],
-        ];
+        return $app->getNamespace() . 'Controller\\' .  $controllerName . 'Controller';
     }
-
-    private function parseAction($action)
-    {
-        $arr = explode('.', $action);
-        $ret = [
-            'action'    => $arr[0],
-        ];
-
-        if(isset($arr[1])){
-            $ret['format']  = $arr[1];
-        } else {
-            $ret['format']  = 'html';
-        }
-
-        return $ret;
-    }
-
 }

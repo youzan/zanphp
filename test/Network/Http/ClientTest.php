@@ -11,6 +11,9 @@ use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Common\Client;
 use Zan\Framework\Testing\TaskTest;
 
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Test\Foundation\Coroutine\Context;
+
 class ClientTest extends TaskTest {
 
     public function setUp()
@@ -20,17 +23,26 @@ class ClientTest extends TaskTest {
         RunMode::set('dev');
 
         Config::init();
-        Config::get('http.client');
+        Config::get('services.php');
     }
 
-    public function taskCall()
+    public function testTaskCall()
     {
-        $option = [
-            'order_no'  => 'E123',
-            'kdt_id'    => 1,
-        ];
-        $result = (yield Client::call('trade.order.detail.byOrderNo', $option));
+        $context = new Context();
+        $task = new Task($this->makeCoroutine($context), null, 8);
+        $task->run();
 
-        $this->assertEquals(3, count($result), 'fail');
+    }
+
+    private function makeCoroutine($context)
+    {
+         $result = (yield Client::call('fenxiao.supplier.goods.getGoodsByKdtGoodsId', [
+            'kdt_goods_id' => 1500107
+        ]));
+        $context->set('result', $result);
+
+        var_dump($result);exit;
+
+        yield 'success';
     }
 }

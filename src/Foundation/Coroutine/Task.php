@@ -53,6 +53,10 @@ class Task
     {
         while (true) {
             try {
+                if ($this->status === Signal::TASK_KILLED) {
+                    $this->fireTaskDoneEvent();
+                    break;
+                }
                 $this->status = $this->scheduler->schedule();
                 switch ($this->status) {
                     case Signal::TASK_KILLED:
@@ -66,12 +70,18 @@ class Task
                         return null;
                 }
             } catch (\Exception $e) {
-                if ($this->scheduler->isStackEmpty()) {
-                    $this->coroutine->throw($e);
-                }
                 $this->scheduler->throwException($e);
             }
         }
+    }
+
+    public function sendException($e)
+    {
+        if ($this->scheduler->isStackEmpty()) {
+            $this->coroutine->throw($e);
+        }
+
+        $this->scheduler->throwException($e);
     }
 
     public function send($value)

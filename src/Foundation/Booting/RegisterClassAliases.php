@@ -44,7 +44,7 @@ class RegisterClassAliases implements Bootable
             'Handler'         => 'Zan\\Framework\\Foundation\\Exception\\Handler',
             'HttpServer'      => 'Zan\\Framework\\Network\\Http\\Server',
             'TcpServer'       => 'Zan\\Framework\\Network\\Tcp\\Server',
-            'Url'             => 'Zan\\Framework\\Utilities\\Types\\Url',
+            'Url'             => 'Zan\\Framework\\Utilities\\Types\\URL',
         ];
     }
 
