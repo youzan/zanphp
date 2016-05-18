@@ -120,8 +120,11 @@ class Worker
     }
 
     public function hawk(){
+        $run = Config::get('hawk.run');
+        if (!$run) {
+            return;
+        }
         $time = Config::get('hawk.time');
-
         Timer::tick($time, [$this,'callHawk']);
     }
 
