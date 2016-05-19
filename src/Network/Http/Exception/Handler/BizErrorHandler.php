@@ -2,38 +2,24 @@
 /**
  * Created by IntelliJ IDEA.
  * User: winglechen
- * Date: 16/4/11
- * Time: 11:00
+ * Date: 16/4/9
+ * Time: 12:09
  */
 
 namespace Zan\Framework\Network\Http\Exception\Handler;
 
-use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
-use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Response\BaseResponse;
+use Zan\Framework\Network\Http\Response\JsonResponse;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
 
-class InternalErrorHandler implements ExceptionHandler
+class BizErrorHandler implements ExceptionHandler
 {
-    private $configKey = 'error';
-
     public function handle(\Exception $e)
     {
-        if (!is_a($e, \Exception::class)) {
-            return false;
-        }
-        $config = Config::get($this->configKey, null);
-        if (!$config) {
-            return new Response('网络错误');
-        }
-        // 跳转到配置的500页面
-        if (isset($config['500'])) {
-            return RedirectResponse::create($config['500'], BaseResponse::HTTP_INTERNAL_SERVER_ERROR);
-        }
-
-        $oops = <<<EOF
+        $errMsg = $e->getMessage();
+        $errorPage = <<<EOT
 
 <!DOCTYPE html>
 <!--[if IEMobile 7 ]>    <html class="no-js iem7"> <![endif]-->
@@ -72,7 +58,7 @@ class InternalErrorHandler implements ExceptionHandler
             <div class="mask"></div>
         </div>
         <div class="error-msg">
-            对不起，页面被霸王龙吃掉了...        </div>
+            $errMsg        </div>
     </div>
 
 <script src="https://su.yzcdn.cn/jquery-2.0.3.min.js"></script>
@@ -96,8 +82,20 @@ $(function(){
 </script>
 </body>
 </html>
-EOF;
+EOT;
 
-        return new Response($oops);
+        $code = $e->getCode();
+        if ($code < 10000 || ($code > 60000 && $code < 100000000)) {
+            yield false;
+            return;
+        }
+
+        $request = (yield getContext('request'));
+        if ($request->wantsJson()) {
+            yield new JsonResponse($e->getMessage());
+        } else {
+            //html
+            yield new Response($errorPage);
+        }
     }
 }

@@ -43,15 +43,20 @@ class ExceptionHandlerChain
         //else throw the exception out
         $exceptionHandled = false;
         foreach ($this->handlerChain as $handler) {
-            $status = $handler->handle($e);
-            if ($status) {
+            $response = (yield $handler->handle($e));
+            if ($response) {
+                $resp = (yield getContext('response'));
+                if (!$resp) {
+                    yield setContext('response', $response);
+                }
                 $exceptionHandled = true;
                 break;
             }
         }
-        if (is_a($status, BaseResponse::class)) {
+        
+        if (is_a($response, BaseResponse::class)) {
             $swooleResponse = (yield getContext('swoole_response'));
-            yield $status->sendBy($swooleResponse);
+            yield $response->sendBy($swooleResponse);
             return;
         }
 
