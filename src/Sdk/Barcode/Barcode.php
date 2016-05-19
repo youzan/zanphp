@@ -39,7 +39,7 @@ class Barcode {
             'fg' => isset($styles['fg']) ? $styles['fg'] : '000000',
         ];
 
-        $config = Config::get('barcode');
+        $config = Config::get('services.barcode');
         // TODO 判断接口返回的状态码
         $response = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/', $params));
         if ($response) {
