@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation;
 
 use RuntimeException;
+use Zan\Framework\Foundation\Booting\LoadFiles;
 use Zan\Framework\Foundation\Container\Container;
 use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
 use Zan\Framework\Foundation\Booting\InitializePathes;
@@ -85,6 +86,7 @@ class Application
             LoadConfiguration::class,
             InitializeSharedObjects::class,
             RegisterClassAliases::class,
+            LoadFiles::class,
         ];
 
         foreach ($bootstrapItems as $bootstrap) {
