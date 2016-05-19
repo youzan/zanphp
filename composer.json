@@ -7,7 +7,7 @@
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/symfony-console.git"
+            "url": "http://gitlab.qima-inc.com/php-3rd-lib/symfony-console.git"
         },
         {
             "type": "git",
@@ -18,11 +18,23 @@
             "url": "http://git.qima-inc.com/php-3rd-lib/psr-log.git"
         },
         {
-            "packagist": false
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/monolog-monolog.git"
         },
         {
-            "type": "composer",
-            "url": "https://packagist.phpcomposer.com"
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/pimple-pimple.git"
+        },
+        {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/guzzle-guzzle.git"
+        },
+        {
+            "type": "git",
+            "url": "http://git.qima-inc.com/php-3rd-lib/symfony-event-dispatcher.git"
+        },
+        {
+            "packagist": false
         }
     ],
     "require": {
