@@ -15,8 +15,8 @@ class ValidationFactoryTest extends \TestCase
 
     public function testMakeMethodCreatesValidValidator()
     {
-        $factory = new Factory();
-        $validator = $factory->make(['foo' => 'bar'], ['baz' => 'boom']);
+        //$factory = new Factory();
+        $validator = Factory::make(['foo' => 'bar'], ['baz' => 'boom']);
         $this->assertEquals(['foo' => 'bar'], $validator->getData());
         $this->assertEquals(['baz' => ['boom']], $validator->getRules());
     }
@@ -24,7 +24,7 @@ class ValidationFactoryTest extends \TestCase
     public function testCustomResolverIsCalled()
     {
         unset($_SERVER['__validator.factory']);
-        $factory = new Factory();
+        $factory = Factory::getInstance();
         $factory->resolver(function ($data, $rules) {
             $_SERVER['__validator.factory'] = true;
 

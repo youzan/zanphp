@@ -11,5 +11,12 @@
 | loading of any our classes "manually". Feels great to relax.
 |
 */
-
 require __DIR__.'/../vendor/autoload.php';
+
+$home = getenv('HOME');
+if (!empty($home)) {
+    $globalAutoloadFile = $home . '/.composer/vendor/autoload.php';
+    if (file_exists($globalAutoloadFile)) {
+        require $globalAutoloadFile;
+    }
+}
