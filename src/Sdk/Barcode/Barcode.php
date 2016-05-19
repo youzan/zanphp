@@ -40,7 +40,8 @@ class Barcode {
         ];
 
         $config = Config::get('services.barcode');
-        // TODO 判断接口返回的状态码
+        // TODO 1. 判断接口返回的状态码
+        // TODO 2. timeout
         $response = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/', $params));
         if ($response) {
             if (false === $base64) {
