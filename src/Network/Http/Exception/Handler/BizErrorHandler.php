@@ -92,7 +92,12 @@ EOT;
 
         $request = (yield getContext('request'));
         if ($request->wantsJson()) {
-            yield new JsonResponse($e->getMessage());
+            $context = [
+                'code' => $code,
+                'msg' => $e->getMessage(),
+                'data' => '',
+            ];
+            yield new JsonResponse($context);
         } else {
             //html
             yield new Response($errorPage);
