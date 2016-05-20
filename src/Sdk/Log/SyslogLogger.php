@@ -11,7 +11,7 @@ namespace Zan\Framework\Sdk\Log\Track;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-class LoggerSystem extends LoggerBase implements LoggerInterface {
+class SyslogLogger extends BaseLogger implements LoggerInterface {
     /**
      * @var TrackLogger
      */
@@ -19,6 +19,7 @@ class LoggerSystem extends LoggerBase implements LoggerInterface {
 
     public function __construct($config){
         $this->init($config);
+
         $this->track = Track::get($this->app, $this->module, $this->type);
     }
 

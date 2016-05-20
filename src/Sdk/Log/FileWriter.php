@@ -11,7 +11,7 @@ namespace Zan\Framework\Sdk\Log\Track;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Path;
 use Exception;
-class TrackFile implements Async {
+class FileWriter implements Async {
 
     private $path;
     private $postData;
@@ -38,7 +38,7 @@ class TrackFile implements Async {
         call_user_func($this->callback, $write);
     }
 
-    public function doWrite($log, $level){
+    public function write($log, $level){
         $this->getLogData($log, $level);
         swoole_async_write($this->path, $this->postData, -1, [$this, 'write_callback']);
         yield $this;

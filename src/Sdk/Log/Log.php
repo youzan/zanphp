@@ -9,7 +9,7 @@ use Zan\Framework\Sdk\Log\Track\LoggerSystem;
 use Psr\Log\LoggerInterface;
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class Logger
+class Log
 {
     private $config = [
         'factory'   => '',
@@ -79,7 +79,7 @@ class Logger
      * 多实例
      * @return LoggerInterface
      */
-    public static function getInstance($key){
+    public static function make($key){
         if (isset(self::$instance[$key])) {
            return self::$instance[$key];
         }
