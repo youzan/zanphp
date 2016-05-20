@@ -54,9 +54,8 @@ class RequestHandler
 
         } catch (\Exception $e) {
             Worker::instance()->reactionRelease();
-            //TODO: 格式化exception输出
             if (Debug::get()) {
-                var_dump($e);
+                $this->echoException($e); 
             }
             $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
             Task::execute($coroutine, $this->context);
@@ -113,5 +112,26 @@ class RequestHandler
     private function getRequestTimeoutJobId()
     {
         return spl_object_hash($this) . '_handle_timeout';
+    }
+
+    private function echoException(\Exception $e)
+    {
+        $code = $e->getCode();
+        $msg = $e->getMessage();
+        $trace = $e->getTraceAsString();
+
+        echo <<<EOF
+        
+        
+###################################################################################
+          \033[1;31mGot a exception\033[0m
+          code: $code
+          message: $msg
+          
+$trace
+###################################################################################
+
+
+EOF;
     }
 }
