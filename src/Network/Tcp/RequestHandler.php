@@ -72,7 +72,7 @@ class RequestHandler {
         } catch(\Exception $e) {
             Worker::instance()->reactionRelease();
             if (Debug::get()) {
-                $this->echoException($e);
+                echo_exception($e);
             }
             $response->sendException($e);
             $this->event->fire($this->getRequestFinishJobId());
