@@ -181,3 +181,42 @@ function getSessionHandler()
         return Signal::TASK_CONTINUE;
     });
 }
+
+function getServerHandler()
+{
+    return new SysCall(function (Task $task) {
+        $context = $task->getContext();
+        $request = $context->get('request');
+        $value = $request ? $request->server : null;
+        $task->send($value);
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function getRequestUri($exclude='', $params=false){
+    return new SysCall(function (Task $task) use ($exclude,$params) {
+        $context = $task->getContext();
+        $request = $context->get('request');
+        $uri = $request->server->get('REQUEST_URI');
+        $host = $request->server->get('HTTP_HOST');
+        $request_uri = $host . $uri;
+        if($exclude) {
+            $request_uri = preg_replace($exclude, '', $request_uri);
+        }
+
+        $pPos   = strpos($request_uri,'?');
+        if(false === $params){
+            if(false !== $pPos){
+                $request_uri = substr($request_uri,0,$pPos);
+            }
+        }
+
+        if(false !== $params && !$pPos){
+            $request_uri .= '?';
+        }
+        $task->send($request_uri);
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+

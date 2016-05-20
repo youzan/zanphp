@@ -507,8 +507,11 @@ class Request extends BaseRequest implements Arrayable, RequestContract
     public function wantsJson()
     {
         $acceptable = $this->getAcceptableContentTypes();
-
-        return isset($acceptable[0]) && Str::contains($acceptable[0], ['/json', '+json']);
+        $isJson = isset($acceptable[0]) && Str::contains($acceptable[0], ['/json', '+json']);
+        if (!$isJson) {
+            $isJson = stripos($this->getRequestUri(), '.json') !== false;
+        }
+        return $isJson;
     }
 
     /**

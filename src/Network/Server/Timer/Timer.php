@@ -160,10 +160,12 @@ class Timer
     private static function valid($interval)
     {
         if (!is_int($interval)) {
+            debug_print_backtrace(); 
             throw new InvalidArgumentException('interval must be a int!');
         }
         
         if ($interval <= 0) {
+            debug_print_backtrace(); 
             throw new InvalidArgumentException('interval must be greater than 0!');
         }
     }

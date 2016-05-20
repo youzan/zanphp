@@ -111,8 +111,8 @@ class KV
 
     /**
      * @param $key
-     * @return \Generator
-     * @throws Exception
+     * @param string $config
+     * @return \Generator|void
      */
     public static function get($config, $key)
     {
@@ -166,7 +166,7 @@ class KV
      * @param $config
      * @return bool
      */
-    private function validConfig($config)
+    private static function validConfig($config)
     {
         if (!$config) {
             return false;

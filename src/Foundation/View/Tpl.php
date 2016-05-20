@@ -11,6 +11,7 @@ namespace Zan\Framework\Foundation\View;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\Types\Dir;
 use Zan\Framework\Foundation\Coroutine\Event;
+use Zan\Framework\Foundation\Core\Config;
 
 class Tpl
 {
@@ -56,10 +57,12 @@ class Tpl
             return $path;
         }
         $pathArr = $this->_parsePath($path);
+        $pathArr = array_map([$this, '_pathUcfirst'], $pathArr);
         $module = array_shift($pathArr);
-        $fullPath = $this->_rootPath . DIRECTORY_SEPARATOR .
-                'src' . DIRECTORY_SEPARATOR .
-                $this->_pathUcfirst($module) . DIRECTORY_SEPARATOR .
+        $srcPath = $this->_rootPath . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+        $customViewConfig = Config::get('custom_view_config') ? Config::get('custom_view_config') . DIRECTORY_SEPARATOR : '';
+        $fullPath = $srcPath . $customViewConfig .
+                $module . DIRECTORY_SEPARATOR .
                 'View' . DIRECTORY_SEPARATOR .
                 join(DIRECTORY_SEPARATOR, $pathArr) .
                 '.html';

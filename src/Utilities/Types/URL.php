@@ -127,38 +127,22 @@ class URL
 
     public static function getRequestUri($exclude='', $params=false)
     {
-        $uri = $_SERVER['REQUEST_URI'];
-        $host = 'http://' . $_SERVER['HTTP_HOST'];
-        $request_uri = $host . $uri;
-        if($exclude) {
-            $request_uri = preg_replace($exclude, '', $request_uri);
-        }
-
-        $pPos   = strpos($request_uri,'?');
-        if(false === $params){
-            if(false !== $pPos){
-                $request_uri = substr($request_uri,0,$pPos);
-            }
-        }
-
-        if(false !== $params && !$pPos){
-            $request_uri .= '?';
-        }
-
-        return $request_uri;
+        yield getRequestUri($exclude,$params);
     }
 
     public static function removeParams($ps=null,$url=null)
     {
         if(null === $url){
-            $url    = self::getRequestUri('',true);
+            $url    =  (yield self::getRequestUri('',true));
         }
         if(!$ps ){
-            return $url;
+            yield $url;
+            return;
         }
         $pos   = strpos($url,'?');
         if(false === $pos){
-            return $url;
+            yield $url;
+            return;
         }
         if(!is_array($ps)){
             $ps = [$ps];
@@ -173,7 +157,7 @@ class URL
             }
         }
 
-        return $prefix . '?' . http_build_query($pMap);
+        yield $prefix . '?' . http_build_query($pMap);
     }
 
     public static function redirect($url,$code=302){
