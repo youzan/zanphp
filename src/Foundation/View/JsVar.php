@@ -11,12 +11,40 @@ namespace Zan\Framework\Foundation\View;
 
 class JsVar
 {
+    /**
+     * 用户账户相关
+     * @var array
+     */
     private $_session = [];
+    /**
+     * 配置相关
+     * @var array
+     */
     private $_config = [];
+    /**
+     * 请求相关
+     * @var array
+     */
     private $_query = [];
+    /**
+     * 运行时环境相关
+     * @var array
+     */
     private $_env = [];
+    /**
+     * 业务自身相关
+     * @var array
+     */
     private $_business = [];
+    /**
+     * 微信分享相关
+     * @var array
+     */
     private $_share = [];
+    /**
+     * 原iron的global中的url清单
+     * @var array
+     */
     private $_domain = [];
 
     public function setSession($key, $value)
