@@ -79,3 +79,30 @@ $trace
 EOF;
     }
 }
+
+if (! function_exists('dd')) {
+    function dd()
+    {
+        if (func_num_args() === 0) {
+            return;
+        }
+
+        // Get all passed variables
+        $variables = func_get_args();
+        var_dump($variables);
+        die;
+    }
+}
+
+if (! function_exists('d')) {
+    function d()
+    {
+        if (func_num_args() === 0) {
+            return;
+        }
+
+        // Get all passed variables
+        $variables = func_get_args();
+        var_dump($variables);
+    }
+}
