@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
@@ -71,7 +72,12 @@ class Server extends ServerBase implements ServerContract
 
     public function onStart($swooleServer)
     {
+        if (RunMode::get() !== 'online') {
+            $masterPid = getmypid();
+            $basePath = Application::getInstance()->getBasePath();
 
+            file_put_contents($basePath . '/.pid', $masterPid);
+        }
     }
 
     public function onShutdown($swooleServer)
