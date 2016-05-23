@@ -23,7 +23,8 @@ class Log
      */
     private static $instance;
 
-    public function __construct($config){
+    public function __construct($config)
+    {
         $this->configParser($config);
         return $this->adapter();
     }
@@ -33,39 +34,40 @@ class Log
      * @param $key
      * @throws ZanException
      */
-    private function configParser($key){
-        if(!$key){
+    private function configParser($key)
+    {
+        if (!$key) {
             throw new InvalidArgumentException('Configuration key cannot be null');
         }
 
-        $logUrl = Config::get('log.'.$key);
-        if(!$logUrl){
+        $logUrl = Config::get('log.' . $key);
+        if (!$logUrl) {
             throw new InvalidArgumentException('Can not find config for logKey: ' . $key);
         }
 
         $config = parse_url($logUrl);
         parse_str($config['query'], $ps);
 
-        $this->config['factory']    = $config['scheme'];
-        $this->config['level']      = $config['host'];
-        $this->config['path']       = isset($config['path']) ? $config['path'] : $this->config['path'];
-        $this->config['module']     = isset($ps['module']) ? $ps['module'] : $this->config['module'];
-        $this->config['type']       = isset($ps['type']) ? $ps['type'] : $this->config['type'];
-
+        $this->config['factory'] = $config['scheme'];
+        $this->config['level'] = $config['host'];
+        $this->config['path'] = isset($config['path']) ? $config['path'] : $this->config['path'];
+        $this->config['module'] = isset($ps['module']) ? $ps['module'] : $this->config['module'];
+        $this->config['type'] = isset($ps['type']) ? $ps['type'] : $this->config['type'];
     }
 
     /**
      * 适配器
      * @return mixed
-     * @throws ZanException
+     * @throws InvalidArgumentException
      */
-    private function adapter(){
+    private function adapter()
+    {
         $factory = $this->config['factory'];
-        switch($factory){
-            case "syslog":
+        switch ($factory) {
+            case 'syslog':
                 return new LoggerSystem($this->config);
                 break;
-            case "log":
+            case 'log':
                 return new LoggerFile($this->config);
                 break;
             default:
@@ -75,11 +77,13 @@ class Log
 
     /**
      * 多实例
+     * @param $key
      * @return LoggerInterface
      */
-    public static function make($key){
+    public static function make($key)
+    {
         if (isset(self::$instance[$key])) {
-           return self::$instance[$key];
+            return self::$instance[$key];
         }
         self::$instance[$key] = new self($key);
         return self::$instance[$key];

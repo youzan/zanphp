@@ -10,21 +10,22 @@ namespace Zan\Framework\Sdk\Log;
 
 use Psr\Log\LogLevel;
 
-abstract class BaseLogger {
+abstract class BaseLogger
+{
     protected $app;
     protected $module;
     protected $type;
     protected $level;
-    protected $leveNum = 0;
+    protected $levelNum = 0;
     protected $path;
-    protected $logMap =[
-        'debug'     => 0,
-        'info'      => 1,
-        'notice'    => 2,
-        'warning'   => 3,
-        'error'     => 4,
-        'critical'  => 5,
-        'alert'     => 6,
+    protected $logMap = [
+        'debug' => 0,
+        'info' => 1,
+        'notice' => 2,
+        'warning' => 3,
+        'error' => 4,
+        'critical' => 5,
+        'alert' => 6,
         'emergency' => 7,
     ];
     protected $writer = null;
@@ -33,18 +34,27 @@ abstract class BaseLogger {
      * 初始化
      * @param $config
      */
-    public function init($config){
-        $this->app      = $config['app'];
-        $this->module   = $config['module'];
-        $this->type     = $config['type'];
-        $this->level    = $config['level'];
+    public function init($config)
+    {
+        $this->app = $config['app'];
+        $this->module = $config['module'];
+        $this->type = $config['type'];
+        $this->level = $config['level'];
         $this->levelNum = $this->getLevelNum($this->level);
-        $this->path     = $config['path'];
+        $this->path = $config['path'];
     }
 
-    public function emergency($message, array $context = []){}
-    public function alert($message, array $context = []){}
-    public function critical($message, array $context = []){}
+    public function emergency($message, array $context = [])
+    {
+    }
+
+    public function alert($message, array $context = [])
+    {
+    }
+
+    public function critical($message, array $context = [])
+    {
+    }
 
     /**
      * error
@@ -52,8 +62,9 @@ abstract class BaseLogger {
      * @param array $context
      * @return null|void
      */
-    public function error($message, array $context = []){
-        if($this->checkLevel(LogLevel::ERROR)){
+    public function error($message, array $context = [])
+    {
+        if ($this->checkLevel(LogLevel::ERROR)) {
             return $this->writer->write($message, LogLevel::ERROR);
         }
     }
@@ -64,8 +75,9 @@ abstract class BaseLogger {
      * @param array $context
      * @return null|void
      */
-    public function warning($message, array $context = []){
-        if($this->checkLevel(LogLevel::WARNING)){
+    public function warning($message, array $context = [])
+    {
+        if ($this->checkLevel(LogLevel::WARNING)) {
             return $this->writer->write($message, LogLevel::WARNING);
         }
     }
@@ -76,8 +88,9 @@ abstract class BaseLogger {
      * @param array $context
      * @return null|void
      */
-    public function notice($message, array $context = []){
-        if($this->checkLevel(LogLevel::NOTICE)){
+    public function notice($message, array $context = [])
+    {
+        if ($this->checkLevel(LogLevel::NOTICE)) {
             return $this->writer->write($message, LogLevel::NOTICE);
         }
     }
@@ -88,8 +101,9 @@ abstract class BaseLogger {
      * @param array $context
      * @return null|void
      */
-    public function info($message, array $context = []){
-        if($this->checkLevel(LogLevel::INFO)){
+    public function info($message, array $context = [])
+    {
+        if ($this->checkLevel(LogLevel::INFO)) {
             return $this->writer->write($message, LogLevel::INFO);
         }
     }
@@ -100,8 +114,9 @@ abstract class BaseLogger {
      * @param array $context
      * @return null|void
      */
-    public function debug($message, array $context = []){
-        if($this->checkLevel(LogLevel::DEBUG)){
+    public function debug($message, array $context = [])
+    {
+        if ($this->checkLevel(LogLevel::DEBUG)) {
             return $this->writer->write($message, LogLevel::DEBUG);
         }
     }
@@ -116,9 +131,10 @@ abstract class BaseLogger {
      * @param $funcLevel
      * @return bool
      */
-    public function checkLevel($funcLevel){
-        $funcLevelNum   = $this->getLevelNum($funcLevel);
-        if($this->leveNum >= $funcLevelNum){
+    public function checkLevel($funcLevel)
+    {
+        $funcLevelNum = $this->getLevelNum($funcLevel);
+        if ($this->levelNum >= $funcLevelNum) {
             return true;
         }
         return false;
@@ -129,7 +145,8 @@ abstract class BaseLogger {
      * @param $level
      * @return mixed
      */
-    protected function getLevelNum($level){
+    protected function getLevelNum($level)
+    {
         return $this->logMap[$level];
     }
-} 
+}
