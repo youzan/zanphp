@@ -76,7 +76,7 @@ class Server extends ServerBase implements ServerContract
             $masterPid = getmypid();
             $basePath = Application::getInstance()->getBasePath();
 
-            file_put_contents($basePath . '/.pid', $masterPid);
+            file_put_contents($basePath . '/bin/.pid', $masterPid);
         }
     }
 
