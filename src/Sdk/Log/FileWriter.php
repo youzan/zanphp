@@ -6,12 +6,13 @@
  * Time: 18:10
  */
 
-namespace Zan\Framework\Sdk\Log\Track;
+namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Path;
 use Exception;
-class FileWriter implements Async {
+
+class FileWriter implements Async, LogWriter{
 
     private $path;
     private $postData;

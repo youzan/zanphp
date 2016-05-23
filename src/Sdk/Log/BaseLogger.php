@@ -6,7 +6,7 @@
  * Time: 13:33
  */
 
-namespace Zan\Framework\Sdk\Log\Track;
+namespace Zan\Framework\Sdk\Log;
 
 use Psr\Log\LogLevel;
 
