@@ -6,18 +6,21 @@
  * Time: 22:30
  */
 
-namespace Zan\Framework\Network\Server\Booting;
+namespace Zan\Framework\Network\Server\ServerStart;
 
-use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Contract\Network\Bootable;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Dir;
 
-class InitLoader {
-    use Singleton;
-
+class InitOrderLoader implements Bootable{
     private $orderFile = '/.order';
 
-    public function load($path)
+    public function bootstrap($server)
+    {
+        // TODO: Implement bootstrap() method.
+    }
+    
+    private function load($path)
     {
         if(!$path){
             return [];

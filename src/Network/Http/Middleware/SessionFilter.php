@@ -10,7 +10,6 @@ namespace Zan\Framework\Network\Http\Middleware;
 
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
-use Zan\Framework\Network\Http\Session;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class SessionFilter implements RequestFilter

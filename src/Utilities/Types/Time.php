@@ -11,12 +11,12 @@ class Time
             return true;
         }
 
-        $this->timeStamp = nova_get_time();;
+        $this->timeStamp = \nova_get_time();;
     }
 
     public static function current($format=false)
     {
-        $timeStamp = nova_get_time();
+        $timeStamp = \nova_get_time();
 
         if(true === $format){
             return $timeStamp;
@@ -27,6 +27,11 @@ class Time
         }
 
         return date($format,$timeStamp);
+    }
+
+    public static function stamp()
+    {
+        return self::current(true);
     }
 
 }

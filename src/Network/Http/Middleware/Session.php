@@ -6,7 +6,7 @@
  * Time: 上午9:46
  */
 
-namespace Zan\Framework\Network\Http;
+namespace Zan\Framework\Network\Http\Middleware;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
@@ -25,7 +25,6 @@ class Session
     private $session_id;
     private $session_map = array();
     private $config;
-    private $kv;
     private $ttl;
     private $isChanged = false;
 
@@ -35,7 +34,6 @@ class Session
 
         $this->request = $request;
         $this->cookie = $cookie;
-        $this->kv = KV::getInstance($this->config['kv']);
         $this->ttl = $this->config['ttl'];
 
     }
@@ -57,7 +55,7 @@ class Session
             return;
         }
 
-        $session = (yield $this->kv->get(self::SESSION_PREFIX.$this->session_id));
+        $session = (yield KV::get($this->config['kv'], self::SESSION_PREFIX.$this->session_id));
         if ($session) {
             $this->session_map = unserialize($session);
         }
@@ -85,7 +83,7 @@ class Session
 
     public function destory()
     {
-        $ret = (yield $this->kv->remove(self::SESSION_PREFIX . $this->session_id));
+        $ret = (yield KV::remove($this->config['kv'], self::SESSION_PREFIX . $this->session_id));
         if (!$ret) {
             yield false;
             return;
@@ -102,7 +100,7 @@ class Session
 
     public function writeBack() {
         if ($this->isChanged) {
-            yield $this->kv->set(self::SESSION_PREFIX . $this->session_id, serialize($this->session_map), $this->ttl);
+            yield KV::set($this->config['kv'], self::SESSION_PREFIX . $this->session_id, serialize($this->session_map), $this->ttl);
         }
     }
 }

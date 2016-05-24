@@ -9,9 +9,9 @@
 namespace Zan\Framework\Testing;
 
 
-class Stub
+abstract class Stub
 {
-    private $realClassName = null;
+    protected $realClassName = null;
 
     /**
      * @return null

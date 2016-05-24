@@ -3,6 +3,8 @@
 namespace Zan\Framework\Foundation\Coroutine;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Exception\ServerTimeoutException;
+use Zan\Framework\Utilities\Types\Time;
 
 class Scheduler
 {
@@ -71,6 +73,7 @@ class Scheduler
         }
     }
 
+    //TODO: 规范化response
     public function asyncCallback($response, $exception = null)
     {
         if ($exception !== null

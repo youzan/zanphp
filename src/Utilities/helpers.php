@@ -56,3 +56,53 @@ if (! function_exists('data_set')) {
         return $target;
     }
 }
+
+if (! function_exists('echo_exception')) {
+    function echo_exception(\Exception $e)
+    {
+        $code = $e->getCode();
+        $msg = $e->getMessage();
+        $trace = $e->getTraceAsString();
+
+        echo <<<EOF
+        
+        
+###################################################################################
+          \033[1;31mGot a exception\033[0m
+          code: $code
+          message: $msg
+          
+$trace
+###################################################################################
+
+
+EOF;
+    }
+}
+
+if (! function_exists('dd')) {
+    function dd()
+    {
+        if (func_num_args() === 0) {
+            return;
+        }
+
+        // Get all passed variables
+        $variables = func_get_args();
+        var_dump($variables);
+        die;
+    }
+}
+
+if (! function_exists('d')) {
+    function d()
+    {
+        if (func_num_args() === 0) {
+            return;
+        }
+
+        // Get all passed variables
+        $variables = func_get_args();
+        var_dump($variables);
+    }
+}

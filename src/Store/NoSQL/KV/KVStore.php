@@ -57,7 +57,7 @@ class KVStore implements Async
             [$this, 'writeCallBack'],
             $this->policy
         );
-
+        
         yield $this;
     }
 

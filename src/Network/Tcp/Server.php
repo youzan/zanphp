@@ -2,6 +2,8 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
@@ -95,6 +97,12 @@ class Server extends ServerBase {
 
     public function onStart($swooleServer)
     {
+        if (RunMode::get() !== 'online') {
+            $masterPid = getmypid();
+            $basePath = Application::getInstance()->getBasePath();
+
+            file_put_contents($basePath . '/bin/.pid', $masterPid);
+        }
     }
 
     public function onShutdown($swooleServer)
@@ -126,7 +134,7 @@ class Server extends ServerBase {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        \Zan\Framework\Network\Server\Monitor\Worker::instance()->reactionReceive();
+        Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
 }
