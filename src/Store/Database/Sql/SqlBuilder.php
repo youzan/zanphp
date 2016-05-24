@@ -7,7 +7,7 @@
  */
 namespace Zan\Framework\Store\Database\Sql;
 
-use Zan\Framework\Store\Database\Mysql\Exception;
+use Zan\Framework\Store\Database\Sql\Exception\SqlBuilderException;
 
 class SqlBuilder
 {
@@ -65,7 +65,7 @@ class SqlBuilder
     private function parseCount($data)
     {
         if (!$data || !isset($data['count']) || '' == $data['count']) {
-            throw new Exception('what field do you want count?');
+            throw new SqlBuilderException('what field do you want count?');
         }
         $count = 'count(' . $data['count'] . ') as count_sql_rows';
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
@@ -188,12 +188,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    throw new Exception('sql map limit error');
+                    throw new SqlBuilderException('sql map limit error');
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new Exception('sql map require error');
+            throw new SqlBuilderException('sql map require error');
         }
         return true;
     }
@@ -295,7 +295,7 @@ class SqlBuilder
             $condition = strtolower(trim($condition));
             $column = trim($column);
             if ('like' === $condition && '%%%' === trim($value)) {
-                throw new Exception('sql like can not contain %%%');
+                throw new SqlBuilderException('sql like can not contain %%%');
             }
             if (false !== $expr || '' != $expr) {
                 $clauses[] = $this->formatColumn($column) . ' ' . $condition . ' ' . $expr . ' ';
@@ -314,7 +314,7 @@ class SqlBuilder
     {
         $value = is_string($value) ? explode(',', $value) : $value;
         if (!is_array($value) || [] == $value) {
-            throw new Exception('sql where条件中in为空');
+            throw new SqlBuilderException('sql where条件中in为空');
         }
         $clause = $this->formatColumn($column) . ' ' . $condition . ' (';
         $tmp = [];

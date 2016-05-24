@@ -6,9 +6,12 @@
  * Time: 下午5:47
  */
 namespace Zan\Framework\Store\Database\Sql;
+
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Core\ConfigLoader;
+use Zan\Framework\Store\Database\Sql\Exception\SqlTableException;
+
 class Table
 {
     use Singleton;
@@ -19,7 +22,7 @@ class Table
         if (!isset($this->tables[$tableName])) {
             $this->setTables();
             if (!isset($this->tables[$tableName])) {
-                throw new Exception('无法获取数' . $tableName . '表所在的数据库配置');
+                throw new SqlTableException('无法获取数' . $tableName . '表所在的数据库配置');
             }
         }
         return $this->tables[$tableName];
