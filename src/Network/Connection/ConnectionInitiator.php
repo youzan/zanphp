@@ -63,7 +63,7 @@ class ConnectionInitiator
         }
         foreach ($config as $k=>$cf) {
             if (!isset($cf['engine'])) {
-                $this->poolName = $this->poolName . '.' . $k;
+                $this->poolName = '' === $this->poolName ? $k : $this->poolName . '.' . $k;
                 $this->initConfig($cf);
                 continue;
             }
@@ -72,13 +72,16 @@ class ConnectionInitiator
                 continue;
             }
             //创建连接池
-            $this->poolName = $this->poolName . '.' . $k;
+            $dir = $this->poolName;
+            $this->poolName = '' === $this->poolName ? $k : $this->poolName . '.' . $k;
             $factoryType = $cf['engine'];
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
-                $cf['pool']['pool_name'] = $this->directory . $this->poolName;
+                $cf['pool']['pool_name'] = $this->poolName;
                 $this->initPool($factoryType, $cf);
-                $this->poolName = '';
+                $fileConfigKeys = array_keys($config);
+                $endKey = end($fileConfigKeys);
+                $this->poolName = $k == $endKey ? '' : $dir;
             }
         }
     }
