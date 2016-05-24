@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
