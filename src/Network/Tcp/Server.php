@@ -96,6 +96,12 @@ class Server extends ServerBase {
 
     public function onStart($swooleServer)
     {
+        if (RunMode::get() !== 'online') {
+            $masterPid = getmypid();
+            $basePath = Application::getInstance()->getBasePath();
+
+            file_put_contents($basePath . '/bin/.pid', $masterPid);
+        }
     }
 
     public function onShutdown($swooleServer)
