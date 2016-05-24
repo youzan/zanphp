@@ -153,7 +153,6 @@ class KV
      */
     public function getConnection($connection)
     {
-        $connection = 'connection.' . $connection;
         $conn = (yield ConnectionManager::getInstance()->get($connection));
         if (!$conn instanceof Connection) {
             throw new Exception('KV get connection error');
