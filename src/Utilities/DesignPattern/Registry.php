@@ -9,7 +9,25 @@
 namespace Zan\Framework\Utilities\DesignPattern;
 
 
-interface Registry {
-    public function get($key, $default=null);
-    public function set($key, $value);
+class Registry  {
+    private static $classMap = [];
+
+    public static function get($key, $default=null)
+    {
+        if(!isset(self::$classMap[$key])) {
+            return $default;
+        }
+
+        return self::$classMap[$key];
+    }
+
+    public static function set($key, $value)
+    {
+        self::$classMap[$key] = $value;
+    }
+
+    public static function contain($key)
+    {
+        return isset(self::$classMap[$key]);
+    }
 }

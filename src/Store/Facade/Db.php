@@ -8,55 +8,35 @@
 
 namespace Zan\Framework\Store\Facade;
 
-
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
-use Zan\Framework\Network\Contract\Connection;
+use Zan\Framework\Store\Database\Flow;
 
 class Db {
-    private $connName = '';
-    private $engine = null;
-    private $autoHandleException = false;
-
-    public function __construct(/*String*/$connName)
+    const RETURN_AFFECTED_ROWS  = true;
+    const USE_MASTER            = true;
+    const RETURN_INSERT_ID      = false;
+    
+    public static function execute($sid, $data, $options = [])
     {
-        if(!$connName || !is_string($connName)) {
-            throw new InvalidArgument('invalid connection name for Db.__construct()');
-        }
-
-        $this->connName = $connName;
-        $this->initEngine($connName);
+        $flow = new Flow();
+        yield $flow->query($sid, $data, $options);
+        return;
     }
-
-    public function query($sql, $config)
+ 
+    public static function beginTransaction()
     {
-        return $this->engine->query($sql);
+        $flow = new Flow();
+        yield $flow->beginTransaction();
     }
-
-    public function beginTransaction($autoHandleException=false)
+    
+    public static function commit()
     {
-        $stradegy = (false === $autoHandleException) ? false : true;
-        $this->autoHandleException = $stradegy;
-
-        return $this->beginTransaction($stradegy);
+        $flow = new Flow();
+        yield $flow->commit();
     }
-
-    public function commit()
+    
+    public static function rollback()
     {
-        return $this->engine->commit();
-    }
-
-    public function rollback()
-    {
-        return $this->engine->roolback();
-    }
-
-    public function close()
-    {
-        return $this->engine->close();
-    }
-
-    private function initEngine()
-    {
-        $this->engine = null;
+        $flow = new Flow();
+        yield $flow->rollback();
     }
 }

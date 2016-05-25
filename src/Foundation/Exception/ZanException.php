@@ -10,5 +10,10 @@ namespace Zan\Framework\Foundation\Exception;
 
 
 class ZanException extends \Exception {
-
+    /**
+     * @var null
+     *  * null : do not logging
+     *  * LogLevel CONST ...
+     */
+    public $logLevel = null;
 }

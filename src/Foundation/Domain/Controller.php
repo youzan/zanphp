@@ -2,38 +2,25 @@
 
 namespace Zan\Framework\Foundation\Domain;
 
-use Zan\Framework\Network\Http\Request;
-use Zan\Framework\Network\Http\Response;
+use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Controller {
 
+    /**
+     * @var Request
+     */
     protected $request;
-    protected $response;
 
-    public function __construct(Request $request, Response $response)
+    /**
+     * @var Context;
+     */
+    protected $context;
+
+    public function __construct(Request $request, Context $context)
     {
         $this->request = $request;
-        $this->respones = $response;
-    }
-
-    public function display()
-    {
-
-    }
-
-    public function assign()
-    {
-
-    }
-
-    public function r($code, $msg, $data)
-    {
-    }
-
-    public function output($data)
-    {
-        $this->respones->setData($data);
-        $this->respones->send();
+        $this->context = $context;
     }
 
 }

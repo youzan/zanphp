@@ -8,8 +8,8 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
-//load commands
-Commands::load();
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Task
 {
@@ -22,7 +22,19 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public function __construct(\Generator $coroutine, $taskId = 0, $parentId = 0, Context $context = null)
+    public static function execute($coroutine, Context $context=null, $taskId=0, $parentId=0)
+    {
+        if($coroutine instanceof \Generator) {
+            $task = new Task($coroutine, $context, $taskId, $parentId);
+            $task->run();
+
+            return $task;
+        }
+
+        return $coroutine;
+    }
+
+    public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, $parentId=0)
     {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();
@@ -41,6 +53,10 @@ class Task
     {
         while (true) {
             try {
+                if ($this->status === Signal::TASK_KILLED) {
+                    $this->fireTaskDoneEvent();
+                    break;
+                }
                 $this->status = $this->scheduler->schedule();
                 switch ($this->status) {
                     case Signal::TASK_KILLED:
@@ -54,18 +70,24 @@ class Task
                         return null;
                 }
             } catch (\Exception $e) {
-                if ($this->scheduler->isStackEmpty()) {
-                    return;
-                }
                 $this->scheduler->throwException($e);
             }
         }
     }
 
+    public function sendException($e)
+    {
+        if ($this->scheduler->isStackEmpty()) {
+            $this->coroutine->throw($e);
+        }
+
+        $this->scheduler->throwException($e);
+    }
+
     public function send($value)
     {
-        $this->coroutine->send($value);
         $this->sendValue = $value;
+        return $this->coroutine->send($value);
     }
 
     public function getTaskId()

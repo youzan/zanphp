@@ -10,9 +10,7 @@ namespace Zan\Framework\Test\Utilities\Types;
 
 use Zan\Framework\Utilities\Types\Number;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
-
-class NumberTest extends \UnitTest {
+class NumberTest extends \TestCase {
     public function testFloatToStingWork()
     {
         $float  = 0.03;

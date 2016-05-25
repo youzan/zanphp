@@ -1,30 +1,32 @@
 {
-    "name"          : "zanphp/zan",
-    "repositories"  : [
+    "name": "zanphp/zan",
+    "repositories": [
     ],
-    "require"       : {
+    "require": {
     },
-    "require-dev": {
-        "phpunit/phpunit": "4.*"
-    },
-    "autoload"      : {
-        "psr-4"     : {
-            "Zan\\Framework\\"  : "src/"
+    "autoload": {
+        "psr-4": {
+            "Zan\\Framework\\": "src/"
         },
-        "classmap"  : [
+        "classmap": [
+        ],
+        "files": [
+            "src/Foundation/Coroutine/Command/Task.php",
+            "src/Utilities/helpers.php"
         ]
     },
-    "autoload-dev"      : {
-      "psr-4"     : {
-        "Zan\\Framework\\Test\\"  : "test/"
-      },
-      "classmap"  : [
-      ]
+    "autoload-dev": {
+        "psr-4": {
+            "Zan\\Framework\\Test\\": "test/"
+        },
+        "classmap": [
+            "test/TestCase.php"
+        ]
     },
-    "config"        : {
-        "preferred-install" : "dist"
+    "config": {
+        "preferred-install": "dist",
+        "secure-http": false
     },
-    "minimum-stability" : "stable",
-    "prefer-stable"     : true
-   
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
