@@ -2,39 +2,32 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Psr\Log\LoggerInterface;
-use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Utilities\Types\Arr;
 
 class Log
 {
-    private $config = [
-        'factory'   => '',
-        'app'       => 'zanphp',
-        'level'     => 'debug',
-        'module'    => 'default',
-        'type'      => 'normal',
-        'path'      => 'debug.log',
-    ];
 
-    /**
-     * @var LoggerInterface
-     */
-    private static $instance;
+    public static $instances = [];
 
-    public function __construct($config)
+    private static function getDefaultConfig()
     {
-        $this->configParser($config);
-        return $this->adapter();
+        return [
+            'factory' => '',
+            'app' => Application::getInstance()->getName(),
+            'module' => 'default',
+            'logLevel' => 'debug',
+            'storeType' => 'normal',
+            'path' => 'debug.log',
+            'useBuffer' => false,
+            'bufferSize' => 4096,
+            'async' => true,
+            'format' => ''
+        ];
     }
 
-    /**
-     * 日志配置解析
-     * @param $key
-     * @throws ZanException
-     */
-    private function configParser($key)
+    private static function configParser($key)
     {
         if (!$key) {
             throw new InvalidArgumentException('Configuration key cannot be null');
@@ -46,46 +39,59 @@ class Log
         }
 
         $config = parse_url($logUrl);
-        parse_str($config['query'], $ps);
+        $defaults = self::getDefaultConfig();
+        $defaults['key'] = $key;
+        $defaults['factory'] = $config['scheme'];
+        $defaults['logLevel'] = $config['host'];
+        if (isset($config['path'])) {
+            $defaults['path'] = $config['path'];
+        }
 
-        $this->config['factory'] = $config['scheme'];
-        $this->config['level'] = $config['host'];
-        $this->config['path'] = isset($config['path']) ? $config['path'] : $this->config['path'];
-        $this->config['module'] = isset($ps['module']) ? $ps['module'] : $this->config['module'];
-        $this->config['type'] = isset($ps['type']) ? $ps['type'] : $this->config['type'];
+        parse_str($config['query'], $params);
+        $result = Arr::merge($defaults, $params);
+
+        if (isset($result['format'])) {
+            $result['format'] = strtolower($result['format']);
+        }
+
+        return $result;
     }
 
-    /**
-     * 适配器
-     * @return mixed
-     * @throws InvalidArgumentException
-     */
-    private function adapter()
+    public static function getInstance($key = 'debug')
     {
-        $factory = $this->config['factory'];
-        switch ($factory) {
+        $config = self::configParser($key);
+
+        $logger = null;
+        switch ($config['factory']) {
             case 'syslog':
-                return new LoggerSystem($this->config);
+                $logger = self::initLoggerInstance($config);
                 break;
+            case 'file':
             case 'log':
-                return new LoggerFile($this->config);
+            case 'blackhole':
+                $logger = self::getLoggerInstance($config);
                 break;
             default:
                 throw new InvalidArgumentException('Cannot support this pattern');
         }
+
+        return $logger;
     }
 
-    /**
-     * 多实例
-     * @param $key
-     * @return LoggerInterface
-     */
-    public static function make($key)
+    private static function initLoggerInstance($config)
     {
-        if (isset(self::$instance[$key])) {
-            return self::$instance[$key];
-        }
-        self::$instance[$key] = new self($key);
-        return self::$instance[$key];
+        return new Logger($config);
     }
+
+    private static function getLoggerInstance($config)
+    {
+        $key = $config['key'];
+        if (isset(Log::$instances[$key])) {
+            return Log::$instances[$key];
+        }
+        $logger = self::initLoggerInstance($config);
+        Log::$instances[$key] = $logger;
+        return Log::$instances[$key];
+    }
+
 }

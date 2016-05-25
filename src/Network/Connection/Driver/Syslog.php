@@ -13,7 +13,7 @@ use Zan\Framework\Contract\Network\Connection;
 
 class Syslog extends Base implements Connection
 {
-    public function closeSocket()
+    protected function closeSocket()
     {
         // TODO: Implement closeSocket() method.
     }

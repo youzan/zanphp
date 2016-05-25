@@ -1,152 +1,28 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: haitao
- * Date: 16/3/17
- * Time: 13:33
+ * Created by IntelliJ IDEA.
+ * User: nuomi
+ * Date: 16/5/24
+ * Time: 下午2:31
  */
 
 namespace Zan\Framework\Sdk\Log;
 
-use Psr\Log\LogLevel;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 abstract class BaseLogger
 {
-    protected $app;
-    protected $module;
-    protected $type;
-    protected $level;
-    protected $levelNum = 0;
-    protected $path;
-    protected $logMap = [
-        'debug' => 0,
-        'info' => 1,
-        'notice' => 2,
-        'warning' => 3,
-        'error' => 4,
-        'critical' => 5,
-        'alert' => 6,
-        'emergency' => 7,
-    ];
-    protected $writer = null;
+    protected $config;
 
-    /**
-     * 初始化
-     * @param $config
-     */
-    public function init($config)
+    public function __construct(array $config)
     {
-        $this->app = $config['app'];
-        $this->module = $config['module'];
-        $this->type = $config['type'];
-        $this->level = $config['level'];
-        $this->levelNum = $this->getLevelNum($this->level);
-        $this->path = $config['path'];
-    }
-
-    public function emergency($message, array $context = [])
-    {
-    }
-
-    public function alert($message, array $context = [])
-    {
-    }
-
-    public function critical($message, array $context = [])
-    {
-    }
-
-    /**
-     * error
-     * @param string $message
-     * @param array $context
-     * @return null|void
-     */
-    public function error($message, array $context = [])
-    {
-        if ($this->checkLevel(LogLevel::ERROR)) {
-            return $this->writer->write($message, LogLevel::ERROR);
+        if (!$config) {
+            throw new InvalidArgumentException('Config is required' . $config);
+            return false;
         }
+        $this->config = $config;
     }
 
-    /**
-     * warning
-     * @param string $message
-     * @param array $context
-     * @return null|void
-     */
-    public function warning($message, array $context = [])
-    {
-        if ($this->checkLevel(LogLevel::WARNING)) {
-            return $this->writer->write($message, LogLevel::WARNING);
-        }
-    }
+    abstract public function write($log);
 
-    /**
-     * notice
-     * @param string $message
-     * @param array $context
-     * @return null|void
-     */
-    public function notice($message, array $context = [])
-    {
-        if ($this->checkLevel(LogLevel::NOTICE)) {
-            return $this->writer->write($message, LogLevel::NOTICE);
-        }
-    }
-
-    /**
-     * info
-     * @param string $message
-     * @param array $context
-     * @return null|void
-     */
-    public function info($message, array $context = [])
-    {
-        if ($this->checkLevel(LogLevel::INFO)) {
-            return $this->writer->write($message, LogLevel::INFO);
-        }
-    }
-
-    /**
-     * debug
-     * @param string $message
-     * @param array $context
-     * @return null|void
-     */
-    public function debug($message, array $context = [])
-    {
-        if ($this->checkLevel(LogLevel::DEBUG)) {
-            return $this->writer->write($message, LogLevel::DEBUG);
-        }
-    }
-
-    public function log($level, $message, array $context = [])
-    {
-
-    }
-
-    /**
-     * 检查等级
-     * @param $funcLevel
-     * @return bool
-     */
-    public function checkLevel($funcLevel)
-    {
-        $funcLevelNum = $this->getLevelNum($funcLevel);
-        if ($this->levelNum >= $funcLevelNum) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * get level num
-     * @param $level
-     * @return mixed
-     */
-    protected function getLevelNum($level)
-    {
-        return $this->logMap[$level];
-    }
 }

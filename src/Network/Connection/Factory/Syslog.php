@@ -17,15 +17,17 @@ class Syslog implements ConnectionFactory
      * @var array
      */
     private $config;
+    private $socket;
+
 
     public function __construct(array $config)
     {
         $this->config = $config;
     }
-    
+
     public function create()
     {
-        
+
     }
 
     public function close()
