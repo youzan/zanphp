@@ -1,9 +1,18 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/12/18
- * Time: 17:20
+/*
+ *    Copyright 2012-2016 Youzan, Inc.
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
  */
 
 
@@ -17,10 +26,6 @@ class MysqlTest extends TaskTest
         //sql map
         //table
         //connection
-
-
-
-
     }
 
     public function testInsert()
@@ -31,60 +36,6 @@ class MysqlTest extends TaskTest
         $this->assertGreaterThan(0, $data);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-        public function testUpdate()
-        {
-            $context = new Context();
-            $job = new UpdateJob($context);
-            $sid = 'demo.demo_sql_update1';
-            $data = [
-                'data' => [
-                    'name' => "abcd",
-                    'nick_name' => 'b',
-                    'id_number' => '330323198888888888',
-                    'gender' => 1
-                ],
-                'var' => ['name' => 'allen'],
-                'and' => [
-                    ['gender', '=', 0],
-                ],
-                'and1' => [
-                    ['id_number', '=', 0],
-                ],
-
-            ];
-            $options = [];
-            $job->setSid($sid)->setData($data)->setOptions($options);
-            $coroutine = $job->run();
-
-            $task = new Task($coroutine);
-            $task->run();
-            $result = $context->show();
-            $this->assertTrue($result['response']);
-        }
-    */
     public function testSelectOne()
     {
         $context = new Context();
@@ -107,44 +58,5 @@ class MysqlTest extends TaskTest
         $task = new Task($coroutine);
         $task->run();
         $result = $context->show();
-//        var_dump(11111);exit;
-        //var_dump($result);
-        //exit;
-        //$this->assertTrue($result['response'] instanceof QueryResult);
-        //$this->assertArrayHasKey('name', $result['response']->one());
     }
-
-/*
-    public function testSelectByWhere()
-    {
-        $context = new Context();
-        $job = new SelectJob($context);
-        $sid = 'demo.demo_sql_id2';
-        $data = [
-            'where' => [
-                ['name', '=', 'a'], ['nick_name', '=', 'b']
-            ],
-            'order' => 'id desc',
-            'group' => 'name',
-            'limit' => 1,
-
-        ];
-        $options = [];
-        $job->setSid($sid)->setData($data)->setOptions($options);
-        $coroutine = $job->run();
-
-        $task = new Task($coroutine);
-        $task->run();
-        $result = $context->show();
-        $this->assertTrue($result['response'] instanceof QueryResult);
-        $this->assertArrayHasKey('name', $result['response']->one());
-    }
-    public function testSelectRequireLimit()
-    {
-
-    }
-
-
-*/
-
 }
