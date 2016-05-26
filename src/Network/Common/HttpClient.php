@@ -3,6 +3,8 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 
 class HttpClient implements Async
 {
@@ -79,6 +81,9 @@ class HttpClient implements Async
 
     public function setTimeout($timeout)
     {
+        if ($timeout < 0 || $timeout > 60) {
+            throw new HttpClientTimeoutException('Timeout must be between 0-60 seconds');
+        }
         $this->timeout = $timeout;
         return $this;
     }
@@ -137,7 +142,7 @@ class HttpClient implements Async
     {
         $this->client = new \swoole_http_client($ip, $this->port);
         $this->buildHeader();
-
+        Timer::after($this->timeout * 1000, [$this, 'checkTimeout'], spl_object_hash($this));
         if('GET' === $this->method){
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
@@ -153,6 +158,7 @@ class HttpClient implements Async
 
     public function onReceive($cli)
     {
+        Timer::clearAfterJob(spl_object_hash($this));
         call_user_func($this->callback, $cli->body);
     }
 
@@ -163,5 +169,12 @@ class HttpClient implements Async
             $response = $jsonData ? $jsonData : $response;
             call_user_func($callback, $response);
         };
+    }
+
+    public function checkTimeout()
+    {
+        $this->client->close();
+        $exception = new HttpClientTimeoutException();
+        call_user_func_array($this->callback, [null, $exception]);
     }
 }
