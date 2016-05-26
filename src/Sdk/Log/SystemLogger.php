@@ -18,13 +18,24 @@ class SystemLogger extends BaseLogger implements Async
         parent::__construct($config);
     }
 
-    public function write($log)
-    {
-        // TODO: Implement write() method.
-    }
-
     public function execute(callable $callback)
     {
         // TODO: Implement execute() method.
     }
+
+    public function init()
+    {
+        // TODO: Implement init() method.
+    }
+
+    public function format($level, $message, $context)
+    {
+        // TODO: Implement format() method.
+    }
+
+    public function write($log)
+    {
+        // TODO: Implement write() method.
+    }
+    
 }

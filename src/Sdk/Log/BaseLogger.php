@@ -28,7 +28,6 @@ abstract class BaseLogger implements LoggerInterface
     protected $config;
     protected $writer = null;
     protected $levelNum = 0;
-    private $bufferData;
 
     abstract public function init();
 
@@ -42,7 +41,6 @@ abstract class BaseLogger implements LoggerInterface
         }
         $this->config = $config;
         $this->levelNum = $this->getLevelNum($this->config['level']);
-
     }
 
     /**
@@ -201,7 +199,7 @@ abstract class BaseLogger implements LoggerInterface
         }
         yield $this[$level]($message, $context);
     }
-    
+
     /**
      * @param $level
      * @return int
@@ -225,45 +223,16 @@ abstract class BaseLogger implements LoggerInterface
         return $this->writer;
     }
 
-    private function checkAsync()
-    {
-        return $this->config['async'];
-    }
-
-    private function checkBuffer()
-    {
-        $config = $this->config;
-        return (!$config['useBuffer'] || (strlen($this->bufferData) >= $config['bufferSize']));
-    }
-
     public function write($level, $message, array $context = array())
     {
         $log = $this->format($level, $message, $context);
-        $this->appendToBuffer($log);
-        if (!$this->checkAsync() || $this->checkBuffer()) {
-            $this->doWrite();
-            $this->emptyBuffer();
-        }
+        $this->doWrite($log);
+
     }
 
-    private function appendToBuffer($log)
+    protected function doWrite($log)
     {
-        $this->bufferData .= $log;
-    }
-
-    private function emptyBuffer()
-    {
-        $this->bufferData = '';
-    }
-
-    private function getBuffer()
-    {
-        return $this->bufferData;
-    }
-
-    private function doWrite()
-    {
-        $this->getWriter()->write($this->getBuffer());
+        $this->getWriter()->write($log);
     }
 
 }

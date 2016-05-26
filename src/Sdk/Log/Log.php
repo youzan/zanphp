@@ -9,7 +9,8 @@ use Zan\Framework\Utilities\Types\Arr;
 class Log
 {
 
-    public static $instances = [];
+    private static $instances = [];
+    private $config;
 
     private static function getDefaultConfig()
     {
@@ -27,7 +28,17 @@ class Log
         ];
     }
 
-    private static function configParser($key)
+    public function __construct($key)
+    {
+        $this->configParser($key);
+        $logger = $this->adapter();
+        if ($this->config['useBuffer']) {
+            $logger = $this->bufferDecorate($logger);
+        }
+        return $logger;
+    }
+
+    private function configParser($key)
     {
         if (!$key) {
             throw new InvalidArgumentException('Configuration key cannot be null');
@@ -40,7 +51,6 @@ class Log
 
         $config = parse_url($logUrl);
         $defaults = self::getDefaultConfig();
-        $defaults['key'] = $key;
         $defaults['factory'] = $config['scheme'];
         $defaults['logLevel'] = $config['host'];
         if (isset($config['path'])) {
@@ -50,26 +60,31 @@ class Log
         parse_str($config['query'], $params);
         $result = Arr::merge($defaults, $params);
 
+        if (isset($result['module'])) {
+            $result['module'] = $key;
+        }
+
         if (isset($result['format'])) {
             $result['format'] = strtolower($result['format']);
         }
 
-        return $result;
+        $this->config = $result;
     }
 
-    public static function getInstance($key = 'debug')
+    private function adapter()
     {
-        $config = self::configParser($key);
-
         $logger = null;
+        $config = $this->config;
         switch ($config['factory']) {
             case 'syslog':
-                $logger = self::initLoggerInstance($config);
+                $logger = new SystemLogger($config);
                 break;
             case 'file':
             case 'log':
+                $logger = new FileLogger($config);
+                break;
             case 'blackhole':
-                $logger = self::getLoggerInstance($config);
+                $logger = new BlackholeLogger($config);
                 break;
             default:
                 throw new InvalidArgumentException('Cannot support this pattern');
@@ -78,20 +93,18 @@ class Log
         return $logger;
     }
 
-    private static function initLoggerInstance($config)
+    private function bufferDecorate($logger)
     {
-        return new Logger($config);
+        return new BufferLogger($logger, $this->config);
     }
 
-    private static function getLoggerInstance($config)
+    public static function getInstance($key)
     {
-        $key = $config['key'];
-        if (isset(Log::$instances[$key])) {
-            return Log::$instances[$key];
+        if (isset(self::$instances[$key])) {
+            return self::$instances[$key];
         }
-        $logger = self::initLoggerInstance($config);
-        Log::$instances[$key] = $logger;
-        return Log::$instances[$key];
+        self::$instances[$key] = new self($key);
+        return self::$instances[$key];
     }
 
 }

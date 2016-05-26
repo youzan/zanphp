@@ -8,10 +8,9 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 
-class Logger implements LoggerInterface
+class Logger
 {
     private $logMap = [
         'all' => 0,
@@ -109,116 +108,4 @@ class Logger implements LoggerInterface
         yield $this->write(LogLevel::EMERGENCY, $log);
     }
 
-    /**
-     * Action must be taken immediately.
-     *
-     * Example: Entire website down, database unavailable, etc. This should
-     * trigger the SMS alerts and wake you up.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function alert($message, array $context = array())
-    {
-        // TODO: Implement alert() method.
-    }
-
-    /**
-     * Critical conditions.
-     *
-     * Example: Application component unavailable, unexpected exception.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function critical($message, array $context = array())
-    {
-        // TODO: Implement critical() method.
-    }
-
-    /**
-     * Runtime errors that do not require immediate action but should typically
-     * be logged and monitored.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function error($message, array $context = array())
-    {
-        // TODO: Implement error() method.
-    }
-
-    /**
-     * Exceptional occurrences that are not errors.
-     *
-     * Example: Use of deprecated APIs, poor use of an API, undesirable things
-     * that are not necessarily wrong.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function warning($message, array $context = array())
-    {
-        // TODO: Implement warning() method.
-    }
-
-    /**
-     * Normal but significant events.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function notice($message, array $context = array())
-    {
-        // TODO: Implement notice() method.
-    }
-
-    /**
-     * Interesting events.
-     *
-     * Example: User logs in, SQL logs.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function info($message, array $context = array())
-    {
-        // TODO: Implement info() method.
-    }
-
-    /**
-     * Detailed debug information.
-     *
-     * @param string $message
-     * @param array $context
-     * @return null
-     */
-    public function debug($message, array $context = array())
-    {
-        // TODO: Implement debug() method.
-    }
-
-    /**
-     * Logs with an arbitrary level.
-     *
-     * @param mixed $level
-     * @param string $message
-     * @param array $context
-     * @return null
-     * @throws InvalidArgumentException
-     */
-    public function log($level, $message, array $context = array())
-    {
-        if (!isset($this->logMap[$level])) {
-            throw new InvalidArgumentException('Log level[' . $level . '] is illegal');
-            return false;
-        }
-        yield $this[$level]($message, $context);
-    }
 }

@@ -8,24 +8,15 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Utilities\Types\Time;
 
-class FileLogger extends BaseLogger implements Async
+class FileLogger extends BaseLogger
 {
-
-    private $callback;
 
     public function __construct(array $config)
     {
         parent::__construct($config);
         $this->config['path'] = $this->getLogPath($this->config);
-    }
-
-    public function execute(callable $callback)
-    {
-        $this->callback = $callback;
     }
 
     private function getLogPath($config)
@@ -42,28 +33,43 @@ class FileLogger extends BaseLogger implements Async
         return $path;
     }
 
-    public function write($log)
+    public function init()
     {
-        $path = $this->config['path'];
-        if (!$path) {
-            throw new InvalidArgumentException('Path not be null');
-        }
-        $dir = dirname($path);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-            chmod($dir, 0755);
-        }
-
-        $callback = $this->config['async'] ? [$this, 'ioReady'] : null;
-        swoole_async_write($path, $log, -1, $callback);
-        if (null === $callback) {
-            $this->ioReady();
-        }
+//        $this->writer = new FileWriter($this->config['path'], $this->config['async']);
+        $this->writer = FileWriter::getInstance($this->config['path'], $this->config['async']);
     }
 
-    public function ioReady()
+    public function format($level, $message, $context)
     {
-        call_user_func($this->callback, true);
+        $result = '';
+        $config = $this->config;
+        $time = Time::current('Y-m-d H:i:s.u');
+        $level = strtoupper($level);
+        $app = $config['app'];
+        $module = $config['module'];
+        $log = $this->getLogString($message, $context);
+        sprintf("[%s]\t[%s]\t[%s]\t%s\t%s\n", $time, $level, $app, $module, $log);
+        return $result;
+    }
+
+    private function getLogString($message, $data)
+    {
+        $result = $message;
+        if (!$data || !is_array($data) || !is_object($data)) {
+            return $result;
+        }
+        $format = isset($this->config['format']) ? $this->config['format'] : '';
+        switch ($format) {
+            case 'json':
+                $result .= "\t" . json_encode($data, JSON_UNESCAPED_UNICODE);
+                break;
+            case 'var':
+                $result .= "\t" . var_export($data, true);
+                break;
+            default :
+                break;
+        }
+        return $result;
     }
 
 }
