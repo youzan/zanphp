@@ -9,7 +9,7 @@
 namespace Zan\Framework\Sdk\Log;
 
 
-class BufferWrite implements LogWriter
+class BufferWriter implements LogWriter
 {
 
     private $bufferSize;

@@ -220,6 +220,9 @@ abstract class BaseLogger implements LoggerInterface
         return;
     }
 
+    /**
+     * @return null|FileWriter|SystemWriter|BufferWriter
+     */
     public function getWriter()
     {
         return $this->writer;

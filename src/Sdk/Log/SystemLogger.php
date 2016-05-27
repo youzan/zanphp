@@ -25,7 +25,8 @@ class SystemLogger extends BaseLogger implements Async
 
     public function init()
     {
-        // TODO: Implement init() method.
+        $this->writer = new SystemWriter();
+        yield $this->writer->init();
     }
 
     public function format($level, $message, $context)
@@ -36,6 +37,10 @@ class SystemLogger extends BaseLogger implements Async
 
     protected function doWrite($log)
     {
+        $writer = $this->getWriter();
+        if (!$writer) {
+            yield $this->init();
+        }
         yield $this->getWriter()->write($log);
     }
 
