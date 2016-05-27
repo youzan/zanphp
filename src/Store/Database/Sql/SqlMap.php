@@ -5,6 +5,7 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Store\Database\Sql\SqlParser;
 use Zan\Framework\Store\Database\Sql\SqlBuilder;
 use Zan\Framework\Foundation\Core\Path;
+use Zan\Framework\Store\Database\Sql\Exception\SqlMapCanNotFindException;
 
 class SqlMap
 {
@@ -35,11 +36,11 @@ class SqlMap
         $key = $sidData['key'];
         $filePath = $sidData['file_path'];
         if (!isset($this->sqlMaps[$filePath]) || [] == $this->sqlMaps[$filePath]) {
-            throw new Exception('no suck sql map');
+            throw new SqlMapCanNotFindException('no suck sql map');
         }
         $sqlMap = $this->sqlMaps[$filePath];
         if (!isset($sqlMap[$key]) || [] == $sqlMap[$key]) {
-            throw new Exception('no suck sql map');
+            throw new SqlMapCanNotFindException('no suck sql map');
         }
         return $sqlMap[$key];
     }
@@ -48,7 +49,7 @@ class SqlMap
     {
         $pos = strrpos($sid, '.');
         if (false === $pos) {
-            throw new Exception('no such sql id');
+            throw new SqlMapCanNotFindException('no such sql id');
         }
 
         $filePath = substr($sid, 0, $pos);

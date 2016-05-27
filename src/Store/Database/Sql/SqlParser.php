@@ -6,7 +6,11 @@
  * Time: 下午4:05
  */
 namespace Zan\Framework\Store\Database\Sql;
+
 use Zan\Framework\Contract\Store\Database\ResultTypeInterface;
+use Zan\Framework\Store\Database\Sql\Exception\SqlCanNotFindTableNameException;
+use Zan\Framework\Store\Database\Sql\Exception\SqlTypeException;
+
 class SqlParser
 {
     private $sqlMap;
@@ -54,7 +58,7 @@ class SqlParser
     {
         preg_match('/^\s*(INSERT|SELECT|UPDATE|DELETE)/is', $sql, $match);
         if (!$match) {
-            throw new Exception('sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一');
+            throw new SqlTypeException('sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一');
         }
         return strtolower(trim($match[0]));
     }
@@ -110,11 +114,11 @@ class SqlParser
         $type = strtoupper(substr($sql, 0, strpos($sql, ' ')));
         $matches = null;
         if (!isset($tablePregMap[$type])) {
-            throw new Exception('Can not find table name, please check your sql type');
+            throw new SqlCanNotFindTableNameException('Can not find table name, please check your sql type');
         }
         preg_match($tablePregMap[$type], $sql, $matches);
         if (!is_array($matches) || !isset($matches[0])) {
-            throw new Exception('Can not find table name, please check your sql type');
+            throw new SqlCanNotFindTableNameException('Can not find table name, please check your sql type');
         }
         $table = $matches[0];
         //去除`符合和库名
@@ -123,7 +127,7 @@ class SqlParser
         }
         $table = trim($table, '`');
         if ('' == $table || !strlen($table)) {
-            throw new Exception('Can\'t get table name');
+            throw new SqlCanNotFindTableNameException('Can\'t get table name');
         }
         return $table;
     }
