@@ -19,7 +19,7 @@ class Log
             'factory' => '',
             'app' => Application::getInstance()->getName(),
             'module' => 'default',
-            'logLevel' => 'debug',
+            'level' => 'debug',
             'storeType' => 'normal',
             'path' => 'debug.log',
             'useBuffer' => false,
@@ -53,7 +53,7 @@ class Log
         $config = parse_url($logUrl);
         $result = self::getDefaultConfig();
         $result['factory'] = $config['scheme'];
-        $result['logLevel'] = $config['host'];
+        $result['level'] = $config['host'];
         if (isset($config['path'])) {
             $result['path'] = $config['path'];
         }
