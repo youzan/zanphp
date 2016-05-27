@@ -30,12 +30,13 @@ class SystemLogger extends BaseLogger implements Async
 
     public function format($level, $message, $context)
     {
-        // TODO: Implement format() method.
+        $result = $message;
+        return $result;
     }
 
-    public function write($log)
+    protected function doWrite($log)
     {
-        // TODO: Implement write() method.
+        yield $this->getWriter()->write($log);
     }
-    
+
 }

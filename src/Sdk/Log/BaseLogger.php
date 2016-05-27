@@ -228,13 +228,12 @@ abstract class BaseLogger implements LoggerInterface
     public function write($level, $message, array $context = array())
     {
         $log = $this->format($level, $message, $context);
-        $this->doWrite($log);
-
+        yield $this->doWrite($log);
     }
 
     protected function doWrite($log)
     {
-        $this->getWriter()->write($log);
+        yield $this->getWriter()->write($log);
     }
 
 }
