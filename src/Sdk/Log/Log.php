@@ -17,7 +17,7 @@ class Log
         return [
             'factory' => '',
             'app' => Application::getInstance()->getName(),
-            'module' => 'default',
+            'module' => null,
             'level' => 'debug',
             'storeType' => 'normal',
             'path' => 'debug.log',
@@ -65,14 +65,14 @@ class Log
         if (isset($config['query'])) {
             parse_str($config['query'], $params);
             $result = Arr::merge($result, $params);
+        }
 
-            if (isset($result['module'])) {
-                $result['module'] = $key;
-            }
+        if (!$result['module']) {
+            $result['module'] = $key;
+        }
 
-            if (isset($result['format'])) {
-                $result['format'] = strtolower($result['format']);
-            }
+        if (isset($result['format'])) {
+            $result['format'] = strtolower($result['format']);
         }
 
         return $result;

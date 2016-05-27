@@ -42,21 +42,20 @@ class FileLogger extends BaseLogger
 
     public function format($level, $message, $context)
     {
-        $result = '';
         $config = $this->config;
         $time = Time::current('Y-m-d H:i:s.u');
         $level = strtoupper($level);
         $app = $config['app'];
         $module = $config['module'];
         $log = $this->getLogString($message, $context);
-        sprintf("[%s]\t[%s]\t[%s]\t%s\t%s\n", $time, $level, $app, $module, $log);
+        $result = sprintf("[%s]\t[%s]\t[%s]\t%s\t%s\n", $time, $level, $app, $module, $log);
         return $result;
     }
 
     private function getLogString($message, $data)
     {
         $result = $message;
-        if (!$data || !is_array($data) || !is_object($data)) {
+        if (empty($data)) {
             return $result;
         }
         $format = isset($this->config['format']) ? $this->config['format'] : '';

@@ -48,6 +48,9 @@ class FileWriter implements LogWriter, Async
 
     public function ioReady()
     {
+        if (!$this->callback) {
+            return;
+        }
         call_user_func($this->callback, true);
     }
 

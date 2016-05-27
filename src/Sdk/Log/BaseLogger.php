@@ -31,7 +31,6 @@ abstract class BaseLogger implements LoggerInterface
 
     public function init()
     {
-        
     }
 
     abstract public function format($level, $message, $context);
@@ -215,7 +214,7 @@ abstract class BaseLogger implements LoggerInterface
     public function checkLevel($level)
     {
         $levelNum = $this->getLevelNum($level);
-        if ($this->levelNum >= $levelNum) {
+        if ($levelNum >= $this->levelNum) {
             return true;
         }
         return;
