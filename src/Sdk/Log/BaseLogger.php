@@ -29,7 +29,10 @@ abstract class BaseLogger implements LoggerInterface
     protected $writer = null;
     protected $levelNum = 0;
 
-    abstract public function init();
+    public function init()
+    {
+        
+    }
 
     abstract public function format($level, $message, $context);
 
