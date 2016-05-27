@@ -36,8 +36,8 @@ class FileLogger extends BaseLogger
 
     public function init()
     {
-//        $this->writer = new FileWriter($this->config['path'], $this->config['async']);
-        $this->writer = FileWriter::getInstance($this->config['path'], $this->config['async']);
+        $this->writer = new FileWriter($this->config['path'], $this->config['async']);
+//        $this->writer = FileWriter::getInstance($this->config['path'], $this->config['async']);
     }
 
     public function format($level, $message, $context)

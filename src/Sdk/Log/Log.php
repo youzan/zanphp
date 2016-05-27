@@ -115,7 +115,8 @@ class Log
             return self::$instances[$key];
         }
         self::$instances[$key] = new self($key);
-        return self::$instances[$key];
+        yield self::$instances[$key]->init();
+        yield self::$instances[$key];
     }
 
 }

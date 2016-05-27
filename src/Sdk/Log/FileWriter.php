@@ -13,8 +13,6 @@ use Zan\Framework\Foundation\Contract\Async;
 class FileWriter implements LogWriter, Async
 {
 
-    private static $instance = null;
-
     private $callback;
     private $path;
     private $async;
@@ -51,15 +49,6 @@ class FileWriter implements LogWriter, Async
     public function ioReady()
     {
         call_user_func($this->callback, true);
-    }
-
-    public static function getInstance($path, $async = true)
-    {
-        if (isset(self::$instance)) {
-            return self::$instance;
-        }
-        self::$instance = new self($path, $async);
-        return self::$instance;
     }
 
 }
