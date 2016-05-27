@@ -28,7 +28,6 @@ class Syslog implements ConnectionFactory
     public function create()
     {
         $this->conn = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
-        $this->conn->set($this->config['config']);
 
         $connection = new SyslogDriver();
         $connection->setSocket($this->conn);
