@@ -28,7 +28,12 @@ class Log
         ];
     }
 
-    private static function init($key)
+    /**
+     * @param $key
+     * @return null|BlackholeLogger|BufferLogger|FileLogger|SystemLogger
+     * @throws InvalidArgumentException
+     */
+    private static function instance($key)
     {
         $config = self::configParser($key);
         $logger = self::adapter($config);
@@ -113,8 +118,7 @@ class Log
         if (isset(self::$instances[$key])) {
             yield self::$instances[$key];
         }
-        self::$instances[$key] = self::init($key);
-        yield self::$instances[$key]->init();
+        self::$instances[$key] = (yield self::instance($key)->init());
         yield self::$instances[$key];
     }
 
