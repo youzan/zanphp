@@ -25,7 +25,7 @@ class SystemLogger extends BaseLogger implements Async
 
     public function init()
     {
-        $this->writer = new SystemWriter();
+        $this->writer = new SystemWriter($this->config['path']);
         yield $this->writer->init();
     }
 
