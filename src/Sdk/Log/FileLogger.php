@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Sdk\Log;
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Utilities\Types\Time;
 
 class FileLogger extends BaseLogger
