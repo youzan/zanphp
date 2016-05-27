@@ -37,7 +37,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if (!$config) {
             throw new InvalidArgumentException('Config is required' . $config);
-            return false;
+            return;
         }
         $this->config = $config;
         $this->levelNum = $this->getLevelNum($this->config['level']);
@@ -54,7 +54,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::EMERGENCY)) {
             yield $this->write(LogLevel::EMERGENCY, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -73,7 +73,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::ALERT)) {
             yield $this->write(LogLevel::ALERT, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -91,7 +91,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::CRITICAL)) {
             yield $this->write(LogLevel::CRITICAL, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -108,7 +108,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::ERROR)) {
             yield $this->write(LogLevel::ERROR, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -127,7 +127,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::WARNING)) {
             yield $this->write(LogLevel::WARNING, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -143,7 +143,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::NOTICE)) {
             yield $this->write(LogLevel::NOTICE, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -161,7 +161,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::INFO)) {
             yield $this->write(LogLevel::INFO, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -177,7 +177,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if ($this->checkLevel(LogLevel::DEBUG)) {
             yield $this->write(LogLevel::DEBUG, $message, $context);
-            return false;
+            return;
         }
         yield null;
     }
@@ -195,7 +195,7 @@ abstract class BaseLogger implements LoggerInterface
     {
         if (!isset($this->logMap[$level])) {
             throw new InvalidArgumentException('Log level[' . $level . '] is illegal');
-            return false;
+            return;
         }
         yield $this[$level]($message, $context);
     }
@@ -215,7 +215,7 @@ abstract class BaseLogger implements LoggerInterface
         if ($this->levelNum >= $levelNum) {
             return true;
         }
-        return false;
+        return;
     }
 
     public function getWriter()

@@ -51,22 +51,24 @@ class Log
         }
 
         $config = parse_url($logUrl);
-        $defaults = self::getDefaultConfig();
-        $defaults['factory'] = $config['scheme'];
-        $defaults['logLevel'] = $config['host'];
+        $result = self::getDefaultConfig();
+        $result['factory'] = $config['scheme'];
+        $result['logLevel'] = $config['host'];
         if (isset($config['path'])) {
-            $defaults['path'] = $config['path'];
+            $result['path'] = $config['path'];
         }
 
-        parse_str($config['query'], $params);
-        $result = Arr::merge($defaults, $params);
+        if (isset($config['query'])) {
+            parse_str($config['query'], $params);
+            $result = Arr::merge($result, $params);
 
-        if (isset($result['module'])) {
-            $result['module'] = $key;
-        }
+            if (isset($result['module'])) {
+                $result['module'] = $key;
+            }
 
-        if (isset($result['format'])) {
-            $result['format'] = strtolower($result['format']);
+            if (isset($result['format'])) {
+                $result['format'] = strtolower($result['format']);
+            }
         }
 
         $this->config = $result;
