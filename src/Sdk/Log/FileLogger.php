@@ -18,6 +18,7 @@ class FileLogger extends BaseLogger
     {
         parent::__construct($config);
         $this->config['path'] = $this->getLogPath($this->config);
+        $this->writer = new FileWriter($this->config['path'], $this->config['async']);
     }
 
     private function getLogPath($config)
@@ -32,12 +33,6 @@ class FileLogger extends BaseLogger
         $path = $logBasePath . $path;
 
         return $path;
-    }
-
-    public function init()
-    {
-        $this->writer = new FileWriter($this->config['path'], $this->config['async']);
-//        $this->writer = FileWriter::getInstance($this->config['path'], $this->config['async']);
     }
 
     public function format($level, $message, $context)

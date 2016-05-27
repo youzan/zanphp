@@ -14,7 +14,6 @@ class BlackholeLogger extends BaseLogger
 
     public function init()
     {
-        $this->writer = null;
     }
 
     public function format($level, $message, $context)

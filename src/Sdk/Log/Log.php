@@ -116,12 +116,11 @@ class Log
     public static function getInstance($key)
     {
         if (isset(self::$instances[$key])) {
-            yield self::$instances[$key];
+            return self::$instances[$key];
         }
         $logger = self::instance($key);
-        yield $logger->init();
         self::$instances[$key] = $logger;
-        yield self::$instances[$key];
+        return self::$instances[$key];
     }
 
 }

@@ -24,11 +24,6 @@ class BufferLogger extends BaseLogger
         $this->logger = $logger;
         $this->config = $config;
         $this->bufferSize = $this->config['bufferSize'];
-        $this->init();
-    }
-
-    public function init()
-    {
         $this->writer = new BufferWriter($this->logger, $this->bufferSize);
     }
 
