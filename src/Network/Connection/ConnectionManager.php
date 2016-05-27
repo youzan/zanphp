@@ -25,9 +25,6 @@ class ConnectionManager
     use Singleton;
 
     private static $poolMap = [];
-    private static $poolConfig=null;
-    private static $mysqlConfig=null;
-    private static $registry=[];
 
     private static $server;
 
@@ -45,15 +42,12 @@ class ConnectionManager
         if(!isset(self::$poolMap[$connKey])){
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
         }     
-        
         $pool = self::$poolMap[$connKey];
-        
         $connection = $pool->get();
         if($connection){
             yield $connection;
             return;
         }
-        
         yield new FutureConnection($this, $connKey, $timeout);
     }
 
