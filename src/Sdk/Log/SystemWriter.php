@@ -16,6 +16,7 @@ class SystemWriter implements LogWriter, Async
 {
 
     private $path;
+    private $conn;
 
     public function __construct($path)
     {
@@ -27,13 +28,13 @@ class SystemWriter implements LogWriter, Async
 
     public function init()
     {
-        $connectionConfig = 'syslog.' . $this->path;
-        (yield ConnectionManager::getInstance()->get($connectionConfig));
+        $connectionConfig = 'syslog.' . str_replace('/', '', $this->path);
+        $this->conn = (yield ConnectionManager::getInstance()->get($connectionConfig));
     }
 
     public function write($log)
     {
-        var_dump('SystemWriter', $log);
+        var_dump('SystemWriter', $log, $this->conn);
         // TODO: Implement write() method.
     }
 
