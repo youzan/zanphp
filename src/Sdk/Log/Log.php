@@ -3,6 +3,7 @@
 namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\Types\Arr;
 
