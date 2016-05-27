@@ -71,6 +71,10 @@ class Log
         $this->config = $result;
     }
 
+    /**
+     * @return null|BlackholeLogger|FileLogger|SystemLogger
+     * @throws InvalidArgumentException
+     */
     private function adapter()
     {
         $logger = null;
@@ -98,6 +102,10 @@ class Log
         return new BufferLogger($logger, $this->config);
     }
 
+    /**
+     * @param $key
+     * @return BlackholeLogger|FileLogger|SystemLogger
+     */
     public static function getInstance($key)
     {
         if (isset(self::$instances[$key])) {
