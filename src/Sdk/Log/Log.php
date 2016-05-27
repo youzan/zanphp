@@ -11,7 +11,6 @@ class Log
 {
 
     private static $instances = [];
-    private $config;
 
     private static function getDefaultConfig()
     {
@@ -29,12 +28,12 @@ class Log
         ];
     }
 
-    public function __construct($key)
+    private static function init($key)
     {
-        $this->configParser($key);
-        $logger = $this->adapter();
-        if ($this->config['useBuffer']) {
-            $logger = $this->bufferDecorate($logger);
+        $config = self::configParser($key);
+        $logger = self::adapter($config);
+        if ($config['useBuffer']) {
+            $logger = self::bufferDecorate($logger, $config);
         }
         return $logger;
     }
@@ -71,17 +70,17 @@ class Log
             }
         }
 
-        $this->config = $result;
+        return $result;
     }
 
     /**
+     * @param $config
      * @return null|BlackholeLogger|FileLogger|SystemLogger
      * @throws InvalidArgumentException
      */
-    private function adapter()
+    private static function adapter($config)
     {
         $logger = null;
-        $config = $this->config;
         switch ($config['factory']) {
             case 'syslog':
                 $logger = new SystemLogger($config);
@@ -100,9 +99,9 @@ class Log
         return $logger;
     }
 
-    private function bufferDecorate($logger)
+    private static function bufferDecorate($logger, $config)
     {
-        return new BufferLogger($logger, $this->config);
+        return new BufferLogger($logger, $config);
     }
 
     /**
@@ -114,7 +113,7 @@ class Log
         if (isset(self::$instances[$key])) {
             yield self::$instances[$key];
         }
-        self::$instances[$key] = new self($key);
+        self::$instances[$key] = self::init($key);
         yield self::$instances[$key]->init();
         yield self::$instances[$key];
     }
