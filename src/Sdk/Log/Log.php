@@ -118,7 +118,9 @@ class Log
         if (isset(self::$instances[$key])) {
             yield self::$instances[$key];
         }
-        self::$instances[$key] = (yield self::instance($key)->init());
+        $logger = self::instance($key);
+        yield $logger->init();
+        self::$instances[$key] = $logger;
         yield self::$instances[$key];
     }
 
