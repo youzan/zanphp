@@ -31,6 +31,7 @@ class Syslog extends Base implements Connection
 
     public function onConnect($cli)
     {
+        $this->getSocket()->send($this->postData);
         //put conn to active_pool
         $this->release();
         echo "nova client connect to server\n";
