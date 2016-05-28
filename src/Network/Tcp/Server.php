@@ -97,16 +97,21 @@ class Server extends ServerBase {
 
     public function onStart($swooleServer)
     {
-        if (RunMode::get() !== 'online') {
-            $masterPid = getmypid();
-            $basePath = Application::getInstance()->getBasePath();
+        if (RunMode::get() == 'test') {
+            $masterPid = $swooleServer->master_pid;
+            $pidFilePath = $this->getPidFilePath();
 
-            file_put_contents($basePath . '/bin/.pid', $masterPid);
+            file_put_contents($pidFilePath, $masterPid);
         }
+        echo "server starting .....\n";
     }
 
     public function onShutdown($swooleServer)
     {
+        $pidFilePath = $this->getPidFilePath();
+        if (file_exists($pidFilePath)) {
+            unlink($pidFilePath);
+        }
         echo "server shutdown .....\n";
     }
 
@@ -136,5 +141,13 @@ class Server extends ServerBase {
     {
         Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getPidFilePath()
+    {
+        return '/tmp/nova-' . strtolower(Application::getInstance()->getName()) . '.pid';
     }
 }
