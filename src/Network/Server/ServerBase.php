@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Server;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Core\RunMode;
 
 class ServerBase
 {
@@ -58,6 +59,32 @@ class ServerBase
             return include $configFile;
         } else {
             return [];
+        }
+    }
+
+    /**
+     * @TODO 改成可以支持自定义
+     * @return string
+     */
+    protected function getPidFilePath()
+    {
+        return '/tmp/' . strtolower(Application::getInstance()->getName()) . '.pid';
+    }
+
+    protected function removePidFile()
+    {
+        $pidFilePath = $this->getPidFilePath();
+        if (file_exists($pidFilePath)) {
+            unlink($pidFilePath);
+        }
+    }
+
+    protected function writePid($pid)
+    {
+        if (RunMode::get() == 'test') {
+            $pidFilePath = $this->getPidFilePath();
+
+            file_put_contents($pidFilePath, $pid);
         }
     }
 }
