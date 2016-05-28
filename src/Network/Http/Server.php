@@ -72,26 +72,25 @@ class Server extends ServerBase implements ServerContract
 
     public function onStart($swooleServer)
     {
-        if (RunMode::get() !== 'online') {
-            $masterPid = getmypid();
-            $basePath = Application::getInstance()->getBasePath();
-
-            file_put_contents($basePath . '/bin/.pid', $masterPid);
-        }
+        $this->writePid($swooleServer->master_pid);
+        echo "server starting .....\n";
     }
 
     public function onShutdown($swooleServer)
     {
-
+        $this->removePidFile();
+        echo "server shutdown .....\n";
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
+        echo "worker #$workerId starting .....\n";
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
+        echo "worker #$workerId stopping .....\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
@@ -107,13 +106,5 @@ class Server extends ServerBase implements ServerContract
 //        } catch (\Exception $e) {
 //            RequestExceptionHandlerChain::getInstance()->handle($e, $swooleHttpRequest, $swooleHttpResponse);
 //        }
-    }
-
-    private function routerSelfCheck()
-    {
-        $basePath = Application::getInstance()->getBasePath();
-        $urlRulesPath = $checkListPath = $basePath . '/init/routing/';
-        $routerSelfCheck = new RouterSelfCheck($urlRulesPath, $checkListPath);
-        $routerSelfCheck->check();
     }
 }
