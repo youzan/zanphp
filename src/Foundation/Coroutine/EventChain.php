@@ -93,8 +93,8 @@ class EventChain
             return false;
         }
 
-        $this->event->fire($afterEvt);
         $this->clearBeforeEventBind($afterEvt);
+        $this->event->fire($afterEvt);
     }
 
     private function fireBeforeEvent($beforeEvt, $afterEvt)

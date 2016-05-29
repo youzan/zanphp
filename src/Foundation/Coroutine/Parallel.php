@@ -51,8 +51,17 @@ class Parallel
 
     public function done()
     {
+        $event = $this->task->getContext()->getEvent();
+        $eventChain = $event->getEventChain();
+        $parentTaskId = $this->task->getTaskId();
+        $taskDoneEventName = 'parallel_task_done_' . $parentTaskId;
+
         foreach ($this->childTasks as $key => $childTask) {
             $this->sendValues[$key] = $childTask->getResult();
+
+            $newTaskId = $childTask->getTaskId();
+            $evtName = 'task_event_' . $newTaskId;
+            $eventChain->breakChain($evtName, $taskDoneEventName);
         }
 
         $this->task->send($this->sendValues);
