@@ -62,7 +62,6 @@ class Parallel
             $newTaskId = $childTask->getTaskId();
             $evtName = 'task_event_' . $newTaskId;
             $eventChain->breakChain($evtName, $taskDoneEventName);
-            $event->unregister($evtName);
         }
 
         $event->unbind($taskDoneEventName, [$this,'done']);
