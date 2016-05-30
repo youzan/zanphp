@@ -28,6 +28,7 @@ class Syslog extends Base implements Connection
     public function send($log)
     {
         $this->postData = $log . "\n";
+        $this->setClientCb([$this, 'ioReady']);
         $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
         return $this;
     }
@@ -35,7 +36,6 @@ class Syslog extends Base implements Connection
     public function onConnect($cli)
     {
         $this->getSocket()->send($this->postData);
-        $this->release();
     }
 
     public function onClose(SwooleClient $cli)
@@ -46,6 +46,11 @@ class Syslog extends Base implements Connection
     public function onReceive(SwooleClient $cli, $data)
     {
         call_user_func($this->clientCb, $data);
+    }
+
+    public function ioReady()
+    {
+        $this->release();
     }
 
     public function onError(SwooleClient $cli)
