@@ -58,11 +58,11 @@ class ServerDiscovery implements Async
 
     public function start()
     {
-        yield $this->get();
+        $servers = (yield $this->get());
         if (!$this->checkIsWatch()) {
             $this->watch();
         }
-        yield LoadBalancing::getInstance()->work();
+        yield LoadBalancingManager::getInstance()->work($servers);
     }
 
     private function checkIsWatch()

@@ -10,6 +10,4 @@ namespace Zan\Framework\Contract\Network;
 interface LoadBalancingStrategyInterface
 {
     public function get();
-
-    public function algorithm();
 }

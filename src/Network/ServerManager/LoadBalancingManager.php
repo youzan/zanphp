@@ -8,25 +8,33 @@
 namespace Zan\Framework\Network\ServerManager;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Network\ServerManager\LoadBalancingPool;
+use Zan\Framework\Foundation\Core\Config;
 
 class LoadBalancingManager
 {
     use Singleton;
 
-    private $config;
+    /**
+     * @var LoadBalancingPool
+     */
+    private $loadBalancingPool;
 
-    private $strategyMap = [
-        'Polling' => 'Zan\Framework\Network\ServerManage\LoadBalancingStrategy\Polling',
-    ];
-
-    private function setConfig($config)
+    public function work($servers)
     {
-        $this->config = $config;
+        $config = Config::get('loadBalancing');
+        $novaConfig = Config::get('nova');
+        foreach ($servers as $server) {
+            $novaConfig['host'] = $server['host'];
+            $novaConfig['port'] = $server['port'];
+            $config['connections'][] = $novaConfig;
+        }
+        $this->loadBalancingPool = new LoadBalancingPool($config);
     }
 
-    public function work()
+    public function get()
     {
-
+        yield $this->loadBalancingPool->get();
     }
 
     public function offline()
@@ -35,16 +43,6 @@ class LoadBalancingManager
     }
 
     public function addOnline()
-    {
-
-    }
-
-    public function get()
-    {
-
-    }
-
-    private function getStrategy()
     {
 
     }

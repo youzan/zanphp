@@ -7,24 +7,47 @@
  */
 namespace Zan\Framework\Network\ServerManager\LoadBalancingStrategy;
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
+use Zan\Framework\Network\ServerManager\LoadBalancingPool;
 
 class Polling implements LoadBalancingStrategyInterface
 {
-    private $connecitonPool;
+    private $offset;
 
-    public function setConnectionPool($connectionPool)
+    private $connectionPool;
+
+    public function __construct(LoadBalancingPool $connectionPool)
     {
-        $this->connecitonPool = $connectionPool;
+        $this->connectionPool = $connectionPool;
     }
 
     public function get()
     {
-
+        yield $this->algorithm();
     }
 
-    public function algorithm()
+    private function algorithm()
     {
-
+        $connections = $this->connectionPool->getConnections();
+        if (count($connections) == 1) {
+            $this->offset = key($connections);
+            yield reset($connections);
+            return;
+        }
+        if (null === $this->offset) {
+            yield reset($connections);
+            $this->offset = key(array_slice($connections, 1, 1));
+            return;
+        }
+        if (isset($connections[$this->offset])) {
+            yield $connections[$this->offset];
+            $keys = array_keys($connections);
+            $this->offset = isset($keys[(array_search($this->offset, $keys) + 1)]) ? $keys[(array_search($this->offset, $keys) + 1)] : $keys[0];
+            return;
+        }
+        $this->offset = key($connections);
+        yield reset($connections);
+        return;
     }
 }

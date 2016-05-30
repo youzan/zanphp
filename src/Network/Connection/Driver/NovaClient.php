@@ -53,4 +53,9 @@ class NovaClient extends Base implements Connection
     public function setClientCb(callable $cb) {
         $this->clientCb = $cb;
     }
+
+    public function heartbeat()
+    {
+
+    }
 }
