@@ -49,14 +49,13 @@ class FileLogger extends BaseLogger
 
     private function getLogString($message, $context)
     {
-        $result = [
-            'message' => $message
-        ];
+        $result = $message;
         if (empty($context)) {
             return $result;
         }
+        $detail = [];
         if (isset($context['exception']) && $context['exception'] instanceof \Exception) {
-            $result['error'] = [
+            $detail['error'] = [
                 'code' => $context['exception']->getCode(),
                 'message' => $context['exception']->getMessage(),
                 'file' => $context['exception']->getFile(),
@@ -65,16 +64,15 @@ class FileLogger extends BaseLogger
                 'stacktraces' => $context['exception']->getTraceAsString()
             ];
             unset($context['exception']);
-            $this->config['format'] = 'json';
         }
-        $result['extra'] = $context;
-        $format = isset($this->config['format']) ? $this->config['format'] : '';
+        $detail['extra'] = $context;
+        $format = isset($this->config['format']) ? $this->config['format'] : 'json';
         switch ($format) {
             case 'json':
-                $result .= "\t" . json_encode($result, JSON_UNESCAPED_UNICODE);
+                $result = $result . "\t" . json_encode($detail, JSON_UNESCAPED_UNICODE);
                 break;
             case 'var':
-                $result .= "\t" . var_export($result, true);
+                $result = $result . "\t" . var_export($result, true);
                 break;
             default :
                 break;

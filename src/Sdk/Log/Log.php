@@ -23,7 +23,7 @@ class Log
             'useBuffer' => false,
             'bufferSize' => 4096,
             'async' => true,
-            'format' => ''
+            'format' => 'json'
         ];
     }
 
