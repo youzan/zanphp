@@ -8,6 +8,8 @@
 
 namespace Zan\Framework\Network\Http\Routing;
 
+use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Network\Http\Exception\RouteCheckFailedException;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Http\Routing\UrlRule;
 use swoole_http_request as SwooleHttpRequest;
@@ -17,91 +19,78 @@ use Zan\Framework\Utilities\Types\Dir;
 
 class RouterSelfCheck
 {
-    public $urlRulesPath = '';
-    public $checkListPath = '';
+    use Singleton;
+
     public $checkList = [];
     public $urlRules = [];
     public $checkResult;
+    public $checkMsg = '';
 
     const CHECK_SUCCESS = 'success';
     const CHECK_FAILED = 'failed';
-    const OUTPUT_PREFIX = '【RouteCheck】';
+    const OUTPUT_PREFIX = '【RouteSelfCheck】';
 
-    public function __construct($urlRulesPath, $checkListPath)
+    public function setUrlRules($urlRules)
     {
-        $this->urlRulesPath = $urlRulesPath;
-        $this->checkListPath = $checkListPath;
-        $this->checkResult = self::CHECK_SUCCESS;
+        $this->urlRules = $urlRules;
+    }
+
+    public function setCheckList($checkList)
+    {
+        $this->checkList = $checkList;
     }
 
     public function check()
     {
-        $this->loadUrlRules();
-        if(empty($this->urlRules)) {
-            echo 'no rules need to check' . PHP_EOL;
-        }
-        $this->loadCheckList();
-        $router = new Router();
+        $this->checkResult = self::CHECK_SUCCESS;
+        $router = Router::getInstance();
         $swooleHttpRequest = new SwooleHttpRequest();
-        foreach($this->urlRules as $rule) {
-            if(!isset($this->checkList[$rule['regex']]) or empty($this->checkList[$rule['regex']])) {
+        foreach($this->urlRules as $rule => $target) {
+            if(!isset($this->checkList[$rule]) or empty($this->checkList[$rule])) {
                 $this->checkResult = self::CHECK_FAILED;
-                $msg = "rule : {$rule['regex']} check failed, reason : no unit_test";
-                $this->output($msg);
+                $this->checkMsg = "rule : {$rule} test failed, reason : no testcase";
                 break;
             }
-            foreach($this->checkList[$rule['regex']] as $testCase) {
+            foreach($this->checkList[$rule] as $testRoute => $realRoute) {
                 $swooleHttpRequest->server = [
-                    'request_uri' => $testCase['request_uri'],
+                    'request_uri' => $testRoute,
                 ];
                 $request = Request::createFromSwooleHttpRequest($swooleHttpRequest);
                 $router->route($request);
-
-                if($request->getRoute() != $testCase['route']) {
+                $result = $this->_mixRouteResult($request->getRoute(), $router->getParameters());
+                $realRoute = ltrim($realRoute, '/');
+                if($result != $realRoute) {
                     $this->checkResult = self::CHECK_FAILED;
-                    $msg = "rule : {$rule['regex']}, testcase : {$testCase['route']} check failed, reason : route parse failed";
-                    $this->output($msg);
+                    $this->checkMsg = "rule : {$rule} test failed, reason : realRoute is '{$result}', expected is '{$realRoute}'";
                     break 2;
-                }
-                if($router->getParameters() != $testCase['parameters']) {
-                    $this->checkResult = self::CHECK_FAILED;
-                    $msg = "rule : {$rule['regex']} , testcase : {$testCase['route']} check failed, reason : parameters parse failed";
-                    $this->output($msg);
                 }
             }
         }
+//
+//        if(self::CHECK_FAILED === $this->checkResult) {
+//            $msg = 'route self check failed!';
+//            $this->output($msg);
+//            exit;
+//        }
+//
+//        $msg = "route self check success!";
+        $this->output();
+    }
 
-        if(self::CHECK_FAILED === $this->checkResult) {
-            $msg = 'route self check failed!';
-            $this->output($msg);
-            exit;
+    private function _mixRouteResult($route, $parameters)
+    {
+        if(empty($parameters)) {
+            return $route;
         }
-
-        $msg = "route self check success!";
-        $this->output($msg);
+        return $route . '?' . http_build_query($parameters);
     }
 
-    private function loadCheckList()
+    protected function output()
     {
-        $checkListFiles = Dir::glob($this->checkListPath, '*.check.php');
-        if (!$checkListFiles) return false;
-        foreach ($checkListFiles as $file)
-        {
-            $checkList = include $file;
-            if (!is_array($checkList)) continue;
-            $this->checkList = Arr::merge($this->checkList, $checkList);
+        if(self::CHECK_SUCCESS == $this->checkResult) {
+            echo self::OUTPUT_PREFIX . 'check success' . PHP_EOL;
+        } else {
+            throw new RouteCheckFailedException(self::OUTPUT_PREFIX . $this->checkMsg);
         }
-    }
-
-    private function loadUrlRules()
-    {
-        UrlRule::loadRules($this->urlRulesPath);
-        $this->urlRules = UrlRule::getRules();
-    }
-
-    protected function output($msg)
-    {
-        //TODO: throw Exception
-        echo self::OUTPUT_PREFIX . $msg . PHP_EOL;
     }
 }
