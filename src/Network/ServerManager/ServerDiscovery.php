@@ -152,11 +152,11 @@ class ServerDiscovery implements Async
         $old = (yield $this->get());
         $offline = array_diff_key($old, $update);
         if ([] != $offline) {
-            yield LoadBalancing::getInstance()->offline($offline);
+            yield LoadBalancingManager::getInstance()->offline($offline);
         }
         $addOnline = array_diff_key($update, $old);
         if ([] != $addOnline) {
-            yield LoadBalancing::getInstance()->addOnline($addOnline);
+            yield LoadBalancingManager::getInstance()->addOnline($addOnline);
         }
         yield $this->serverStore->set('list', $update);
         //todo set waitIndex
