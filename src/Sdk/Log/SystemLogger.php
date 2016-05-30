@@ -13,21 +13,30 @@ use Zan\Framework\Network\Connection\ConnectionManager;
 
 class SystemLogger extends BaseLogger
 {
+    const TOPIC_PREFIX = 'track';
     private $priority;
     private $hostname;
     private $server;
     private $pid;
     private $conn = null;
     private $connectionConfig;
+    private $supportStoreType = [
+        'normal' => 'normal',
+        'persistence' => 'persistence'
+    ];
 
     public function __construct($config)
     {
         parent::__construct($config);
+        if (!isset($this->supportStoreType[$this->config['storeType']])) {
+            throw new InvalidArgumentException('StoreType is invalid' . $this->config['storeType']);
+            return;
+        }
+        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->config['path']);
         $this->priority = LOG_LOCAL3 + LOG_INFO;
         $this->hostname = Env::get('hostname');
-        $this->server = $this->hostname . "/" . gethostbyname($this->hostname);
+        $this->server = $this->hostname . '/' . gethostbyname($this->hostname);
         $this->pid = Env::get('pid');
-        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->config['path']);
     }
 
     public function init()
@@ -42,7 +51,7 @@ class SystemLogger extends BaseLogger
         $topic = $this->buildTopic();
         $module = $this->config['module'];
         $body = $this->buildBody();
-        $result = $header . "topic=" . $topic . " " . $module . " " . $body;
+        $result = $header . 'topic=' . $topic . ' ' . $module . ' ' . $body;
 
         return $result;
     }
@@ -57,13 +66,18 @@ class SystemLogger extends BaseLogger
 
     private function buildHeader($level)
     {
-        $time = date("Y-m-d H:i:s");
+        $time = date('Y-m-d H:i:s');
         return "<{$this->priority}>{$time} {$this->server} {$level}[{$this->pid}]: ";
     }
 
     private function buildTopic()
     {
-        return 'test topic';
+        $config = $this->config;
+        $result = SystemLogger::TOPIC_PREFIX . '.' . $config['storeType'];
+        if ($config['topic']) {
+            $result = $result . '.' . $config['topic'];
+        }
+        return $result;
     }
 
     private function buildBody()
