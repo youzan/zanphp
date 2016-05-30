@@ -38,6 +38,16 @@ class RequestTask {
 
     public function run()
     {
+        try {
+            yield $this->doRun();
+        } catch (\Exception $e) {
+            $this->response->sendException($e);
+            $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
+        }
+    }
+    
+    private function doRun()
+    {
         $response = (yield $this->middleWareManager->executeFilters());
         if(null !== $response){
             $this->output($response);
