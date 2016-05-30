@@ -23,7 +23,7 @@ class LoadBalancingManager
     public function work($servers)
     {
         $config = Config::get('loadBalancing');
-        $novaConfig = Config::get('nova');
+        $novaConfig = Config::get('novaConnection');
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
