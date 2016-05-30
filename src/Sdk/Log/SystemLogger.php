@@ -50,7 +50,7 @@ class SystemLogger extends BaseLogger
         $header = $this->buildHeader($level);
         $topic = $this->buildTopic();
         $module = $this->config['module'];
-        $body = $this->buildBody();
+        $body = $this->buildBody($level, $message, $context);
         $result = $header . 'topic=' . $topic . ' ' . $module . ' ' . $body;
 
         return $result;
@@ -80,9 +80,34 @@ class SystemLogger extends BaseLogger
         return $result;
     }
 
-    private function buildBody()
+    private function buildBody($level, $message, array $context = [])
     {
-        return 'test body';
+        $detail = [];
+        if (isset($context['exception']) && $context['exception'] instanceof \Exception) {
+            $detail['error'] = [
+                'code' => $context['exception']->getCode(),
+                'message' => $context['exception']->getMessage(),
+                'file' => $context['exception']->getFile(),
+                'line' => $context['exception']->getLine(),
+                'param' => $context['exception']->getTrace()[0]['args'],
+                'stacktraces' => $context['exception']->getTraceAsString()
+            ];
+            unset($context['exception'];
+        }
+        if (isset($this->config['extra'])) {
+            $detail['extra'] = $context;
+        }
+        $config = $this->config;
+        $result = [
+            'platform' => 'php',
+            'app' => $config['app'],
+            'module' => $config['module'],
+            'type' => '',
+            'level' => $level,
+            'tag' => $message,
+            'detail' => $detail
+        ];
+        return json_encode($result);
     }
 
 }
