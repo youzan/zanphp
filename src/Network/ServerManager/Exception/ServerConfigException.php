@@ -5,7 +5,7 @@
  * Date: 16/5/25
  * Time: 下午4:09
  */
-namespace Zan\Framework\Network\ServerManage\Exception;
+namespace Zan\Framework\Network\ServerManager\Exception;
 
 
 use Zan\Framework\Foundation\Exception\ZanException;
