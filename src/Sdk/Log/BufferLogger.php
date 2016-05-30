@@ -10,7 +10,6 @@ namespace Zan\Framework\Sdk\Log;
 
 class BufferLogger extends BaseLogger
 {
-
     private $logger;
     private $bufferSize;
     private $bufferData;

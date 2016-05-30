@@ -13,7 +13,6 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class FileWriter implements LogWriter, Async
 {
-
     private $callback;
     private $path;
     private $async;

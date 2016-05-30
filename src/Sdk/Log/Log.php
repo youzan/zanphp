@@ -9,7 +9,6 @@ use Zan\Framework\Utilities\Types\Arr;
 
 class Log
 {
-
     private static $instances = [];
 
     private static function getDefaultConfig()

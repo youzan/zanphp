@@ -13,7 +13,6 @@ use Zan\Framework\Network\Connection\ConnectionManager;
 
 class SystemLogger extends BaseLogger
 {
-
     private $priority;
     private $hostname;
     private $server;
@@ -35,7 +34,6 @@ class SystemLogger extends BaseLogger
     {
         $this->conn = (yield ConnectionManager::getInstance()->get($this->connectionConfig));
         $this->writer = new SystemWriter($this->conn);
-        yield $this->writer->init();
     }
 
     public function format($level, $message, $context)

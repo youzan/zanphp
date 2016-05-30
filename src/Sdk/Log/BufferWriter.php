@@ -11,7 +11,6 @@ namespace Zan\Framework\Sdk\Log;
 
 class BufferWriter implements LogWriter
 {
-
     private $bufferSize;
     private $realWriter;
 

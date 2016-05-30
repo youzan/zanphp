@@ -21,8 +21,7 @@ class NovaClient extends Base implements Connection
     {
         return true;
     }
-
-
+    
     public function init() {
         //set callback
         $this->getSocket()->on('connect', [$this, 'onConnect']);

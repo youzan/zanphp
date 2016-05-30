@@ -26,5 +26,4 @@ class BlackholeLogger extends BaseLogger
         yield null;
     }
 
-
 }

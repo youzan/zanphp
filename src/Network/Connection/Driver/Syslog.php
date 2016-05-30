@@ -29,12 +29,12 @@ class Syslog extends Base implements Connection
     public function send($log)
     {
         $this->postData = $log . "\n";
-        $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        $this->getSocket()->send($this->postData);
     }
 
     public function onConnect($cli)
     {
-        $this->getSocket()->send($this->postData);
+        $this->release();
     }
 
     public function onClose(SwooleClient $cli)
@@ -51,7 +51,6 @@ class Syslog extends Base implements Connection
     public function onError(SwooleClient $cli)
     {
         $this->close();
-        echo "nova client error\n";
     }
 
     public function setClientCb(callable $cb)
