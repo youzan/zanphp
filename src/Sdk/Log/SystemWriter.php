@@ -28,7 +28,6 @@ class SystemWriter implements LogWriter, Async
 
     public function write($log)
     {
-        var_dump('SystemWriter', $log, $this->conn);
         $this->conn->setClientCb([$this, 'ioReady']);
         yield $this->conn->send($log);
     }
