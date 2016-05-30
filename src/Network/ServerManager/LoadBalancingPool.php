@@ -17,7 +17,7 @@ class LoadBalancingPool
     private $connections = [];
 
     private $strategyMap = [
-        'polling' => 'Zan\Framework\Network\ServerManage\LoadBalancingStrategy\Polling',
+        'polling' => 'Zan\Framework\Network\ServerManager\LoadBalancingStrategy\Polling',
     ];
 
     /**

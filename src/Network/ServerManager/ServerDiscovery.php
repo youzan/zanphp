@@ -7,7 +7,6 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
-use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Network\Server\Timer\Timer;
@@ -20,13 +19,8 @@ use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\LoadBalancingManager;
 
 
-class ServerDiscovery implements Async
+class ServerDiscovery
 {
-    /**
-     * @var HttpClient
-     */
-    private $httpClient;
-
     private $config;
 
     /**
@@ -59,8 +53,9 @@ class ServerDiscovery implements Async
     public function start()
     {
         $servers = (yield $this->get());
-        if (!$this->checkIsWatch()) {
-            $this->watch();
+        $isWatch = (yield $this->checkIsWatch());
+        if (!$isWatch) {
+            yield $this->watch();
         }
         yield LoadBalancingManager::getInstance()->work($servers);
     }
@@ -68,22 +63,24 @@ class ServerDiscovery implements Async
     private function checkIsWatch()
     {
         $watchTime = (yield $this->serverStore->get('last_time'));
-        if ((time() - $watchTime) > 3 * $this->config['watch']['loop-time']) {
-            return false;
+        $watchTime = $watchTime == null ? 0 : $watchTime;
+        if ((time() - $watchTime) > (3 * $this->config['watch']['loop-time'])) {
+            yield false;
+            return;
         }
-        return true;
+        yield true;
     }
 
     public function get()
     {
         $servers = (yield $this->serverStore->get('list'));
-        if (null != $servers) {
+        if (null !== $servers) {
             yield $servers;
             return;
         }
         $httpClient = new HttpClient($this->config['get']['host'], $this->config['get']['port']);
         $uri = $this->config['get']['uri'] . '/' .
-            $this->config['get']['protocol'] . '/' .
+            $this->config['get']['protocol'] . ':' .
             $this->config['get']['namespace'] . '/'.
             $this->config['get']['server_name'];
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
@@ -102,14 +99,15 @@ class ServerDiscovery implements Async
         }
         $servers = [];
         foreach ($raw['node']['nodes'] as $server) {
-            $servers[$server['IP'].':'.$server['Port']] = [
-                'namespace' => $server['Namespace'],
-                'server_name' => $server['SrvName'],
-                'ip' => $server['IP'],
-                'port' => $server['Port'],
-                'protocol' => $server['Protocol'],
-                'status' => $server['Status'],
-                'weight' => $server['Weight'],
+            $value = json_decode($server['value'], true);
+            $servers[$value['IP'].':'.$value['Port']] = [
+                'namespace' => $value['Namespace'],
+                'server_name' => $value['SrvName'],
+                'host' => $value['IP'],
+                'port' => $value['Port'],
+                'protocol' => $value['Protocol'],
+                'status' => $value['Status'],
+                'weight' => $value['Weight'],
                 //todo ExtData 暂时不处理 by xiaoniu
             ];
         }
@@ -164,29 +162,13 @@ class ServerDiscovery implements Async
 
     private function watchEtcd()
     {
-        if (null == $this->httpClient) {
-            $this->httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
-            $this->httpClient->setTimeout($this->config['watch']['timeout']);
-            $this->httpClient->setMethod('GET');
-            $params = $this->waitIndex > 0 ? ['wait' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true];
-            $body = json_encode($params);
-            $this->httpClient->setHeader([
-                'Content-Type' => 'application/json',
-//                'Connection' => 'keep-alive',
-            ]);
-            $this->httpClient->setBody($body);
-            $uri = $this->config['watch']['uri'] . '/' .
-                $this->config['watch']['protocol'] . '/' .
-                $this->config['watch']['namespace'] . '/' .
-                $this->config['watch']['server_name'];
-            $this->httpClient->setUri($uri);
-        }
-        yield $this;
-    }
-
-    public function execute(callable $callback)
-    {
-        $this->httpClient->setCallback($this->getCallback($callback))->handle();
+        $params = $this->waitIndex > 0 ? ['wait' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true];
+        $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
+        $uri = $this->config['watch']['uri'] . '/' .
+            $this->config['watch']['protocol'] . ':' .
+            $this->config['watch']['namespace'] . '/'.
+            $this->config['watch']['server_name'];
+        yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
     }
 
     private function getCallback(callable $callback)
