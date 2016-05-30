@@ -66,14 +66,6 @@ class RouterSelfCheck
                 }
             }
         }
-//
-//        if(self::CHECK_FAILED === $this->checkResult) {
-//            $msg = 'route self check failed!';
-//            $this->output($msg);
-//            exit;
-//        }
-//
-//        $msg = "route self check success!";
         $this->output();
     }
 
