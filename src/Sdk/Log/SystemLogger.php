@@ -9,6 +9,7 @@
 namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Core\Env;
+use Zan\Framework\Network\Connection\ConnectionManager;
 
 class SystemLogger extends BaseLogger
 {
