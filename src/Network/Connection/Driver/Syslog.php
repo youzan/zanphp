@@ -14,11 +14,7 @@ use swoole_client as SwooleClient;
 class Syslog extends Base implements Connection
 {
     private $clientCb;
-
-    protected function closeSocket()
-    {
-        return true;
-    }
+    private $postData;
 
     public function init()
     {
@@ -29,18 +25,22 @@ class Syslog extends Base implements Connection
         $this->getSocket()->on('error', [$this, 'onError']);
     }
 
+    public function send($log)
+    {
+        $this->postData = $log . "\n";
+        $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        return $this;
+    }
+
     public function onConnect($cli)
     {
         $this->getSocket()->send($this->postData);
-        //put conn to active_pool
         $this->release();
-        echo "nova client connect to server\n";
     }
 
     public function onClose(SwooleClient $cli)
     {
         $this->close();
-        echo "nova client close\n";
     }
 
     public function onReceive(SwooleClient $cli, $data)
@@ -57,5 +57,10 @@ class Syslog extends Base implements Connection
     public function setClientCb(callable $cb)
     {
         $this->clientCb = $cb;
+    }
+
+    protected function closeSocket()
+    {
+        return true;
     }
 }

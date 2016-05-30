@@ -36,16 +36,13 @@ class Syslog implements ConnectionFactory
         $connection->init();
 
         //call connect
-        $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        // $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
         return $connection;
     }
 
     public function close()
     {
-
+        $this->conn->close();
     }
 
-    public function heart()
-    {
-    }
 }

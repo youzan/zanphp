@@ -37,7 +37,6 @@ class NovaClient implements ConnectionFactory
         $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
         return $connection;
     }
-    
 
     public function close()
     {

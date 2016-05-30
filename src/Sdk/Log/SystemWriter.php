@@ -17,6 +17,7 @@ class SystemWriter implements LogWriter, Async
 
     private $path;
     private $conn;
+    private $callback;
 
     public function __construct($path)
     {
@@ -35,11 +36,11 @@ class SystemWriter implements LogWriter, Async
     public function write($log)
     {
         var_dump('SystemWriter', $log, $this->conn);
-        // TODO: Implement write() method.
+        $this->conn->send($log);
     }
 
     public function execute(callable $callback)
     {
-        // TODO: Implement execute() method.
+        $this->callback = $callback;
     }
 }
