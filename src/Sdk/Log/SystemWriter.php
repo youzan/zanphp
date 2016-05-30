@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Sdk\Log;
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
@@ -19,7 +20,7 @@ class SystemWriter implements LogWriter, Async
     public function __construct($conn)
     {
         if (!$conn instanceof Connection) {
-            throw new InvalidArgumentException('$conn master be instanceof Connection.' . $conn);
+            throw new InvalidArgumentException('$conn master be instanceof Connection.');
             return;
         }
         $this->conn = $conn;
