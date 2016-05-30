@@ -18,6 +18,7 @@ class SystemWriter implements LogWriter, Async
     private $path;
     private $conn;
     private $callback;
+    private $connectionConfig;
 
     public function __construct($path)
     {
@@ -25,18 +26,18 @@ class SystemWriter implements LogWriter, Async
             throw new InvalidArgumentException('Path not be null');
         }
         $this->path = $path;
+        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->path);
     }
 
     public function init()
     {
-        $connectionConfig = 'syslog.' . str_replace('/', '', $this->path);
-        $this->conn = (yield ConnectionManager::getInstance()->get($connectionConfig));
+        $this->conn = (yield ConnectionManager::getInstance()->get($this->connectionConfig));
     }
 
     public function write($log)
     {
         var_dump('SystemWriter', $log, $this->conn);
-        $this->conn->send($log);
+        yield $this->conn->send($log);
     }
 
     public function execute(callable $callback)

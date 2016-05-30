@@ -30,7 +30,6 @@ class Syslog extends Base implements Connection
         $this->postData = $log . "\n";
         $this->setClientCb([$this, 'ioReady']);
         $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
-        return $this;
     }
 
     public function onConnect($cli)
