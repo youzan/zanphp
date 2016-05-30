@@ -32,11 +32,9 @@ class Syslog implements ConnectionFactory
         $connection = new SyslogDriver();
         $connection->setSocket($this->conn);
         $connection->setConfig($this->config);
-        $connection->setIsAsync(true);
         $connection->init();
 
         //call connect
-        // $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
         return $connection;
     }
 

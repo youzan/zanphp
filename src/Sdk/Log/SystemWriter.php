@@ -10,33 +10,27 @@ namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Network\Connection\ConnectionManager;
+use Zan\Framework\Network\Connection\Driver\Syslog;
 
 class SystemWriter implements LogWriter, Async
 {
 
-    private $path;
     private $conn;
     private $callback;
-    private $connectionConfig;
 
-    public function __construct($path)
+    public function __construct($conn)
     {
-        if (!$path) {
-            throw new InvalidArgumentException('Path not be null');
+        if (!$conn instanceof Syslog) {
+            throw new InvalidArgumentException('Connection master be instanceof Syslog.' . $conn);
+            return;
         }
-        $this->path = $path;
-        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->path);
-    }
-
-    public function init()
-    {
-        $this->conn = (yield ConnectionManager::getInstance()->get($this->connectionConfig));
+        $this->conn = $conn;
     }
 
     public function write($log)
     {
         var_dump('SystemWriter', $log, $this->conn);
+        $this->conn->setClientCb([$this, 'ioReady']);
         yield $this->conn->send($log);
     }
 
@@ -44,4 +38,13 @@ class SystemWriter implements LogWriter, Async
     {
         $this->callback = $callback;
     }
+
+    public function ioReady($data)
+    {
+        var_dump($data);
+        $resp = [];
+        $exception = null;
+        call_user_func_array($this->callback, [$resp, $exception]);
+    }
+
 }

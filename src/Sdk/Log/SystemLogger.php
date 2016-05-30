@@ -17,7 +17,8 @@ class SystemLogger extends BaseLogger
     private $hostname;
     private $server;
     private $pid;
-    private $callback;
+    private $conn = null;
+    private $connectionConfig;
 
     public function __construct($config)
     {
@@ -26,16 +27,13 @@ class SystemLogger extends BaseLogger
         $this->hostname = Env::get('hostname');
         $this->server = $this->hostname . "/" . gethostbyname($this->hostname);
         $this->pid = Env::get('pid');
-    }
-
-    public function execute(callable $callback)
-    {
-        $this->callback = $callback;
+        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->path);
     }
 
     public function init()
     {
-        $this->writer = new SystemWriter($this->config['path']);
+        $this->conn = (yield ConnectionManager::getInstance()->get($this->connectionConfig));
+        $this->writer = new SystemWriter($this->conn);
         yield $this->writer->init();
     }
 
@@ -52,8 +50,7 @@ class SystemLogger extends BaseLogger
 
     protected function doWrite($log)
     {
-        $writer = $this->getWriter();
-        if (!$writer) {
+        if (!$this->writer || !$this->conn instanceof Syslog) {
             yield $this->init();
         }
         yield $this->getWriter()->write($log);
@@ -67,12 +64,12 @@ class SystemLogger extends BaseLogger
 
     private function buildTopic()
     {
-
+        return 'test topic';
     }
 
     private function buildBody()
     {
-
+        return 'test body';
     }
 
 }
