@@ -94,14 +94,11 @@ class SystemLogger extends BaseLogger
             ];
             unset($context['exception']);
         }
-        if (isset($this->config['extra'])) {
-            $detail['extra'] = $context;
-        }
-        $config = $this->config;
+        $detail['extra'] = $context;
         $result = [
             'platform' => 'php',
-            'app' => $config['app'],
-            'module' => $config['module'],
+            'app' => $this->config['app'],
+            'module' => $this->config['module'],
             'type' => '',
             'level' => $level,
             'tag' => $message,

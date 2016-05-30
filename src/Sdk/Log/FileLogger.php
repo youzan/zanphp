@@ -47,19 +47,34 @@ class FileLogger extends BaseLogger
         return $result;
     }
 
-    private function getLogString($message, $data)
+    private function getLogString($message, $context)
     {
-        $result = $message;
-        if (empty($data)) {
+        $result = [
+            'message' => $message
+        ];
+        if (empty($context)) {
             return $result;
         }
+        if (isset($context['exception']) && $context['exception'] instanceof \Exception) {
+            $result['error'] = [
+                'code' => $context['exception']->getCode(),
+                'message' => $context['exception']->getMessage(),
+                'file' => $context['exception']->getFile(),
+                'line' => $context['exception']->getLine(),
+                'param' => $context['exception']->getTrace()[0]['args'],
+                'stacktraces' => $context['exception']->getTraceAsString()
+            ];
+            unset($context['exception']);
+            $this->config['format'] = 'json';
+        }
+        $result['extra'] = $context;
         $format = isset($this->config['format']) ? $this->config['format'] : '';
         switch ($format) {
             case 'json':
-                $result .= "\t" . json_encode($data, JSON_UNESCAPED_UNICODE);
+                $result .= "\t" . json_encode($result, JSON_UNESCAPED_UNICODE);
                 break;
             case 'var':
-                $result .= "\t" . var_export($data, true);
+                $result .= "\t" . var_export($result, true);
                 break;
             default :
                 break;
