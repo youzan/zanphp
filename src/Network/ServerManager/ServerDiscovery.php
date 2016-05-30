@@ -85,7 +85,7 @@ class ServerDiscovery implements Async
         $uri = $this->config['get']['uri'] . '/' .
             $this->config['get']['protocol'] . '/' .
             $this->config['get']['namespace'] . '/'.
-            $this->config['get']['server_ame'];
+            $this->config['get']['server_name'];
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
         $servers = (yield $this->parseEtcdData($raw));
         yield $this->save($servers);
@@ -178,7 +178,7 @@ class ServerDiscovery implements Async
             $uri = $this->config['watch']['uri'] . '/' .
                 $this->config['watch']['protocol'] . '/' .
                 $this->config['watch']['namespace'] . '/' .
-                $this->config['watch']['server_ame'];
+                $this->config['watch']['server_name'];
             $this->httpClient->setUri($uri);
         }
         yield $this;
