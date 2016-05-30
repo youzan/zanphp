@@ -27,7 +27,7 @@ class SystemLogger extends BaseLogger
         $this->hostname = Env::get('hostname');
         $this->server = $this->hostname . "/" . gethostbyname($this->hostname);
         $this->pid = Env::get('pid');
-        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->path);
+        $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->conn['path']);
     }
 
     public function init()
