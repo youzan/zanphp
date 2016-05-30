@@ -64,7 +64,6 @@ class Parallel
             $eventChain->breakChain($evtName, $taskDoneEventName);
         }
 
-        $event->unbind($taskDoneEventName, [$this,'done']);
         $event->unregister($taskDoneEventName);
 
         $this->task->send($this->sendValues);
