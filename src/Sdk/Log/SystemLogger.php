@@ -92,7 +92,7 @@ class SystemLogger extends BaseLogger
                 'param' => $context['exception']->getTrace()[0]['args'],
                 'stacktraces' => $context['exception']->getTraceAsString()
             ];
-            unset($context['exception'];
+            unset($context['exception']);
         }
         if (isset($this->config['extra'])) {
             $detail['extra'] = $context;
