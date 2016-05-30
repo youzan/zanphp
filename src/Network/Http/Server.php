@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Http;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
+use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Http\ServerStart\InitializeCache;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
@@ -23,6 +24,7 @@ class Server extends ServerBase implements ServerContract
     protected $serverStartItems = [
         InitializeRouter::class,
         InitializeUrlRule::class,
+        InitializeRouterSelfCheck::class,
         InitializeMiddleware::class,
         InitializeExceptionHandlerChain::class,
         InitializeCache::class
