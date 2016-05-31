@@ -28,7 +28,7 @@ class InitLogConfig implements Bootable
     private function initLog($configArray)
     {
         foreach ($configArray as $key => $config) {
-            Log::getInstance($key);
+            Log::make($key);
         }
     }
 

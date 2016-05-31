@@ -17,22 +17,9 @@ class FileLogger extends BaseLogger
     public function __construct(array $config)
     {
         parent::__construct($config);
+        
         $this->config['path'] = $this->getLogPath($this->config);
         $this->writer = new FileWriter($this->config['path'], $this->config['async']);
-    }
-
-    private function getLogPath($config)
-    {
-        $logBasePath = '';
-        $path = ltrim($config['path'], '/');
-        if ($config['factory'] === 'log') {
-            $logBasePath = Config::get('path.log');
-        } else if ($config['factory'] === 'file') {
-            $logBasePath = '/';
-        }
-        $path = $logBasePath . $path;
-
-        return $path;
     }
 
     public function format($level, $message, $context)
@@ -43,8 +30,25 @@ class FileLogger extends BaseLogger
         $app = $config['app'];
         $module = $config['module'];
         $log = $this->getLogString($message, $context);
+        
         $result = sprintf("[%s]\t[%s]\t[%s]\t%s\t%s\n", $time, $level, $app, $module, $log);
         return $result;
+    }
+
+    private function getLogPath($config)
+    {
+        $logBasePath = '';
+        $path = ltrim($config['path'], '/');
+        
+        if ($config['factory'] === 'log') {
+            $logBasePath = Config::get('path.log');
+        } else if ($config['factory'] === 'file') {
+            $logBasePath = '/';
+        }
+        
+        $path = $logBasePath . $path;
+
+        return $path;
     }
 
     private function getLogString($message, $context)
@@ -53,13 +57,16 @@ class FileLogger extends BaseLogger
         if (empty($context)) {
             return $result;
         }
+        
         $detail = [];
         if (isset($context['exception']) && $context['exception'] instanceof \Exception) {
             $detail['error'] = $this->formatException($context['exception']);
             unset($context['exception']);
         }
+        
         $detail['extra'] = $context;
         $format = isset($this->config['format']) ? $this->config['format'] : 'json';
+        
         switch ($format) {
             case 'json':
                 $result = $result . "\t" . json_encode($detail, JSON_UNESCAPED_UNICODE);
@@ -70,6 +77,7 @@ class FileLogger extends BaseLogger
             default :
                 break;
         }
+        
         return $result;
     }
 
