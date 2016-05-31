@@ -20,7 +20,6 @@ class Mysqli extends Base implements Connection
     private $classHash = null;
     public function closeSocket()
     {
-//        $this->socket->close();
         return true;
     }
     
