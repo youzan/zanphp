@@ -75,7 +75,7 @@ class Cache {
 
     private static function getRealKey($config, $keys){
         $format = $config['key'];
-        if($keys === null){
+        if($keys == null){
             return $format;
         }
         if(!is_array($keys)){

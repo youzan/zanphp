@@ -327,7 +327,7 @@ class RedisConnection
         ready:
         $this->clean();
         $this->redis->freeConnection($cli->sock, $this);
-        call_user_func($this->callback, $result, $success);
+        call_user_func($this->callback, chop($result), $success);
     }
 
     function onClose(\swoole_client $cli)
