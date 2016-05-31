@@ -128,20 +128,16 @@ class ServerDiscovery
 
     public function watching()
     {
-        try {
-            $raw = (yield $this->watchEtcd());
+        while (true) {
+            try {
+                $raw = (yield $this->watchEtcd());
 //            if (null != $raw) {
 //                yield $this->update($raw);
 //            }
-            var_dump($raw);
-        } catch (HttpClientTimeoutException $e) {
+                var_dump($raw);
+            } catch (HttpClientTimeoutException $e) {
+            }
         }
-        $this->after();
-    }
-
-    public function after()
-    {
-        Timer::after($this->config['watch']['loop-time'], [$this, 'watching'], spl_object_hash($this));
     }
 
     private function setDoWatch()
