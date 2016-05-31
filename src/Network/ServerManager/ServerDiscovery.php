@@ -65,11 +65,12 @@ class ServerDiscovery
     private function checkIsWatch()
     {
         $watchTime = $this->serverStore->get('last_time');
+
         $watchTime = $watchTime == null ? 0 : $watchTime;
         if ((time() - $watchTime) > (3 * $this->config['watch']['loop-time'])) {
             return false;
         }
-        return false;
+        return true;
     }
 
     public function get()
@@ -129,12 +130,12 @@ class ServerDiscovery
     public function watching()
     {
         while (true) {
+            $this->setDoWatch();
             try {
                 $raw = (yield $this->watchEtcd());
-//            if (null != $raw) {
-//                yield $this->update($raw);
-//            }
-                var_dump($raw);
+                if (null != $raw) {
+                    yield $this->update($raw);
+                }
             } catch (HttpClientTimeoutException $e) {
             }
         }
