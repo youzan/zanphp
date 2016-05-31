@@ -91,8 +91,8 @@ class EventChain
             return false;
         }
 
-        Event::fire($afterEvt);
         self::clearBeforeEventBind($afterEvt);
+        Event::fire($afterEvt);
     }
 
     private static function fireBeforeEvent($beforeEvt, $afterEvt)

@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
@@ -11,7 +10,6 @@ use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
-use Zan\Framework\Network\Tcp\RequestExceptionHandlerChain; 
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
@@ -97,16 +95,13 @@ class Server extends ServerBase {
 
     public function onStart($swooleServer)
     {
-        if (RunMode::get() !== 'online') {
-            $masterPid = getmypid();
-            $basePath = Application::getInstance()->getBasePath();
-
-            file_put_contents($basePath . '/bin/.pid', $masterPid);
-        }
+        $this->writePid($swooleServer->master_pid);
+        echo "server starting .....\n";
     }
 
     public function onShutdown($swooleServer)
     {
+        $this->removePidFile();
         echo "server shutdown .....\n";
     }
 
@@ -114,12 +109,12 @@ class Server extends ServerBase {
     {
         $this->bootWorkerStartItem($workerId);
         
-        echo "worker starting .....\n";
+        echo "worker #$workerId starting .....\n";
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        echo "worker stoping ....\n";
+        echo "worker #$workerId stopping ....\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
@@ -137,4 +132,5 @@ class Server extends ServerBase {
         Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
+    
 }

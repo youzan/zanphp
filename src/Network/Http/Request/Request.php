@@ -56,6 +56,29 @@ class Request extends BaseRequest implements Arrayable, RequestContract
     }
 
     /**
+     * Generates a normalized URI (URL) for the Request.
+     *
+     * @return string A normalized URI (URL) for the Request
+     *
+     * @see getQueryString()
+     */
+    public function getUri()
+    {
+        if (null !== $qs = $this->getQueryString()) {
+            $qs = '?'.$qs;
+        }
+
+        // 若使用了反向代理,通过此处理拿到完整的URL
+        if ($this->headers->has('X_ZAN_PROXY_DIR')) {
+            $baseUrl = '/' . trim($this->headers->get('X_ZAN_PROXY_DIR'), '/');
+        } else {
+            $baseUrl = $this->getBaseUrl();
+        }
+
+        return $this->getSchemeAndHttpHost().$baseUrl.$this->getPathInfo().$qs;
+    }
+
+    /**
      * Get the root URL for the application.
      *
      * @return string

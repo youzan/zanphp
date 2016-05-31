@@ -25,7 +25,6 @@ class FutureConnection implements Async
         if(!is_int($timeout)){
             throw new InvalidArgumentException('invalid timeout for Future[Connection]');
         }
-
         $this->connectionManager = $connectionManager;
         $this->connKey = $connKey;
         $this->timeout = $timeout;
@@ -39,14 +38,8 @@ class FutureConnection implements Async
 
     private function init()
     {
-        //have free conn
         $evtName = $this->connKey . '_free';
         Event::once($evtName,[$this,'getConnection' ]);
-
-        //bind timeout event
-        //$entTimeout = $this->connKey . '_timeout';
-        //Event::once($evtName,[$this,'timeoutEvent' ]);
-
     }
 
     public function getConnection()
@@ -57,14 +50,6 @@ class FutureConnection implements Async
     public function doGeting()
     {
         $conn = (yield $this->connectionManager->get($this->connKey));
-
         call_user_func($this->taskCallback, $conn);
     }
-
-    public function timeoutEvent()
-    {
-        //todo
-
-    }
-    
 }

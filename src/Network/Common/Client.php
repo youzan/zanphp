@@ -66,7 +66,7 @@ class Client implements Async
 
     private function setMethod($method)
     {
-        $this->method = $method;
+        $this->method = strtoupper($method);
     }
 
     private function setUri($api)
