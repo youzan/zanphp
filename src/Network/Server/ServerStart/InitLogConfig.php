@@ -17,19 +17,18 @@ class InitLogConfig implements Bootable
 
     public function bootstrap($server)
     {
-        $configArray = $this->readConfig();
+        $configArray = Config::get('log');
+        if(!$configArray){
+            return true;
+        }
+        
         $this->initLog($configArray);
-    }
-
-    private function readConfig()
-    {
-        return Config::get('log');
     }
 
     private function initLog($configArray)
     {
         foreach ($configArray as $key => $config) {
-            Log::getInstance($key);
+            Log::make($key);
         }
     }
 

@@ -10,7 +10,45 @@ use Zan\Framework\Utilities\Types\Arr;
 class Log
 {
     private static $instances = [];
+    
+    /**
+     * @param $key
+     * @return BlackholeLogger|FileLogger|SystemLogger
+     * @throws InvalidArgumentException
+     */
+    public static function make($key)
+    {
+        if (!$key) {
+            throw new InvalidArgumentException('Configuration key cannot be null');
+        }
 
+        if (isset(self::$instances[$key])) {
+            return self::$instances[$key];
+        }
+        
+        $logger = self::create($key);
+        self::$instances[$key] = $logger;
+        
+        return self::$instances[$key];
+    }
+    
+    /**
+     * @param $key
+     * @return null|BlackholeLogger|BufferLogger|FileLogger|SystemLogger
+     * @throws InvalidArgumentException
+     */
+    private static function create($key)
+    {
+        $config = self::getConfigByKey($key);
+        $logger = self::getAdapter($config);
+        
+        if ($config['useBuffer']) {
+            $logger = new BufferLogger($logger, $config);
+        }
+        
+        return $logger;
+    }
+ 
     private static function getDefaultConfig()
     {
         return [
@@ -26,29 +64,10 @@ class Log
             'format' => 'json'
         ];
     }
-
-    /**
-     * @param $key
-     * @return null|BlackholeLogger|BufferLogger|FileLogger|SystemLogger
-     * @throws InvalidArgumentException
-     */
-    private static function instance($key)
+   
+    private function getConfigByKey($key)
     {
-        $config = self::configParser($key);
-        $logger = self::adapter($config);
-        if ($config['useBuffer']) {
-            $logger = self::bufferDecorate($logger, $config);
-        }
-        return $logger;
-    }
-
-    private function configParser($key)
-    {
-        if (!$key) {
-            throw new InvalidArgumentException('Configuration key cannot be null');
-        }
-
-        $logUrl = Config::get('log.' . $key);
+        $logUrl = Config::get('log.' . $key, null);
         if (!$logUrl) {
             throw new InvalidArgumentException('Can not find config for logKey: ' . $key);
         }
@@ -82,7 +101,7 @@ class Log
      * @return null|BlackholeLogger|FileLogger|SystemLogger
      * @throws InvalidArgumentException
      */
-    private static function adapter($config)
+    private static function getAdapter($config)
     {
         $logger = null;
         switch ($config['factory']) {
@@ -102,24 +121,5 @@ class Log
 
         return $logger;
     }
-
-    private static function bufferDecorate($logger, $config)
-    {
-        return new BufferLogger($logger, $config);
-    }
-
-    /**
-     * @param $key
-     * @return BlackholeLogger|FileLogger|SystemLogger
-     */
-    public static function getInstance($key)
-    {
-        if (isset(self::$instances[$key])) {
-            return self::$instances[$key];
-        }
-        $logger = self::instance($key);
-        self::$instances[$key] = $logger;
-        return self::$instances[$key];
-    }
-
+    
 }

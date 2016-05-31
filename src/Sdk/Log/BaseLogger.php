@@ -28,18 +28,17 @@ abstract class BaseLogger implements LoggerInterface
     protected $config;
     protected $writer = null;
     protected $levelNum = 0;
+    
+    abstract public function format($level, $message, $context);
 
     public function init()
     {
     }
 
-    abstract public function format($level, $message, $context);
-
     public function __construct(array $config)
     {
         if (!$config) {
             throw new InvalidArgumentException('Config is required' . $config);
-            return;
         }
         $this->config = $config;
         $this->levelNum = $this->getLevelNum($this->config['level']);
@@ -217,7 +216,8 @@ abstract class BaseLogger implements LoggerInterface
         if ($levelNum >= $this->levelNum) {
             return true;
         }
-        return;
+        
+        return false;
     }
 
     /**
