@@ -41,8 +41,9 @@ class Mysqli extends Base implements Connection
     public function heartbeating()
     {
         $time = Time::current(true) - $this->lastUsedTime;
-        if ($this->lastUsedTime != 0 && $time <  $this->config['pool']['heartbeat-time']/1000) {
-            Timer::after((Time::current(true)-$time), [$this,'heartbeating']);
+        $hearBeatTime = $this->config['pool']['heartbeat-time']/1000;//s
+        if ($this->lastUsedTime != 0 && $time <  $hearBeatTime) {
+            Timer::after(($hearBeatTime-$time)*1000, [$this,'heartbeating']);
             return;
         }
 
