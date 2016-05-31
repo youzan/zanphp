@@ -84,14 +84,7 @@ class SystemLogger extends BaseLogger
     {
         $detail = [];
         if (isset($context['exception']) && $context['exception'] instanceof \Exception) {
-            $detail['error'] = [
-                'code' => $context['exception']->getCode(),
-                'message' => $context['exception']->getMessage(),
-                'file' => $context['exception']->getFile(),
-                'line' => $context['exception']->getLine(),
-                'param' => $context['exception']->getTrace()[0]['args'],
-                'stacktraces' => $context['exception']->getTraceAsString()
-            ];
+            $detail['error'] = $this->formatException($context['exception']);
             unset($context['exception']);
         }
         $detail['extra'] = $context;

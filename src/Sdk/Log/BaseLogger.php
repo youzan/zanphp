@@ -239,4 +239,16 @@ abstract class BaseLogger implements LoggerInterface
         yield $this->getWriter()->write($log);
     }
 
+    protected function formatException(Exception $e)
+    {
+        return [
+            'code' => $e->getCode(),
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'param' => $e->getTrace()[0]['args'],
+            'stacktraces' => $e->getTraceAsString()
+        ];
+    }
+
 }
