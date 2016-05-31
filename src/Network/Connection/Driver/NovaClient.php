@@ -10,7 +10,8 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
-
+use Zan\Framework\Network\Server\Timer\Timer;
+use Kdt\Iron\Nova\Foundation\TService;
 
 class NovaClient extends Base implements Connection
 {
@@ -54,8 +55,20 @@ class NovaClient extends Base implements Connection
         $this->clientCb = $cb;
     }
 
-    public function heartbeat()
-    {
-
-    }
+//    public function heartbeat()
+//    {
+//        Timer::after($this->config['pool']['heartbeat-time'], [$this,'heartbeating'], spl_object_hash($this));
+//    }
+//
+//    public function heartbeating()
+//    {
+//
+//        $this->getSocket();
+//    }
+//
+//    private function ping()
+//    {
+//
+//        $this->heartbeat();
+//    }
 }

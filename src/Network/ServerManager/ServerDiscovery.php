@@ -17,6 +17,8 @@ use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\LoadBalancingManager;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 
 class ServerDiscovery
@@ -125,12 +127,16 @@ class ServerDiscovery
         Timer::after($this->config['watch']['loop-time'], [$this, 'watch'], spl_object_hash($this));
         $this->setDoWatch();
         try {
-            $raw = (yield $this->watchEtcd());
-            if (null != $raw) {
-                yield $this->update($raw);
-                Timer::clearAfterJob(spl_object_hash($this));
-                $this->watch();
-            }
+
+//            $raw = (yield $this->watchEtcd());
+            $coroutine = $this->watchEtcd();
+            $context = new Context();
+            Task::execute($coroutine, $context);
+//            if (null != $raw) {
+//                yield $this->update($raw);
+//                Timer::clearAfterJob(spl_object_hash($this));
+//                $this->watch();
+//            }
         } catch (HttpClientTimeoutException $e) {
         }
     }
