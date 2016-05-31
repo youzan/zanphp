@@ -74,8 +74,8 @@ class SystemLogger extends BaseLogger
     {
         $config = $this->config;
         $result = SystemLogger::TOPIC_PREFIX . '.' . $config['storeType'];
-        if (isset($config['topic'])) {
-            $result = $result . '.' . $config['topic'];
+        if (isset($config['module'])) {
+            $result = $result . '.' . $config['module'];
         }
         return $result;
     }
