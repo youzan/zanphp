@@ -49,6 +49,8 @@ class Queue implements Async
         $this->handler = function ($callback) use ($topic, $message) {
             NSQueue::publish($topic, $message, $callback);
         };
+        
+        yield $this;
     }
 
     /**
@@ -59,7 +61,11 @@ class Queue implements Async
      */
     public function subscribe($topic, $channel, callable $callback, $timeout = 1800)
     {
-        NSQueue::set(['subTimeout' => $timeout]);
-        NSQueue::subscribe($topic, $channel, $callback);
+        $this->handler = function ($callback) use ($topic, $channel, $callback, $timeout) {
+            NSQueue::set(['subTimeout' => $timeout]);
+            NSQueue::subscribe($topic, $channel, $callback);
+        };
+
+        yield $this;
     }
 }
