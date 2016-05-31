@@ -15,6 +15,7 @@ class InitializeQiniuConfig
 {
     public function bootstrap($server)
     {
-        Qiniu::setConfig(Config::get('qiniu'));
+        $config = Config::get('qiniu');
+        Qiniu::setConfig($config);
     }
 }
