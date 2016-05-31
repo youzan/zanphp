@@ -45,16 +45,6 @@ class BufferLogger extends BaseLogger
         $this->bufferData .= $log;
     }
 
-    private function emptyBuffer()
-    {
-        $this->bufferData = '';
-    }
-
-    private function getBuffer()
-    {
-        return $this->bufferData;
-    }
-
     private function checkAsync()
     {
         return $this->config['async'];
@@ -64,6 +54,16 @@ class BufferLogger extends BaseLogger
     {
         $config = $this->config;
         return (!$config['useBuffer'] || (strlen($this->bufferData) >= $this->bufferSize));
+    }
+
+    private function getBuffer()
+    {
+        return $this->bufferData;
+    }
+
+    private function emptyBuffer()
+    {
+        $this->bufferData = '';
     }
 
 }

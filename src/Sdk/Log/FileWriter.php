@@ -15,6 +15,7 @@ class FileWriter implements LogWriter, Async
 {
     private $callback;
     private $path;
+    private $dir;
     private $async;
 
     public function __construct($path, $async = true)
@@ -22,8 +23,9 @@ class FileWriter implements LogWriter, Async
         if (!$path) {
             throw new InvalidArgumentException('Path not be null');
         }
-        
+
         $this->path = $path;
+        $this->dir = dirname($this->path);
         $this->async = $async;
     }
 
@@ -34,16 +36,14 @@ class FileWriter implements LogWriter, Async
 
     public function write($log)
     {
-        //TODO move to __construct
-        $dir = dirname($this->path);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-            chmod($dir, 0755);
+        if (!is_dir($this->dir)) {
+            mkdir($this->dir, 0755, true);
+            chmod($this->dir, 0755);
         }
 
         $callback = $this->async ? [$this, 'ioReady'] : null;
         swoole_async_write($this->path, $log, -1, $callback);
-        
+
         if (null === $callback) {
             $this->ioReady();
         }

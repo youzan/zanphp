@@ -30,11 +30,11 @@ class SystemLogger extends BaseLogger
     public function __construct($config)
     {
         parent::__construct($config);
-        
+
         if (!isset($this->supportStoreType[$this->config['storeType']])) {
             throw new InvalidArgumentException('StoreType is invalid' . $this->config['storeType']);
         }
-        
+
         $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->config['path']);
         $this->priority = LOG_LOCAL3 + LOG_INFO;
         $this->hostname = Env::get('hostname');
@@ -64,7 +64,7 @@ class SystemLogger extends BaseLogger
         if (!$this->writer || !$this->conn instanceof Syslog) {
             yield $this->init();
         }
-        
+
         yield $this->getWriter()->write($log);
     }
 
@@ -87,12 +87,13 @@ class SystemLogger extends BaseLogger
     private function buildBody($level, $message, array $context = [])
     {
         $detail = [];
-        if (isset($context['exception']) 
-                && $context['exception'] instanceof \Exception) {
+        if (isset($context['exception'])
+            && $context['exception'] instanceof \Exception
+        ) {
             $detail['error'] = $this->formatException($context['exception']);
             unset($context['exception']);
         }
-        
+
         $detail['extra'] = $context;
         $result = [
             'platform' => 'php',
@@ -103,7 +104,7 @@ class SystemLogger extends BaseLogger
             'tag' => $message,
             'detail' => $detail
         ];
-        
+
         return json_encode($result);
     }
 

@@ -10,7 +10,7 @@ use Zan\Framework\Utilities\Types\Arr;
 class Log
 {
     private static $instances = [];
-    
+
     /**
      * @param $key
      * @return BlackholeLogger|FileLogger|SystemLogger
@@ -25,13 +25,13 @@ class Log
         if (isset(self::$instances[$key])) {
             return self::$instances[$key];
         }
-        
+
         $logger = self::create($key);
         self::$instances[$key] = $logger;
-        
+
         return self::$instances[$key];
     }
-    
+
     /**
      * @param $key
      * @return null|BlackholeLogger|BufferLogger|FileLogger|SystemLogger
@@ -41,14 +41,14 @@ class Log
     {
         $config = self::getConfigByKey($key);
         $logger = self::getAdapter($config);
-        
+
         if ($config['useBuffer']) {
             $logger = new BufferLogger($logger, $config);
         }
-        
+
         return $logger;
     }
- 
+
     private static function getDefaultConfig()
     {
         return [
@@ -64,7 +64,7 @@ class Log
             'format' => 'json'
         ];
     }
-   
+
     private function getConfigByKey($key)
     {
         $logUrl = Config::get('log.' . $key, null);
@@ -121,5 +121,5 @@ class Log
 
         return $logger;
     }
-    
+
 }

@@ -8,9 +8,9 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Network\Connection\Driver\Syslog;
 
 class SystemWriter implements LogWriter, Async
 {
@@ -19,8 +19,8 @@ class SystemWriter implements LogWriter, Async
 
     public function __construct($conn)
     {
-        if (!$conn instanceof Connection) {
-            throw new InvalidArgumentException('$conn master be instanceof Connection.');
+        if (!$conn instanceof Syslog) {
+            throw new InvalidArgumentException('$conn master be instanceof Syslog.');
             return;
         }
         $this->conn = $conn;
