@@ -11,6 +11,8 @@ use Zan\Framework\Network\Http\ServerStart\InitializeCache;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
+use Zan\Framework\Network\Http\WorkerStart\InitializeServerDiscovery;
+
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
@@ -32,7 +34,8 @@ class Server extends ServerBase implements ServerContract
 
     protected $workerStartItems = [
         InitializeConnectionPool::class,
-        InitializeWorkerMonitor::class
+        InitializeWorkerMonitor::class,
+        InitializeServerDiscovery::class,
     ];
 
     /**

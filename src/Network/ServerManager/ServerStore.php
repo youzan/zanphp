@@ -21,18 +21,18 @@ class ServerStore
     public function set($key, $value)
     {
         if (apcu_exists($this->getKey($key))) {
-            yield apcu_store($this->getKey($key), json_encode($value));
+            return apcu_store($this->getKey($key), json_encode($value));
         } else {
-            yield apcu_add($this->getKey($key), json_encode($value));
+            return apcu_add($this->getKey($key), json_encode($value));
         }
     }
 
     public function get($key)
     {
-        $data = (yield apcu_fetch($this->getKey($key)));
+        $data = apcu_fetch($this->getKey($key));
         if ('' != $data) {
-            yield json_decode($data, true);
+            return json_decode($data, true);
         }
-        yield null;
+        return null;
     }
 }

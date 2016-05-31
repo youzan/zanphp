@@ -30,7 +30,6 @@ class LoadBalancingManager
             $config['connections'][] = $novaConfig;
         }
         $this->loadBalancingPool = new LoadBalancingPool($config);
-        yield true;
     }
 
     public function get()

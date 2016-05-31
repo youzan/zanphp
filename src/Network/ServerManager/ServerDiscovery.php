@@ -59,23 +59,22 @@ class ServerDiscovery
         if (!$isWatch) {
             $this->watch();
         }
-        yield LoadBalancingManager::getInstance()->work($servers);
+        LoadBalancingManager::getInstance()->work($servers);
     }
 
     private function checkIsWatch()
     {
-        $watchTime = (yield $this->serverStore->get('last_time'));
+        $watchTime = $this->serverStore->get('last_time');
         $watchTime = $watchTime == null ? 0 : $watchTime;
         if ((time() - $watchTime) > (3 * $this->config['watch']['loop-time'])) {
-            yield false;
-            return;
+            return false;
         }
-        yield true;
+        return false;
     }
 
     public function get()
     {
-        $servers = (yield $this->serverStore->get('list'));
+        $servers = $this->serverStore->get('list');
         if (null !== $servers) {
             yield $servers;
             return;
@@ -118,7 +117,7 @@ class ServerDiscovery
 
     private function save($servers)
     {
-        yield $this->serverStore->set('list', $servers);
+        return $this->serverStore->set('list', $servers);
     }
 
     public function watch()
@@ -137,13 +136,17 @@ class ServerDiscovery
             var_dump($raw);
         } catch (HttpClientTimeoutException $e) {
         }
+        $this->after();
+    }
+
+    public function after()
+    {
         Timer::after($this->config['watch']['loop-time'], [$this, 'watching'], spl_object_hash($this));
     }
 
-
     private function setDoWatch()
     {
-        yield $this->serverStore->set('last_time', time());
+        return $this->serverStore->set('last_time', time());
     }
 
     private function update($raw)
@@ -162,7 +165,7 @@ class ServerDiscovery
         if ([] != $addOnline) {
             yield LoadBalancingManager::getInstance()->addOnline($addOnline);
         }
-        yield $this->serverStore->set('list', $update);
+        $this->serverStore->set('list', $update);
         //todo set waitIndex
     }
 
