@@ -19,8 +19,8 @@ use Zan\Framework\Utilities\Types\Time;
 class Mysqli extends Base implements Connection
 {
     public $lastUsedTime=0;
-
     private $classHash = null;
+    
     public function closeSocket()
     {
         return true;
