@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Sdk\Queue\NSQ;
 
+use Kdt\Iron\NSQ\Message\MsgInterface;
 use Kdt\Iron\NSQ\Queue as NSQueue;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
@@ -28,7 +29,7 @@ class Queue implements Async
     public function __construct()
     {
         NSQueue::set([
-            'lookupd' => Config::get('connection.nsq.lookupd')
+            'lookupd' => Config::get('nsq.lookupd')
         ]);
     }
 
@@ -44,7 +45,7 @@ class Queue implements Async
      * @param $topic
      * @param $message
      */
-    public function publish($topic, $message)
+    public function publish($topic, MsgInterface $message)
     {
         $this->handler = function ($callback) use ($topic, $message) {
             NSQueue::publish($topic, $message, $callback);
