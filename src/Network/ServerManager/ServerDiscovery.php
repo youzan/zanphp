@@ -132,6 +132,9 @@ class ServerDiscovery
             $coroutine = $this->watchEtcd();
             $context = new Context();
             Task::execute($coroutine, $context);
+            var_dump('watch');
+            var_dump($context);
+            var_dump('watch_end');
 //            if (null != $raw) {
 //                yield $this->update($raw);
 //                Timer::clearAfterJob(spl_object_hash($this));
@@ -168,7 +171,7 @@ class ServerDiscovery
 
     private function watchEtcd()
     {
-        $params = $this->waitIndex > 0 ? ['wait' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true];
+        $params = $this->waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true, 'recursive' => true];
         $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
         $uri = $this->config['watch']['uri'] . '/' .
             $this->config['watch']['protocol'] . ':' .
