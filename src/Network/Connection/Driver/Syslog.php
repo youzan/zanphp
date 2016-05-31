@@ -13,6 +13,7 @@ use Zan\Framework\Contract\Network\Connection;
 
 class Syslog extends Base implements Connection
 {
+    private $clientCb;
     private $postData;
     protected $isAsync = true;
 
@@ -20,6 +21,7 @@ class Syslog extends Base implements Connection
     {
         //set callback
         $this->getSocket()->on('connect', [$this, 'onConnect']);
+        $this->getSocket()->on('receive', [$this, 'onReceive']);
         $this->getSocket()->on('close', [$this, 'onClose']);
         $this->getSocket()->on('error', [$this, 'onError']);
     }
@@ -41,9 +43,20 @@ class Syslog extends Base implements Connection
         $this->close();
     }
 
+    public function onReceive(SwooleClient $cli, $data)
+    {
+        $this->release();
+        call_user_func($this->clientCb, $data);
+    }
+
     public function onError(SwooleClient $cli)
     {
         $this->close();
+    }
+
+    public function setClientCb(callable $cb)
+    {
+        $this->clientCb = null;
     }
 
     protected function closeSocket()
