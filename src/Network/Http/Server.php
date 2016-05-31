@@ -8,6 +8,7 @@ use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Http\ServerStart\InitializeCache;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
+use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use swoole_http_server as SwooleServer;
@@ -25,7 +26,8 @@ class Server extends ServerBase implements ServerContract
         InitializeUrlRule::class,
         InitializeMiddleware::class,
         InitializeExceptionHandlerChain::class,
-        InitializeCache::class
+        InitializeCache::class,
+        InitLogConfig::class,
     ];
 
     protected $workerStartItems = [

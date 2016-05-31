@@ -112,7 +112,7 @@ class Log
      * @param $key
      * @return BlackholeLogger|FileLogger|SystemLogger
      */
-    public static function getInstance($key)
+    public static function make($key)
     {
         if (isset(self::$instances[$key])) {
             return self::$instances[$key];
