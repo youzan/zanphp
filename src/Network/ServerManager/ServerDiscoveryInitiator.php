@@ -18,9 +18,7 @@ class ServerDiscoveryInitiator
     {
         $serverDiscovery = new ServerDiscovery();
         $coroutine =  $serverDiscovery->start();
-        while ($coroutine->valid()) {
-            $coroutine->send();
-        }
+        Task::execute($coroutine);
     }
 
 }

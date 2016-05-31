@@ -55,7 +55,7 @@ class ServerDiscovery
     public function start()
     {
         $servers = (yield $this->get());
-        $isWatch = (yield $this->checkIsWatch());
+        $isWatch = $this->checkIsWatch();
         if (!$isWatch) {
             $this->watch();
         }
