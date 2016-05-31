@@ -18,7 +18,6 @@ class BufferWriter implements LogWriter
     {
         if (!$logger) {
             throw new InvalidArgumentException('Logger is required' . $logger);
-            return false;
         }
         $this->bufferSize = $bufferSize;
         $this->realWriter = $logger->getWriter();

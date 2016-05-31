@@ -196,7 +196,6 @@ abstract class BaseLogger implements LoggerInterface
     {
         if (!isset($this->logMap[$level])) {
             throw new InvalidArgumentException('Log level[' . $level . '] is illegal');
-            return;
         }
         yield $this[$level]($message, $context);
     }
@@ -216,7 +215,7 @@ abstract class BaseLogger implements LoggerInterface
         if ($levelNum >= $this->levelNum) {
             return true;
         }
-        
+
         return false;
     }
 

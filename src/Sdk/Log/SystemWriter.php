@@ -21,7 +21,6 @@ class SystemWriter implements LogWriter, Async
     {
         if (!$conn instanceof Syslog) {
             throw new InvalidArgumentException('$conn master be instanceof Syslog.');
-            return;
         }
         $this->conn = $conn;
     }

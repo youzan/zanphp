@@ -18,7 +18,6 @@ class BufferLogger extends BaseLogger
     {
         if (!$logger) {
             throw new InvalidArgumentException('Logger is required' . $logger);
-            return false;
         }
         $this->logger = $logger;
         $this->config = $config;
