@@ -23,6 +23,10 @@
         },
         {
             "type": "git",
+            "url": "http://gitlab.qima-inc.com/php-lib/nsq-async.git"
+        },
+        {
+            "type": "git",
             "url": "http://git.qima-inc.com/php-3rd-lib/pimple-pimple.git"
         },
         {
@@ -41,6 +45,7 @@
         "qiniu/php-sdk": "7.0.0",
         "symfony/console": "3.1",
         "elasticsearch/yz-elasticsearch-client": "dev-master",
+        "php-lib/nsq-async": "dev-master",
         "psr/log": "1.0.0"
     },
     "autoload": {
