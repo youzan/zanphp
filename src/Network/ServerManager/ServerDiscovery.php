@@ -57,7 +57,7 @@ class ServerDiscovery
         $servers = (yield $this->get());
         $isWatch = (yield $this->checkIsWatch());
         if (!$isWatch) {
-            yield $this->watch();
+            $this->watch();
         }
         yield LoadBalancingManager::getInstance()->work($servers);
     }
@@ -123,26 +123,23 @@ class ServerDiscovery
 
     public function watch()
     {
-        //绑定心跳检测事件
-        Timer::after($this->config['watch']['loop-time'], [$this, 'watch'], spl_object_hash($this));
-        $this->setDoWatch();
-        try {
+        $coroutine = $this->watching();
+        Task::execute($coroutine);
+    }
 
-//            $raw = (yield $this->watchEtcd());
-            $coroutine = $this->watchEtcd();
-            $context = new Context();
-            Task::execute($coroutine, $context);
-            var_dump('watch');
-            var_dump($context);
-            var_dump('watch_end');
+    public function watching()
+    {
+        try {
+            $raw = (yield $this->watchEtcd());
 //            if (null != $raw) {
 //                yield $this->update($raw);
-//                Timer::clearAfterJob(spl_object_hash($this));
-//                $this->watch();
 //            }
+            var_dump($raw);
         } catch (HttpClientTimeoutException $e) {
         }
+        Timer::after($this->config['watch']['loop-time'], [$this, 'watching'], spl_object_hash($this));
     }
+
 
     private function setDoWatch()
     {
@@ -179,16 +176,6 @@ class ServerDiscovery
             $this->config['watch']['server_name'];
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
     }
-
-    private function getCallback(callable $callback)
-    {
-        return function($response) use ($callback) {
-            $jsonData = json_decode($response, true);
-            $response = $jsonData ? $jsonData : $response;
-            call_user_func($callback, $response);
-        };
-    }
-
 }
 
 
