@@ -27,21 +27,12 @@ class SystemWriter implements LogWriter, Async
 
     public function write($log)
     {
-        $this->conn->setClientCb([$this, 'ioReady']);
         yield $this->conn->send($log);
     }
 
     public function execute(callable $callback)
     {
         $this->callback = $callback;
-    }
-
-    public function ioReady($data)
-    {
-        var_dump($data);
-        $resp = [];
-        $exception = null;
-        call_user_func_array($this->callback, [$resp, $exception]);
     }
 
 }
