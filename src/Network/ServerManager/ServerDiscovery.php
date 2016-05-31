@@ -67,7 +67,7 @@ class ServerDiscovery
         $watchTime = $this->serverStore->get('last_time');
 
         $watchTime = $watchTime == null ? 0 : $watchTime;
-        if ((time() - $watchTime) > (3 * $this->config['watch']['loop-time'])) {
+        if ((time() - $watchTime) > (3 * $this->config['watch']['timeout'] * 1000)) {
             return false;
         }
         return true;
@@ -123,6 +123,7 @@ class ServerDiscovery
 
     public function watch()
     {
+        $this->setDoWatch();
         $coroutine = $this->watching();
         Task::execute($coroutine);
     }
