@@ -9,6 +9,7 @@ namespace Zan\Framework\Network\ServerManager;
 
 use Zan\Framework\Network\ServerManager\ServerDiscovery;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Foundation\Coroutine\Task;
 
 class ServerDiscoveryInitiator
 {
