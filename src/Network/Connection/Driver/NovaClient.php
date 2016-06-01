@@ -65,7 +65,7 @@ class NovaClient extends Base implements Connection
         Timer::after($this->config['pool']['heartbeat-time'], [$this, 'ping']);
     }
 
-    private function ping()
+    public function ping()
     {
         $sendBuffer = null;
         $serviceName = 'com.youzan.service.test';
