@@ -42,6 +42,14 @@ class RedisManager {
         yield $result;
     }
 
+    public function delete($key)
+    {
+        $result = new RedisResult();
+        $this->client->EXPIRE($key, 0, [$result, 'response']);
+        $this->release();
+        yield $result;
+    }
+
     public function set($key, $value, $expire=0) {
         $result = new RedisResult();
         $this->client->set($key, $value, [$result, 'response']);
