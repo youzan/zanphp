@@ -12,6 +12,7 @@ use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Connection\Exception\NovaClientPingEncodeException;
 
 class NovaClient extends Base implements Connection
 {
@@ -83,8 +84,7 @@ class NovaClient extends Base implements Connection
             $this->sendBuffer = $sendBuffer;
             $sent = $this->getSocket()->send($sendBuffer);
         } else {
-            //
-            //throw new ProtocolException('nova.encoding.failed');
+            throw new NovaClientPingEncodeException('nova.encoding.failed');
         }
         $this->heartbeating();
     }
@@ -92,10 +92,9 @@ class NovaClient extends Base implements Connection
     public function recv($data)
     {
         if (null !== $data && $data === $this->sendBuffer) {
-
-        } else {
-            var_dump('no');
+            return;
         }
+        $this->getPool()->remove($this);
     }
 
 }

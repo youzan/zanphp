@@ -89,7 +89,12 @@ class LoadBalancingPool implements ConnectionPool
 
     public function remove(Connection $conn)
     {
-
+        $key = spl_object_hash($conn);
+        if (!isset($this->connections[$key])) {
+            return false;
+        }
+        unset($this->connections[$key]);
+        return true;
     }
 
     public function recycle(Connection $conn)
