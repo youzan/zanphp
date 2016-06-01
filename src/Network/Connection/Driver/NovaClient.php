@@ -11,6 +11,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Foundation\Coroutine\Task;
 
 class NovaClient extends Base implements Connection
 {
