@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\ServerManager;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\ServerManager\LoadBalancingPool;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 
 class LoadBalancingManager
 {
@@ -29,7 +30,8 @@ class LoadBalancingManager
             $novaConfig['port'] = $server['port'];
             $config['connections'][] = $novaConfig;
         }
-        $this->loadBalancingPool = new LoadBalancingPool($config);
+        $novaClientFactory = new NovaClientFactory($config['connections']);
+        $this->loadBalancingPool = new LoadBalancingPool($novaClientFactory, $config, 'novaClient');
     }
 
     public function get()

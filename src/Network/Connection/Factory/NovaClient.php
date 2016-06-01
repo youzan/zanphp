@@ -14,7 +14,6 @@ use swoole_client as SwooleClient;
 class NovaClient implements ConnectionFactory
 {
     private $config;
-    private $conn;
 
     public function __construct(array $config)
     {
@@ -23,23 +22,27 @@ class NovaClient implements ConnectionFactory
 
     public function create()
     {
-        $clientFlags = SWOOLE_SOCK_TCP;
-        $this->conn = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-        $this->conn->set($this->config['config']);
+        $connections = [];
+        foreach ($this->config as $config) {
+            $clientFlags = SWOOLE_SOCK_TCP;
+            $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+            $socket->set($config['config']);
 
-        $connection = new \Zan\Framework\Network\Connection\Driver\NovaClient();
-        $connection->setSocket($this->conn);
-        $connection->setConfig($this->config);
-        $connection->init();
+            $connection = new \Zan\Framework\Network\Connection\Driver\NovaClient();
+            $connection->setSocket($socket);
+            $connection->setConfig($config);
+            $connection->init();
 
-        //call connect
-        $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
-        return $connection;
+            //call connect
+            $socket->connect($config['host'], $config['port'], $config['timeout']);
+            $connections[] = $connection;
+        }
+        return $connections;
     }
 
     public function close()
     {
-        $this->conn->close();
+
     }
 
 }

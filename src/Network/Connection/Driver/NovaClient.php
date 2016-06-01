@@ -17,6 +17,7 @@ class NovaClient extends Base implements Connection
 {
     private $clientCb;
     protected $isAsync = true;
+    private $sendBuffer;
 
     protected function closeSocket()
     {
@@ -79,6 +80,7 @@ class NovaClient extends Base implements Connection
             $this->recv($data);
         });
         if (nova_encode($serviceName, $method, $localIp, $localPort, $reqSeqNo, '', '', $sendBuffer)) {
+            $this->sendBuffer = $sendBuffer;
             $sent = $this->getSocket()->send($sendBuffer);
         } else {
             //
@@ -89,7 +91,11 @@ class NovaClient extends Base implements Connection
 
     public function recv($data)
     {
-        
+        if (null !== $data && $data === $this->sendBuffer) {
+
+        } else {
+            var_dump('no');
+        }
     }
 
 }

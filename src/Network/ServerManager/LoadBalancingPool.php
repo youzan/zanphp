@@ -7,14 +7,23 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
+use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Contract\Network\ConnectionFactory;
 
-class LoadBalancingPool
+class LoadBalancingPool implements ConnectionPool
 {
     private $connections = [];
+
+    /**
+     * @var ConnectionFactory
+     */
+    private $factory;
+
+    private $config;
 
     private $strategyMap = [
         'polling' => 'Zan\Framework\Network\ServerManager\LoadBalancingStrategy\Polling',
@@ -25,28 +34,29 @@ class LoadBalancingPool
      */
     private $strategy;
 
-    private $config;
-
-    public function __construct($config)
+    public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
-        $this->init($config);
+        $this->init($connectionFactory, $config);
     }
 
-    private function init($config)
+    private function init($connectionFactory, $config)
     {
         $this->config = $config;
+        $this->factory = $connectionFactory;
         $this->createConnect();
         $this->initStrategy();
     }
 
     private function createConnect()
     {
-        foreach ($this->config['connections'] as $config) {
-            $novaClientFactory = new NovaClientFactory($config);
-            $connection = $novaClientFactory->create();
-            $connection->heartbeat();
-            $key = spl_object_hash($connection);
-            $this->connections[$key] = $connection;
+        $connections = $this->factory->create();
+        foreach ($connections as $connection) {
+            if ($connection instanceof Connection) {
+                $key = spl_object_hash($connection);
+                $this->connections[$key] = $connection;
+                $connection->setPool($this);
+                $connection->heartbeat();
+            }
         }
     }
 
@@ -71,12 +81,18 @@ class LoadBalancingPool
     }
 
 
+
     public function reload(array $config)
     {
 
     }
 
     public function remove(Connection $conn)
+    {
+
+    }
+
+    public function recycle(Connection $conn)
     {
 
     }
