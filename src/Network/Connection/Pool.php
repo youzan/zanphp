@@ -14,10 +14,10 @@ use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Utilities\Types\ObjectArray;
+use Zan\Framework\Utilities\Types\Time;
 
 class Pool implements ConnectionPool
 {
-
     private $freeConnection = null;
 
     private $activeConnection = null;
@@ -38,11 +38,10 @@ class Pool implements ConnectionPool
 
     public function init()
     {
-        //todo 读取配置文件
         $initConnection = $this->poolConfig['pool']['init-connection'];
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
-        for ($i=0; $i<$initConnection; $i++) {
+        for ($i = 0; $i < $initConnection; $i++) {
             //todo 创建链接,存入数组
             $this->createConnect();
         }
@@ -50,14 +49,13 @@ class Pool implements ConnectionPool
 
     private function createConnect()
     {
-        //todo 创建链接,存入数组
         $connection = $this->factory->create();
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
         } else {
             $this->freeConnection->push($connection);
         }
-        
+
         $connection->setPool($this);
         $connection->heartbeat();
         $connection->setEngine($this->type);
@@ -76,7 +74,6 @@ class Pool implements ConnectionPool
 
     public function reload(array $config)
     {
-        
     }
 
     public function get()
@@ -86,11 +83,12 @@ class Pool implements ConnectionPool
         }
         $conn = $this->freeConnection->pop();
         $this->activeConnection->push($conn);
+        $conn->lastUsedTime = Time::current(true);
 
 //        deferRelease($conn);
         return $conn;
     }
-    
+
     public function recycle(Connection $conn)
     {
         $evtName = null;
@@ -100,19 +98,16 @@ class Pool implements ConnectionPool
         
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
-        
-        if ($evtName) {
-            //唤醒等待事件
+        if (count($this->freeConnection) == 1) {
+            $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
         }
     }
-    
+
     public function remove(Connection $conn)
     {
-        $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
-        //补充删除被删除连接
         $this->createConnect();
-
     }
+
 }

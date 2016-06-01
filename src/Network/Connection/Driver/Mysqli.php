@@ -14,10 +14,13 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Mysqli as Engine;
+use Zan\Framework\Utilities\Types\Time;
 
 class Mysqli extends Base implements Connection
 {
+    public $lastUsedTime=0;
     private $classHash = null;
+
     public function closeSocket()
     {
         return true;
@@ -32,11 +35,18 @@ class Mysqli extends Base implements Connection
 
     public function heartbeatLater()
     {
-        Timer::after($this->config['pool']['heartbeat-time'], [$this,'heartbeating'], $this->classHash);
+        Timer::after($this->config['pool']['heartbeat-time'], [$this,'heartbeating']);
     }
     
     public function heartbeating()
     {
+        $time = Time::current(true) - $this->lastUsedTime;
+        $hearBeatTime = $this->config['pool']['heartbeat-time']/1000;//s
+        if ($this->lastUsedTime != 0 && $time <  $hearBeatTime) {
+            Timer::after(($hearBeatTime-$time)*1000, [$this,'heartbeating']);
+            return;
+        }
+
         if (!$this->pool->getFreeConnection()->get($this->classHash)) {
             $this->heartbeatLater();
             return ;

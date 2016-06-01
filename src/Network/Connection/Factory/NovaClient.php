@@ -30,14 +30,12 @@ class NovaClient implements ConnectionFactory
         $connection = new \Zan\Framework\Network\Connection\Driver\NovaClient();
         $connection->setSocket($this->conn);
         $connection->setConfig($this->config);
-        $connection->setIsAsync(true);
         $connection->init();
 
         //call connect
         $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
         return $connection;
     }
-    
 
     public function close()
     {

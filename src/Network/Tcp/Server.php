@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
@@ -17,7 +18,8 @@ use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 class Server extends ServerBase {
 
     protected $serverStartItems = [
-        InitializeSqlMap::class
+        InitializeSqlMap::class,
+        InitLogConfig::class,
     ];
 
     protected $workerStartItems = [

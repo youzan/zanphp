@@ -16,13 +16,13 @@ use Zan\Framework\Foundation\Coroutine\Task;
 class NovaClient extends Base implements Connection
 {
     private $clientCb;
-    
+    protected $isAsync = true;
+
     protected function closeSocket()
     {
         return true;
     }
-
-
+    
     public function init() {
         //set callback
         $this->getSocket()->on('connect', [$this, 'onConnect']);

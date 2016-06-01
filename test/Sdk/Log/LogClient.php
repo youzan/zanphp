@@ -8,18 +8,19 @@
 
 namespace Zan\Framework\Test\Sdk\Log;
 
-use Zan\Framework\Sdk\Log\LoggerFactory;
+use Zan\Framework\Sdk\Log\Logger;
+use Zan\Framework\Testing\TaskTest;
+use Zan\Framework\Foundation\Core\Path;
 
-class LogClient {
+class LogClient extends TaskTest {
 
-    private $logger;
+    public function taskWirteLog(){
+        $path = __DIR__ . '/log/';
+        Path::setLogPath($path);
+        $log = Logger::getInstance('trade');
 
-    public function __construct(){
-        $this->logger = LoggerFactory::getLogger('zanhttdemo');
+        $data = ['name'=>'hht', 'context'=>'test1'];
+        $ret = (yield $log->info($data));
+        var_dump($ret);
     }
-
-    public function addLog($msg)
-    {
-        yield $this->logger->info($msg);
-    }
-} 
+}
