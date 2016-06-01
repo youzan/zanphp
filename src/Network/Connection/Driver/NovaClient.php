@@ -75,6 +75,9 @@ class NovaClient extends Base implements Connection
         $localIp = ip2long($sockInfo['host']);
         $localPort = $sockInfo['port'];
         $reqSeqNo = nova_get_sequence();
+        $this->setClientCb(function($data) {
+            $this->recv($data);
+        });
         if (nova_encode($serviceName, $method, $localIp, $localPort, $reqSeqNo, '', '', $sendBuffer)) {
             $sent = $this->getSocket()->send($sendBuffer);
         } else {
@@ -83,4 +86,10 @@ class NovaClient extends Base implements Connection
         }
         $this->heartbeating();
     }
+
+    public function recv($data)
+    {
+        
+    }
+
 }
