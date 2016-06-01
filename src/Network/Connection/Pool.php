@@ -28,9 +28,6 @@ class Pool implements ConnectionPool
 
     private $type = null;
 
-
-
-
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
         $this->poolConfig = $config;
@@ -49,7 +46,6 @@ class Pool implements ConnectionPool
             //todo 创建链接,存入数组
             $this->createConnect();
         }
-
     }
 
     private function createConnect()
@@ -85,7 +81,6 @@ class Pool implements ConnectionPool
 
     public function get()
     {
-
         if ($this->freeConnection->isEmpty()) {
             return null;
         }
