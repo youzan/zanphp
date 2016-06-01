@@ -167,13 +167,15 @@ class Request implements BaseRequest {
             $this->remotePort = $remotePort;
             $this->seqNo = $seqNo;
             $this->attachData = $attachData;
-
-            $this->formatRoute();
-            $this->decodeArgs();
-
+            
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;
+                echo "heartbeating ...\n";
+                return ;
             }
+            
+            $this->formatRoute();
+            $this->decodeArgs();
         } else {
             //TODO: throw TApplicationException
         }
