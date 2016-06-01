@@ -53,7 +53,6 @@ class Log
     {
         return [
             'factory' => '',
-            'app' => Application::getInstance()->getName(),
             'module' => null,
             'level' => 'debug',
             'storeType' => 'normal',
@@ -92,6 +91,9 @@ class Log
         if (isset($result['format'])) {
             $result['format'] = strtolower($result['format']);
         }
+
+        // force set app value to Application name
+        $result['app'] = Application::getInstance()->getName();
 
         return $result;
     }
