@@ -76,7 +76,14 @@ class NovaClientPool
 
     public function reload(array $config)
     {
-
+        $novaClientFactory = new NovaClientFactory($config);
+        $connection = $novaClientFactory->create();
+        if ($connection instanceof Connection) {
+            $key = spl_object_hash($connection);
+            $this->connections[$key] = $connection;
+            $connection->setPool($this);
+            $connection->heartbeat();
+        }
     }
 
     public function remove(Connection $conn)
@@ -86,7 +93,6 @@ class NovaClientPool
             return false;
         }
         unset($this->connections[$key]);
-
     }
 
     public function recycle(Connection $conn)

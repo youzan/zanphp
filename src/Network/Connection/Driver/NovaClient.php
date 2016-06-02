@@ -27,11 +27,6 @@ class NovaClient extends Base implements Connection
         return true;
     }
 
-    public function setPool($pool)
-    {
-        $this->pool = $pool;
-    }
-    
     public function init() {
         //set callback
         $this->getSocket()->on('connect', [$this, 'onConnect']);
@@ -79,5 +74,11 @@ class NovaClient extends Base implements Connection
         $client = NovaPingClient::getInstance($this, 'com.youzan.service.test');
         $ping = (yield $client->ping());
         $this->heartbeat();
+    }
+
+    public function close()
+    {
+        parent::close();
+        $this->getPool()->reload($this->config);
     }
 }
