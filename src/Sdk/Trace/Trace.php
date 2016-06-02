@@ -27,7 +27,12 @@ class Trace
     public function __construct($config)
     {
         $this->run = false;
-        if ($config && isset($config['run']) && $config['run'] == true) {
+        
+        if ($config) {
+            $this->config = $config;
+        }
+
+        if (isset($config['run']) && $config['run'] == true) {
             $this->run = true;
         }
     }
