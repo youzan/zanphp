@@ -27,7 +27,7 @@ class NovaClient extends Base implements Connection
         return true;
     }
 
-    public function setPool(NovaClientPool $pool)
+    public function setPool($pool)
     {
         $this->pool = $pool;
     }

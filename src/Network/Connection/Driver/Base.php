@@ -24,7 +24,7 @@ abstract class Base implements Connection
 
     abstract protected function closeSocket();
 
-    public function setPool(ConnectionPool $pool)
+    public function setPool($pool)
     {
         $this->pool = $pool;
     }
