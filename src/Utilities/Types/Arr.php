@@ -212,7 +212,8 @@ class Arr {
             return $array[$key];
         }
 
-        foreach (explode('.', $key) as $segment) {
+        $arr = explode('.', $key);
+        foreach ($arr as $segment) {
             if (static::accessible($array) && static::exists($array, $segment)) {
                 $array = $array[$segment];
             } else {
