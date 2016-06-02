@@ -72,8 +72,6 @@ class NovaClientPool
         yield $this->loadBalancingStrategy->get();
     }
 
-
-
     public function reload(array $config)
     {
         $novaClientFactory = new NovaClientFactory($config);
