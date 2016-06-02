@@ -7,6 +7,7 @@
  */
 namespace Zan\Framework\Network\Connection;
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
@@ -38,13 +39,23 @@ class NovaClientConnectionManager
         yield $this->novaClientPool->get();
     }
 
-    public function offline()
+    public function offline($servers)
     {
-
+        foreach ($servers as $server) {
+            $connection = $this->novaClientPool->getConnectionByHostPort($server['host'], $server['port']);
+            if ($connection instanceof Connection) {
+                $this->novaClientPool->remove($connection);
+            }
+        }
     }
 
-    public function addOnline()
+    public function addOnline($servers)
     {
-
+        $novaConfig = Config::get('novaConnection');
+        foreach ($servers as $server) {
+            $novaConfig['host'] = $server['host'];
+            $novaConfig['port'] = $server['port'];
+            $this->novaClientPool->reload($novaConfig);
+        }
     }
 }

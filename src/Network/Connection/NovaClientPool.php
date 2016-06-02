@@ -21,6 +21,8 @@ class NovaClientPool
         'polling' => 'Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling',
     ];
 
+    private $configConnectionMap = [];
+
     /**
      * @var LoadBalancingStrategyInterface
      */
@@ -46,6 +48,7 @@ class NovaClientPool
             if ($connection instanceof Connection) {
                 $key = spl_object_hash($connection);
                 $this->connections[$key] = $connection;
+                $this->configConnectionMap[$config['host'].':'.$config['port']] = $connection;
                 $connection->setPool($this);
                 $connection->heartbeat();
             }
@@ -65,6 +68,11 @@ class NovaClientPool
     public function getConnections()
     {
         return $this->connections;
+    }
+
+    public function getConnectionByHostPort($host, $port)
+    {
+        return isset($this->configConnectionMap[$host.':'.$port]) ? $this->configConnectionMap[$host.':'.$port] : null;
     }
 
     public function get()

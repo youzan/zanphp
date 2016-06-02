@@ -157,11 +157,11 @@ class ServerDiscovery
         $old = (yield $this->get());
         $offline = array_diff_key($old, $update);
         if ([] != $offline) {
-            yield LoadBalancingManager::getInstance()->offline($offline);
+            NovaClientConnectionManager::getInstance()->offline($offline);
         }
         $addOnline = array_diff_key($update, $old);
         if ([] != $addOnline) {
-            yield LoadBalancingManager::getInstance()->addOnline($addOnline);
+            NovaClientConnectionManager::getInstance()->addOnline($addOnline);
         }
         $this->serverStore->set('list', $update);
         //todo set waitIndex
