@@ -12,6 +12,7 @@ use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Kdt\Iron\Nova\Network\Client as NovaPingClient;
 use Zan\Framework\Network\Connection\Exception\NovaClientPingEncodeException;
 
 class NovaClient extends Base implements Connection
@@ -70,31 +71,10 @@ class NovaClient extends Base implements Connection
 
     public function ping()
     {
-        $sendBuffer = null;
-        $serviceName = 'com.youzan.service.test';
-        $method = 'ping';
-        $sockInfo = $this->getSocket()->getsockname();
-        $localIp = ip2long($sockInfo['host']);
-        $localPort = $sockInfo['port'];
-        $reqSeqNo = nova_get_sequence();
-        $this->setClientCb(function($data) {
-            $this->recv($data);
-        });
-        if (nova_encode($serviceName, $method, $localIp, $localPort, $reqSeqNo, '', '', $sendBuffer)) {
-            $this->sendBuffer = $sendBuffer;
-            $sent = $this->getSocket()->send($sendBuffer);
-        } else {
-            throw new NovaClientPingEncodeException('nova.encoding.failed');
-        }
+        $client = NovaPingClient::getInstance($this, 'com.youzan.service.test');
+        yield $client->ping();
         $this->heartbeating();
     }
 
-    public function recv($data)
-    {
-        if (null !== $data && $data === $this->sendBuffer) {
-            return;
-        }
-        $this->getPool()->remove($this);
-    }
 
 }
