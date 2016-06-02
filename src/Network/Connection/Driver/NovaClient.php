@@ -14,6 +14,7 @@ use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Kdt\Iron\Nova\Network\Client as NovaPingClient;
 use Zan\Framework\Network\Connection\Exception\NovaClientPingEncodeException;
+use Zan\Framework\Network\Connection\NovaClientPool;
 
 class NovaClient extends Base implements Connection
 {
@@ -24,6 +25,11 @@ class NovaClient extends Base implements Connection
     protected function closeSocket()
     {
         return true;
+    }
+
+    public function setPool(NovaClientPool $pool)
+    {
+        $this->pool = $pool;
     }
     
     public function init() {

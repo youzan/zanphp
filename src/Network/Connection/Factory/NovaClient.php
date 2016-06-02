@@ -22,22 +22,18 @@ class NovaClient implements ConnectionFactory
 
     public function create()
     {
-        $connections = [];
-        foreach ($this->config as $config) {
-            $clientFlags = SWOOLE_SOCK_TCP;
-            $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-            $socket->set($config['config']);
+        $clientFlags = SWOOLE_SOCK_TCP;
+        $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+        $socket->set($this->config['config']);
 
-            $connection = new \Zan\Framework\Network\Connection\Driver\NovaClient();
-            $connection->setSocket($socket);
-            $connection->setConfig($config);
-            $connection->init();
+        $connection = new \Zan\Framework\Network\Connection\Driver\NovaClient();
+        $connection->setSocket($socket);
+        $connection->setConfig($this->config);
+        $connection->init();
 
-            //call connect
-            $socket->connect($config['host'], $config['port'], $config['timeout']);
-            $connections[] = $connection;
-        }
-        return $connections;
+        //call connect
+        $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        return $connection;
     }
 
     public function close()

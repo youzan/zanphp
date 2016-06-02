@@ -10,7 +10,7 @@ namespace Zan\Framework\Network\Connection;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
+
 
 class NovaClientConnectionManager
 {
@@ -30,8 +30,7 @@ class NovaClientConnectionManager
             $novaConfig['port'] = $server['port'];
             $config['connections'][] = $novaConfig;
         }
-        $novaClientFactory = new NovaClientFactory($config['connections']);
-        $this->novaClientPool = new NovaClientPool($novaClientFactory, $config, 'novaClient');
+        $this->novaClientPool = new NovaClientPool($config);
     }
 
     public function get()

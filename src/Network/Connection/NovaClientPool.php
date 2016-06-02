@@ -7,21 +7,13 @@
  */
 namespace Zan\Framework\Network\Connection;
 
-use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Utilities\DesignPattern\Singleton;
-use Zan\Framework\Contract\Network\ConnectionFactory;
 
-class NovaClientPool implements ConnectionPool
+class NovaClientPool
 {
     private $connections = [];
-
-    /**
-     * @var ConnectionFactory
-     */
-    private $factory;
 
     private $config;
 
@@ -34,23 +26,23 @@ class NovaClientPool implements ConnectionPool
      */
     private $loadBalancingStrategy;
 
-    public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
+    public function __construct(array $config)
     {
-        $this->init($connectionFactory, $config);
+        $this->init($config);
     }
 
-    private function init($connectionFactory, $config)
+    private function init($config)
     {
         $this->config = $config;
-        $this->factory = $connectionFactory;
         $this->createConnect();
         $this->initLoadBalancingStrategy();
     }
 
     private function createConnect()
     {
-        $connections = $this->factory->create();
-        foreach ($connections as $connection) {
+        foreach ($this->config['connections'] as $config) {
+            $novaClientFactory = new NovaClientFactory($config);
+            $connection = $novaClientFactory->create();
             if ($connection instanceof Connection) {
                 $key = spl_object_hash($connection);
                 $this->connections[$key] = $connection;
@@ -94,7 +86,7 @@ class NovaClientPool implements ConnectionPool
             return false;
         }
         unset($this->connections[$key]);
-        return true;
+
     }
 
     public function recycle(Connection $conn)
