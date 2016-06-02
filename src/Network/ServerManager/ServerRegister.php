@@ -7,10 +7,19 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
+use Zan\Framework\Network\Common\HttpClient;
+
 class ServerRegister
 {
 
+    public function register()
+    {
+        $httpClient = new HttpClient($host, $port);
+        yield $httpClient->post($uri, $params, $timeout);
 
+
+
+    }
 
 
 }

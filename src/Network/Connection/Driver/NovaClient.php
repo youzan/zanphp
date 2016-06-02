@@ -57,24 +57,21 @@ class NovaClient extends Base implements Connection
     public function setClientCb(callable $cb) {
         $this->clientCb = $cb;
     }
-
     public function heartbeat()
     {
-        $coroutine = $this->heartbeating();
-        Task::execute($coroutine);
+        Timer::after($this->config['pool']['heartbeat-time'], [$this, 'heartbeating']);
     }
 
     public function heartbeating()
     {
-        Timer::after($this->config['pool']['heartbeat-time'], [$this, 'ping']);
+        $coroutine = $this->ping();
+        Task::execute($coroutine);
     }
 
     public function ping()
     {
         $client = NovaPingClient::getInstance($this, 'com.youzan.service.test');
-        yield $client->ping();
-        $this->heartbeating();
+        $ping = (yield $client->ping());
+        $this->heartbeat();
     }
-
-
 }

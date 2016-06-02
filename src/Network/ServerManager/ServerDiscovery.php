@@ -16,7 +16,7 @@ use Zan\Framework\Network\ServerManager\Exception\ServerDiscoveryEtcdException;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 
 use Zan\Framework\Network\ServerManager\ServerStore;
-use Zan\Framework\Network\ServerManager\LoadBalancingManager;
+use Zan\Framework\Network\Connection\NovaClientConnectionManager;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -59,7 +59,7 @@ class ServerDiscovery
         if (!$isWatch) {
             $this->watch();
         }
-        LoadBalancingManager::getInstance()->work($servers);
+        NovaClientConnectionManager::getInstance()->work($servers);
     }
 
     private function checkIsWatch()

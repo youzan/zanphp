@@ -5,21 +5,21 @@
  * Date: 16/5/19
  * Time: 下午4:01
  */
-namespace Zan\Framework\Network\ServerManager;
+namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-use Zan\Framework\Network\ServerManager\LoadBalancingPool;
+use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 
-class LoadBalancingManager
+class NovaClientConnectionManager
 {
     use Singleton;
 
     /**
-     * @var LoadBalancingPool
+     * @var NovaClientPool
      */
-    private $loadBalancingPool;
+    private $novaClientPool;
 
     public function work($servers)
     {
@@ -31,12 +31,12 @@ class LoadBalancingManager
             $config['connections'][] = $novaConfig;
         }
         $novaClientFactory = new NovaClientFactory($config['connections']);
-        $this->loadBalancingPool = new LoadBalancingPool($novaClientFactory, $config, 'novaClient');
+        $this->novaClientPool = new NovaClientPool($novaClientFactory, $config, 'novaClient');
     }
 
     public function get()
     {
-        yield $this->loadBalancingPool->get();
+        yield $this->novaClientPool->get();
     }
 
     public function offline()

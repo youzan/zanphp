@@ -5,11 +5,11 @@
  * Date: 16/5/27
  * Time: 下午7:15
  */
-namespace Zan\Framework\Network\ServerManager\LoadBalancingStrategy;
+namespace Zan\Framework\Network\Connection\LoadBalancingStrategy;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
-use Zan\Framework\Network\ServerManager\LoadBalancingPool;
+use Zan\Framework\Network\Connection\NovaClientPool;
 
 class Polling implements LoadBalancingStrategyInterface
 {
@@ -17,7 +17,7 @@ class Polling implements LoadBalancingStrategyInterface
 
     private $connectionPool;
 
-    public function __construct(LoadBalancingPool $connectionPool)
+    public function __construct(NovaClientPool $connectionPool)
     {
         $this->connectionPool = $connectionPool;
     }

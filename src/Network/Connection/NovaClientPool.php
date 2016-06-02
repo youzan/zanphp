@@ -5,7 +5,7 @@
  * Date: 16/5/27
  * Time: 下午7:40
  */
-namespace Zan\Framework\Network\ServerManager;
+namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
@@ -14,7 +14,7 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Contract\Network\ConnectionFactory;
 
-class LoadBalancingPool implements ConnectionPool
+class NovaClientPool implements ConnectionPool
 {
     private $connections = [];
 
@@ -25,14 +25,14 @@ class LoadBalancingPool implements ConnectionPool
 
     private $config;
 
-    private $strategyMap = [
-        'polling' => 'Zan\Framework\Network\ServerManager\LoadBalancingStrategy\Polling',
+    private $loadBalancingStrategyMap = [
+        'polling' => 'Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling',
     ];
 
     /**
      * @var LoadBalancingStrategyInterface
      */
-    private $strategy;
+    private $loadBalancingStrategy;
 
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
@@ -44,7 +44,7 @@ class LoadBalancingPool implements ConnectionPool
         $this->config = $config;
         $this->factory = $connectionFactory;
         $this->createConnect();
-        $this->initStrategy();
+        $this->initLoadBalancingStrategy();
     }
 
     private function createConnect()
@@ -60,14 +60,14 @@ class LoadBalancingPool implements ConnectionPool
         }
     }
 
-    private function initStrategy()
+    private function initLoadBalancingStrategy()
     {
         $key = $this->config['strategy'];
-        if (!isset($this->strategyMap[$key])) {
+        if (!isset($this->loadBalancingStrategyMap[$key])) {
             //exception
         }
-        $strategy = $this->strategyMap[$key];
-        $this->strategy = new $strategy($this);
+        $loadBalancingStrategy = $this->loadBalancingStrategyMap[$key];
+        $this->loadBalancingStrategy = new $loadBalancingStrategy($this);
     }
 
     public function getConnections()
@@ -77,7 +77,7 @@ class LoadBalancingPool implements ConnectionPool
 
     public function get()
     {
-        yield $this->strategy->get();
+        yield $this->loadBalancingStrategy->get();
     }
 
 
