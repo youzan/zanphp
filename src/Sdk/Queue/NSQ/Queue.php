@@ -36,7 +36,7 @@ class Queue implements Async
     /**
      * @param callable $callback
      */
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         call_user_func($this->handler, $callback);
     }
