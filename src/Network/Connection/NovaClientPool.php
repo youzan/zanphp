@@ -21,7 +21,9 @@ class NovaClientPool
         'polling' => 'Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling',
     ];
 
-    private $configConnectionMap = [];
+    private $nowReloadStepTime = 0;
+    private $incReloadStepTime = 5000;
+    private $maxReloadStepTime = 30000;
 
     /**
      * @var LoadBalancingStrategyInterface
@@ -36,22 +38,26 @@ class NovaClientPool
     private function init($config)
     {
         $this->config = $config;
-        $this->createConnect();
+        $this->createConnections();
         $this->initLoadBalancingStrategy();
     }
 
-    private function createConnect()
+    private function createConnections()
     {
         foreach ($this->config['connections'] as $config) {
-            $novaClientFactory = new NovaClientFactory($config);
-            $connection = $novaClientFactory->create();
-            if ($connection instanceof Connection) {
-                $key = spl_object_hash($connection);
-                $this->connections[$key] = $connection;
-                $this->configConnectionMap[$config['host'].':'.$config['port']] = $connection;
-                $connection->setPool($this);
-                $connection->heartbeat();
-            }
+            $this->createConnection($config);
+        }
+    }
+
+    public function createConnection($config)
+    {
+        $novaClientFactory = new NovaClientFactory($config);
+        $connection = $novaClientFactory->create();
+        if ($connection instanceof Connection) {
+            $key = spl_object_hash($connection);
+            $this->connections[$key] = $connection;
+            $connection->setPool($this);
+            $connection->heartbeat();
         }
     }
 
@@ -72,24 +78,23 @@ class NovaClientPool
 
     public function getConnectionByHostPort($host, $port)
     {
-        return isset($this->configConnectionMap[$host.':'.$port]) ? $this->configConnectionMap[$host.':'.$port] : null;
+        foreach ($this->connections as $connection) {
+            $config = $connection->getConfig();
+            if ($config['host'] == $host && $config['port'] == $port) {
+                return $connection;
+            }
+        }
+        return null;
     }
 
-    public function get()
+    public function get($serviceName)
     {
-        yield $this->loadBalancingStrategy->get();
+        yield $this->loadBalancingStrategy->get($serviceName);
     }
 
     public function reload(array $config)
     {
-        $novaClientFactory = new NovaClientFactory($config);
-        $connection = $novaClientFactory->create();
-        if ($connection instanceof Connection) {
-            $key = spl_object_hash($connection);
-            $this->connections[$key] = $connection;
-            $connection->setPool($this);
-            $connection->heartbeat();
-        }
+        $this->createConnection($config);
     }
 
     public function remove(Connection $conn)

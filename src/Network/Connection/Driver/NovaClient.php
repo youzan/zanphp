@@ -23,9 +23,7 @@ class NovaClient extends Base implements Connection
     private $clientCb;
     protected $isAsync = true;
 
-    private $nowReloadStepTime = 0;
-    private $incReloadStepTime = 5000;
-    private $maxReloadStepTime = 30000;
+
 
     protected function closeSocket()
     {

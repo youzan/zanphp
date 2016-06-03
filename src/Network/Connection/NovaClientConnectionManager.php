@@ -11,18 +11,15 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
-
+use Zan\Framework\Network\Connection\Exception\CanNotFindServiceNamePoolException;
 
 class NovaClientConnectionManager
 {
     use Singleton;
 
-    /**
-     * @var NovaClientPool
-     */
-    private $novaClientPool;
+    private $novaClientPool = [];
 
-    public function work($servers)
+    public function work($serviceName, $servers)
     {
         $config = Config::get('loadBalancing');
         $novaConfig = Config::get('novaConnection');
@@ -31,31 +28,46 @@ class NovaClientConnectionManager
             $novaConfig['port'] = $server['port'];
             $config['connections'][] = $novaConfig;
         }
-        $this->novaClientPool = new NovaClientPool($config);
+        $this->novaClientPool[$serviceName] = new NovaClientPool($config);
     }
 
-    public function get()
+    /**
+     * @param $serviceName
+     * @return NovaClientPool | null
+     */
+    public function getPool($serviceName)
     {
-        yield $this->novaClientPool->get();
+        if (!isset($this->novaClientPool[$serviceName])) {
+            throw new CanNotFindServiceNamePoolException();
+        }
+        return $this->novaClientPool[$serviceName];
     }
 
-    public function offline($servers)
+    public function get($serviceName)
     {
+        $pool = $this->getPool($serviceName);
+        yield $pool->get($serviceName);
+    }
+
+    public function offline($serviceName, $servers)
+    {
+        $pool = $this->getPool($serviceName);
         foreach ($servers as $server) {
-            $connection = $this->novaClientPool->getConnectionByHostPort($server['host'], $server['port']);
-            if ($connection instanceof Connection) {
-                $this->novaClientPool->remove($connection);
+            $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
+            if (null !== $connection && $connection instanceof Connection) {
+                $pool->remove($connection);
             }
         }
     }
 
-    public function addOnline($servers)
+    public function addOnline($serviceName, $servers)
     {
         $novaConfig = Config::get('novaConnection');
+        $pool = $this->getPool($serviceName);
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $this->novaClientPool->reload($novaConfig);
+            $pool->createConnection($novaConfig);
         }
     }
 }

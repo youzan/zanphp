@@ -54,17 +54,19 @@ class ServerDiscovery
 
     public function start()
     {
-        $servers = (yield $this->get());
-        $isWatch = $this->checkIsWatch();
-        if (!$isWatch) {
-            $this->watch();
+        foreach ($this->config['service_name'] as $serviceName) {
+            $servers = (yield $this->get($serviceName));
+            $isWatch = $this->checkIsWatch($serviceName);
+            if (!$isWatch) {
+                $this->watch($serviceName);
+            }
+            NovaClientConnectionManager::getInstance()->work($serviceName, $servers);
         }
-        NovaClientConnectionManager::getInstance()->work($servers);
     }
 
-    private function checkIsWatch()
+    private function checkIsWatch($serviceName)
     {
-        $watchTime = $this->serverStore->get('last_time');
+        $watchTime = $this->serverStore->get($this->getDoWatchKey($serviceName));
 
         $watchTime = $watchTime == null ? 0 : $watchTime;
         if ((time() - $watchTime) > (3 * $this->config['watch']['timeout'] * 1000)) {
@@ -73,9 +75,9 @@ class ServerDiscovery
         return true;
     }
 
-    public function get()
+    public function get($serviceName)
     {
-        $servers = $this->serverStore->get('list');
+        $servers = $this->serverStore->get($this->getServiceListKey($serviceName));
         if (null !== $servers) {
             yield $servers;
             return;
@@ -84,10 +86,10 @@ class ServerDiscovery
         $uri = $this->config['get']['uri'] . '/' .
             $this->config['get']['protocol'] . ':' .
             $this->config['get']['namespace'] . '/'.
-            $this->config['get']['server_name'];
+            $serviceName;
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
         $servers = (yield $this->parseEtcdData($raw));
-        yield $this->save($servers);
+        yield $this->save($serviceName, $servers);
         yield $servers;
     }
 
@@ -104,7 +106,7 @@ class ServerDiscovery
             $value = json_decode($server['value'], true);
             $servers[$value['IP'].':'.$value['Port']] = [
                 'namespace' => $value['Namespace'],
-                'server_name' => $value['SrvName'],
+                'service_name' => $value['SrvName'],
                 'host' => $value['IP'],
                 'port' => $value['Port'],
                 'protocol' => $value['Protocol'],
@@ -116,66 +118,78 @@ class ServerDiscovery
         yield $servers;
     }
 
-    private function save($servers)
+    private function save($serviceName, $servers)
     {
-        return $this->serverStore->set('list', $servers);
+        return $this->serverStore->set($this->getServiceListKey($serviceName), $servers);
     }
 
-    public function watch()
+    public function watch($serviceName)
     {
-        $this->setDoWatch();
-        $coroutine = $this->watching();
+        $this->setDoWatch($serviceName);
+        $coroutine = $this->watching($serviceName);
         Task::execute($coroutine);
     }
 
-    public function watching()
+    public function watching($serviceName)
     {
         while (true) {
-            $this->setDoWatch();
+            $this->setDoWatch($serviceName);
             try {
-                $raw = (yield $this->watchEtcd());
+                $raw = (yield $this->watchEtcd($serviceName));
                 if (null != $raw) {
-                    yield $this->update($raw);
+                    yield $this->update($serviceName, $raw);
                 }
             } catch (HttpClientTimeoutException $e) {
             }
         }
     }
 
-    private function setDoWatch()
+    private function setDoWatch($serviceName)
     {
-        return $this->serverStore->set('last_time', time());
+        return $this->serverStore->set($this->getDoWatchKey($serviceName), time());
     }
 
-    private function update($raw)
+
+
+    private function update($serviceName, $raw)
     {
         $update = (yield $this->parseEtcdData($raw));
         if ([] == $update) {
             yield null;
             return;
         }
-        $old = (yield $this->get());
+        $old = (yield $this->get($serviceName));
         $offline = array_diff_key($old, $update);
         if ([] != $offline) {
-            NovaClientConnectionManager::getInstance()->offline($offline);
+            NovaClientConnectionManager::getInstance()->offline($serviceName, $offline);
         }
         $addOnline = array_diff_key($update, $old);
         if ([] != $addOnline) {
-            NovaClientConnectionManager::getInstance()->addOnline($addOnline);
+            NovaClientConnectionManager::getInstance()->addOnline($serviceName, $addOnline);
         }
-        $this->serverStore->set('list', $update);
+        $this->serverStore->set($this->getServiceListKey($serviceName), $update);
         //todo set waitIndex
     }
 
-    private function watchEtcd()
+    private function watchEtcd($serviceName)
     {
         $params = $this->waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true, 'recursive' => true];
         $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
         $uri = $this->config['watch']['uri'] . '/' .
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
-            $this->config['watch']['server_name'];
+            $serviceName;
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+    }
+
+    private function getDoWatchKey($serviceName)
+    {
+        return 'last_time_' . $serviceName;
+    }
+
+    private function getServiceListKey($serviceName)
+    {
+        return 'list_' . $serviceName;
     }
 }
 
