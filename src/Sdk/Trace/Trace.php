@@ -28,11 +28,11 @@ class Trace
     private $pid;
     private $builder;
 
-    private $_root_id;
-    private $_parent_id;
+    private $_root_id = 'null';
+    private $_parent_id = 'null';
     private $_stack = [];
 
-    public function __construct($config, $rootId = "null", $parentId = "null")
+    public function __construct($config, $rootId = null, $parentId = null)
     {
         $this->run = false;
 
@@ -48,8 +48,14 @@ class Trace
         $this->ip = gethostbyname($this->hostName);
         $this->pid = getmypid();
 
-        $this->_root_id = $rootId;
-        $this->_parent_id = $parentId;
+        if ($rootId) {
+            $this->_root_id = $rootId;
+        }
+
+        if ($parentId) {
+            $this->_parent_id = $parentId;
+        }
+
     }
 
     public function initHeader()
@@ -57,6 +63,7 @@ class Trace
         if (!$this->run) {
             return false;
         }
+        $msgId = Uuid::get();
         $header = [
             self::PROTOCOL,
             $this->appName,
@@ -65,12 +72,13 @@ class Trace
             self::GROUP_NAME,
             $this->pid,
             self::NAME,
-            Uuid::get(),
+            $msgId,
             $this->_parent_id,
             $this->_root_id,
             "null"
         ];
         $this->builder->buildHeader($header);
+        $this->_parent_id = $this->_root_id = $msgId;
     }
 
     public function transactionBegin($type, $name)
