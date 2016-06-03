@@ -31,7 +31,7 @@ class FutureConnection implements Async
         $this->init();
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->taskCallback = $callback;
     }

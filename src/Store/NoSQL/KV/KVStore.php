@@ -155,7 +155,7 @@ class KVStore implements Async
         }
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
     }

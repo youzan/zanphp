@@ -39,7 +39,7 @@ class EsClient implements Async
         return $this;
     }
 
-    public function execute(Callable $callback)
+    public function execute(Callable $callback, $task)
     {
         call_user_func($this->handle, $callback);
     }

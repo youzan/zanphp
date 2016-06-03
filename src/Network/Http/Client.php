@@ -42,7 +42,7 @@ class Client implements Async {
         $this->buildParams($parameter);
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
 

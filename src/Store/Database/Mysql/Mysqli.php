@@ -49,7 +49,7 @@ class Mysqli implements DriverInterface
         return $this->connection;
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
     }
