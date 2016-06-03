@@ -14,6 +14,7 @@ use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
+use Zan\Framework\Network\ServerManager\ServerRegister;
 
 class Server extends ServerBase {
 
@@ -81,7 +82,7 @@ class Server extends ServerBase {
 
         $appName = Application::getInstance()->getName();
         $config['module'] = $appName;
-
+        new ServerRegister();
         $this->swooleServer->nova_config($config);
     }
 

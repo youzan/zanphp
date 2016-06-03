@@ -84,11 +84,10 @@ class NovaClient extends Base implements Connection
     public function close()
     {
         $time = $this->getPool()->getReloadTimeWithInc($this->config);
-        Timer::clearAfterJob($this->getPool()->getReloadJobId($this->config));
-        Timer::after($time, [$this, 'reload'], $this->getPool()->getReloadJobId($this->config));
         if ($time === NovaClientPool::CONNECTION_RELOAD_STEP_TIME) {
-            $this->reload();
+            return $this->reload();
         }
+        Timer::after($time, [$this, 'reload'], $this->getPool()->getReloadJobId($this->config));
     }
 
     public function release()
