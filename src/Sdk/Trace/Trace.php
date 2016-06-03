@@ -93,6 +93,22 @@ class Trace
         array_push($this->_stack, $trace);
     }
 
+    /**
+     * @return string
+     */
+    public function getRootId()
+    {
+        return $this->_root_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getParentId()
+    {
+        return $this->_parent_id;
+    }
+
     public function commit($status)
     {
         if (!$this->run) {
