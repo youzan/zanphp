@@ -20,13 +20,13 @@ class MiddlewareInitiator
         MiddlewareConfig::getInstance()->setConfig($config);
     }
 
-    public function initExtendFilters(array $extendFilters = [])
+    public function initZanFilters(array $zanFilters = [])
     {
-        MiddlewareConfig::getInstance()->setExtendFilters($extendFilters);
+        MiddlewareConfig::getInstance()->setZanFilters($zanFilters);
     }
 
-    public function initExtendTerminators(array $extendTerminators = [])
+    public function initZanTerminators(array $zanTerminators = [])
     {
-        MiddlewareConfig::getInstance()->setExtendTerminators($extendTerminators);
+        MiddlewareConfig::getInstance()->setZanTerminators($zanTerminators);
     }
 } 
