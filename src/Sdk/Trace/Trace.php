@@ -79,7 +79,7 @@ class Trace
             return false;
         }
 
-        list($usec, $sec) = microtime();
+        list($usec, $sec) = explode(' ', microtime());
         $time = date("YYYY-MM-DD HH:ii:ss", $sec) . substr($usec, 1, 4);
 
         $trace = [
@@ -99,7 +99,7 @@ class Trace
             return false;
         }
 
-        list($usec, $sec) = microtime();
+        list($usec, $sec) = explode(' ', microtime());
         $time = date("YYYY-MM-DD HH:ii:ss", $sec) . substr($usec, 1, 4);
 
         $data = array_pop($this->_stack);
@@ -120,7 +120,7 @@ class Trace
             return false;
         }
 
-        list($usec, $sec) = microtime();
+        list($usec, $sec) = explode(' ', microtime());
         $time = date("YYYY-MM-DD HH:ii:ss", $sec) . substr($usec, 1, 4);
 
         $trace = [
@@ -136,7 +136,8 @@ class Trace
     public function send()
     {
         if (!$this->run) {
-            return false;
+            yield false;
+            return;
         }
 
         $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));

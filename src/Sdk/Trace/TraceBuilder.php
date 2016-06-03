@@ -24,19 +24,19 @@ class TraceBuilder
 
     public function buildTransaction(array $transaction)
     {
-        array_unshift($header, "%s\t%s\t%s\n");
+        array_unshift($transaction, "%s\t%s\t%s\n");
         $this->data .= call_user_func_array("sprintf", $transaction);
     }
 
     public function commitTransaction(array $transaction)
     {
-        array_unshift($header, "%s\t%s\t%s\t%s\t%s\n");
+        array_unshift($transaction, "%s\t%s\t%s\t%s\t%s\n");
         $this->data .= call_user_func_array("sprintf", $transaction);
     }
 
     public function buildEvent(array $event)
     {
-        array_unshift($header, "%s\t%s\t%s\t%s\t%s\n");
+        array_unshift($event, "%s\t%s\t%s\t%s\t%s\n");
         $this->data .= call_user_func_array("sprintf", $event);
     }
 

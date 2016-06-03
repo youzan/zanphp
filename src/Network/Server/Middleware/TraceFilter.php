@@ -40,6 +40,7 @@ class TraceFilter implements RequestFilter
         $trace = new Trace($config, $rootId, $parentId);
         $trace->initHeader();
         $trace->transactionBegin(Constant::NOVA, $name);
+        
         $context->set('trace', $trace);
     }
 }
