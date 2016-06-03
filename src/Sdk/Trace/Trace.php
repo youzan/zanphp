@@ -30,6 +30,7 @@ class Trace
 
     private $_root_id = 'null';
     private $_parent_id = 'null';
+    private $_remoteCallMsgId;
     private $_stack = [];
 
     public function __construct($config, $rootId = null, $parentId = null)
@@ -58,12 +59,16 @@ class Trace
 
     }
 
-    public function initHeader()
+    public function initHeader($msgId = null)
     {
         if (!$this->run) {
             return false;
         }
-        $msgId = Uuid::get();
+
+        if (!$msgId) {
+            $msgId = Uuid::get();
+        }
+
         $header = [
             self::PROTOCOL,
             $this->appName,
@@ -78,7 +83,11 @@ class Trace
             "null"
         ];
         $this->builder->buildHeader($header);
-        $this->_parent_id = $this->_root_id = $msgId;
+        if (!$this->_root_id) {
+            $this->_root_id = $msgId;
+        }
+
+        $this->_parent_id = $msgId;
     }
 
     public function transactionBegin($type, $name)
@@ -155,6 +164,22 @@ class Trace
             addslashes($context),
         ];
         $this->builder->buildEvent($trace);
+    }
+
+    /**
+     * @param mixed $remoteCallMsgId
+     */
+    public function setRemoteCallMsgId($remoteCallMsgId)
+    {
+        $this->_remoteCallMsgId = $remoteCallMsgId;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getRemoteCallMsgId()
+    {
+        return $this->_remoteCallMsgId;
     }
 
     public function send()

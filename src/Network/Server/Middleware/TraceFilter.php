@@ -24,6 +24,7 @@ class TraceFilter implements RequestFilter
         $rootId = $parentId = 'null';
         $isTcp = method_exists($request, 'getAttachData');
         $name = '';
+        $eventId = null;
         if ($isTcp) {
             $attachData = $request->getAttachData();
             $attachArr = json_decode($attachData, true);
@@ -35,10 +36,13 @@ class TraceFilter implements RequestFilter
                 $parentId = $attachArr[Trace::TRACE_KEY]['parentId'];
             }
 
+            if (isset($attachArr[Trace::TRACE_KEY]['eventId'])) {
+                $eventId = $attachArr[Trace::TRACE_KEY]['eventId'];
+            }
             $name = $request->getServiceName() . '.' . $request->getMethodName();
         }
         $trace = new Trace($config, $rootId, $parentId);
-        $trace->initHeader();
+        $trace->initHeader($eventId);
         $trace->transactionBegin(Constant::NOVA, $name);
         
         $context->set('trace', $trace);
