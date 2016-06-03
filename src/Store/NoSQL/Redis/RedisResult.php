@@ -15,7 +15,7 @@ class RedisResult implements  Async{
 
     private $callback = null;
 
-    public function execute(callable $callback){
+    public function execute(callable $callback, $task){
         $this->callback = $callback;
     }
 

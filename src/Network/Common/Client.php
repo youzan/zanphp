@@ -54,7 +54,7 @@ class Client implements Async
         yield $client->build();
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->httpClient->setCallback($this->getCallback($callback))->handle();
     }

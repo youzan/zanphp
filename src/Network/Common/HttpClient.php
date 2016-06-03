@@ -57,7 +57,7 @@ class HttpClient implements Async
         yield $this->build();
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->setCallback($this->getCallback($callback))->handle();
     }
