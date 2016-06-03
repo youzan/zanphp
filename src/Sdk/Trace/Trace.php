@@ -91,8 +91,8 @@ class Trace
             "null"
         ];
         $this->builder->buildHeader($header);
-        var_dump($this->_root_id);
-        if (!$this->_root_id) {
+
+        if ($this->_root_id = 'null') {
             $this->_root_id = $msgId;
         }
 
