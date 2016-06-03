@@ -15,6 +15,7 @@ use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\ServerManager\ServerRegister;
+use Zan\Framework\Foundation\Coroutine\Task;
 
 class Server extends ServerBase {
 
