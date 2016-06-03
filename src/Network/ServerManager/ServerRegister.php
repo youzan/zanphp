@@ -16,6 +16,18 @@ class ServerRegister
     public function parseConfig($config)
     {
         $extData = [];
+        @exec("ifconfig", $ifconfig);
+        $ip = '';
+        foreach ($ifconfig as $value) {
+            preg_match_all('/(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})+/', $value, $match);
+            if (empty($match[0])) {
+                continue;
+            }
+            if ($match[0][0] != '127.0.0.1') {
+                $ip = $match[0][0];
+                break;
+            }
+        }
         foreach ($config['services'] as $service) {
             $extData[] = [
                 'service' => $service['service'],
@@ -28,7 +40,7 @@ class ServerRegister
         return [
             'Namespace' => 'com.youzan.service',
             'SrvName' => $config['module'],
-            'IP' => Env::get('ip'),
+            'IP' => $ip,
             'Port' => Config::get('server.port'),
             'Protocol' => 'nova',
             'Status' => 1,
