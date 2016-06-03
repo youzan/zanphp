@@ -86,7 +86,7 @@ class Mysqli implements DriverInterface
                 $error = $link->_error;
                 $this->connection->release();
                 $exception = new MysqliSqlSyntaxException($error);
-            } elseif ($link->_erron == 1062) {
+            } elseif ($link->_errno == 1062) {
                 $error = $link->_error;
                 $this->connection->release();
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
