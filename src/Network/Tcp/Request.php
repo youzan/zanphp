@@ -10,6 +10,9 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class Request implements BaseRequest {
     private $data;
@@ -179,5 +182,29 @@ class Request implements BaseRequest {
         } else {
             //TODO: throw TApplicationException
         }
+    }
+
+    /**
+     * cat trace start
+     * @return Trace
+     */
+    public function startTrace()
+    {
+        $config = Config::get("monitor.trace");
+        $attachArr = json_decode($this->attachData, true);
+
+        $rootId = $parentId = "null";
+        if (isset($attachArr[Trace::TRACE_KEY]['rootId'])) {
+            $rootId = $attachArr[Trace::TRACE_KEY]['rootId'];
+        }
+        
+        if (isset($attachArr[Trace::TRACE_KEY]['parentId'])) {
+            $parentId = $attachArr[Trace::TRACE_KEY]['parentId'];
+        }
+
+        $trace = new Trace($config, $rootId, $parentId);
+        $trace->initHeader();
+        $trace->transactionBegin(Constant::NOVA, $this->serviceName . "." . $this->methodName);
+        return $trace;
     }
 }
