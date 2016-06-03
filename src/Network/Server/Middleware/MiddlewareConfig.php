@@ -18,22 +18,22 @@ class MiddlewareConfig
     use Singleton;
 
     private $config = null;
-    private $extendFilters = [];
-    private $extendTerminators = [];
+    private $zanFilters = [];
+    private $zanTerminators = [];
 
     public function setConfig($config)
     {
         $this->config = $config;
     }
 
-    public function setExtendFilters(array $extendFilters)
+    public function setZanFilters(array $zanFilters)
     {
-        $this->extendFilters = $extendFilters;
+        $this->zanFilters = $zanFilters;
     }
 
-    public function setExtendTerminators(array $extendTerminators)
+    public function setZanTerminators(array $zanTerminators)
     {
-        $this->extendTerminators = $extendTerminators;
+        $this->zanTerminators = $zanTerminators;
     }
 
     public function getGroupValue(Request $request)
@@ -77,7 +77,7 @@ class MiddlewareConfig
         $baseFilters = [
 
         ];
-        return array_merge($baseFilters, $this->extendFilters, $filters);
+        return array_merge($baseFilters, $this->zanFilters, $filters);
     }
 
     public function addBaseTerminators($terminators)
@@ -85,6 +85,6 @@ class MiddlewareConfig
         $baseTerminators = [
             \Zan\Framework\Network\Server\Middleware\WorkerTerminator::class,
         ];
-        return array_merge($terminators, $this->extendTerminators, $baseTerminators);
+        return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }
 }
