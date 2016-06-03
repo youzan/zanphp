@@ -28,5 +28,6 @@ class TraceTerminator implements RequestTerminator
         }
 
         //send数据
+        yield $trace->send();
     }
 }

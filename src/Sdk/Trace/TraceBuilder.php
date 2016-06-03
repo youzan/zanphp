@@ -47,7 +47,6 @@ class TraceBuilder
     public function getData()
     {
         $strlen = strlen($this->data);
-        var_dump($strlen . $this->data);
         return $strlen . $this->data;
     }
 }
