@@ -28,8 +28,8 @@ class Trace
     private $pid;
     private $builder;
 
-    private $_root_id = 'null';
-    private $_parent_id = 'null';
+    private $_root_id;
+    private $_parent_id;
     private $_remoteCallMsgId;
     private $_stack = [];
 
@@ -69,6 +69,14 @@ class Trace
             $msgId = Uuid::get();
         }
 
+        if (!$this->_root_id) {
+            $this->_root_id = 'null';
+        }
+
+        if (!$this->_parent_id) {
+            $this->_parent_id = 'null';
+        }
+        
         $header = [
             self::PROTOCOL,
             $this->appName,
