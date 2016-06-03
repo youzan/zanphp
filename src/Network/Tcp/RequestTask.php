@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class RequestTask {
@@ -55,6 +56,8 @@ class RequestTask {
         }
 
         $dispatcher = new Dispatcher();
+        $trace = $this->context->get('trace');
+        $trace->logEvent(Constant::NOVA_PROCCESS, Constant::SUCCESS, 'dispatch');
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
         $this->output($result);
         Worker::instance()->reactionRelease();
