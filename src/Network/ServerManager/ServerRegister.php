@@ -29,10 +29,10 @@ class ServerRegister
             'Namespace' => 'com.youzan.service',
             'SrvName' => $config['module'],
             'IP' => Env::get('ip'),
-            'Port' => 8000,
+            'Port' => Config::get('server.port'),
             'Protocol' => 'nova',
             'Status' => 1,
-            'Weight' => 0,
+            'Weight' => 100,
             'ExtData' => json_encode($extData),
         ];
     }

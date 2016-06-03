@@ -82,7 +82,8 @@ class Server extends ServerBase {
 
         $appName = Application::getInstance()->getName();
         $config['module'] = $appName;
-        new ServerRegister();
+        $register = new ServerRegister();
+        $register->register($config);
         $this->swooleServer->nova_config($config);
     }
 
