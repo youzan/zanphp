@@ -23,8 +23,6 @@ class NovaClient extends Base implements Connection
     private $clientCb;
     protected $isAsync = true;
 
-
-
     protected function closeSocket()
     {
         return true;
@@ -85,17 +83,17 @@ class NovaClient extends Base implements Connection
 
     public function close()
     {
-        $this->nowReloadStepTime += $this->incReloadStepTime;
-        $this->nowReloadStepTime = $this->nowReloadStepTime >= $this->maxReloadStepTime ? $this->maxReloadStepTime : $this->nowReloadStepTime;
-        Timer::after($this->nowReloadStepTime, [$this, 'reload'], $this->getReloadTimerAfterJobId());
-        if ($this->nowReloadStepTime === $this->incReloadStepTime) {
+        $time = $this->getPool()->getReloadTimeWithInc($this->config);
+        Timer::after($time, [$this, 'reload'], $this->getPool()->getReloadJobId($this->config));
+        if ($time === NovaClientPool::CONNECTION_RELOAD_STEP_TIME) {
             $this->reload();
         }
     }
 
     public function release()
     {
-        Timer::clearAfterJob($this->getReloadTimerAfterJobId());
+        Timer::clearAfterJob($this->getPool()->getReloadJobId($this->config));
+        $this->getPool()->resetReloadTime($this->config);
     }
 
     public function reload()
@@ -103,10 +101,4 @@ class NovaClient extends Base implements Connection
         $this->getPool()->remove($this);
         $this->getPool()->reload($this->config);
     }
-
-    private function getReloadTimerAfterJobId()
-    {
-        return spl_object_hash($this) . '_reload';
-    }
-
 }

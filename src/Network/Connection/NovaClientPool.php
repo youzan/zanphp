@@ -21,9 +21,10 @@ class NovaClientPool
         'polling' => 'Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling',
     ];
 
-    private $nowReloadStepTime = 0;
-    private $incReloadStepTime = 5000;
-    private $maxReloadStepTime = 30000;
+    const CONNECTION_RELOAD_STEP_TIME = 5000;
+    const CONNECTION_RELOA_MAX_STEP_TIME = 30000;
+
+    private $reloadTime = [];
 
     /**
      * @var LoadBalancingStrategyInterface
@@ -87,9 +88,9 @@ class NovaClientPool
         return null;
     }
 
-    public function get($serviceName)
+    public function get()
     {
-        yield $this->loadBalancingStrategy->get($serviceName);
+        yield $this->loadBalancingStrategy->get();
     }
 
     public function reload(array $config)
@@ -109,5 +110,31 @@ class NovaClientPool
     public function recycle(Connection $conn)
     {
 
+    }
+
+    public function getReloadTimeWithInc($config)
+    {
+        if (!isset($this->reloadTime[$this->getReloadTimeKey($config)])) {
+            $this->reloadTime[$this->getReloadTimeKey($config)] = 0;
+        }
+        $this->reloadTime[$this->getReloadTimeKey($config)] += self::CONNECTION_RELOAD_STEP_TIME;
+        $this->reloadTime[$this->getReloadTimeKey($config)] = $this->reloadTime[$this->getReloadTimeKey($config)] >= self::CONNECTION_RELOA_MAX_STEP_TIME
+            ? self::CONNECTION_RELOA_MAX_STEP_TIME : $this->reloadTime[$this->getReloadTimeKey($config)];
+        return $this->reloadTime[$this->getReloadTimeKey($config)];
+    }
+
+    public function resetReloadTime($config)
+    {
+        $this->reloadTime[$this->getReloadTimeKey($config)] = 0;
+    }
+
+    private function getReloadTimeKey($config)
+    {
+        return $config['host'] . ':' . $config['port'];
+    }
+
+    public function getReloadJobId($config)
+    {
+        return spl_object_hash($this).$this->getReloadTimeKey($config);
     }
 }

@@ -46,7 +46,7 @@ class NovaClientConnectionManager
     public function get($serviceName)
     {
         $pool = $this->getPool($serviceName);
-        yield $pool->get($serviceName);
+        yield $pool->get();
     }
 
     public function offline($serviceName, $servers)
