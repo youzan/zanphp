@@ -121,7 +121,7 @@ class Scheduler
             return null;
         }
 
-        $value->execute([$this, 'asyncCallback']);
+        $value->execute([$this, 'asyncCallback'], $this->task);
 
         return Signal::TASK_WAIT;
     }

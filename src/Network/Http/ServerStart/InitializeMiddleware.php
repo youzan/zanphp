@@ -10,16 +10,15 @@ namespace Zan\Framework\Network\Http\ServerStart;
 
 use Zan\Framework\Network\Server\Middleware\MiddlewareInitiator;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\ConfigLoader;
 
 class InitializeMiddleware
 {
-    private $extendFilters = [
-        //'filter1', 'filter2'
+    private $zanFilters = [
         \Zan\Framework\Network\Http\Middleware\SessionFilter::class,
     ];
 
-    private $extendTerminators = [
-         //'terminator1', 'terminator2'
+    private $zanTerminators = [
         \Zan\Framework\Network\Http\Middleware\SessionTerminator::class,
     ];
 
@@ -29,10 +28,11 @@ class InitializeMiddleware
     public function bootstrap($server)
     {
         $middlewareInitiator = MiddlewareInitiator::getInstance();
-        $middlewareConfig = Config::get('middleware');
+        $middlewareConfig = ConfigLoader::getInstance()->load(Config::get('path.middleware'));
+        $middlewareConfig = isset($middlewareConfig['middleware']) ? $middlewareConfig['middleware'] : [];
         $middlewareConfig = !is_array($middlewareConfig) || [] == $middlewareConfig ? [] : $middlewareConfig;
         $middlewareInitiator->initConfig($middlewareConfig);
-        $middlewareInitiator->initExtendFilters($this->extendFilters);
-        $middlewareInitiator->initExtendTerminators($this->extendTerminators);
+        $middlewareInitiator->initZanFilters($this->zanFilters);
+        $middlewareInitiator->initZanTerminators($this->zanTerminators);
     }
 }

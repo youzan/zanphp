@@ -15,6 +15,7 @@ use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliSqlSyntaxException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
 
 class Mysqli implements DriverInterface
 {
@@ -49,7 +50,7 @@ class Mysqli implements DriverInterface
         return $this->connection;
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
     }
@@ -85,6 +86,10 @@ class Mysqli implements DriverInterface
                 $error = $link->_error;
                 $this->connection->release();
                 $exception = new MysqliSqlSyntaxException($error);
+            } elseif ($link->_errno == 1062) {
+                $error = $link->_error;
+                $this->connection->release();
+                $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
             } else {
                 $error = $link->_error;
                 $this->connection->release();
