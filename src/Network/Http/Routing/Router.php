@@ -49,7 +49,7 @@ class Router {
         $this->repairRoute();
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
-        $this->setParameters($this->parameters);
+        $this->setParameters($request, $this->parameters);
     }
 
     public function parseRoute()
@@ -96,15 +96,12 @@ class Router {
         $this->parameters = $result['parameter'];
     }
 
-    private function setParameters(array $parameters = [])
+    private function setParameters(Request $request, array $parameters = [])
     {
         if(empty($parameters)) {
             return;
         }
-        foreach($parameters as $k => $v) {
-            $_GET[$k] = $v;
-            $_REQUEST[$k] = $v;
-        }
+        $request->query->add($parameters);
     }
 
     public function getParameters()
