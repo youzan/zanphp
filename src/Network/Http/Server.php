@@ -68,7 +68,7 @@ class Server extends ServerBase implements ServerContract
         $this->swooleServer->on('request', [$this, 'onRequest']);
 
         $this->bootServerStartItem();
-
+        $this->init();
         $this->swooleServer->start();
     }
 

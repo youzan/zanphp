@@ -31,17 +31,9 @@ class ServerStore
         return null;
     }
 
-    public function inc($key, $step)
-    {
-        if (!apcu_exists($key)) {
-            apcu_store($key, 0);
-        }
-        return apcu_inc($key, (int)$step);
-    }
-
     public function getLockGetServices($serviceName)
     {
-        return $this->get($this->getLockGetServicesKey($serviceName));
+        return $this->apcu_fetch($this->getLockGetServicesKey($serviceName));
     }
 
     public function lockGetServices($serviceName)
@@ -51,7 +43,7 @@ class ServerStore
 
     public function resetLockGetServices($serviceName)
     {
-        return $this->set($this->getLockGetServicesKey($serviceName), 0);
+        return $this->apcu_store($this->getLockGetServicesKey($serviceName), 0);
     }
 
     public function getLockGetServicesKey($serviceName)
