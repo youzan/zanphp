@@ -198,9 +198,8 @@ class Trace
             return;
         }
 
-        var_dump($this->builder->getData());
-//        $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));
-//        $tcpClient = new TcpClient($connection);
-//        yield $tcpClient->send($this->builder->getData());
+        $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));
+        $tcpClient = new TcpClient($connection);
+        yield $tcpClient->send($this->builder->getData());
     }
 }

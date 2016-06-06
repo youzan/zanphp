@@ -20,7 +20,7 @@ class TcpClient implements Async
         $this->_conn->setClientCb([$this, 'recv']);
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->_callback = $callback;
     }
