@@ -87,7 +87,15 @@ class Task
     public function send($value)
     {
         $this->sendValue = $value;
-        return $this->coroutine->send($value);
+
+        try {
+            $result = $this->coroutine->send($value);
+        } catch (\Exception $e) {
+            $this->scheduler->throwException($e);
+            return false;
+        }
+
+        return $result;
     }
 
     public function getTaskId()
