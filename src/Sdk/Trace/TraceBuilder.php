@@ -58,6 +58,7 @@ class TraceBuilder
             substr(time()/rand(0,24), 0, 6),
             rand(100000, 999999)
         ];
+        $data = implode('-', $data);
         return $data;
     }
 }
