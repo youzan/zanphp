@@ -46,8 +46,6 @@ class TraceBuilder
 
     public function getData()
     {
-        //$strlen = strlen($this->data);
-        $strlen = pack("L*", strlen($this->data));
-        return $strlen . $this->data;
+        return cat_encode($this->data);
     }
 }
