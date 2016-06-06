@@ -77,6 +77,9 @@ class ServerDiscovery
     private function isGet()
     {
         $isGet = $this->serverStore->get($this->getIsGetKey());
+        if (null == $isGet) {
+            return false;
+        }
         if ($isGet > 0) {
             return true;
         }
