@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Sdk\Trace;
 
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class TraceBuilder
@@ -47,5 +48,16 @@ class TraceBuilder
     public function getData()
     {
         return cat_encode($this->data);
+    }
+
+    public static function generateId()
+    {
+        $data = [
+            Application::getInstance()->getName(),
+            dechex(ip2long(gethostbyname(gethostname()))),
+            substr(time()/rand(0,24), 0, 6),
+            rand(100000, 999999)
+        ];
+        return $data;
     }
 }
