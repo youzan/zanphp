@@ -22,6 +22,8 @@ use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Http\Routing\RouterSelfCheck;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Network\Server\ServerBase;
+use Zan\Framework\Network\ServerManager\ServerStore;
+use Zan\Framework\Foundation\Core\Config;
 
 class Server extends ServerBase implements ServerContract
 {
@@ -68,6 +70,14 @@ class Server extends ServerBase implements ServerContract
         $this->bootServerStartItem();
 
         $this->swooleServer->start();
+    }
+
+    private function init()
+    {
+        $serviceNames = Config::get('haunt.service_name');
+        foreach ($serviceNames as $serviceName) {
+            ServerStore::getInstance()->resetLockGetServices($serviceName);
+        }
     }
 
     public function stop()
