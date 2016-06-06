@@ -15,6 +15,7 @@ use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\ServerManager\ServerStore;
 
 class Server extends ServerBase {
 
@@ -73,6 +74,11 @@ class Server extends ServerBase {
         }
         $config['path'] = Path::getRootPath() . $config['path'];
         Nova::init($config);
+
+        $serviceNames = Config::get('haunt.service_name');
+        foreach ($serviceNames as $serviceName) {
+            ServerStore::getInstance()->resetLockGetServices($serviceName);
+        }
     }
 
     private function registerServices()

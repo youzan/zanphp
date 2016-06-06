@@ -61,34 +61,26 @@ class ServerDiscovery
 
     public function get()
     {
-        if ($this->isGet()) {
+        if (!$this->lockGetServices()) {
             $servers = $this->getByStore();
             if (null == $servers) {
                 Timer::after($this->config['get']['loop_time'], [$this, 'get'], $this->getGetServicesJobId());
                 return;
             }
         } else {
-            $this->serverStore->inc($this->getIsGetKey(), 1);
             $servers = (yield $this->getByEtcd());
         }
         NovaClientConnectionManager::getInstance()->work($this->serviceName, $servers);
     }
 
-    private function isGet()
+    private function lockGetServices()
     {
-        $isGet = $this->serverStore->get($this->getIsGetKey());
-        if (null == $isGet) {
-            return false;
-        }
-        if ($isGet > 0) {
-            return true;
-        }
-        return false;
+        return $this->serverStore->lockGetServices($this->serviceName);
     }
 
     private function getByStore()
     {
-        return $this->serverStore->get($this->getServiceListKey());
+        return $this->serverStore->getServices($this->serviceName);
     }
 
     private function getByEtcd()
@@ -131,7 +123,7 @@ class ServerDiscovery
 
     private function save($servers)
     {
-        return $this->serverStore->set($this->getServiceListKey(), $servers);
+        return $this->serverStore->setServices($this->serviceName, $servers);
     }
 
     public function watch()
@@ -146,7 +138,7 @@ class ServerDiscovery
 
     private function checkIsWatch()
     {
-        $watchTime = $this->serverStore->get($this->getDoWatchKey());
+        $watchTime = $this->serverStore->getDoWatch($this->serviceName);
         $watchTime = $watchTime == null ? 0 : $watchTime;
         if ((time() - $watchTime) > ($this->config['watch']['timeout'] * 1000 + 10)) {
             return false;
@@ -176,10 +168,8 @@ class ServerDiscovery
 
     private function setDoWatch()
     {
-        return $this->serverStore->set($this->getDoWatchKey(), time());
+        return $this->serverStore->setDoWatch($this->serviceName);
     }
-
-
 
     private function update($raw)
     {
@@ -197,7 +187,7 @@ class ServerDiscovery
         if ([] != $addOnline) {
             NovaClientConnectionManager::getInstance()->addOnline($this->serviceName, $addOnline);
         }
-        $this->serverStore->set($this->getServiceListKey(), $update);
+        $this->serverStore->setServices($this->serviceName, $update);
         //todo set waitIndex
     }
 
@@ -210,21 +200,6 @@ class ServerDiscovery
             $this->config['watch']['namespace'] . '/'.
             $this->serviceName;
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
-    }
-
-    private function getDoWatchKey()
-    {
-        return 'last_time_' . $this->serviceName;
-    }
-
-    private function getServiceListKey()
-    {
-        return 'list_' . $this->serviceName;
-    }
-
-    private function getIsGetKey()
-    {
-        return 'get_' . $this->serviceName;
     }
 
     private function getGetServicesJobId()
