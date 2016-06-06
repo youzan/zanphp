@@ -64,7 +64,7 @@ class ServerDiscovery
         if ($this->isGet()) {
             $servers = $this->getByStore();
             if (null == $servers) {
-                Timer::after($this->config['get']['loop_get_time'], [$this, 'get'], $this->getGetServicesJobId());
+                Timer::after($this->config['get']['loop_time'], [$this, 'get'], $this->getGetServicesJobId());
                 return;
             }
         } else {
@@ -141,7 +141,7 @@ class ServerDiscovery
             $this->toWatch();
             return;
         }
-        Timer::after($this->config['watch']['loop_watch_time'], [$this, 'watch'], $this->getWatchServicesJobId());
+        Timer::after($this->config['watch']['loop_time'], [$this, 'watch'], $this->getWatchServicesJobId());
     }
 
     private function checkIsWatch()
