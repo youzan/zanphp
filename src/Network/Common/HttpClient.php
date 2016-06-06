@@ -17,6 +17,9 @@ class HttpClient implements Async
     private $host;
     private $port;
 
+    /**
+     * @var int [millisecond]
+     */
     private $timeout;
 
     private $uri;
@@ -39,7 +42,7 @@ class HttpClient implements Async
         return new static($host, $port);
     }
 
-    public function get($uri = '', $params = [], $timeout = 3)
+    public function get($uri = '', $params = [], $timeout = 3000)
     {
         $this->setMethod(self::GET);
         $this->setTimeout($timeout);
@@ -49,7 +52,7 @@ class HttpClient implements Async
         yield $this->build();
     }
 
-    public function post($uri = '', $params = [], $timeout = 3)
+    public function post($uri = '', $params = [], $timeout = 3000)
     {
         $this->setMethod(self::POST);
         $this->setTimeout($timeout);
@@ -81,7 +84,7 @@ class HttpClient implements Async
 
     public function setTimeout($timeout)
     {
-        if ($timeout < 0 || $timeout > 60) {
+        if ($timeout < 0 || $timeout > 60000) {
             throw new HttpClientTimeoutException('Timeout must be between 0-60 seconds');
         }
         $this->timeout = $timeout;
@@ -142,7 +145,7 @@ class HttpClient implements Async
     {
         $this->client = new \swoole_http_client($ip, $this->port);
         $this->buildHeader();
-        Timer::after($this->timeout * 1000, [$this, 'checkTimeout'], spl_object_hash($this));
+        Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         if('GET' === $this->method){
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
