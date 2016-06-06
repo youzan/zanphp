@@ -15,6 +15,7 @@ use swoole_client as SwooleClient;
 class Tcp extends Base implements Connection
 {
     private $clientCb;
+    protected $isAsync = true;
     
     protected function closeSocket()
     {
