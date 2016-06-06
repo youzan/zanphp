@@ -10,6 +10,9 @@ namespace Zan\Framework\Network\ServerManager;
 use Zan\Framework\Network\ServerManager\ServerDiscovery;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Foundation\Core\Config;
+
+use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 
 class ServerDiscoveryInitiator
 {
@@ -17,9 +20,15 @@ class ServerDiscoveryInitiator
 
     public function init()
     {
-        $serverDiscovery = new ServerDiscovery();
-        $coroutine =  $serverDiscovery->start();
-        Task::execute($coroutine);
+        $config = Config::get('haunt');
+        if (empty($config)) {
+            throw new ServerConfigException();
+        }
+        foreach ($config['service_name'] as $serviceName) {
+            $serverDiscovery = new ServerDiscovery($config, $serviceName);
+            $coroutine = $serverDiscovery->start();
+            Task::execute($coroutine);
+        }
     }
 
 }

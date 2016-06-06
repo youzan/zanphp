@@ -35,4 +35,12 @@ class ServerStore
         }
         return null;
     }
+
+    public function inc($key, $step)
+    {
+        if (!apcu_exists($this->getKey($key))) {
+            apcu_store($this->getKey($key), 0);
+        }
+        return apcu_inc($this->getKey($key), (int)$step);
+    }
 }

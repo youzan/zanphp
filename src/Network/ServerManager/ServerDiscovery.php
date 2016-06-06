@@ -11,7 +11,6 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Network\Server\Timer\Timer;
 
-use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 use Zan\Framework\Network\ServerManager\Exception\ServerDiscoveryEtcdException;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 
@@ -25,6 +24,8 @@ class ServerDiscovery
 {
     private $config;
 
+    private $serviceName;
+
     /**
      * @var ServerStore
      */
@@ -32,18 +33,15 @@ class ServerDiscovery
 
     private $waitIndex = 0;
 
-    public function __construct()
+    public function __construct($config, $serviceName)
     {
-        $this->initConfig();
+        $this->initConfig($config);
+        $this->serviceName = $serviceName;
         $this->initServerStore();
     }
 
-    private function initConfig()
+    private function initConfig($config)
     {
-        $config = Config::get('haunt');
-        if (empty($config)) {
-            throw new ServerConfigException();
-        }
         $this->config = $config;
     }
 
@@ -54,42 +52,52 @@ class ServerDiscovery
 
     public function start()
     {
-        foreach ($this->config['service_name'] as $serviceName) {
-            $servers = (yield $this->get($serviceName));
-            $isWatch = $this->checkIsWatch($serviceName);
-            if (!$isWatch) {
-                $this->watch($serviceName);
+        yield $this->get();
+        $isWatch = $this->checkIsWatch();
+        if (!$isWatch) {
+            $this->watch();
+        }
+    }
+
+    public function get()
+    {
+        if ($this->isGet()) {
+            $servers = $this->getByStore();
+            if (null == $servers) {
+                Timer::after($this->config['get']['loop_get_time'], [$this, 'get'], $this->getGetServicesJobId());
+                return;
             }
-            NovaClientConnectionManager::getInstance()->work($serviceName, $servers);
+        } else {
+            $this->serverStore->inc($this->getIsGetKey(), 1);
+            $servers = (yield $this->getByEtcd());
         }
+        NovaClientConnectionManager::getInstance()->work($this->serviceName, $servers);
     }
 
-    private function checkIsWatch($serviceName)
+    private function isGet()
     {
-        $watchTime = $this->serverStore->get($this->getDoWatchKey($serviceName));
-
-        $watchTime = $watchTime == null ? 0 : $watchTime;
-        if ((time() - $watchTime) > (3 * $this->config['watch']['timeout'] * 1000)) {
-            return false;
+        $isGet = $this->serverStore->get($this->getIsGetKey());
+        if ($isGet > 0) {
+            return true;
         }
-        return true;
+        return false;
     }
 
-    public function get($serviceName)
+    private function getByStore()
     {
-        $servers = $this->serverStore->get($this->getServiceListKey($serviceName));
-        if (null !== $servers) {
-            yield $servers;
-            return;
-        }
+        return $this->serverStore->get($this->getServiceListKey());
+    }
+
+    private function getByEtcd()
+    {
         $httpClient = new HttpClient($this->config['get']['host'], $this->config['get']['port']);
         $uri = $this->config['get']['uri'] . '/' .
             $this->config['get']['protocol'] . ':' .
             $this->config['get']['namespace'] . '/'.
-            $serviceName;
+            $this->serviceName;
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
         $servers = (yield $this->parseEtcdData($raw));
-        yield $this->save($serviceName, $servers);
+        yield $this->save($servers);
         yield $servers;
     }
 
@@ -118,78 +126,112 @@ class ServerDiscovery
         yield $servers;
     }
 
-    private function save($serviceName, $servers)
+    private function save($servers)
     {
-        return $this->serverStore->set($this->getServiceListKey($serviceName), $servers);
+        return $this->serverStore->set($this->getServiceListKey(), $servers);
     }
 
-    public function watch($serviceName)
+    public function watch()
     {
-        $this->setDoWatch($serviceName);
-        $coroutine = $this->watching($serviceName);
+        $isWatch = $this->checkIsWatch();
+        if (!$isWatch) {
+            $this->toWatch();
+            return;
+        }
+        Timer::after($this->config['watch']['loop_watch_time'], [$this, 'watch'], $this->getWatchServicesJobId());
+    }
+
+    private function checkIsWatch()
+    {
+        $watchTime = $this->serverStore->get($this->getDoWatchKey());
+        $watchTime = $watchTime == null ? 0 : $watchTime;
+        if ((time() - $watchTime) > ($this->config['watch']['timeout'] * 1000 + 10)) {
+            return false;
+        }
+        return true;
+    }
+
+    public function toWatch()
+    {
+        $coroutine = $this->watching();
         Task::execute($coroutine);
     }
 
-    public function watching($serviceName)
+    public function watching()
     {
         while (true) {
-            $this->setDoWatch($serviceName);
+            $this->setDoWatch();
             try {
-                $raw = (yield $this->watchEtcd($serviceName));
+                $raw = (yield $this->watchEtcd());
                 if (null != $raw) {
-                    yield $this->update($serviceName, $raw);
+                    yield $this->update($raw);
                 }
             } catch (HttpClientTimeoutException $e) {
             }
         }
     }
 
-    private function setDoWatch($serviceName)
+    private function setDoWatch()
     {
-        return $this->serverStore->set($this->getDoWatchKey($serviceName), time());
+        return $this->serverStore->set($this->getDoWatchKey(), time());
     }
 
 
 
-    private function update($serviceName, $raw)
+    private function update($raw)
     {
         $update = (yield $this->parseEtcdData($raw));
         if ([] == $update) {
             yield null;
             return;
         }
-        $old = (yield $this->get($serviceName));
+        $old = $this->getByStore();
         $offline = array_diff_key($old, $update);
         if ([] != $offline) {
-            NovaClientConnectionManager::getInstance()->offline($serviceName, $offline);
+            NovaClientConnectionManager::getInstance()->offline($this->serviceName, $offline);
         }
         $addOnline = array_diff_key($update, $old);
         if ([] != $addOnline) {
-            NovaClientConnectionManager::getInstance()->addOnline($serviceName, $addOnline);
+            NovaClientConnectionManager::getInstance()->addOnline($this->serviceName, $addOnline);
         }
-        $this->serverStore->set($this->getServiceListKey($serviceName), $update);
+        $this->serverStore->set($this->getServiceListKey(), $update);
         //todo set waitIndex
     }
 
-    private function watchEtcd($serviceName)
+    private function watchEtcd()
     {
         $params = $this->waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true, 'recursive' => true];
         $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
         $uri = $this->config['watch']['uri'] . '/' .
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
-            $serviceName;
+            $this->serviceName;
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
     }
 
-    private function getDoWatchKey($serviceName)
+    private function getDoWatchKey()
     {
-        return 'last_time_' . $serviceName;
+        return 'last_time_' . $this->serviceName;
     }
 
-    private function getServiceListKey($serviceName)
+    private function getServiceListKey()
     {
-        return 'list_' . $serviceName;
+        return 'list_' . $this->serviceName;
+    }
+
+    private function getIsGetKey()
+    {
+        return 'get_' . $this->serviceName;
+    }
+
+    private function getGetServicesJobId()
+    {
+        return spl_object_hash($this) . '_get_' . $this->serviceName;
+    }
+    
+    private function getWatchServicesJobId()
+    {
+        return spl_object_hash($this) . '_watch_' . $this->serviceName;
     }
 }
 
