@@ -33,7 +33,7 @@ class ServerStore
 
     public function getLockGetServices($serviceName)
     {
-        return $this->apcu_fetch($this->getLockGetServicesKey($serviceName));
+        return apcu_fetch($this->getLockGetServicesKey($serviceName));
     }
 
     public function lockGetServices($serviceName)
@@ -43,7 +43,7 @@ class ServerStore
 
     public function resetLockGetServices($serviceName)
     {
-        return $this->apcu_store($this->getLockGetServicesKey($serviceName), 0);
+        return apcu_store($this->getLockGetServicesKey($serviceName), 0);
     }
 
     public function getLockGetServicesKey($serviceName)

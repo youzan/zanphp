@@ -65,11 +65,18 @@ class ServerDiscovery
             $servers = $this->getByStore();
             if (null == $servers) {
                 Timer::after($this->config['get']['loop_time'], [$this, 'get'], $this->getGetServicesJobId());
-                return;
+            } else {
+                NovaClientConnectionManager::getInstance()->work($this->serviceName, $servers);
             }
         } else {
-            $servers = (yield $this->getByEtcd());
+            $coroutine = $this->getByEtcdAndStartConnection();
+            Task::execute($coroutine);
         }
+    }
+
+    private function getByEtcdAndStartConnection()
+    {
+        $servers = (yield $this->getByEtcd());
         NovaClientConnectionManager::getInstance()->work($this->serviceName, $servers);
     }
 
