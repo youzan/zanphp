@@ -77,6 +77,7 @@ class Server extends ServerBase implements ServerContract
         $serviceNames = Config::get('haunt.service_name');
         foreach ($serviceNames as $serviceName) {
             ServerStore::getInstance()->resetLockGetServices($serviceName);
+            ServerStore::getInstance()->resetLockWatch($serviceName);
         }
     }
 

@@ -66,18 +66,33 @@ class ServerStore
         return 'server_list_' . $serviceName;
     }
 
-    public function getDoWatch($serviceName)
+    public function getDoWatchLastTime($serviceName)
     {
-        return $this->get($this->getSetDoWatchKey($serviceName));
+        return $this->get($this->getSetDoWatchLastTimeKey($serviceName));
     }
 
-    public function setDoWatch($serviceName)
+    public function setDoWatchLastTime($serviceName)
     {
-        return $this->set($this->getSetDoWatchKey($serviceName), time());
+        return $this->set($this->getSetDoWatchLastTimeKey($serviceName), time());
     }
 
-    public function getSetDoWatchKey($serviceName)
+    public function getSetDoWatchLastTimeKey($serviceName)
     {
         return 'server_watch_last_time_' . $serviceName;
+    }
+
+    public function lockWatch($serviceName)
+    {
+        return apcu_cas($this->getLockWatchKey($serviceName), 0, 1);
+    }
+
+    public function resetLockWatch($serviceName)
+    {
+        return apcu_store($this->getLockWatchKey($serviceName), 0);
+    }
+
+    public function getLockWatchKey($serviceName)
+    {
+        return 'server_lock_watch_' . $serviceName;
     }
 }

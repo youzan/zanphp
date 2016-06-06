@@ -52,11 +52,8 @@ class ServerDiscovery
 
     public function start()
     {
-        yield $this->get();
-        $isWatch = $this->checkIsWatch();
-        if (!$isWatch) {
-            $this->watch();
-        }
+        $this->get();
+        $this->watch();
     }
 
     public function get()
@@ -99,7 +96,7 @@ class ServerDiscovery
             $this->serviceName;
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
         $servers = (yield $this->parseEtcdData($raw));
-        yield $this->save($servers);
+        yield $this->saveServices($servers);
         yield $servers;
     }
 
@@ -128,14 +125,18 @@ class ServerDiscovery
         yield $servers;
     }
 
-    private function save($servers)
+    private function saveServices($servers)
     {
         return $this->serverStore->setServices($this->serviceName, $servers);
     }
 
     public function watch()
     {
-        $isWatch = $this->checkIsWatch();
+        if ($this->serverStore->lockWatch($this->serviceName)) {
+            $this->toWatch();
+            return;
+        }
+        $isWatch = $this->checkIsWatchTimeout();
         if (!$isWatch) {
             $this->toWatch();
             return;
@@ -143,9 +144,9 @@ class ServerDiscovery
         Timer::after($this->config['watch']['loop_time'], [$this, 'watch'], $this->getWatchServicesJobId());
     }
 
-    private function checkIsWatch()
+    private function checkIsWatchTimeout()
     {
-        $watchTime = $this->serverStore->getDoWatch($this->serviceName);
+        $watchTime = $this->serverStore->getDoWatchLastTime($this->serviceName);
         $watchTime = $watchTime == null ? 0 : $watchTime;
         if ((time() - $watchTime) > ($this->config['watch']['timeout'] * 1000 + 10)) {
             return false;
@@ -175,7 +176,7 @@ class ServerDiscovery
 
     private function setDoWatch()
     {
-        return $this->serverStore->setDoWatch($this->serviceName);
+        return $this->serverStore->setDoWatchLastTime($this->serviceName);
     }
 
     private function update($raw)
