@@ -62,7 +62,7 @@ class NovaClientConnectionManager
 
     public function addOnline($module, $servers)
     {
-        $novaConfig = Config::get('novaConnection');
+        $novaConfig = Config::get('connection.nova');
         $pool = $this->getPool($module);
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
