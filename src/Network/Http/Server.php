@@ -42,6 +42,9 @@ class Server extends ServerBase implements ServerContract
     protected $workerStartItems = [
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
+    ];
+
+    protected $masterManagerStartItems = [
         InitializeServerDiscovery::class,
     ];
 
@@ -94,6 +97,7 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
+        $this->bootMasterManagerStartItem();
         echo "server starting .....\n";
     }
 
