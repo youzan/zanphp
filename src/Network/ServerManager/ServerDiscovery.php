@@ -24,7 +24,7 @@ class ServerDiscovery
 {
     private $config;
 
-    private $modules;
+    private $module;
 
     /**
      * @var ServerStore
@@ -33,10 +33,10 @@ class ServerDiscovery
 
     private $waitIndex = 0;
 
-    public function __construct($config, $modules)
+    public function __construct($config, $module)
     {
         $this->initConfig($config);
-        $this->modules = $modules;
+        $this->module = $module;
         $this->initServerStore();
     }
 
@@ -63,7 +63,7 @@ class ServerDiscovery
             if (null == $servers) {
                 Timer::after($this->config['get']['loop_time'], [$this, 'get'], $this->getGetServicesJobId());
             } else {
-                NovaClientConnectionManager::getInstance()->work($this->modules, $servers);
+                NovaClientConnectionManager::getInstance()->work($this->module, $servers);
             }
         } else {
             $coroutine = $this->getByEtcdAndStartConnection();
@@ -74,17 +74,17 @@ class ServerDiscovery
     private function getByEtcdAndStartConnection()
     {
         $servers = (yield $this->getByEtcd());
-        NovaClientConnectionManager::getInstance()->work($this->modules, $servers);
+        NovaClientConnectionManager::getInstance()->work($this->module, $servers);
     }
 
     private function lockGetServices()
     {
-        return $this->serverStore->lockGetServices($this->modules);
+        return $this->serverStore->lockGetServices($this->module);
     }
 
     private function getByStore()
     {
-        return $this->serverStore->getServices($this->modules);
+        return $this->serverStore->getServices($this->module);
     }
 
     private function getByEtcd()
@@ -93,7 +93,7 @@ class ServerDiscovery
         $uri = $this->config['get']['uri'] . '/' .
             $this->config['get']['protocol'] . ':' .
             $this->config['get']['namespace'] . '/'.
-            $this->modules;
+            $this->module;
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
         $servers = (yield $this->parseEtcdData($raw));
         yield $this->saveServices($servers);
@@ -127,12 +127,12 @@ class ServerDiscovery
 
     private function saveServices($servers)
     {
-        return $this->serverStore->setServices($this->modules, $servers);
+        return $this->serverStore->setServices($this->module, $servers);
     }
 
     public function watch()
     {
-        if ($this->serverStore->lockWatch($this->modules)) {
+        if ($this->serverStore->lockWatch($this->module)) {
             $this->toWatch();
             return;
         }
@@ -146,7 +146,7 @@ class ServerDiscovery
 
     private function checkIsWatchTimeout()
     {
-        $watchTime = $this->serverStore->getDoWatchLastTime($this->modules);
+        $watchTime = $this->serverStore->getDoWatchLastTime($this->module);
         $watchTime = $watchTime == null ? 0 : $watchTime;
         if ((time() - $watchTime) > ($this->config['watch']['timeout'] * 1000 + 10)) {
             return false;
@@ -176,7 +176,7 @@ class ServerDiscovery
 
     private function setDoWatch()
     {
-        return $this->serverStore->setDoWatchLastTime($this->modules);
+        return $this->serverStore->setDoWatchLastTime($this->module);
     }
 
     private function update($raw)
@@ -189,13 +189,13 @@ class ServerDiscovery
         $old = $this->getByStore();
         $offline = array_diff_key($old, $update);
         if ([] != $offline) {
-            NovaClientConnectionManager::getInstance()->offline($this->modules, $offline);
+            NovaClientConnectionManager::getInstance()->offline($this->module, $offline);
         }
         $addOnline = array_diff_key($update, $old);
         if ([] != $addOnline) {
-            NovaClientConnectionManager::getInstance()->addOnline($this->modules, $addOnline);
+            NovaClientConnectionManager::getInstance()->addOnline($this->module, $addOnline);
         }
-        $this->serverStore->setServices($this->modules, $update);
+        $this->serverStore->setServices($this->module, $update);
         //todo set waitIndex
     }
 
@@ -206,18 +206,18 @@ class ServerDiscovery
         $uri = $this->config['watch']['uri'] . '/' .
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
-            $this->modules;
+            $this->module;
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
     }
 
     private function getGetServicesJobId()
     {
-        return spl_object_hash($this) . '_get_' . $this->modules;
+        return spl_object_hash($this) . '_get_' . $this->module;
     }
     
     private function getWatchServicesJobId()
     {
-        return spl_object_hash($this) . '_watch_' . $this->modules;
+        return spl_object_hash($this) . '_watch_' . $this->module;
     }
 }
 

@@ -24,8 +24,8 @@ class ServerDiscoveryInitiator
         if (empty($config)) {
             throw new ServerConfigException();
         }
-        foreach ($config['modules'] as $modules) {
-            $serverDiscovery = new ServerDiscovery($config, $modules);
+        foreach ($config['modules'] as $module) {
+            $serverDiscovery = new ServerDiscovery($config, $module);
             $coroutine = $serverDiscovery->start();
             Task::execute($coroutine);
         }

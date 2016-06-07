@@ -19,7 +19,7 @@ class NovaClientConnectionManager
 
     private $novaClientPool = [];
 
-    public function work($serviceName, $servers)
+    public function work($module, $servers)
     {
         $config = Config::get('loadBalancing');
         $novaConfig = Config::get('connection.nova');
@@ -28,30 +28,30 @@ class NovaClientConnectionManager
             $novaConfig['port'] = $server['port'];
             $config['connections'][] = $novaConfig;
         }
-        $this->novaClientPool[$serviceName] = new NovaClientPool($config);
+        $this->novaClientPool[$module] = new NovaClientPool($config);
     }
 
     /**
-     * @param $serviceName
+     * @param $module
      * @return NovaClientPool | null
      */
-    public function getPool($serviceName)
+    public function getPool($module)
     {
-        if (!isset($this->novaClientPool[$serviceName])) {
+        if (!isset($this->novaClientPool[$module])) {
             throw new CanNotFindServiceNamePoolException();
         }
-        return $this->novaClientPool[$serviceName];
+        return $this->novaClientPool[$module];
     }
 
-    public function get($serviceName)
+    public function get($module)
     {
-        $pool = $this->getPool($serviceName);
+        $pool = $this->getPool($module);
         yield $pool->get();
     }
 
-    public function offline($serviceName, $servers)
+    public function offline($module, $servers)
     {
-        $pool = $this->getPool($serviceName);
+        $pool = $this->getPool($module);
         foreach ($servers as $server) {
             $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
             if (null !== $connection && $connection instanceof Connection) {
@@ -60,10 +60,10 @@ class NovaClientConnectionManager
         }
     }
 
-    public function addOnline($serviceName, $servers)
+    public function addOnline($module, $servers)
     {
         $novaConfig = Config::get('novaConnection');
-        $pool = $this->getPool($serviceName);
+        $pool = $this->getPool($module);
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
