@@ -64,7 +64,7 @@ class Log
         ];
     }
 
-    private function getConfigByKey($key)
+    private static function getConfigByKey($key)
     {
         $logUrl = Config::get('log.' . $key, null);
         if (!$logUrl) {
