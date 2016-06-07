@@ -54,7 +54,7 @@ class Scheduler
     {
         if ($this->isStackEmpty()) {
             if ($this->task->getParentTask() instanceof Task) {
-                $this->task->getParentTask()->getCoroutine()->throw($e);
+                $this->task->getParentTask()->sendException($e);
             } else {
                 $this->task->getCoroutine()->throw($e);
             }
