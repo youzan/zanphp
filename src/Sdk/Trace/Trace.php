@@ -135,7 +135,7 @@ class Trace
         return $this->_parent_id;
     }
 
-    public function commit($status)
+    public function commit($status, $data = '')
     {
         if (!$this->run) {
             return false;
@@ -152,6 +152,7 @@ class Trace
             $data[2],
             addslashes($status),
             $utime . "us",
+            addslashes($data)
         ];
         $this->builder->commitTransaction($trace);
     }

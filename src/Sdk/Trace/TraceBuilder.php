@@ -19,25 +19,25 @@ class TraceBuilder
 
     public function buildHeader(array $header)
     {
-        array_unshift($header, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n");
+        array_unshift($header, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $header);
     }
 
     public function buildTransaction(array $transaction)
     {
-        array_unshift($transaction, "%s\t%s\t%s\n");
+        array_unshift($transaction, "%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $transaction);
     }
 
     public function commitTransaction(array $transaction)
     {
-        array_unshift($transaction, "%s\t%s\t%s\t%s\t%s\n");
+        array_unshift($transaction, "%s\t%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $transaction);
     }
 
     public function buildEvent(array $event)
     {
-        array_unshift($event, "%s\t%s\t%s\t%s\t%s\n");
+        array_unshift($event, "%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $event);
     }
 
@@ -55,7 +55,7 @@ class TraceBuilder
         $data = [
             Application::getInstance()->getName(),
             dechex(ip2long(gethostbyname(gethostname()))),
-            substr(time()/rand(0,24), 0, 6),
+            floor(time()/3600),
             rand(100000, 999999)
         ];
         $data = implode('-', $data);
