@@ -47,9 +47,10 @@ class ServerBase
             $this->masterManagerStartItems,
             $this->getCustomizedMasterManagerStartItems()
         );
-
-        foreach ($masterManagerStartItems as $bootstrap) {
-            Di::make($bootstrap)->bootstrap($this);
+        if ([] !== $masterManagerStartItems) {
+            foreach ($masterManagerStartItems as $bootstrap) {
+                Di::make($bootstrap)->bootstrap($this);
+            }
         }
     }
 
