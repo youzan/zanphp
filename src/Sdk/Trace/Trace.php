@@ -66,7 +66,7 @@ class Trace
         }
 
         if (!$msgId) {
-            $msgId = $this->builder->generateId();
+            $msgId = Uuid::get();
         }
 
         if (!$this->_root_id) {
@@ -135,7 +135,7 @@ class Trace
         return $this->_parent_id;
     }
 
-    public function commit($status, $data = '')
+    public function commit($status, $sendData = '')
     {
         if (!$this->run) {
             return false;
@@ -152,7 +152,7 @@ class Trace
             $data[2],
             addslashes($status),
             $utime . "us",
-            addslashes($data)
+            addslashes($sendData)
         ];
         $this->builder->commitTransaction($trace);
     }
