@@ -87,6 +87,9 @@ class SqlParser
             case 'count' :
                 $resultType = ResultTypeInterface::COUNT;
                 break;
+            case 'affected' :
+                $resultType = ResultTypeInterface::AFFECTED_ROWS;
+                break;
             case 'raw' :
                 $resultType = ResultTypeInterface::RAW;
                 break;
