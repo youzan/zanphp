@@ -14,7 +14,7 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 class Task
 {
     protected $taskId = 0;
-    protected $parentId = 0;
+    protected $parentTask;
     protected $coroutine = null;
     protected $context = null;
 
@@ -22,10 +22,10 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public static function execute($coroutine, Context $context=null, $taskId=0, $parentId=0)
+    public static function execute($coroutine, Context $context=null, $taskId=0, Task $parentTask)
     {
         if($coroutine instanceof \Generator) {
-            $task = new Task($coroutine, $context, $taskId, $parentId);
+            $task = new Task($coroutine, $context, $taskId, $parentTask);
             $task->run();
 
             return $task;
@@ -34,11 +34,11 @@ class Task
         return $coroutine;
     }
 
-    public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, $parentId=0)
+    public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, Task $parentTask)
     {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();
-        $this->parentId = $parentId;
+        $this->parentTask = $parentTask;
 
         if ($context) {
             $this->context = $context;
@@ -77,10 +77,6 @@ class Task
 
     public function sendException($e)
     {
-        if ($this->scheduler->isStackEmpty()) {
-            $this->coroutine->throw($e);
-        }
-
         $this->scheduler->throwException($e);
     }
 
@@ -88,14 +84,7 @@ class Task
     {
         $this->sendValue = $value;
 
-        try {
-            $result = $this->coroutine->send($value);
-        } catch (\Exception $e) {
-            $this->scheduler->throwException($e);
-            return false;
-        }
-
-        return $result;
+        return $this->coroutine->send($value);
     }
 
     public function getTaskId()
@@ -136,6 +125,11 @@ class Task
     public function setCoroutine(\Generator $coroutine)
     {
         $this->coroutine = $coroutine;
+    }
+
+    public function getParentTask()
+    {
+        return $this->parentTask;
     }
 
     public function fireTaskDoneEvent()
