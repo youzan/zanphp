@@ -40,12 +40,14 @@ class TraceFilter implements RequestFilter
                 $eventId = $attachArr[Trace::TRACE_KEY]['eventId'];
             }
             $name = $request->getServiceName() . '.' . $request->getMethodName();
+            $type = Constant::NOVA;
         } else {
+            $type = Constant::HTTP;
             $name = $request->getUrl();
         }
         $trace = new Trace($config, $rootId, $parentId);
         $trace->initHeader($eventId);
-        $trace->transactionBegin(Constant::NOVA, $name);
+        $trace->transactionBegin($type, $name);
         
         $context->set('trace', $trace);
     }
