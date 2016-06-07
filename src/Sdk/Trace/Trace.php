@@ -115,7 +115,7 @@ class Trace
         ];
         $this->builder->buildTransaction($trace);
 
-        $trace[0] = ($sec + $usec) * 100000000;
+        $trace[0] = $sec  + $usec;
         array_push($this->_stack, $trace);
     }
 
@@ -145,7 +145,7 @@ class Trace
         $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
 
         $data = array_pop($this->_stack);
-        $utime = (($sec + $usec) * 100000000) - $data[0];
+        $utime = ($sec + $usec - $data[0]) * 100000000;
         $trace = [
             "T$time",
             $data[1],

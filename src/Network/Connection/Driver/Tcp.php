@@ -43,7 +43,6 @@ class Tcp extends Base implements Connection
     }
 
     public function onReceive(SwooleClient $cli, $data) {
-        $this->release();
         call_user_func($this->clientCb, $data);
     }
 

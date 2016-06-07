@@ -27,6 +27,7 @@ class TcpClient implements Async
 
     public function recv($data) 
     {
+        $this->_conn->release();
         if (false === $data or '' == $data) {
             throw new NetworkException(
                 socket_strerror($this->_sock->errCode),
