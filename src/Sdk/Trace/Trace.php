@@ -66,7 +66,7 @@ class Trace
         }
 
         if (!$msgId) {
-            $msgId = Uuid::get();
+            $msgId = $this->builder->generateId();
         }
 
         if (!$this->_root_id) {
