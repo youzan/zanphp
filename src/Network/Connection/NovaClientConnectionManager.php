@@ -12,12 +12,16 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Exception\CanNotFindServiceNamePoolException;
+use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientModuleByServiceNameException;
+use Zan\Framework\Network\Connection\Exception\CanNotFindModuleMethodByServiceNameException;
 
 class NovaClientConnectionManager
 {
     use Singleton;
 
     private $novaClientPool = [];
+
+    private $serviceToModuleMap = [];
 
     public function work($module, $servers)
     {
@@ -27,9 +31,17 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
+            $this->addServiceToModuleMap($module, $server['services']);
             $config[] = $novaConfig;
         }
         $this->novaClientPool[$module] = new NovaClientPool($config, $loadBalancing['strategy']);
+    }
+
+    private function addServiceToModuleMap($module, $services)
+    {
+        foreach ($services as $service) {
+            $this->serviceToModuleMap[$service['service']] = ['module' => $module, 'methods' => $service['methods']];
+        }
     }
 
     /**
@@ -70,6 +82,7 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
+            $this->addServiceToModuleMap($module, $server['services']);
             $pool->createConnection($novaConfig);
             $pool->addConfig($novaConfig);
         }
@@ -77,6 +90,12 @@ class NovaClientConnectionManager
 
     private function getModule($serviceName, $method)
     {
-
+        if (!isset($this->serviceToModuleMap[$serviceName])) {
+            throw new CanNotFindNovaClientModuleByServiceNameException();
+        }
+        if (!in_array($method, $this->serviceToModuleMap[$serviceName])) {
+            throw new CanNotFindModuleMethodByServiceNameException();
+        }
+        return $this->serviceToModuleMap[$serviceName]['module'];
     }
 }

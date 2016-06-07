@@ -119,7 +119,7 @@ class ServerDiscovery
                 'protocol' => $value['Protocol'],
                 'status' => $value['Status'],
                 'weight' => $value['Weight'],
-                //todo ExtData 暂时不处理 by xiaoniu
+                'services' => json_decode($value['ExtData'], true)
             ];
         }
         yield $servers;
