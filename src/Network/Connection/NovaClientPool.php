@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 class NovaClientPool
 {
@@ -95,7 +96,15 @@ class NovaClientPool
 
     public function reload(array $config)
     {
-        $this->createConnection($config);
+        $interval = $this->getReloadTime($config['host'], $config['port']);
+        if ($interval === 0) {
+            $this->incReloadTime($config['host'], $config['port']);
+            $this->createConnection($config);
+            return;
+        }
+        Timer::after($interval, function () use ($config) {
+            $this->createConnection($config);
+        }, $this->getReloadJobId($config['host'], $config['port']));
     }
 
     public function remove(Connection $conn)
@@ -112,29 +121,34 @@ class NovaClientPool
 
     }
 
-    public function getReloadTimeWithInc($config)
+    private function getReloadTime($host, $port)
     {
-        if (!isset($this->reloadTime[$this->getReloadTimeKey($config)])) {
-            $this->reloadTime[$this->getReloadTimeKey($config)] = 0;
+        $key = $this->getReloadTimeKey($host, $port);
+        if (!isset($this->reloadTime[$key])) {
+            $this->reloadTime[$key] = 0;
         }
-        $this->reloadTime[$this->getReloadTimeKey($config)] += self::CONNECTION_RELOAD_STEP_TIME;
-        $this->reloadTime[$this->getReloadTimeKey($config)] = $this->reloadTime[$this->getReloadTimeKey($config)] >= self::CONNECTION_RELOA_MAX_STEP_TIME
-            ? self::CONNECTION_RELOA_MAX_STEP_TIME : $this->reloadTime[$this->getReloadTimeKey($config)];
-        return $this->reloadTime[$this->getReloadTimeKey($config)];
+        return $this->reloadTime[$key];
+    }
+
+    private function incReloadTime($host, $port)
+    {
+        $key = $this->getReloadTimeKey($host, $port);
+        $this->reloadTime[$key] += self::CONNECTION_RELOAD_STEP_TIME;
+        $this->reloadTime[$key] = $this->reloadTime[$key] >= self::CONNECTION_RELOA_MAX_STEP_TIME ? self::CONNECTION_RELOA_MAX_STEP_TIME : $this->reloadTime[$key];
     }
 
     public function resetReloadTime($config)
     {
-        $this->reloadTime[$this->getReloadTimeKey($config)] = 0;
+        $this->reloadTime[$this->getReloadTimeKey($config['host'], $config['port'])] = 0;
     }
 
-    private function getReloadTimeKey($config)
+    private function getReloadTimeKey($host, $port)
     {
-        return $config['host'] . ':' . $config['port'];
+        return $host . ':' . $port;
     }
 
-    public function getReloadJobId($config)
+    public function getReloadJobId($host, $port)
     {
-        return spl_object_hash($this).$this->getReloadTimeKey($config);
+        return spl_object_hash($this).$this->getReloadTimeKey($host, $port);
     }
 }
