@@ -11,6 +11,7 @@ use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Network\Connection\Exception\CanNotFindLoadBalancingStrategeMapException;
 
 class NovaClientPool
 {
@@ -32,21 +33,21 @@ class NovaClientPool
      */
     private $loadBalancingStrategy;
 
-    public function __construct(array $config)
+    public function __construct(array $config, $strategy)
     {
-        $this->init($config);
+        $this->init($config, $strategy);
     }
 
-    private function init($config)
+    private function init($config, $strategy)
     {
         $this->config = $config;
         $this->createConnections();
-        $this->initLoadBalancingStrategy();
+        $this->initLoadBalancingStrategy($strategy);
     }
 
     private function createConnections()
     {
-        foreach ($this->config['connections'] as $config) {
+        foreach ($this->config as $config) {
             $this->createConnection($config);
         }
     }
@@ -62,13 +63,12 @@ class NovaClientPool
         }
     }
 
-    private function initLoadBalancingStrategy()
+    private function initLoadBalancingStrategy($strategy)
     {
-        $key = $this->config['strategy'];
-        if (!isset($this->loadBalancingStrategyMap[$key])) {
-            //exception
+        if (!isset($this->loadBalancingStrategyMap[$strategy])) {
+            throw new CanNotFindLoadBalancingStrategeMapException();
         }
-        $loadBalancingStrategy = $this->loadBalancingStrategyMap[$key];
+        $loadBalancingStrategy = $this->loadBalancingStrategyMap[$strategy];
         $this->loadBalancingStrategy = new $loadBalancingStrategy($this);
     }
 
@@ -113,6 +113,20 @@ class NovaClientPool
             return false;
         }
         unset($this->connections[$key]);
+    }
+
+    public function removeConfig($config)
+    {
+        foreach ($this->config as $key => $tmpConfig) {
+            if ($tmpConfig['host'] == $config['host'] && $tmpConfig['port'] == $config['port']) {
+                unset($this->config[$key]);
+            }
+        }
+    }
+
+    public function addConfig($config)
+    {
+        $this->config[] = $config;
     }
 
     public function recycle(Connection $conn)

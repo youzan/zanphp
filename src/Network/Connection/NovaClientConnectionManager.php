@@ -21,14 +21,15 @@ class NovaClientConnectionManager
 
     public function work($module, $servers)
     {
-        $config = Config::get('loadBalancing');
+        $loadBalancing = Config::get('loadBalancing');
         $novaConfig = Config::get('connection.nova');
+        $config = [];
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $config['connections'][] = $novaConfig;
+            $config[] = $novaConfig;
         }
-        $this->novaClientPool[$module] = new NovaClientPool($config);
+        $this->novaClientPool[$module] = new NovaClientPool($config, $loadBalancing['strategy']);
     }
 
     /**
@@ -43,8 +44,9 @@ class NovaClientConnectionManager
         return $this->novaClientPool[$module];
     }
 
-    public function get($module)
+    public function get($serviceName, $method)
     {
+        $module = $this->getModule($serviceName, $method);
         $pool = $this->getPool($module);
         yield $pool->get();
     }
@@ -56,6 +58,7 @@ class NovaClientConnectionManager
             $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
             if (null !== $connection && $connection instanceof Connection) {
                 $pool->remove($connection);
+                $pool->removeConfig($server);
             }
         }
     }
@@ -68,6 +71,12 @@ class NovaClientConnectionManager
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $pool->createConnection($novaConfig);
+            $pool->addConfig($novaConfig);
         }
+    }
+
+    private function getModule($serviceName, $method)
+    {
+
     }
 }
