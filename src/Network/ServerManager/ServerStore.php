@@ -31,68 +31,68 @@ class ServerStore
         return null;
     }
 
-    public function getLockGetServices($serviceName)
+    public function getLockGetServices($modules)
     {
-        return apcu_fetch($this->getLockGetServicesKey($serviceName));
+        return apcu_fetch($this->getLockGetServicesKey($modules));
     }
 
-    public function lockGetServices($serviceName)
+    public function lockGetServices($modules)
     {
-        return apcu_cas($this->getLockGetServicesKey($serviceName), 0, 1);
+        return apcu_cas($this->getLockGetServicesKey($modules), 0, 1);
     }
 
-    public function resetLockGetServices($serviceName)
+    public function resetLockGetServices($modules)
     {
-        return apcu_store($this->getLockGetServicesKey($serviceName), 0);
+        return apcu_store($this->getLockGetServicesKey($modules), 0);
     }
 
-    public function getLockGetServicesKey($serviceName)
+    public function getLockGetServicesKey($modules)
     {
-        return 'server_get_lock_' . $serviceName;
+        return 'server_get_lock_' . $modules;
     }
 
-    public function getServices($serviceName)
+    public function getServices($modules)
     {
-        return $this->get($this->getServicesKey($serviceName));
+        return $this->get($this->getServicesKey($modules));
     }
 
-    public function setServices($serviceName, $servers)
+    public function setServices($modules, $servers)
     {
-        return $this->set($this->getServicesKey($serviceName), $servers);
+        return $this->set($this->getServicesKey($modules), $servers);
     }
 
-    public function getServicesKey($serviceName)
+    public function getServicesKey($modules)
     {
-        return 'server_list_' . $serviceName;
+        return 'server_list_' . $modules;
     }
 
-    public function getDoWatchLastTime($serviceName)
+    public function getDoWatchLastTime($modules)
     {
-        return $this->get($this->getSetDoWatchLastTimeKey($serviceName));
+        return $this->get($this->getSetDoWatchLastTimeKey($modules));
     }
 
-    public function setDoWatchLastTime($serviceName)
+    public function setDoWatchLastTime($modules)
     {
-        return $this->set($this->getSetDoWatchLastTimeKey($serviceName), time());
+        return $this->set($this->getSetDoWatchLastTimeKey($modules), time());
     }
 
-    public function getSetDoWatchLastTimeKey($serviceName)
+    public function getSetDoWatchLastTimeKey($modules)
     {
-        return 'server_watch_last_time_' . $serviceName;
+        return 'server_watch_last_time_' . $modules;
     }
 
-    public function lockWatch($serviceName)
+    public function lockWatch($modules)
     {
-        return apcu_cas($this->getLockWatchKey($serviceName), 0, 1);
+        return apcu_cas($this->getLockWatchKey($modules), 0, 1);
     }
 
-    public function resetLockWatch($serviceName)
+    public function resetLockWatch($modules)
     {
-        return apcu_store($this->getLockWatchKey($serviceName), 0);
+        return apcu_store($this->getLockWatchKey($modules), 0);
     }
 
-    public function getLockWatchKey($serviceName)
+    public function getLockWatchKey($modules)
     {
-        return 'server_lock_watch_' . $serviceName;
+        return 'server_lock_watch_' . $modules;
     }
 }
