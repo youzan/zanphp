@@ -25,6 +25,7 @@ class Tcp implements ConnectionFactory
     {
         $clientFlags = SWOOLE_SOCK_TCP;
         $this->conn = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+        $this->conn->set($this->config['config']);
 
         $connection = new \Zan\Framework\Network\Connection\Driver\Tcp();
         $connection->setSocket($this->conn);
