@@ -19,7 +19,8 @@ class Path {
     const DEFAULT_CACHE_PATH    = 'resource/cache/';
     const DEFAULT_MODEL_PATH    = 'resource/model/';
     const DEFAULT_TABLE_PATH    = 'resource/config/share/table/';
-    const DEFAULT_ROUTING_PATH  = 'init/routing';
+    const DEFAULT_ROUTING_PATH  = 'resource/routing/';
+    const DEFAULT_MIDDLEWARE_PATH = 'resource/middleware';
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
     const CONFIG_PATH_CONFIG_KEY  = 'path.config';
@@ -29,6 +30,8 @@ class Path {
     const MODEL_PATH_CONFIG_KEY   = 'path.model';
     const TABLE_PATH_CONFIG_KEY   = 'path.table';
     const ROUTING_PATH_CONFIG_KEY = 'path.routing';
+    const MIDDLEWARE_PATH_CONFIG_KEY = 'path.middleware';
+
 
     private static $rootPath    = null;
     private static $configPath  = null;
@@ -38,6 +41,7 @@ class Path {
     private static $modelPath   = null;
     private static $tablePath   = null;
     private static $routingPath = null;
+    private static $middlewarePath = null;
 
     public static function init($rootPath)
     {
@@ -94,6 +98,11 @@ class Path {
         return self::$routingPath;
     }
 
+    public static function getMiddlewarePath()
+    {
+        return self::$middlewarePath;
+    }
+
     private static function setRootPath($rootPath)
     {
         self::$rootPath = Dir::formatPath($rootPath);
@@ -108,6 +117,7 @@ class Path {
         self::$cachePath = self::$rootPath . self::DEFAULT_CACHE_PATH;
         self::$tablePath = self::$rootPath . self::DEFAULT_TABLE_PATH;
         self::$routingPath = self::$rootPath . self::DEFAULT_ROUTING_PATH;
+        self::$middlewarePath = self::$rootPath . self::DEFAULT_MIDDLEWARE_PATH;
     }
 
     private static function setInConfig()
@@ -120,5 +130,6 @@ class Path {
         Config::set(self::MODEL_PATH_CONFIG_KEY, self::$modelPath);
         Config::set(self::TABLE_PATH_CONFIG_KEY, self::$tablePath);
         Config::set(self::ROUTING_PATH_CONFIG_KEY, self::$routingPath);
+        Config::set(self::MIDDLEWARE_PATH_CONFIG_KEY, self::$middlewarePath);
     }
 }

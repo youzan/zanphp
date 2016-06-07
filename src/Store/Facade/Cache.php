@@ -34,6 +34,17 @@ class Cache {
         }
     }
 
+    public static function delete($configKey, $key)
+    {
+        yield self::getRedisManager($configKey);
+        $cacheKey = self::getConfigCacheKey($configKey);
+        $realKey = self::getRealKey($cacheKey, $key);
+        if (!empty($realKey)) {
+            $result = (yield self::$redis->delete($realKey));
+            yield $result;
+        }
+    }
+
     public static function expire($configKey, $key, $expire=0)
     {
         yield self::getRedisManager($configKey);

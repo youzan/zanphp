@@ -57,7 +57,7 @@ class ServerBase
     protected function getCustomizedServerStartItems()
     {
         $basePath = Application::getInstance()->getBasePath();
-        $configFile = $basePath . '/init/ServerStart/config.php';
+        $configFile = $basePath . '/init/ServerStart/.config.php';
 
         if (file_exists($configFile)) {
             return include $configFile;
@@ -69,7 +69,7 @@ class ServerBase
     protected function getCustomizedWorkerStartItems()
     {
         $basePath = Application::getInstance()->getBasePath();
-        $configFile = $basePath . '/init/WorkerStart/config.php';
+        $configFile = $basePath . '/init/WorkerStart/.config.php';
 
         if (file_exists($configFile)) {
             return include $configFile;
