@@ -22,7 +22,7 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public static function execute($coroutine, Context $context=null, $taskId=0, Task $parentTask)
+    public static function execute($coroutine, Context $context=null, $taskId=0, Task $parentTask = null)
     {
         if($coroutine instanceof \Generator) {
             $task = new Task($coroutine, $context, $taskId, $parentTask);
@@ -34,7 +34,7 @@ class Task
         return $coroutine;
     }
 
-    public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, Task $parentTask)
+    public function __construct(\Generator $coroutine, Context $context=null, $taskId=0, Task $parentTask = null)
     {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();
