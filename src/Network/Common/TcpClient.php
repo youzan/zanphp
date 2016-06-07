@@ -37,17 +37,16 @@ class TcpClient implements Async
         call_user_func($this->_callback, $data);
     }
     
-    public function send($data)
+    public function send($data, $hasRecv = true)
     {
         $sent = $this->_sock->send($data);
         if (false === $sent) {
             throw new NetworkException(socket_strerror($this->_sock->errCode), $this->_sock->errCode);
         }
-        yield $this;
-    }
 
-    public function release()
-    {
-        $this->_conn->release();
+        if (!$hasRecv) {
+            $this->_conn->release();
+        }
+        yield $this;
     }
 }
