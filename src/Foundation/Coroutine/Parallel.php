@@ -36,7 +36,7 @@ class Parallel
                 continue; 
             }
 
-            $childTask = Task::execute($coroutine, $taskContext, 0, $this->task);
+            $childTask = new Task($coroutine, $taskContext, 0, $this->task);
             $this->childTasks[$key] = $childTask;
 
             $newTaskId = $childTask->getTaskId();
