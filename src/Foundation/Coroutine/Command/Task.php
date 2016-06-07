@@ -27,10 +27,32 @@ function taskSleep($ms)
 function newTask(\Generator $gen = null)
 {
     return new SysCall(function (Task $task) use ($gen) {
-        $task->send(null);
+        $context = $task->getContext();
+        $pid     = $task->getTaskId();
+        Task::execute($gen, $context, 0, $pid);
 
+        $task->send(null);
         return Signal::TASK_CONTINUE;
     });
+}
+
+function go(\Generator $coroutine)
+{
+    return newTask($coroutine);
+}
+
+function defer(callable $callback)
+{
+
+}
+
+function deferRelease(Resource $res, $stradegy = Resource::AUTO_RELEASE)
+{
+}
+
+function release(Resource $res, $stradegy = Resource::AUTO_RELEASE)
+{
+
 }
 
 function killTask()
@@ -117,20 +139,7 @@ function parallel($coroutines)
     });
 }
 
-function defer(callable $callback)
-{
 
-}
-
-function deferRelease(Resource $res, $stradegy = Resource::AUTO_RELEASE)
-{
-
-}
-
-function release(Resource $res, $stradegy = Resource::AUTO_RELEASE)
-{
-
-}
 
 function getCookieHandler()
 {

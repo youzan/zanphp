@@ -18,7 +18,6 @@ use Zan\Framework\Utilities\Types\Time;
 
 class Pool implements ConnectionPool
 {
-
     private $freeConnection = null;
 
     private $activeConnection = null;
@@ -28,9 +27,6 @@ class Pool implements ConnectionPool
     private $factory = null;
 
     private $type = null;
-
-
-
 
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
@@ -45,10 +41,10 @@ class Pool implements ConnectionPool
         $initConnection = $this->poolConfig['pool']['init-connection'];
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
-        for ($i=0; $i<$initConnection; $i++) {
+        for ($i = 0; $i < $initConnection; $i++) {
+            //todo 创建链接,存入数组
             $this->createConnect();
         }
-
     }
 
     private function createConnect()
@@ -59,7 +55,7 @@ class Pool implements ConnectionPool
         } else {
             $this->freeConnection->push($connection);
         }
-        
+
         $connection->setPool($this);
         $connection->heartbeat();
         $connection->setEngine($this->type);
@@ -78,7 +74,6 @@ class Pool implements ConnectionPool
 
     public function reload(array $config)
     {
-        
     }
 
     public function get()
@@ -93,7 +88,7 @@ class Pool implements ConnectionPool
 //        deferRelease($conn);
         return $conn;
     }
-    
+
     public function recycle(Connection $conn)
     {
         $this->freeConnection->push($conn);
@@ -103,10 +98,11 @@ class Pool implements ConnectionPool
             Event::fire($evtName, [], false);
         }
     }
-    
+
     public function remove(Connection $conn)
     {
         $this->activeConnection->remove($conn);
         $this->createConnect();
     }
+
 }

@@ -109,6 +109,19 @@ class KV
         yield $kv->setMap($key, $value, $ttl);
     }
 
+    public static function incr($config, $key, $value = 1)
+    {
+        $config = Config::get('kvstore.' . $config);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $kvObj = self::init($config['namespace'], $config['set']);
+        $conn = (yield $kvObj->getConnection($config['connection']));
+        $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
+        yield $kv->incr($key, $value);
+    }
+
     /**
      * @param $key
      * @param string $config
