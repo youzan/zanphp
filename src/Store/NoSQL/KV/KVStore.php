@@ -95,6 +95,21 @@ class KVStore implements Async
         yield $this;
     }
 
+    public function incr($key, $value)
+    {
+        $this->conn->getSocket()->incr_async(
+            $this->namespace,
+            $this->setName,
+            $key,
+            self::DEFAULT_BIN_NAME,
+            $value,
+            [$this, 'writeCallBack'],
+            $this->policy
+        );
+
+        yield $this;
+    }
+
     public function get($key)
     {
         $this->conn->getSocket()->get_async(
