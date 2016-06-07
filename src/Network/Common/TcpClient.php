@@ -45,4 +45,9 @@ class TcpClient implements Async
         }
         yield $this;
     }
+
+    public function release()
+    {
+        $this->_conn->release();
+    }
 }

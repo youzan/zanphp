@@ -115,7 +115,7 @@ class Trace
         ];
         $this->builder->buildTransaction($trace);
 
-        $trace[0] = $sec  + $usec;
+        $trace[0] = $sec + $usec;
         array_push($this->_stack, $trace);
     }
 
@@ -145,7 +145,7 @@ class Trace
         $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
 
         $data = array_pop($this->_stack);
-        $utime = ($sec + $usec - $data[0]) * 100000000;
+        $utime = floor(($sec + $usec - $data[0]) * 100000000);
         $trace = [
             "T$time",
             $data[1],
@@ -202,5 +202,6 @@ class Trace
         $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));
         $tcpClient = new TcpClient($connection);
         yield $tcpClient->send($this->builder->getData());
+        $tcpClient->release();
     }
 }
