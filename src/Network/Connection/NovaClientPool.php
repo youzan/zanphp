@@ -59,7 +59,6 @@ class NovaClientPool
             $key = spl_object_hash($connection);
             $this->connections[$key] = $connection;
             $connection->setPool($this);
-            $connection->heartbeat();
         }
     }
 
