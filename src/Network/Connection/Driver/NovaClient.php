@@ -61,7 +61,7 @@ class NovaClient extends Base implements Connection
     }
     public function heartbeat()
     {
-        Timer::after($this->config['pool']['heartbeat-time'], [$this, 'heartbeating']);
+        Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating']);
     }
 
     public function heartbeating()
