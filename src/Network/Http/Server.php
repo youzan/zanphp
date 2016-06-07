@@ -78,10 +78,10 @@ class Server extends ServerBase implements ServerContract
 
     private function init()
     {
-        $serviceNames = Config::get('haunt.service_name');
-        foreach ($serviceNames as $serviceName) {
-            ServerStore::getInstance()->resetLockGetServices($serviceName);
-            ServerStore::getInstance()->resetLockWatch($serviceName);
+        $modules = Config::get('haunt.modules');
+        foreach ($modules as $module) {
+            ServerStore::getInstance()->resetLockGetServices($module);
+            ServerStore::getInstance()->resetLockWatch($module);
         }
     }
 
