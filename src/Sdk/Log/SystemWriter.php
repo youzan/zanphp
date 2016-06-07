@@ -30,7 +30,7 @@ class SystemWriter implements LogWriter, Async
         yield $this->conn->send($log);
     }
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
     }
