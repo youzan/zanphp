@@ -14,9 +14,6 @@ class ServerBase
     protected $workerStartItems = [
     ];
 
-    protected $masterManagerStartItems = [
-    ];
-
     protected function bootServerStartItem()
     {
         $serverStartItems = array_merge(
@@ -41,19 +38,6 @@ class ServerBase
         }
     }
 
-    protected function bootMasterManagerStartItem()
-    {
-        $masterManagerStartItems = array_merge(
-            $this->masterManagerStartItems,
-            $this->getCustomizedMasterManagerStartItems()
-        );
-        if ([] !== $masterManagerStartItems) {
-            foreach ($masterManagerStartItems as $bootstrap) {
-                Di::make($bootstrap)->bootstrap($this);
-            }
-        }
-    }
-
     protected function getCustomizedServerStartItems()
     {
         $basePath = Application::getInstance()->getBasePath();
@@ -70,18 +54,6 @@ class ServerBase
     {
         $basePath = Application::getInstance()->getBasePath();
         $configFile = $basePath . '/init/WorkerStart/.config.php';
-
-        if (file_exists($configFile)) {
-            return include $configFile;
-        } else {
-            return [];
-        }
-    }
-
-    protected function getCustomizedMasterManagerStartItems()
-    {
-        $basePath = Application::getInstance()->getBasePath();
-        $configFile = $basePath . '/init/MasterManager/config.php';
 
         if (file_exists($configFile)) {
             return include $configFile;
