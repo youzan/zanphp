@@ -65,7 +65,9 @@ class Mysqli implements DriverInterface
     public function query($sql)
     {
         $this->trace = (yield getContext('trace'));
-        $this->trace->transactionBegin(Constant::SQL, $sql);
+        if ($this->trace) {
+            $this->trace->transactionBegin(Constant::SQL, $sql);
+        }
 
         $config = $this->connection->getConfig();
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_QUERY_TIMEOUT;
@@ -102,8 +104,11 @@ class Mysqli implements DriverInterface
                 $this->connection->release();
                 $exception = new MysqliQueryException($error);
             }
+
+            if ($this->trace) {
                 $this->trace->commit($exception->getTraceAsString());
-        } else {
+            }
+        } else if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
 
@@ -113,7 +118,9 @@ class Mysqli implements DriverInterface
 
     public function onQueryTimeout()
     {
-        $this->trace->commit("SQL query timeout");
+        if ($this->trace) {
+            $this->trace->commit("SQL query timeout");
+        }
         $this->connection->close();
         //TODO: sql记入日志
         call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException()]);

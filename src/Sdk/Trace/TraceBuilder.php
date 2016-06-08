@@ -41,12 +41,12 @@ class TraceBuilder
     }
 
     public function isNotEmpty() {
-        return !empty(self::$data);
+        return !empty($this->data);
     }
 
     public function getData()
     {
-        $strlen = pack("L*", strlen($this->data));
+        $strlen = pack("N*", strlen($this->data));
         return $strlen . $this->data;
     }
 
@@ -55,6 +55,7 @@ class TraceBuilder
         if (null === self::$hexIp) {
             self::$hexIp = dechex(ip2long(Env::get('ip')));
         }
+
         $data = [
             Application::getInstance()->getName(),
             self::$hexIp,
