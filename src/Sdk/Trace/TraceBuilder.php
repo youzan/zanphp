@@ -18,7 +18,7 @@ class TraceBuilder
 
     public function buildHeader(array $header)
     {
-        array_unshift($header, "%s\tTraceBuilder%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
+        array_unshift($header, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $header);
     }
 
