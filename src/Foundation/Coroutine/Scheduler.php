@@ -53,8 +53,9 @@ class Scheduler
     public function throwException($e, $isFirstCall = false)
     {
         if ($this->isStackEmpty()) {
-            if ($this->task->getParentTask() instanceof Task) {
-                $this->task->getParentTask()->sendException($e);
+            $parent = $this->task->getParentTask();
+            if (null !== $parent && $parent instanceof Task) {
+                $parent->sendException($e);
             } else {
                 $this->task->getCoroutine()->throw($e);
             }
