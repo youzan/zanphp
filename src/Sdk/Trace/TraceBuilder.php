@@ -9,17 +9,16 @@
 namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Application;
-use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Foundation\Core\Env;
 
 class TraceBuilder
 {
-    use Singleton;
-
     private $data = "";
+    private static $hexIp = null;
 
     public function buildHeader(array $header)
     {
-        array_unshift($header, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
+        array_unshift($header, "%s\tTraceBuilder%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $header);
     }
 
@@ -47,14 +46,18 @@ class TraceBuilder
 
     public function getData()
     {
-        return cat_encode($this->data);
+        $strlen = pack("L*", strlen($this->data));
+        return $strlen . $this->data;
     }
 
     public static function generateId()
     {
+        if (null === self::$hexIp) {
+            self::$hexIp = dechex(ip2long(Env::get('ip')));
+        }
         $data = [
             Application::getInstance()->getName(),
-            dechex(ip2long(gethostbyname(gethostname()))),
+            self::$hexIp,
             floor(time()/3600),
             rand(100000, 999999)
         ];
