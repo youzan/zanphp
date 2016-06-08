@@ -54,6 +54,10 @@ class TraceBuilder
     {
         if (null === self::$hexIp) {
             self::$hexIp = dechex(ip2long(Env::get('ip')));
+            $zeroLen = 8 - strlen(self::$hexIp);
+            if ($zeroLen) {
+                self::$hexIp = str_repeat('0', $zeroLen) . self::$hexIp;
+            }
         }
 
         $data = [
