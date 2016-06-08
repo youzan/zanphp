@@ -79,6 +79,10 @@ class Server extends ServerBase {
     private function registerServices()
     {
         $config = Config::get('nova.platform');
+        $config['services'] = Nova::getAvailableService();
+
+        $appName = Application::getInstance()->getName();
+        $config['module'] = $appName;
         $this->swooleServer->nova_config($config);
     }
 
