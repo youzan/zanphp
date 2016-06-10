@@ -34,7 +34,6 @@ class Client implements Async
 
     private function __construct($host, $port)
     {
-        $host = str_replace('http://', '', $host);
         $this->host = $host;
         $this->port = $port;
     }
@@ -43,7 +42,6 @@ class Client implements Async
     {
         $apiConfig = self::getApiConfig($api);
         $params = self::filterParams($params, $apiConfig['type']);
-
         $client = new self($apiConfig['host'], $apiConfig['port']);
         $client->setType($apiConfig['type']);
         $client->setTimeout($apiConfig['timeout']);
@@ -151,12 +149,13 @@ class Client implements Async
             $target = static::getSubTarget($target, $api);
         }
         if (!empty($target['host'])) {
+            $target['host'] = str_replace('http://', '', $target['host']);
             $hostInfo = explode(':', $target['host']);
         } else {
             $hostInfo = null;
         }
 
-        $host = isset($hostInfo[0]) ? $hostInfo[0] : 'api.koudaitong.com';
+        $host = isset($hostInfo[0]) ? str_replace('/', '', $hostInfo[0]) : 'api.koudaitong.com';
         $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
         $type = isset($target['type']) ? $target['type'] : 'local';
         $timeout = isset($target['timeout']) ? $target['timeout'] : 3;
@@ -189,7 +188,7 @@ class Client implements Async
 
     private static function filterParams($params, $type)
     {
-        if ($type == self::PHP_TYPE) {
+        if ($type == 'local') {
             $params['debug'] = 'json';
         }
 
