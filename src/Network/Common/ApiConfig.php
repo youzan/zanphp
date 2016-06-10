@@ -927,7 +927,7 @@ return [
         'account' => [
 
             'type' => 'local',
-            'host' => 'http://usercenter.s.qima-inc.com',
+            'host' => 'http://api.koudaitong.com:80',
             'sub' => [
                 [
                     'mod' => 'account.admin',
