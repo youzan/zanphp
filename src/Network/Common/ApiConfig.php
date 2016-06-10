@@ -3,7 +3,7 @@ return [
     'test' => [
         'account' => [
             'type' => 'local',
-            'host' => 'http://192.168.66.207:8025',
+            'host' => 'http://api.koudaitong.com',
             'sub' => [
                 [
                     'mod' => 'account.admin',
@@ -472,7 +472,7 @@ return [
     'qatest' => [
         'account' => [
             'type' => 'local',
-            'host' => 'http://10.9.20.165:8025',
+            'host' => 'http://api.koudaitong.com',
             'sub' => [
                 [
                     'mod' => 'account.admin',
