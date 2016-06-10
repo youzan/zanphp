@@ -34,6 +34,7 @@ class Client implements Async
 
     private function __construct($host, $port)
     {
+        $host = str_replace('http://', '', $host);
         $this->host = $host;
         $this->port = $port;
     }
@@ -61,7 +62,7 @@ class Client implements Async
 
     private function setType($type)
     {
-        $this->type = $type;
+        $this->type = $type == 'local' ? self::PHP_TYPE : $type;
     }
 
     private function setMethod($method)
@@ -145,7 +146,7 @@ class Client implements Async
             return false;
         }
         $mod = substr ($api, 0, $pos);
-        $target = isset (self::$apiConfig[$mod]) ? self::$apiConfig[$mod] : ['type' => 'php'];
+        $target = isset (self::$apiConfig[$mod]) ? self::$apiConfig[$mod] : ['type' => 'local'];
         if (isset($target['sub']) && $target['sub']) {
             $target = static::getSubTarget($target, $api);
         }
@@ -157,7 +158,7 @@ class Client implements Async
 
         $host = isset($hostInfo[0]) ? $hostInfo[0] : 'api.koudaitong.com';
         $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
-        $type = isset($target['type']) ? $target['type'] : 'php';
+        $type = isset($target['type']) ? $target['type'] : 'local';
         $timeout = isset($target['timeout']) ? $target['timeout'] : 3;
 
         return [
