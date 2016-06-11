@@ -2,7 +2,9 @@
 
 namespace Zan\Framework\Network\Common;
 
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
@@ -134,7 +136,17 @@ class Client implements Async
     private static function getApiConfig($api)
     {
         if (is_null(self::$apiConfig)) {
-            $allApiConfig = include(__DIR__ . '/ApiConfig.php');
+            $configFile  = Application::getInstance()->getBasePath() . '/vendor/zan-config/iron/files/service_host.php';
+            if (file_exists($configFile)) {
+                $allApiConfig = require $configFile;
+            } else {
+                $configFile = __DIR__ . '/ApiConfig.php';
+                if (!file_exists($configFile)) {
+                    throw new SystemException('service_host 配置文件不存');
+                }
+                $allApiConfig = require $configFile;
+            }
+
             $runMode = RunMode::get();
             self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : $allApiConfig['test'];
         }
