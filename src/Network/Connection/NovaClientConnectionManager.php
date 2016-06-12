@@ -93,7 +93,7 @@ class NovaClientConnectionManager
         if (!isset($this->serviceToModuleMap[$serviceName])) {
             throw new CanNotFindNovaClientModuleByServiceNameException();
         }
-        if (!in_array($method, $this->serviceToModuleMap[$serviceName])) {
+        if (!in_array($method, $this->serviceToModuleMap[$serviceName]['methods'])) {
             throw new CanNotFindModuleMethodByServiceNameException();
         }
         return $this->serviceToModuleMap[$serviceName]['module'];
