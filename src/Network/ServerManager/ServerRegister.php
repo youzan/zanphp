@@ -39,14 +39,18 @@ class ServerRegister
             ];
         }
         return [
-            'Namespace' => 'com.youzan.service',
-            'SrvName' => $config['module'],
-            'IP' => $ip,
-            'Port' => Config::get('server.port'),
-            'Protocol' => 'nova',
-            'Status' => 1,
-            'Weight' => 100,
-            'ExtData' => json_encode($extData),
+            'SrvList' => [
+                [
+                    'Namespace' => 'com.youzan.service',
+                    'SrvName' => $config['module'],
+                    'IP' => $ip,
+                    'Port' => (int)Config::get('server.port'),
+                    'Protocol' => 'nova',
+                    'Status' => 1,
+                    'Weight' => 100,
+                    'ExtData' => json_encode($extData),
+                ]
+            ]
         ];
     }
 
