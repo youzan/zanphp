@@ -45,10 +45,6 @@ class Server extends ServerBase implements ServerContract
         InitializeServerDiscovery::class,
     ];
 
-    protected $masterManagerStartItems = [
-
-    ];
-
     /**
      * @var swooleServer
      */
@@ -98,7 +94,6 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        $this->bootMasterManagerStartItem();
         echo "server starting .....\n";
     }
 
