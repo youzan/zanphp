@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Sdk\Log;
 
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class BufferWriter implements LogWriter
 {

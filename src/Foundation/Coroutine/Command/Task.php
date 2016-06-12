@@ -28,8 +28,7 @@ function newTask(\Generator $gen = null)
 {
     return new SysCall(function (Task $task) use ($gen) {
         $context = $task->getContext();
-        $pid     = $task->getTaskId();
-        Task::execute($gen, $context, 0, $pid);
+        Task::execute($gen, $context, 0, $task);
 
         $task->send(null);
         return Signal::TASK_CONTINUE;
