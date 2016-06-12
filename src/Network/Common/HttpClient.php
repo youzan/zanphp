@@ -22,6 +22,8 @@ class HttpClient implements Async
      */
     private $timeout;
 
+    private $isTimeout = true;
+
     private $uri;
     private $method;
 
@@ -91,6 +93,12 @@ class HttpClient implements Async
         return $this;
     }
 
+    public function setIsTimeout($isTimeout = true)
+    {
+        $this->isTimeout = $isTimeout;
+        return $this;
+    }
+
     public function setParams($params)
     {
         $this->params = $params;
@@ -145,7 +153,9 @@ class HttpClient implements Async
     {
         $this->client = new \swoole_http_client($ip, $this->port);
         $this->buildHeader();
-        Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
+        if ($this->isTimeout === true) {
+            Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
+        }
         if('GET' === $this->method){
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
