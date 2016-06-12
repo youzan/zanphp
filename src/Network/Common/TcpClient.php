@@ -12,12 +12,18 @@ class TcpClient implements Async
     private $_conn;
     private $_sock;
     private $_callback;
+    private $_hasRecv = true;
 
     public function __construct(Connection $conn)
     {
         $this->_conn = $conn;
         $this->_sock = $conn->getSocket();
-        $this->_conn->setClientCb([$this, 'recv']);
+        $config = $conn->getConfig();
+        if (isset($config['hasRecv']) && $config['hasRecv'] === false) {
+            $this->_hasRecv = false;
+        } else {
+            $this->_conn->setClientCb([$this, 'recv']);
+        }
     }
 
     public function execute(callable $callback, $task)
@@ -37,16 +43,18 @@ class TcpClient implements Async
         call_user_func($this->_callback, $data);
     }
     
-    public function send($data, $hasRecv = true)
+    public function send($data)
     {
         $sent = $this->_sock->send($data);
         if (false === $sent) {
             throw new NetworkException(socket_strerror($this->_sock->errCode), $this->_sock->errCode);
         }
 
-        if (!$hasRecv) {
+        if (!$this->_hasRecv) {
             $this->_conn->release();
+            yield;
+        } else {
+            yield $this;
         }
-        yield $this;
     }
 }

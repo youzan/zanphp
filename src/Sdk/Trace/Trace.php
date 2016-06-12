@@ -201,6 +201,6 @@ class Trace
 
         $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));
         $tcpClient = new TcpClient($connection);
-        yield $tcpClient->send($this->builder->getData(), false);
+        yield $tcpClient->send($this->builder->getData());
     }
 }
