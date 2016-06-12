@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\ServerManager;
 use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Common\Curl;
 
 class ServerRegister
 {
@@ -52,8 +53,8 @@ class ServerRegister
     public function register($config)
     {
         $haunt = Config::get('haunt');
-        $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), $haunt['register']['timeout']);
+        $curl = new Curl();
+        return $curl->post($haunt['register']['uri'], $this->parseConfig($config), $haunt['register']['timeout']);
     }
 
 
