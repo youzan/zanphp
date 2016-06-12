@@ -26,8 +26,7 @@ class ServerDiscoveryInitiator
         }
         foreach ($config['modules'] as $module) {
             $serverDiscovery = new ServerDiscovery($config, $module);
-            $coroutine = $serverDiscovery->start();
-            Task::execute($coroutine);
+            $serverDiscovery->start();
         }
     }
 
