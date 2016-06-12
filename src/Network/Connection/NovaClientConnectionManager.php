@@ -98,4 +98,16 @@ class NovaClientConnectionManager
         }
         return $this->serviceToModuleMap[$serviceName]['module'];
     }
+
+    public function update($module, $servers)
+    {
+        $novaConfig = Config::get('connection.nova');
+        foreach ($servers as $server) {
+            $novaConfig['host'] = $server['host'];
+            $novaConfig['port'] = $server['port'];
+            foreach ($server['services'] as $service) {
+                $this->serviceToModuleMap[$service['service']] = ['module' => $module, 'methods' => $service['methods']];
+            }
+        }
+    }
 }

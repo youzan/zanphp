@@ -95,8 +95,8 @@ class ServerDiscovery
             $this->config['get']['namespace'] . '/'.
             $this->module;
         $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
-        $servers = (yield $this->parseEtcdData($raw));
-        yield $this->saveServices($servers);
+        $servers = $this->parseEtcdData($raw);
+        $this->saveServices($servers);
         yield $servers;
     }
 
@@ -111,7 +111,7 @@ class ServerDiscovery
         $servers = [];
         foreach ($raw['node']['nodes'] as $server) {
             $value = json_decode($server['value'], true);
-            $servers[] = [
+            $servers[$this->getStoreServicesKey($value['IP'], $value['Port'])] = [
                 'namespace' => $value['Namespace'],
                 'modules' => $value['SrvName'],
                 'host' => $value['IP'],
@@ -122,7 +122,7 @@ class ServerDiscovery
                 'services' => json_decode($value['ExtData'], true)
             ];
         }
-        yield $servers;
+        return $servers;
     }
 
     private function saveServices($servers)
@@ -167,7 +167,7 @@ class ServerDiscovery
             try {
                 $raw = (yield $this->watchEtcd());
                 if (null != $raw) {
-                    yield $this->update($raw);
+                    $this->update($raw);
                 }
             } catch (HttpClientTimeoutException $e) {
             }
@@ -181,22 +181,76 @@ class ServerDiscovery
 
     private function update($raw)
     {
-        $update = (yield $this->parseEtcdData($raw));
-        if ([] == $update) {
-            yield null;
+        $update = $this->parseWatchEtcdData($raw);
+        if (null == $update) {
             return;
         }
-        $old = $this->getByStore();
-        $offline = array_diff_key($old, $update);
-        if ([] != $offline) {
-            NovaClientConnectionManager::getInstance()->offline($this->module, $offline);
+        $nowStore = $this->getByStore();
+        if (isset($update['off_line'])) {
+            NovaClientConnectionManager::getInstance()->offline($this->module, [$update['off_line']]);
+            if (isset($nowStore[$this->getStoreServicesKey($update['off_line']['host'], $update['off_line']['port'])])) {
+                unset($nowStore[$this->getStoreServicesKey($update['off_line']['host'], $update['off_line']['port'])]);
+            }
         }
-        $addOnline = array_diff_key($update, $old);
-        if ([] != $addOnline) {
-            NovaClientConnectionManager::getInstance()->addOnline($this->module, $addOnline);
+        if (isset($update['add_on_line'])) {
+            NovaClientConnectionManager::getInstance()->addOnline($this->module, [$update['add_on_line']]);
+            $nowStore[$this->getStoreServicesKey($update['add_on_line']['host'], $update['add_on_line']['port'])] = $update['add_on_line'];
         }
-        $this->serverStore->setServices($this->module, $update);
-        //todo set waitIndex
+        if (isset($update['update'])) {
+            NovaClientConnectionManager::getInstance()->update($this->module, [$update['update']]);
+            $nowStore[$this->getStoreServicesKey($update['update']['host'], $update['update']['port'])] = $update['update'];
+        }
+        $this->serverStore->setServices($this->module, $nowStore);
+    }
+
+    private function parseWatchEtcdData($raw)
+    {
+        if (null === $raw || [] === $raw) {
+            throw new ServerDiscoveryEtcdException('watch etcd data error');
+        }
+        if (!isset($raw['node']) && !isset($raw['prevNode'])) {
+            throw new ServerDiscoveryEtcdException('watch etcd can\' find anything');
+        }
+        if (isset($raw['node']['value']) && isset($raw['prevNode']['value'])) {
+            $new = json_decode($raw['node']['value'], true);
+            $data['update'] = [
+                'namespace' => $new['Namespace'],
+                'modules' => $new['SrvName'],
+                'host' => $new['IP'],
+                'port' => $new['Port'],
+                'protocol' => $new['Protocol'],
+                'status' => $new['Status'],
+                'weight' => $new['Weight'],
+                'services' => json_decode($new['ExtData'], true)
+            ];
+            return $data;
+        }
+        if (!isset($raw['node']['value'])) {
+            $value = json_decode($raw['prevNode']['value'], true);
+            $data['off_line'] = [
+                'namespace' => $value['Namespace'],
+                'modules' => $value['SrvName'],
+                'host' => $value['IP'],
+                'port' => $value['Port'],
+                'protocol' => $value['Protocol'],
+                'status' => $value['Status'],
+                'weight' => $value['Weight'],
+                'services' => json_decode($value['ExtData'], true)
+            ];
+            return $data;
+        }
+        $value = json_decode($raw['node']['value'], true);
+        $data['add_on_line'] = [
+            'namespace' => $value['Namespace'],
+            'modules' => $value['SrvName'],
+            'host' => $value['IP'],
+            'port' => $value['Port'],
+            'protocol' => $value['Protocol'],
+            'status' => $value['Status'],
+            'weight' => $value['Weight'],
+            'services' => json_decode($value['ExtData'], true)
+        ];
+        return $data;
     }
 
     private function watchEtcd()
@@ -208,6 +262,11 @@ class ServerDiscovery
             $this->config['watch']['namespace'] . '/'.
             $this->module;
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+    }
+
+    private function getStoreServicesKey($host, $port)
+    {
+        return $host . ':' . $port;
     }
 
     private function getGetServicesJobId()
