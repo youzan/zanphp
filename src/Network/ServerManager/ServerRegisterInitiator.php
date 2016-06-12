@@ -22,7 +22,6 @@ class ServerRegisterInitiator
     {
         $config = Config::get('nova.platform');
         $config['services'] = Nova::getAvailableService();
-
         $appName = Application::getInstance()->getName();
         $config['module'] = $appName;
         $register = new ServerRegister();
