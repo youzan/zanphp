@@ -26,8 +26,7 @@ class ServerRegisterInitiator
         $appName = Application::getInstance()->getName();
         $config['module'] = $appName;
         $register = new ServerRegister();
-        $coroutine = $register->register($config);
-        Task::execute($coroutine);
+        $register->register($config);
     }
 
 }
