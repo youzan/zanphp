@@ -65,18 +65,18 @@ class NovaClient extends Base implements Connection
     }
     public function heartbeat()
     {
-        $time = (Time::current(true) - $this->lastUsedTime) * 1000;
-        if ($time >= $this->config['heartbeat-time']) {
-            Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating']);
-        } else {
-            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'heartbeating']);
-        }
+        Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating']);
     }
 
     public function heartbeating()
     {
-        $coroutine = $this->ping();
-        Task::execute($coroutine);
+        $time = (Time::current(true) - $this->lastUsedTime) * 1000;
+        if ($time >= $this->config['heartbeat-time']) {
+            $coroutine = $this->ping();
+            Task::execute($coroutine);
+        } else {
+            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'heartbeating']);
+        }
     }
 
     public function ping()
