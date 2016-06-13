@@ -158,7 +158,7 @@ class Client implements Async
         $host = isset($hostInfo[0]) ? $hostInfo[0] : 'api.koudaitong.com';
         $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
         $type = isset($target['type']) ? $target['type'] : 'php';
-        $timeout = isset($target['timeout']) ? $target['timeout'] : 3;
+        $timeout = isset($target['timeout']) ? $target['timeout'] : 3000;
 
         return [
             'host' => $host,
