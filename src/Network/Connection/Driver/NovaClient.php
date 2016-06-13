@@ -17,11 +17,13 @@ use Zan\Framework\Network\Connection\Exception\NovaClientPingEncodeException;
 use Kdt\Iron\Nova\Exception\NetworkException;
 
 use Zan\Framework\Network\Connection\NovaClientPool;
+use Zan\Framework\Utilities\Types\Time;
 
 class NovaClient extends Base implements Connection
 {
     private $clientCb;
     protected $isAsync = true;
+    private $lastUsedTime = 0;
 
     protected function closeSocket()
     {
@@ -40,6 +42,7 @@ class NovaClient extends Base implements Connection
         //put conn to active_pool
         $this->release();
         $this->heartbeat();
+        $this->getPool()->connecting();
         echo "nova client connect to server\n";
     }
 
@@ -62,7 +65,12 @@ class NovaClient extends Base implements Connection
     }
     public function heartbeat()
     {
-        Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating']);
+        $time = Time::current(true) * 1000 - $this->lastUsedTime;
+        if ($time >= $this->config['heartbeat-time']) {
+            Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating']);
+        } else {
+            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'heartbeating']);
+        }
     }
 
     public function heartbeating()

@@ -17,6 +17,8 @@ class NovaClientPool
 {
     private $connections = [];
 
+    private $waitingConnections = [];
+
     private $config;
 
     private $loadBalancingStrategyMap = [
@@ -58,9 +60,16 @@ class NovaClientPool
         $connection = $novaClientFactory->create();
         if ($connection instanceof Connection) {
             $key = spl_object_hash($connection);
-            $this->connections[$key] = $connection;
+            $this->waitingConnections[$key] = $connection;
             $connection->setPool($this);
         }
+    }
+
+    public function connecting(Connection $connection)
+    {
+        $key = spl_object_hash($connection);
+        $this->connections[$key] = $connection;
+        unset($this->waitingConnections[$key]);
     }
 
     private function initLoadBalancingStrategy($strategy)
