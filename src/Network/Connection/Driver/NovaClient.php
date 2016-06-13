@@ -65,7 +65,7 @@ class NovaClient extends Base implements Connection
     }
     public function heartbeat()
     {
-        $time = Time::current(true) * 1000 - $this->lastUsedTime;
+        $time = (Time::current(true) - $this->lastUsedTime) * 1000;
         if ($time >= $this->config['heartbeat-time']) {
             Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating']);
         } else {
@@ -99,5 +99,10 @@ class NovaClient extends Base implements Connection
     public function release()
     {
         $this->getPool()->resetReloadTime($this->config);
+    }
+
+    public function setLastUsedTime()
+    {
+        $this->lastUsedTime = Time::current(true);
     }
 }
