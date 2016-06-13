@@ -41,8 +41,8 @@ class NovaClient extends Base implements Connection
     public function onConnect($cli) {
         //put conn to active_pool
         $this->release();
-        $this->heartbeat();
         $this->getPool()->connecting($this);
+        $this->heartbeat();
         echo "nova client connect to server\n";
     }
 
