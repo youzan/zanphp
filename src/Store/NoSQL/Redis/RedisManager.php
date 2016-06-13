@@ -50,12 +50,9 @@ class RedisManager {
         yield $result;
     }
 
-    public function set($key, $value, $expire=0) {
+    public function set($key, $value) {
         $result = new RedisResult();
         $this->client->set($key, $value, [$result, 'response']);
-        if ($expire >0) {
-            $this->client->EXPIRE($key, $expire, [$result, 'response']);
-        }
         $this->release();
         yield $result;
     }
