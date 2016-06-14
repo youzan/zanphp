@@ -61,10 +61,14 @@ class Cache {
         yield self::getRedisManager($configKey);
         $cacheKey = self::getConfigCacheKey($configKey);
         $realKey = self::getRealKey($cacheKey, $keys);
+        $result = false;
         if (!empty($realKey)) {
-            $result = (yield self::$redis->set($realKey, $value, $cacheKey['exp']));
-            yield $result;
+            $result = (yield self::$redis->set($realKey, $value));
         }
+        if ($result) {
+            yield self::$redis->expire($realKey, $cacheKey['exp']);
+        }
+        yield $result;
     }
 
     private static function getRedisConnByConfigKey($configKey)
