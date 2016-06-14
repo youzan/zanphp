@@ -136,7 +136,7 @@ class Client implements Async
 
             $code = $jsonData['code'];
             if ($code > 0) {
-                $msg = isset($jsonData['msg']) ? $jsonData['msg'] : $jsonData['data'];
+                $msg = isset($jsonData['msg']) ? $jsonData['msg'] : '网络错误';
                 $e = new SystemException($msg, $code);
                 call_user_func($callback, null, $e);
                 return;
