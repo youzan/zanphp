@@ -20,10 +20,10 @@ class ServerRegisterInitiator
 
     public function init()
     {
+        //TODO: check config position
         $config = Config::get('nova.platform');
         $config['services'] = Nova::getAvailableService();
-        $appName = Application::getInstance()->getName();
-        $config['module'] = $appName;
+        
         $register = new ServerRegister();
         $coroutine = $register->register($config);
         Task::execute($coroutine);

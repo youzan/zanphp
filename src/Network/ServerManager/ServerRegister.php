@@ -7,6 +7,7 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
@@ -21,9 +22,6 @@ class ServerRegister
         foreach ($config['services'] as $service) {
             $extData[] = [
                 'service' => $service['service'],
-                'language' => 'php',
-                'timestamp' => time(),
-                'version' => '1.0.0',
                 'methods' => $service['methods'],
             ];
         }
@@ -31,7 +29,7 @@ class ServerRegister
             'SrvList' => [
                 [
                     'Namespace' => 'com.youzan.service',
-                    'SrvName' => $config['module'],
+                    'SrvName' => Application::getInstance()->getName(),
                     'IP' => $ip,
                     'Port' => (int)Config::get('server.port'),
                     'Protocol' => 'nova',
