@@ -12,6 +12,7 @@ use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Connection\Exception\CanNotFindLoadBalancingStrategeMapException;
+use Zan\Framework\Network\ServerManager\ServerStore;
 
 class NovaClientPool
 {
@@ -104,13 +105,7 @@ class NovaClientPool
 
     public function reload(array $config)
     {
-        $canReload = false;
-        foreach ($this->config as $conf) {
-            if ($conf['host'] == $config['host'] && $conf['port'] == $config['port']) {
-                $canReload = true;
-                break;
-            }
-        }
+        $canReload = $this->checkCanReload($config);
         if (false === $canReload) {
             return;
         }
@@ -123,6 +118,22 @@ class NovaClientPool
         Timer::after($interval, function () use ($config) {
             $this->createConnection($config);
         });
+    }
+
+    private function checkCanReload($config)
+    {
+        $canReload = false;
+        $services = ServerStore::getInstance()->getServices($config['modules']);
+        if (null == $services || [] == $services) {
+            return false;
+        }
+        foreach ($services as $service) {
+            if ($service['host'] == $config['host'] && $service['port'] == $config['port']) {
+                $canReload = true;
+                break;
+            }
+        }
+        return $canReload;
     }
 
     public function remove(Connection $conn)
