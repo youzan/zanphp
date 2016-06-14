@@ -13,12 +13,14 @@ use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
+use Zan\Framework\Network\Tcp\ServerStart\InitializeCache;
 
 class Server extends ServerBase {
 
     protected $serverStartItems = [
         InitializeSqlMap::class,
         InitLogConfig::class,
+        InitializeCache::class
     ];
 
     protected $workerStartItems = [

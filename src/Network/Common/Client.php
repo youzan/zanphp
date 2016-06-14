@@ -3,7 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\RunMode;
-use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
 
@@ -42,7 +42,6 @@ class Client implements Async
     {
         $apiConfig = self::getApiConfig($api);
         $params = self::filterParams($params, $apiConfig['type']);
-
         $client = new self($apiConfig['host'], $apiConfig['port']);
         $client->setType($apiConfig['type']);
         $client->setTimeout($apiConfig['timeout']);
@@ -61,7 +60,7 @@ class Client implements Async
 
     private function setType($type)
     {
-        $this->type = $type;
+        $this->type = $type == 'local' ? self::PHP_TYPE : $type;
     }
 
     private function setMethod($method)
@@ -83,7 +82,7 @@ class Client implements Async
 
     private function setParams($params)
     {
-       $this->params = $params;
+        $this->params = $params;
     }
 
     private function setFormat($format){
@@ -96,7 +95,7 @@ class Client implements Async
         $this->httpClient->setTimeout($this->timeout);
         $this->httpClient->setMethod($this->method);
 
-        if ($this->method != 'POST' and $this->method != 'PUT') {
+        if ($this->method == 'GET') {
             $this->uri = $this->uri . '?' . http_build_query($this->params);
         } else {
             if ($this->type == self::PHP_TYPE) {
@@ -119,15 +118,61 @@ class Client implements Async
     private function getCallback(callable $callback)
     {
         return function($response) use ($callback) {
-            $jsonData = json_decode($response, true);
-            $response = $jsonData ? $jsonData : $response;
-            if($this->format =='yar' && $this->type == self::PHP_TYPE && isset($response['code'])){
-                if($response['code']){
-                    $msg = $response['msg'] ? $response['msg'] : $response['data'];
-                    throw new ZanException($msg,$response['code']);
-                }
-                $response = $response['data'];
+            $jsonData = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
+            if (false === $jsonData || !is_array($jsonData)) {
+                // TODO 分配 code
+                $e = new SystemException('网络错误', 10000);
+                call_user_func($callback, null, $e);
+                return;
             }
+
+            // 检查格式
+            if (!isset($jsonData['code']) || !array_key_exists('data', $jsonData)) {
+                // TODO 分配 code, 调整提示语
+                $e = new SystemException('服务方返回的数据格式有误', 10000);
+                call_user_func($callback, null, $e);
+                return;
+            }
+
+            $code = $jsonData['code'];
+            if ($code > 0) {
+                $msg = isset($jsonData['msg']) ? $jsonData['msg'] : '网络错误';
+                $e = new SystemException($msg, $code);
+                call_user_func($callback, null, $e);
+                return;
+            }
+
+            // 兼容 Java HTTP 接口返回了两层数据, MLGBD
+            // array_key_exists 效率较低,但是 isset 不能满足所有场景
+            if ($this->type == self::JAVA_TYPE
+                && (isset($jsonData['data']['data']) || array_key_exists('data', $jsonData['data']))
+                && isset($jsonData['data']['code'])
+                && (isset($jsonData['data']['message']) || array_key_exists('message', $jsonData['data']))
+            ) {
+                // 我......
+                if (isset($jsonData['data']['success'])) {
+                    // 请保持该条件独立判断
+                    if ($jsonData['data']['success'] == false) {
+                        $msg = $jsonData['data']['message'];
+                        $e = new SystemException($msg, $code);
+                        call_user_func($callback, null, $e);
+                        return;
+                    }
+                } else {
+                    $code = $jsonData['data']['code'];
+                    if ($code > 0) {
+                        $msg = $jsonData['data']['message'];
+                        $e = new SystemException($msg, $code);
+                        call_user_func($callback, null, $e);
+                        return;
+                    }
+                }
+
+                $response = $jsonData['data']['data'];
+            } else {
+                $response = $jsonData['data'];
+            }
+
             call_user_func($callback, $response);
         };
     }
@@ -135,9 +180,14 @@ class Client implements Async
     private static function getApiConfig($api)
     {
         if (is_null(self::$apiConfig)) {
-            $allApiConfig = include(__DIR__ . '/ApiConfig.php');
+            $configFile = __DIR__ . '/ApiConfig.php';
+            if (!file_exists($configFile)) {
+                throw new SystemException('service_host 配置文件不存在');
+            }
+            $allApiConfig = require $configFile;
+
             $runMode = RunMode::get();
-            self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : $allApiConfig['dev'];
+            self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : $allApiConfig['test'];
         }
 
         $pos = stripos ($api, ".");
@@ -145,19 +195,20 @@ class Client implements Async
             return false;
         }
         $mod = substr ($api, 0, $pos);
-        $target = isset (self::$apiConfig[$mod]) ? self::$apiConfig[$mod] : ['type' => 'php'];
+        $target = isset (self::$apiConfig[$mod]) ? self::$apiConfig[$mod] : ['type' => 'local'];
         if (isset($target['sub']) && $target['sub']) {
             $target = static::getSubTarget($target, $api);
         }
         if (!empty($target['host'])) {
+            $target['host'] = str_replace('http://', '', $target['host']);
             $hostInfo = explode(':', $target['host']);
         } else {
             $hostInfo = null;
         }
 
-        $host = isset($hostInfo[0]) ? $hostInfo[0] : 'api.koudaitong.com';
+        $host = isset($hostInfo[0]) ? str_replace('/', '', $hostInfo[0]) : 'api.koudaitong.com';
         $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
-        $type = isset($target['type']) ? $target['type'] : 'php';
+        $type = isset($target['type']) ? $target['type'] : 'local';
         $timeout = isset($target['timeout']) ? $target['timeout'] : 3;
 
         return [
@@ -188,7 +239,7 @@ class Client implements Async
 
     private static function filterParams($params, $type)
     {
-        if ($type == self::PHP_TYPE) {
+        if ($type == 'local') {
             $params['debug'] = 'json';
         }
 

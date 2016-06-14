@@ -58,7 +58,7 @@ class SqlParser
     {
         preg_match('/^\s*(INSERT|SELECT|UPDATE|DELETE)/is', $sql, $match);
         if (!$match) {
-            throw new SqlTypeException('sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一');
+            throw new SqlTypeException('sql语句类型错误,必须是INSERT|SELECT|UPDATE|DELETE其中之一 : ' . $sql);
         }
         return strtolower(trim($match[0]));
     }
@@ -117,11 +117,11 @@ class SqlParser
         $type = strtoupper(substr($sql, 0, strpos($sql, ' ')));
         $matches = null;
         if (!isset($tablePregMap[$type])) {
-            throw new SqlCanNotFindTableNameException('Can not find table name, please check your sql type');
+            throw new SqlCanNotFindTableNameException('Can not find table name, please check your sql type :' . $sql);
         }
         preg_match($tablePregMap[$type], $sql, $matches);
         if (!is_array($matches) || !isset($matches[0])) {
-            throw new SqlCanNotFindTableNameException('Can not find table name, please check your sql type');
+            throw new SqlCanNotFindTableNameException('Can not find table name, please check your sql type : ' . $sql);
         }
         $table = $matches[0];
         //去除`符合和库名
@@ -130,7 +130,7 @@ class SqlParser
         }
         $table = trim($table, '`');
         if ('' == $table || !strlen($table)) {
-            throw new SqlCanNotFindTableNameException('Can\'t get table name');
+            throw new SqlCanNotFindTableNameException('Can\'t get table name : '. $sql);
         }
         return $table;
     }
