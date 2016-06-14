@@ -33,10 +33,11 @@ class RequestHandler {
 
     public function handle(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
+        Worker::instance()->reactionReceive();
+
         $this->swooleServer = $swooleServer;
         $this->fd = $fd;
         $this->fromId = $fromId;
-
         $this->doRequest($data);
     }
 
@@ -70,7 +71,6 @@ class RequestHandler {
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
         } catch(\Exception $e) {
-            Worker::instance()->reactionRelease();
             if (Debug::get()) {
                 echo_exception($e);
             }

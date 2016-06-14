@@ -36,6 +36,8 @@ class RequestHandler
 
     public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
+        Worker::instance()->reactionReceive();
+
         try {
             $request = Request::createFromSwooleHttpRequest($swooleRequest);
             $this->initContext($request, $swooleResponse);
@@ -53,7 +55,6 @@ class RequestHandler
             $this->task->run();
 
         } catch (\Exception $e) {
-            Worker::instance()->reactionRelease();
             if (Debug::get()) {
                 echo_exception($e); 
             }
