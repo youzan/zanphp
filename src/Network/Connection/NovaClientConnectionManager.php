@@ -34,11 +34,10 @@ class NovaClientConnectionManager
             $this->serverConfig[$module][$server['host'].':'.$server['port']] = $server;
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $novaConfig['module'] = $server['module'];
             $this->addServiceToModuleMap($module, $server['services']);
             $config[$novaConfig['port'].':'.$novaConfig['port']] = $novaConfig;
         }
-        $this->novaClientPool[$module] = new NovaClientPool($config, $loadBalancing['strategy']);
+        $this->novaClientPool[$module] = new NovaClientPool($config, $loadBalancing['strategy'], $module);
     }
 
     private function addServiceToModuleMap($module, $services)
@@ -91,7 +90,6 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $novaConfig['module'] = $server['module'];
             $this->addServiceToModuleMap($module, $server['services']);
             $pool->createConnection($novaConfig);
             $pool->addConfig($novaConfig);

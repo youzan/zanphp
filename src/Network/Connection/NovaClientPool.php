@@ -22,6 +22,8 @@ class NovaClientPool
 
     private $config;
 
+    private $module;
+
     private $loadBalancingStrategyMap = [
         'polling' => 'Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling',
     ];
@@ -36,14 +38,15 @@ class NovaClientPool
      */
     private $loadBalancingStrategy;
 
-    public function __construct(array $config, $strategy)
+    public function __construct(array $config, $strategy, $module)
     {
-        $this->init($config, $strategy);
+        $this->init($config, $strategy, $module);
     }
 
-    private function init($config, $strategy)
+    private function init($config, $strategy, $module)
     {
         $this->config = $config;
+        $this->module = $module;
         $this->createConnections();
         $this->initLoadBalancingStrategy($strategy);
     }
@@ -128,7 +131,7 @@ class NovaClientPool
     private function checkCanReload($config)
     {
         $canReload = false;
-        $services = ServerStore::getInstance()->getServices($config['modules']);
+        $services = ServerStore::getInstance()->getServices($this->module);
         if (null == $services || [] == $services) {
             return false;
         }
