@@ -71,8 +71,7 @@ class RequestHandler
         $this->context->set('swoole_response', $swooleResponse);
 
         $router = Router::getInstance();
-        $router->route($request);
-        $route = $router->parseRoute();
+        $route = $router->route($request);
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
 
