@@ -35,7 +35,7 @@ class NovaClientConnectionManager
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $this->addServiceToModuleMap($module, $server['services']);
-            $config[$novaConfig['port'].':'.$novaConfig['port']] = $novaConfig;
+            $config[$novaConfig['host'].':'.$novaConfig['port']] = $novaConfig;
         }
         $this->novaClientPool[$module] = new NovaClientPool($config, $loadBalancing['strategy'], $module);
     }
