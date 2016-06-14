@@ -283,26 +283,28 @@ class ServerDiscovery
         $storeServices = $this->serverStore->getServices($this->module);
         $onLine = $offLine = $update = [];
         $useServices = NovaClientConnectionManager::getInstance()->getSeverConfig($this->module);
-        foreach ($useServices as $key => $service) {
-            if (!isset($storeServices[$key])) {
-                $offLine[$key] = $service;
-            } elseif (isset($useServices[$key]) && $service != $useServices[$key]) {
-                $update[$key] = $service;
+        if (!empty($storeServices)) {
+            foreach ($useServices as $key => $service) {
+                if (!isset($storeServices[$key])) {
+                    $offLine[$key] = $service;
+                } elseif (isset($useServices[$key]) && $service != $useServices[$key]) {
+                    $update[$key] = $service;
+                }
             }
-        }
-        foreach ($storeServices as $key => $service) {
-            if (!isset($useServices[$key])) {
-                $onLine[$key] = $service;
+            foreach ($storeServices as $key => $service) {
+                if (!isset($useServices[$key])) {
+                    $onLine[$key] = $service;
+                }
             }
-        }
-        if ([] != $offLine) {
-            NovaClientConnectionManager::getInstance()->offline($this->module, $offLine);
-        }
-        if ([] != $onLine) {
-            NovaClientConnectionManager::getInstance()->addOnline($this->module, $onLine);
-        }
-        if ([] != $update) {
-            NovaClientConnectionManager::getInstance()->update($this->module, $update);
+            if ([] != $offLine) {
+                NovaClientConnectionManager::getInstance()->offline($this->module, $offLine);
+            }
+            if ([] != $onLine) {
+                NovaClientConnectionManager::getInstance()->addOnline($this->module, $onLine);
+            }
+            if ([] != $update) {
+                NovaClientConnectionManager::getInstance()->update($this->module, $update);
+            }
         }
         $this->watchStore();
     }
