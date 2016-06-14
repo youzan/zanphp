@@ -45,8 +45,7 @@ class ServerRegister
     {
         $haunt = Config::get('haunt');
         $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        $httpClient->setIsTimeout(false);
-        yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), $haunt['register']['timeout']);
+        yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), null);
     }
 
 

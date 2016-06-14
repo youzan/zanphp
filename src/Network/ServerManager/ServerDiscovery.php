@@ -54,6 +54,7 @@ class ServerDiscovery
     {
         $this->get();
         $this->watch();
+        $this->watchStore();
     }
 
     public function get()
@@ -154,13 +155,13 @@ class ServerDiscovery
         return true;
     }
 
-    public function toWatch()
+    private function toWatch()
     {
         $coroutine = $this->watching();
         Task::execute($coroutine);
     }
 
-    public function watching()
+    private function watching()
     {
         while (true) {
             $this->setDoWatch();
@@ -185,22 +186,15 @@ class ServerDiscovery
         if (null == $update) {
             return;
         }
-        $nowStore = $this->getByStore();
         if (isset($update['off_line'])) {
             NovaClientConnectionManager::getInstance()->offline($this->module, [$update['off_line']]);
-            if (isset($nowStore[$this->getStoreServicesKey($update['off_line']['host'], $update['off_line']['port'])])) {
-                unset($nowStore[$this->getStoreServicesKey($update['off_line']['host'], $update['off_line']['port'])]);
-            }
         }
         if (isset($update['add_on_line'])) {
             NovaClientConnectionManager::getInstance()->addOnline($this->module, [$update['add_on_line']]);
-            $nowStore[$this->getStoreServicesKey($update['add_on_line']['host'], $update['add_on_line']['port'])] = $update['add_on_line'];
         }
         if (isset($update['update'])) {
             NovaClientConnectionManager::getInstance()->update($this->module, [$update['update']]);
-            $nowStore[$this->getStoreServicesKey($update['update']['host'], $update['update']['port'])] = $update['update'];
         }
-        $this->serverStore->setServices($this->module, $nowStore);
     }
 
     private function parseWatchEtcdData($raw)
@@ -211,6 +205,7 @@ class ServerDiscovery
         if (!isset($raw['node']) && !isset($raw['prevNode'])) {
             throw new ServerDiscoveryEtcdException('watch etcd can\' find anything');
         }
+        $nowStore = $this->getByStore();
         if (isset($raw['node']['value']) && isset($raw['prevNode']['value'])) {
             $new = json_decode($raw['node']['value'], true);
             $data['update'] = [
@@ -223,6 +218,8 @@ class ServerDiscovery
                 'weight' => $new['Weight'],
                 'services' => json_decode($new['ExtData'], true)
             ];
+            $nowStore[$this->getStoreServicesKey($data['update']['host'], $data['update']['port'])] = $data['update'];
+            $this->serverStore->setServices($this->module, $nowStore);
             return $data;
         }
         if (!isset($raw['node']['value'])) {
@@ -237,6 +234,10 @@ class ServerDiscovery
                 'weight' => $value['Weight'],
                 'services' => json_decode($value['ExtData'], true)
             ];
+            if (isset($nowStore[$this->getStoreServicesKey($data['off_line']['host'], $data['off_line']['port'])])) {
+                unset($nowStore[$this->getStoreServicesKey($data['off_line']['host'], $data['off_line']['port'])]);
+            }
+            $this->serverStore->setServices($this->module, $nowStore);
             return $data;
         }
         $value = json_decode($raw['node']['value'], true);
@@ -250,6 +251,8 @@ class ServerDiscovery
             'weight' => $value['Weight'],
             'services' => json_decode($value['ExtData'], true)
         ];
+        $nowStore[$this->getStoreServicesKey($data['add_on_line']['host'], $data['add_on_line']['port'])] = $data['add_on_line'];
+        $this->serverStore->setServices($this->module, $nowStore);
         return $data;
     }
 
@@ -262,6 +265,46 @@ class ServerDiscovery
             $this->config['watch']['namespace'] . '/'.
             $this->module;
         yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+    }
+
+    public function watchStore()
+    {
+        Timer::after($this->config['watch_store']['loop_time'], [$this, 'toWatchStore']);
+    }
+
+    public function toWatchStore()
+    {
+        $coroutine = $this->watchingStore();
+        Task::execute($coroutine);
+    }
+
+    private function watchingStore()
+    {
+        $storeServices = $this->serverStore->getServices($this->module);
+        $connectionsConfig = NovaClientConnectionManager::getInstance()->getPool($this->module)->getConfig();
+        $onLine = $offLine = $update = [];
+        foreach ($connectionsConfig as $key => $service) {
+            if (!isset($storeServices[$key])) {
+                $offLine[] = $service;
+            } elseif ($service != $storeServices[$key]) {
+                $update[] = $service;
+            }
+        }
+        foreach ($storeServices as $key => $service) {
+            if (!isset($connectionsConfig[$key])) {
+                $onLine[] = $service;
+            }
+        }
+        if ([] != $offLine) {
+            NovaClientConnectionManager::getInstance()->offline($this->module, $offLine);
+        }
+        if ([] != $onLine) {
+            NovaClientConnectionManager::getInstance()->addOnline($this->module, $onLine);
+        }
+        if ([] != $update) {
+            NovaClientConnectionManager::getInstance()->update($this->module, $update);
+        }
+        $this->watchStore();
     }
 
     private function getStoreServicesKey($host, $port)
