@@ -12,6 +12,7 @@ use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\Curl;
+use Zan\Framework\Utilities\Types\Time;
 
 class ServerRegister
 {
@@ -21,6 +22,9 @@ class ServerRegister
         $ip = nova_get_ip();
         foreach ($config['services'] as $service) {
             $extData[] = [
+                'language'=> 'php',
+                'version' => '1.0.0',
+                'timestamp'=> Time::stamp(),
                 'service' => $service['service'],
                 'methods' => $service['methods'],
             ];

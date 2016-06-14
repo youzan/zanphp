@@ -281,10 +281,9 @@ class ServerDiscovery
     private function watchingStore()
     {
         $storeServices = $this->serverStore->getServices($this->module);
-        $connectionsConfig = NovaClientConnectionManager::getInstance()->getPool($this->module)->getConfig();
         $onLine = $offLine = $update = [];
         $useServices = NovaClientConnectionManager::getInstance()->getSeverConfig($this->module);
-        foreach ($connectionsConfig as $key => $service) {
+        foreach ($useServices as $key => $service) {
             if (!isset($storeServices[$key])) {
                 $offLine[$key] = $service;
             } elseif (isset($useServices[$key]) && $service != $useServices[$key]) {
@@ -292,7 +291,7 @@ class ServerDiscovery
             }
         }
         foreach ($storeServices as $key => $service) {
-            if (!isset($connectionsConfig[$key])) {
+            if (!isset($useServices[$key])) {
                 $onLine[$key] = $service;
             }
         }
