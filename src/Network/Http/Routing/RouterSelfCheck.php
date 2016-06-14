@@ -57,7 +57,7 @@ class RouterSelfCheck
                 ];
                 $request = Request::createFromSwooleHttpRequest($swooleHttpRequest);
                 $router->route($request);
-                $result = $this->_mixRouteResult($request->getRoute(), $router->getParameters());
+                $result = $this->_mixRouteResult($request->getRoute(), $request->query->all());
                 $realRoute = ltrim($realRoute, '/');
                 if($result != $realRoute) {
                     $this->checkResult = self::CHECK_FAILED;
