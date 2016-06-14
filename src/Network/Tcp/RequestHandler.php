@@ -33,7 +33,6 @@ class RequestHandler {
 
     public function handle(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        Worker::instance()->reactionReceive();
 
         $this->swooleServer = $swooleServer;
         $this->fd = $fd;
@@ -56,7 +55,6 @@ class RequestHandler {
             $request->decode();
             if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $data);
-                Worker::instance()->reactionRelease();
                 return;
             }
 
@@ -68,6 +66,7 @@ class RequestHandler {
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
             Timer::after($request_timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
 
+            Worker::instance()->reactionReceive();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
         } catch(\Exception $e) {

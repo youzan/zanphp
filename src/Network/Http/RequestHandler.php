@@ -6,7 +6,6 @@ use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
-use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Response\BaseResponse;
@@ -36,8 +35,6 @@ class RequestHandler
 
     public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
-        Worker::instance()->reactionReceive();
-
         try {
             $request = Request::createFromSwooleHttpRequest($swooleRequest);
             $this->initContext($request, $swooleResponse);
@@ -51,6 +48,7 @@ class RequestHandler
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
             Timer::after($timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
 
+            Worker::instance()->reactionReceive();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
 
