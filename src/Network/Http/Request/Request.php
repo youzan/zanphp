@@ -42,8 +42,7 @@ class Request extends BaseRequest implements Arrayable, RequestContract
                 $server[$newKey] = $value;
             }
         }
-        $content = $swooleRequest->rawContent();
-        $request = new static($get, $post, $attributes, $cookie, $files, $server, $content);
+        $request = new static($get, $post, $attributes, $cookie, $files, $server);
 
         // parse http body
         $contentType = $request->headers->get('CONTENT_TYPE');
@@ -52,10 +51,10 @@ class Request extends BaseRequest implements Arrayable, RequestContract
             $data = [];
 
             if ($request->isJson()) {
-                $data = json_decode($request->getContent(), true, 512, JSON_BIGINT_AS_STRING);
+                $data = json_decode($swooleRequest->rawContent(), true, 512, JSON_BIGINT_AS_STRING);
                 $request->json = new ParameterBag($data);
             } elseif (0 === strpos($contentType, 'application/x-www-form-urlencoded')) {
-                parse_str($request->getContent(), $data);
+                parse_str($swooleRequest->rawContent(), $data);
             }
             if ($data) {
                 $request->request = new ParameterBag($data);
