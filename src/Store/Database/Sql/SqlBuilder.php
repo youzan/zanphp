@@ -221,7 +221,7 @@ class SqlBuilder
         if (!isset($update[0])) {
             $tmp = [];
             foreach ($update as $column => $value) {
-                $tmp[] = [$column, $this->formatValue($value)];
+                $tmp[] = [$column, Validator::realEscape($value)];
             }
             $update = $tmp;
         }
