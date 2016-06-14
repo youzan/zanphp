@@ -646,11 +646,11 @@ class Request extends BaseRequest implements Arrayable, RequestContract
     /**
      * Returns the request body content.
      *
+     * @param bool $asResource
      * @return string The request body content.
      *
-     * @throws \LogicException
      */
-    public function getContent()
+    public function getContent($asResource = false)
     {
         return $this->content;
     }
