@@ -104,6 +104,16 @@ class NovaClientPool
 
     public function reload(array $config)
     {
+        $canReload = false;
+        foreach ($this->config as $conf) {
+            if ($conf['host'] == $config['host'] && $conf['port'] == $config['port']) {
+                $canReload = true;
+                break;
+            }
+        }
+        if (false === $canReload) {
+            return;
+        }
         $interval = $this->getReloadTime($config['host'], $config['port']);
         if ($interval === 0) {
             $this->incReloadTime($config['host'], $config['port']);
