@@ -283,16 +283,17 @@ class ServerDiscovery
         $storeServices = $this->serverStore->getServices($this->module);
         $connectionsConfig = NovaClientConnectionManager::getInstance()->getPool($this->module)->getConfig();
         $onLine = $offLine = $update = [];
+        $useServices = NovaClientConnectionManager::getInstance()->getSeverConfig($this->module);
         foreach ($connectionsConfig as $key => $service) {
             if (!isset($storeServices[$key])) {
-                $offLine[] = $service;
-            } elseif ($service != $storeServices[$key]) {
-                $update[] = $service;
+                $offLine[$key] = $service;
+            } elseif (isset($useServices[$key]) && $service != $useServices[$key]) {
+                $update[$key] = $service;
             }
         }
         foreach ($storeServices as $key => $service) {
             if (!isset($connectionsConfig[$key])) {
-                $onLine[] = $service;
+                $onLine[$key] = $service;
             }
         }
         if ([] != $offLine) {

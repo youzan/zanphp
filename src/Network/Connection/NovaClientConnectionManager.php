@@ -23,12 +23,15 @@ class NovaClientConnectionManager
 
     private $serviceToModuleMap = [];
 
+    private $serverConfig = [];
+
     public function work($module, $servers)
     {
         $loadBalancing = Config::get('loadBalancing');
         $novaConfig = Config::get('connection.nova');
         $config = [];
         foreach ($servers as $server) {
+            $this->serverConfig[$module][$server['host'].':'.$server['port']] = $server;
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $this->addServiceToModuleMap($module, $server['services']);
@@ -42,6 +45,11 @@ class NovaClientConnectionManager
         foreach ($services as $service) {
             $this->serviceToModuleMap[$service['service']] = ['module' => $module, 'methods' => $service['methods']];
         }
+    }
+
+    public function getSeverConfig($module)
+    {
+        return isset($this->serverConfig[$module]) ? $this->serverConfig[$module] : [];
     }
 
     /**
