@@ -112,7 +112,7 @@ class NovaClientPool
         }
         Timer::after($interval, function () use ($config) {
             $this->createConnection($config);
-        }, $this->getReloadJobId($config['host'], $config['port']));
+        });
     }
 
     public function remove(Connection $conn)
