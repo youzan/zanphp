@@ -17,13 +17,14 @@ use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
 use Zan\Framework\Foundation\Container\Di;
-
+use Zan\Framework\Network\Tcp\ServerStart\InitializeCache;
 
 class Server extends ServerBase {
 
     protected $serverStartItems = [
         InitializeSqlMap::class,
         InitLogConfig::class,
+        InitializeCache::class
     ];
 
     protected $workerStartItems = [
