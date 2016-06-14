@@ -145,6 +145,7 @@ class Client implements Async
             // 兼容 Java HTTP 接口返回了两层数据, MLGBD
             // array_key_exists 效率较低,但是 isset 不能满足所有场景
             if ($this->type == self::JAVA_TYPE
+                && is_array($jsonData['data'])
                 && (isset($jsonData['data']['data']) || array_key_exists('data', $jsonData['data']))
                 && isset($jsonData['data']['code'])
                 && (isset($jsonData['data']['message']) || array_key_exists('message', $jsonData['data']))
