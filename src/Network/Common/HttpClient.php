@@ -22,8 +22,6 @@ class HttpClient implements Async
      */
     private $timeout;
 
-    private $isTimeout = true;
-
     private $uri;
     private $method;
 
@@ -86,16 +84,12 @@ class HttpClient implements Async
 
     public function setTimeout($timeout)
     {
-        if ($timeout < 0 || $timeout > 60000) {
-            throw new HttpClientTimeoutException('Timeout must be between 0-60 seconds');
+        if (null !== $timeout) {
+            if ($timeout < 0 || $timeout > 60000) {
+                throw new HttpClientTimeoutException('Timeout must be between 0-60 seconds');
+            }
         }
         $this->timeout = $timeout;
-        return $this;
-    }
-
-    public function setIsTimeout($isTimeout = true)
-    {
-        $this->isTimeout = $isTimeout;
         return $this;
     }
 
@@ -153,7 +147,7 @@ class HttpClient implements Async
     {
         $this->client = new \swoole_http_client($ip, $this->port);
         $this->buildHeader();
-        if ($this->isTimeout === true) {
+        if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         }
         if('GET' === $this->method){

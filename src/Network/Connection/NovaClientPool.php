@@ -87,6 +87,11 @@ class NovaClientPool
         return $this->connections;
     }
 
+    public function getConfig()
+    {
+        return $this->config;
+    }
+
     public function getConnectionByHostPort($host, $port)
     {
         foreach ($this->connections as $connection) {
@@ -156,7 +161,7 @@ class NovaClientPool
 
     public function addConfig($config)
     {
-        $this->config[] = $config;
+        $this->config[$config['host'].':'.$config['port']] = $config;
     }
 
     public function recycle(Connection $conn)
