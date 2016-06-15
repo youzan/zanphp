@@ -6,20 +6,19 @@
  * Time: 12:14
  */
 
-namespace Zan\Framework\Network\Http\ServerStart;
+namespace Zan\Framework\Foundation\Booting;
 
+use Zan\Framework\Contract\Foundation\Bootable;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\ConfigLoader;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Facade\Cache;
 
-class InitializeCache
+class InitializeCache implements Bootable
 {
-    /**
-     * @param $server
-     */
-    public function bootstrap($server)
+    public function bootstrap(Application $app)
     {
         $cacheMap = ConfigLoader::getInstance()->load(Path::getCachePath());
-        Cache::init($cacheMap);
+        Cache::initConfigMap($cacheMap);
     }
 }

@@ -26,7 +26,7 @@ class UrlRegex {
     {
         $regex  = self::parseRegex($regex);
         $regex  = str_replace('/','\/',$regex);
-        $regex  = '#^' . $regex . '#i';
+        $regex  = '#' . $regex . '#i';
         return [
             'regex' => $regex,
             'url'  => $realUrl

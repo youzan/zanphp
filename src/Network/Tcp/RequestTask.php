@@ -60,8 +60,7 @@ class RequestTask {
         $trace->logEvent(Constant::NOVA_PROCCESS, Constant::SUCCESS, 'dispatch');
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
         $this->output($result);
-        Worker::instance()->reactionRelease();
-        
+
         $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
     }
 

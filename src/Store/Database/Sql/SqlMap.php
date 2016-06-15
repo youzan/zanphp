@@ -36,11 +36,11 @@ class SqlMap
         $key = $sidData['key'];
         $filePath = $sidData['file_path'];
         if (!isset($this->sqlMaps[$filePath]) || [] == $this->sqlMaps[$filePath]) {
-            throw new SqlMapCanNotFindException('no suck sql map');
+            throw new SqlMapCanNotFindException('no suck sql map file path :'.$sid);
         }
         $sqlMap = $this->sqlMaps[$filePath];
         if (!isset($sqlMap[$key]) || [] == $sqlMap[$key]) {
-            throw new SqlMapCanNotFindException('no suck sql map');
+            throw new SqlMapCanNotFindException('no suck sql map key :'. $sid);
         }
         return $sqlMap[$key];
     }

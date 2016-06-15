@@ -15,7 +15,7 @@ class Router {
     use Singleton;
 
     private $config;
-    private $url;
+    private $url = '';
     private $route = '';
     private $format = '';
     private $rules = [];
@@ -30,6 +30,14 @@ class Router {
         $this->url = ltrim($url, $this->separator);
         $this->removeIllegalString();
         $this->rules = UrlRule::getRules();
+    }
+
+    private function clear()
+    {
+        $this->url = '';
+        $this->route = '';
+        $this->format = '';
+        $this->parameters = [];
     }
 
     public function setConfig($config)
@@ -50,9 +58,12 @@ class Router {
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
         $this->setParameters($request, $this->parameters);
+        $route = $this->parseRoute();
+        $this->clear();
+        return $route;
     }
 
-    public function parseRoute()
+    private function parseRoute()
     {
         $parts = array_filter(explode($this->separator, trim($this->route, $this->separator)));
         $route['action_name'] = array_pop($parts);

@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitEnv;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
@@ -15,12 +14,14 @@ use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
+use Zan\Framework\Network\Tcp\ServerStart\InitializeCache;
 
 class Server extends ServerBase {
 
     protected $serverStartItems = [
         InitializeSqlMap::class,
         InitLogConfig::class,
+        InitializeCache::class
     ];
 
     protected $workerStartItems = [
@@ -133,7 +134,6 @@ class Server extends ServerBase {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
     

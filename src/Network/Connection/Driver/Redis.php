@@ -13,8 +13,35 @@ use Zan\Framework\Contract\Network\Connection;
 
 class Redis extends Base implements Connection
 {
-    public function closeSocket()
+    protected $isAsync = true;
+
+    protected function closeSocket()
     {
-        // TODO: Implement closeSocket() method.
+        return true;
     }
+
+    public function init() {
+        //set callback
+        $this->getSocket()->on('close', [$this, 'onClose']);
+        $this->getSocket()->on('message', [$this, 'onMessage']);
+    }
+
+    public function onClose($redis){
+        $this->close();
+        echo "redis client close\n";
+    }
+
+    public function onConnect($redis, $res) {
+        if (false === $res) {
+            //TODO: connect失败
+        }
+        //put conn to active_pool
+        $this->release();
+        echo "redis client connect to server\n";
+    }
+
+    public function onMessage($redis, $message) {
+
+    }
+
 }

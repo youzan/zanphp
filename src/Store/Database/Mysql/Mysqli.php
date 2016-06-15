@@ -94,7 +94,7 @@ class Mysqli implements DriverInterface
             } elseif ($link->_errno == 1064) {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliSqlSyntaxException($error);
+                $exception = new MysqliSqlSyntaxException($error . ':' . $this->sql);
             } elseif ($link->_errno == 1062) {
                 $error = $link->_error;
                 $this->connection->release();
@@ -102,7 +102,7 @@ class Mysqli implements DriverInterface
             } else {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliQueryException($error);
+                $exception = new MysqliQueryException($error . ':' . $this->sql);
             }
 
             if ($this->trace) {
