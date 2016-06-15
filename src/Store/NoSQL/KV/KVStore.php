@@ -95,13 +95,14 @@ class KVStore implements Async
         yield $this;
     }
 
-    public function incr($key, $value)
+    public function incr($key, $value, $binName = null)
     {
+        $binName = (null === $binName) ? self::DEFAULT_BIN_NAME : $binName;
         $this->conn->getSocket()->incr_async(
             $this->namespace,
             $this->setName,
             $key,
-            self::DEFAULT_BIN_NAME,
+            $binName,
             $value,
             [$this, 'writeCallBack'],
             $this->policy
@@ -110,7 +111,22 @@ class KVStore implements Async
         yield $this;
     }
 
-    public function get($key)
+    public function get($key, $binName = null)
+    {
+        $binName = (null === $binName) ? [self::DEFAULT_BIN_NAME] : [$binName];
+        $this->conn->getSocket()->key_select_async(
+            $this->namespace,
+            $this->setName,
+            $key,
+            $binName,
+            [$this, 'readCallBack'],
+            $this->policy
+        );
+
+        yield $this;
+    }
+
+    public function getMulti($key)
     {
         $this->conn->getSocket()->get_async(
             $this->namespace,
