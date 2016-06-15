@@ -11,6 +11,7 @@ use RuntimeException;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\ConfigLoader;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\Redis\Redis;
@@ -114,7 +115,10 @@ class Cache {
 
     private static function getRealKey($config, $keys){
         $format = isset($config['key']) ? $config['key'] : null ;
-        if($keys == null){
+        if($keys === null){
+            if ($format === null) {
+                throw new InvalidArgumentException('expect keys is string or array, null given');
+            }
             return $format;
         }
         if(!is_array($keys)){

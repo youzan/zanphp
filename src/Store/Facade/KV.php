@@ -11,6 +11,7 @@ namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\KV\KVStore;
@@ -223,7 +224,10 @@ class KV
 
     private static function getRealKey($config, $keys){
         $format = isset($config['key']) ? $config['key'] : null ;
-        if($keys == null){
+        if($keys === null){
+            if ($format === null) {
+                throw new InvalidArgumentException('expect keys is string or array, null given');
+            }
             return $format;
         }
         if(!is_array($keys)){
