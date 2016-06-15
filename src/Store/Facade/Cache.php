@@ -8,107 +8,137 @@
 namespace Zan\Framework\Store\Facade;
 
 use RuntimeException;
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\ConfigLoader;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
+use Zan\Framework\Store\NoSQL\Exception;
+use Zan\Framework\Store\NoSQL\Redis\Redis;
 use Zan\Framework\Store\NoSQL\Redis\RedisManager;
 
 class Cache {
 
-    private static $redis=null;
+    const POOL_PREFIX = 'connection.';
 
-    private static $cacheMap = null;
-
-    public static function init(array $cacheMap)
+    private static $_instance = null;
+    private static $_configMap = null;
+    
+    private static function init($connection)
     {
-        self::$cacheMap = $cacheMap;
+        if (null === self::$_instance[$connection]) {
+            self::$_instance[$connection] = new self;
+        }
+        return self::$_instance[$connection];
     }
 
-    public static function get($configKey, $keys)
+    public static function initConfigMap($configMap)
     {
-        yield self::getRedisManager($configKey);
-        $cacheKey = self::getConfigCacheKey($configKey);
-        $realKey = self::getRealKey($cacheKey, $keys);
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->get($realKey));
-            yield $result;
-        }
+        self::$_configMap = $configMap;
     }
 
-    public static function delete($configKey, $key)
-    {
-        yield self::getRedisManager($configKey);
-        $cacheKey = self::getConfigCacheKey($configKey);
-        $realKey = self::getRealKey($cacheKey, $key);
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->delete($realKey));
-            yield $result;
+
+    public static function __callStatic($func, $args) {
+        $configKey = array_shift($args);
+        $keys = array_shift($args);
+
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
         }
+
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        array_unshift($args, $realKey);
+
+        yield call_user_func_array([$redis, $func], $args);
     }
 
-    public static function expire($configKey, $key, $expire=0)
+    public static function set($configKey, $keys, $value)
     {
-        yield self::getRedisManager($configKey);
-        $cacheKey = self::getConfigCacheKey($configKey);
-        $realKey = self::getRealKey($cacheKey, $key);
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->expire($realKey, $expire));
-            yield $result;
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
         }
-    }
 
-    public static function set($configKey, $value, $keys)
-    {
-        yield self::getRedisManager($configKey);
-        $cacheKey = self::getConfigCacheKey($configKey);
-        $realKey = self::getRealKey($cacheKey, $keys);
-        $result = false;
-        if (!empty($realKey)) {
-            $result = (yield self::$redis->set($realKey, $value));
-        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->set($realKey, $value));
         if ($result) {
-            yield self::$redis->expire($realKey, $cacheKey['exp']);
+            $ttl = isset($config['exp']) ? $config['exp'] : 0;
+            yield $redis->expire($realKey, $ttl);
         }
         yield $result;
     }
 
-    private static function getRedisConnByConfigKey($configKey)
+    /**
+     * @param $connection
+     * @return \Generator
+     * @throws Exception
+     * @throws \Zan\Framework\Foundation\Exception\System\InvalidArgumentException
+     */
+    public function getConnection($connection)
     {
-        $pos= strrpos($configKey, '.');
-        $subPath = substr($configKey,0, $pos);
-        $config = self::getConfigCacheKey($subPath);
-        if(!isset($config['common'])) {
-            throw new RuntimeException('connection path config not found');
+        $conn = (yield ConnectionManager::getInstance()->get($connection));
+        if (!$conn instanceof Connection) {
+            throw new Exception('Redis get connection error');
         }
-        return $config['common']['connection'];
+
+        yield $conn;
     }
 
-    public static function getRedisManager($configKey)
+    /**
+     * @param $config
+     * @return bool
+     */
+    private static function validConfig($config)
     {
-        $conn = (yield ConnectionManager::getInstance()->get(self::getRedisConnByConfigKey($configKey)));
-        self::$redis = new RedisManager($conn);
+        if (!$config) {
+            return false;
+        }
+
+        if (!isset($config['connection'])
+            || !isset($config['key'])) {
+            return false;
+        }
+
+        return true;
     }
 
     private static function getRealKey($config, $keys){
-        $format = $config['key'];
-        if($keys == null){
+        $format = isset($config['key']) ? $config['key'] : null ;
+        if($keys === null){
+            if ($format === null) {
+                throw new InvalidArgumentException('expect keys is string or array, null given');
+            }
             return $format;
         }
         if(!is_array($keys)){
             $keys = [$keys];
         }
-        $key = call_user_func_array('sprintf', array_merge([$format], $keys));
+
+        array_unshift($keys, $format);
+        $key = call_user_func_array('sprintf', $keys);
         return $key;
     }
 
     private static function getConfigCacheKey($configKey)
     {
-        $result = self::$cacheMap;
-        $routes = explode('.',$configKey);
-        if(empty($routes)){
+        $result = self::$_configMap;
+        $routes = explode('.', $configKey);
+        if (empty($routes)) {
             return null;
         }
-        foreach($routes as $route){
-            if(!isset($result[$route])){
+        foreach ($routes as $route) {
+            if (!isset($result[$route])) {
                 return null;
             }
             $result = &$result[$route];
