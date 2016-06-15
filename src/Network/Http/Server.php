@@ -2,12 +2,10 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
-use Zan\Framework\Network\Http\ServerStart\InitializeCache;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
@@ -18,8 +16,6 @@ use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Server as ServerContract;
-use Zan\Framework\Network\Http\Routing\RouterSelfCheck;
-use Zan\Framework\Foundation\Application;
 use Zan\Framework\Network\Server\ServerBase;
 
 class Server extends ServerBase implements ServerContract
@@ -32,7 +28,6 @@ class Server extends ServerBase implements ServerContract
         InitializeRouterSelfCheck::class,
         InitializeMiddleware::class,
         InitializeExceptionHandlerChain::class,
-        InitializeCache::class,
         InitLogConfig::class,
     ];
 
