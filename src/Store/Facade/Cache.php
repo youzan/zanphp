@@ -72,7 +72,8 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->set($realKey, $value));
         if ($result) {
-            yield $redis->expire($realKey, $config['exp']);
+            $ttl = isset($config['exp']) ? $config['exp'] : 0;
+            yield $redis->expire($realKey, $ttl);
         }
         yield $result;
     }
@@ -112,7 +113,7 @@ class Cache {
     }
 
     private static function getRealKey($config, $keys){
-        $format = $config['key'];
+        $format = isset($config['key']) ? $config['key'] : null ;
         if($keys == null){
             return $format;
         }

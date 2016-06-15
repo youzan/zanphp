@@ -17,6 +17,7 @@ class Path {
     const DEFAULT_SQL_PATH      = 'resource/sql/';
     const DEFAULT_LOG_PATH      = 'resource/log/';
     const DEFAULT_CACHE_PATH    = 'resource/cache/';
+    const DEFAULT_KV_PATH    = 'resource/kvstore/';
     const DEFAULT_MODEL_PATH    = 'resource/model/';
     const DEFAULT_TABLE_PATH    = 'resource/config/share/table/';
     const DEFAULT_ROUTING_PATH  = 'resource/routing/';
@@ -27,6 +28,7 @@ class Path {
     const SQL_PATH_CONFIG_KEY     = 'path.sql';
     const LOG_PATH_CONFIG_KEY     = 'path.log';
     const CACHE_PATH_CONFIG_KEY   = 'path.cache';
+    const KV_PATH_CONFIG_KEY   = 'path.kvstore';
     const MODEL_PATH_CONFIG_KEY   = 'path.model';
     const TABLE_PATH_CONFIG_KEY   = 'path.table';
     const ROUTING_PATH_CONFIG_KEY = 'path.routing';
@@ -38,6 +40,7 @@ class Path {
     private static $sqlPath     = null;
     private static $logPath     = null;
     private static $cachePath   = null;
+    private static $kvPath   = null;
     private static $modelPath   = null;
     private static $tablePath   = null;
     private static $routingPath = null;
@@ -88,6 +91,11 @@ class Path {
         return self::$cachePath;
     }
 
+    public static function getKvPath()
+    {
+        return self::$kvPath;
+    }
+
     public static function getTablePath()
     {
         return self::$tablePath;
@@ -115,6 +123,7 @@ class Path {
         self::$logPath = self::$rootPath . self::DEFAULT_LOG_PATH;
         self::$modelPath = self::$rootPath . self::DEFAULT_MODEL_PATH;
         self::$cachePath = self::$rootPath . self::DEFAULT_CACHE_PATH;
+        self::$kvPath = self::$rootPath . self::DEFAULT_KV_PATH;
         self::$tablePath = self::$rootPath . self::DEFAULT_TABLE_PATH;
         self::$routingPath = self::$rootPath . self::DEFAULT_ROUTING_PATH;
         self::$middlewarePath = self::$rootPath . self::DEFAULT_MIDDLEWARE_PATH;
@@ -127,6 +136,7 @@ class Path {
         Config::set(self::SQL_PATH_CONFIG_KEY, self::$sqlPath);
         Config::set(self::LOG_PATH_CONFIG_KEY, self::$logPath);
         Config::set(self::CACHE_PATH_CONFIG_KEY, self::$cachePath);
+        Config::set(self::KV_PATH_CONFIG_KEY, self::$kvPath);
         Config::set(self::MODEL_PATH_CONFIG_KEY, self::$modelPath);
         Config::set(self::TABLE_PATH_CONFIG_KEY, self::$tablePath);
         Config::set(self::ROUTING_PATH_CONFIG_KEY, self::$routingPath);
