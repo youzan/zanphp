@@ -35,25 +35,20 @@ class KVStore implements Async
         $this->policy = $connection->getConfig()['policy'];
     }
 
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $binName, $value, $ttl = 0)
     {
         $this->policy['ttl'] = $ttl;
 
-        if (!is_string($value) && !is_numeric($value)) {
-            yield false;
-            return;
-        }
-
-        if (strlen($value) > self::COMPRESS_LEN) {
+        if (is_string($value) && strlen($value) > self::COMPRESS_LEN) {
             $value = LZ4::getInstance()->encode($value);
         }
 
-        $this->conn->getSocket()->put_simple_async(
+        $binList = [$binName => $value];
+        $this->conn->getSocket()->put_async(
             $this->namespace,
             $this->setName,
             $key,
-            self::DEFAULT_BIN_NAME,
-            $value,
+            $binList,
             [$this, 'writeCallBack'],
             $this->policy
         );
@@ -61,33 +56,25 @@ class KVStore implements Async
         yield $this;
     }
 
-    public function setList($key, array $value, $ttl = 0)
+    public function setMulti($key, array $binList, $ttl = 0)
     {
         $this->policy['ttl'] = $ttl;
 
-        $this->conn->getSocket()->put_list_async(
+        foreach ($binList as $binName => $value) {
+            if (!is_string($value) && !is_numeric($value)) {
+                continue;
+            }
+
+            if (strlen($value) > self::COMPRESS_LEN) {
+                $binList[$binName] = LZ4::getInstance()->encode($value);
+            }
+        }
+
+        $this->conn->getSocket()->put_async(
             $this->namespace,
             $this->setName,
             $key,
-            self::DEFAULT_BIN_NAME,
-            $value,
-            [$this, 'writeCallBack'],
-            $this->policy
-        );
-
-        yield $this;
-    }
-
-    public function setMap($key, array $value, $ttl = 0)
-    {
-        $this->policy['ttl'] = $ttl;
-
-        $this->conn->getSocket()->put_map_async(
-            $this->namespace,
-            $this->setName,
-            $key,
-            self::DEFAULT_BIN_NAME,
-            $value,
+            $binList,
             [$this, 'writeCallBack'],
             $this->policy
         );
@@ -126,13 +113,27 @@ class KVStore implements Async
         yield $this;
     }
 
-    public function getMulti($key)
+    public function getMulti($key, array $binNameList)
+    {
+        $this->conn->getSocket()->key_select_async(
+            $this->namespace,
+            $this->setName,
+            $key,
+            $binNameList,
+            [$this, 'readMultiCallBack'],
+            $this->policy
+        );
+
+        yield $this;
+    }
+
+    public function getAll($key)
     {
         $this->conn->getSocket()->get_async(
             $this->namespace,
             $this->setName,
             $key,
-            [$this, 'readCallBack'],
+            [$this, 'readMultiCallBack'],
             $this->policy
         );
 
@@ -173,17 +174,43 @@ class KVStore implements Async
         }
 
         $LZ4 = LZ4::getInstance();
-        //set的情况
-        if (isset($rec[self::DEFAULT_BIN_NAME])) {
-            if ($LZ4->isLZ4($rec[self::DEFAULT_BIN_NAME])) {
-                $value = $LZ4->decode($rec[self::DEFAULT_BIN_NAME]);
-            } else {
-                $value = $rec[self::DEFAULT_BIN_NAME];
-            }
-            call_user_func($this->callback, $value);
-        } else {
-            call_user_func($this->callback, $rec);
+
+        if (!is_array($rec) || count($rec) !== 1) {
+            //TODO: 记录返回值异常
+            call_user_func($this->callback, null);
+            return;
         }
+
+        $ret = current($rec);
+        if ($LZ4->isLZ4($ret)) {
+            $ret = $LZ4->decode($ret);
+        }
+        call_user_func($this->callback, $ret);
+    }
+
+    public function readMultiCallBack($err, $rec)
+    {
+        $this->conn->release();
+        if ($err != self::AEROSPIKE_OK) {
+            //TODO: 日志记录err
+            call_user_func($this->callback, null);
+            return;
+        }
+
+        $LZ4 = LZ4::getInstance();
+
+        if (!is_array($rec)) {
+            //TODO: 记录返回值异常
+            call_user_func($this->callback, null);
+            return;
+        }
+
+        foreach ($rec as $binName => $value) {
+            if ($LZ4->isLZ4($value)) {
+                $rec[$binName] = $LZ4->decode($value);
+            }
+        }
+        call_user_func($this->callback, $rec);
     }
 
     public function execute(callable $callback, $task)
