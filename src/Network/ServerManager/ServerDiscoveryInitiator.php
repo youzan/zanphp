@@ -11,6 +11,7 @@ use Zan\Framework\Network\ServerManager\ServerDiscovery;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\ServerManager\ServerStore;
 
 use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 
@@ -24,10 +25,16 @@ class ServerDiscoveryInitiator
         if (empty($config)) {
             throw new ServerConfigException();
         }
-        foreach ($config['modules'] as $module) {
-            $serverDiscovery = new ServerDiscovery($config, $module);
-            $serverDiscovery->start();
+        if (ServerStore::getInstance()->lockDiscovery()) {
+            foreach ($config['app_names'] as $appName) {
+                $serverDiscovery = new ServerDiscovery($config, $appName);
+                $serverDiscovery->workByEtcd();
+            }
+        } else {
+            foreach ($config['app_names'] as $appName) {
+                $serverDiscovery = new ServerDiscovery($config, $appName);
+                $serverDiscovery->workByStore();
+            }
         }
     }
-
 }
