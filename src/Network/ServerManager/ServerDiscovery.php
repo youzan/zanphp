@@ -62,7 +62,7 @@ class ServerDiscovery
         if (!$this->lockGetServices()) {
             $servers = $this->getByStore();
             if (null == $servers) {
-                Timer::after($this->config['get']['loop_time'], [$this, 'get'], $this->getGetServicesJobId());
+                Timer::after($this->config['discovery']['loop_time'], [$this, 'get'], $this->getGetServicesJobId());
             } else {
                 NovaClientConnectionManager::getInstance()->work($this->module, $servers);
             }
@@ -90,12 +90,12 @@ class ServerDiscovery
 
     private function getByEtcd()
     {
-        $httpClient = new HttpClient($this->config['get']['host'], $this->config['get']['port']);
-        $uri = $this->config['get']['uri'] . '/' .
-            $this->config['get']['protocol'] . ':' .
-            $this->config['get']['namespace'] . '/'.
+        $httpClient = new HttpClient($this->config['discovery']['host'], $this->config['discovery']['port']);
+        $uri = $this->config['discovery']['uri'] . '/' .
+            $this->config['discovery']['protocol'] . ':' .
+            $this->config['discovery']['namespace'] . '/'.
             $this->module;
-        $raw = (yield $httpClient->get($uri, [], $this->config['get']['timeout']));
+        $raw = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
         $servers = $this->parseEtcdData($raw);
         $this->saveServices($servers);
         yield $servers;
