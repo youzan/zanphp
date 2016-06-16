@@ -55,7 +55,6 @@ class RequestHandler {
             $result = $request->decode();
             if ($request->getIsHeartBeat()) {
                 $this->swooleServer->send($this->fd, $result);
-                Worker::instance()->reactionRelease();
                 return;
             }
 
