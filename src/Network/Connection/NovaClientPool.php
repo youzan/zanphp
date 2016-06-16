@@ -13,6 +13,8 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Connection\Exception\CanNotFindLoadBalancingStrategeMapException;
 use Zan\Framework\Network\ServerManager\ServerStore;
+use Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling;
+use Zan\Framework\Foundation\Container\Di;
 
 class NovaClientPool
 {
@@ -25,7 +27,7 @@ class NovaClientPool
     private $module;
 
     private $loadBalancingStrategyMap = [
-        'polling' => 'Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling',
+        'polling' => Polling::class,
     ];
 
     const CONNECTION_RELOAD_STEP_TIME = 5000;
@@ -38,17 +40,17 @@ class NovaClientPool
      */
     private $loadBalancingStrategy;
 
-    public function __construct(array $config, $strategy, $module)
+    public function __construct(array $config, $module)
     {
-        $this->init($config, $strategy, $module);
+        $this->init($config, $module);
     }
 
-    private function init($config, $strategy, $module)
+    private function init($config, $module)
     {
         $this->config = $config;
         $this->module = $module;
         $this->createConnections();
-        $this->initLoadBalancingStrategy($strategy);
+        $this->initLoadBalancingStrategy($this->config['load_balancing_strategy']);
     }
 
     private function createConnections()
@@ -82,7 +84,7 @@ class NovaClientPool
             throw new CanNotFindLoadBalancingStrategeMapException();
         }
         $loadBalancingStrategy = $this->loadBalancingStrategyMap[$strategy];
-        $this->loadBalancingStrategy = new $loadBalancingStrategy($this);
+        $this->loadBalancingStrategy = Di::make($loadBalancingStrategy, [$this]);
     }
 
     public function getConnections()
