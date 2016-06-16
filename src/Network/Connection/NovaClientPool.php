@@ -40,17 +40,17 @@ class NovaClientPool
      */
     private $loadBalancingStrategy;
 
-    public function __construct(array $config, $module)
+    public function __construct($module, array $config, $loadBalancingStrategy)
     {
-        $this->init($config, $module);
+        $this->init($module, $config, $loadBalancingStrategy);
     }
 
-    private function init($config, $module)
+    private function init($module, $config, $loadBalancingStrategy)
     {
         $this->config = $config;
         $this->module = $module;
         $this->createConnections();
-        $this->initLoadBalancingStrategy($this->config['load_balancing_strategy']);
+        $this->initLoadBalancingStrategy($loadBalancingStrategy);
     }
 
     private function createConnections()
