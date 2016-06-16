@@ -171,7 +171,9 @@ class Request implements BaseRequest {
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;
                 echo "heartbeating ...\n";
-                return ;
+                $data = null;
+                nova_encode($this->serviceName, 'pong', $this->remoteIp, $this->remotePort, $this->seqNo, '', '', $data);
+                return $data;
             }
             
             $this->formatRoute();

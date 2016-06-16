@@ -52,9 +52,10 @@ class RequestHandler {
         $this->context->set('request_end_event_name', $this->getRequestFinishJobId());
 
         try {
-            $request->decode();
+            $result = $request->decode();
             if ($request->getIsHeartBeat()) {
-                $this->swooleServer->send($this->fd, $data);
+                $this->swooleServer->send($this->fd, $result);
+                Worker::instance()->reactionRelease();
                 return;
             }
 

@@ -3,6 +3,8 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 
 class HttpClient implements Async
 {
@@ -15,6 +17,9 @@ class HttpClient implements Async
     private $host;
     private $port;
 
+    /**
+     * @var int [millisecond]
+     */
     private $timeout;
 
     private $uri;
@@ -37,7 +42,7 @@ class HttpClient implements Async
         return new static($host, $port);
     }
 
-    public function get($uri = '', $params = [], $timeout = 3)
+    public function get($uri = '', $params = [], $timeout = 3000)
     {
         $this->setMethod(self::GET);
         $this->setTimeout($timeout);
@@ -47,7 +52,7 @@ class HttpClient implements Async
         yield $this->build();
     }
 
-    public function post($uri = '', $params = [], $timeout = 3)
+    public function post($uri = '', $params = [], $timeout = 3000)
     {
         $this->setMethod(self::POST);
         $this->setTimeout($timeout);
@@ -79,6 +84,11 @@ class HttpClient implements Async
 
     public function setTimeout($timeout)
     {
+        if (null !== $timeout) {
+            if ($timeout < 0 || $timeout > 60000) {
+                throw new HttpClientTimeoutException('Timeout must be between 0-60 seconds');
+            }
+        }
         $this->timeout = $timeout;
         return $this;
     }
@@ -137,7 +147,9 @@ class HttpClient implements Async
     {
         $this->client = new \swoole_http_client($ip, $this->port);
         $this->buildHeader();
-
+        if (null !== $this->timeout) {
+            Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
+        }
         if('GET' === $this->method){
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
@@ -153,6 +165,7 @@ class HttpClient implements Async
 
     public function onReceive($cli)
     {
+        Timer::clearAfterJob(spl_object_hash($this));
         call_user_func($this->callback, $cli->body);
     }
 
@@ -163,5 +176,12 @@ class HttpClient implements Async
             $response = $jsonData ? $jsonData : $response;
             call_user_func($callback, $response);
         };
+    }
+
+    public function checkTimeout()
+    {
+        $this->client->close();
+        $exception = new HttpClientTimeoutException();
+        call_user_func_array($this->callback, [null, $exception]);
     }
 }
