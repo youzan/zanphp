@@ -28,13 +28,7 @@ class KVStore implements ConnectionFactory
 
         $hosts = '';
         if (is_array($this->config['ip_list'])) {
-            foreach ($this->config['ip_list'] as $index => $host) {
-                if ($index === 0) {
-                    $hosts .= $host;
-                } else {
-                    $hosts .= ";$host";
-                }
-            }
+            $hosts = implode(';', $this->config['ip_list']);
         } else {
             $hosts = $this->config['ip_list'];
         }
