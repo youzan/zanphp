@@ -73,7 +73,7 @@ class ServerDiscovery
     {
         $servers = $this->getByStore();
         if (null == $servers) {
-            Timer::after($this->config['discovery']['loop_time'], [$this, 'discoveryByStore'], $this->getGetServicesJobId());
+            Timer::after($this->config['discovery']['loop_time'], [$this, 'discoverByStore'], $this->getGetServicesJobId());
         } else {
             NovaClientConnectionManager::getInstance()->work($this->appName, $servers);
         }

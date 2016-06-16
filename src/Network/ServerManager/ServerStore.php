@@ -105,4 +105,9 @@ class ServerStore
     {
         return 'sever_lock_discovery';
     }
+
+    public function resetLockDiscovery()
+    {
+        return apcu_store($this->getLockDiscoveryKey(), 0);
+    }
 }
