@@ -80,11 +80,12 @@ class Application
     {
         $this->setContainer();
 
+        // TODO 配置化
         $bootstrapItems = [
+            InitializeEnv::class,
             InitializeRunMode::class,
             InitializeDebug::class,
             InitializePathes::class,
-            InitializeEnv::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
             RegisterClassAliases::class,
