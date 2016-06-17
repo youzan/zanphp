@@ -260,7 +260,9 @@ class ServerDiscovery
     private function checkIsWatchingByEtcdTimeout()
     {
         $watchTime = $this->serverStore->getDoWatchLastTime($this->appName);
-        $watchTime = $watchTime == null ? 0 : $watchTime;
+        if (null === $watchTime) {
+            return true;
+        }
         if ((Time::current(true) - $watchTime) > ($this->config['watch']['timeout'] + 10)) {
             return false;
         }
