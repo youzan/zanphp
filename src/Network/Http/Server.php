@@ -20,6 +20,7 @@ use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 
 class Server extends ServerBase implements ServerContract
 {
@@ -102,12 +103,13 @@ class Server extends ServerBase implements ServerContract
 
     public function onWorkerStop($swooleServer, $workerId)
     {
+        ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
         echo "worker #$workerId stopping .....\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
-
+        ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)

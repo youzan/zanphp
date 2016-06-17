@@ -19,6 +19,8 @@ class ServerDiscoveryInitiator
 {
     use Singleton;
 
+    private $lockDiscovery = 0;
+
     public function init()
     {
         $config = Config::get('haunt');
@@ -26,6 +28,7 @@ class ServerDiscoveryInitiator
             throw new ServerConfigException();
         }
         if (ServerStore::getInstance()->lockDiscovery()) {
+            $this->lockDiscovery = 1;
             foreach ($config['app_names'] as $appName) {
                 $serverDiscovery = new ServerDiscovery($config, $appName);
                 $serverDiscovery->workByEtcd();
@@ -35,6 +38,13 @@ class ServerDiscoveryInitiator
                 $serverDiscovery = new ServerDiscovery($config, $appName);
                 $serverDiscovery->workByStore();
             }
+        }
+    }
+
+    public function resetLockDiscovery()
+    {
+        if (1 == $this->lockDiscovery) {
+            return ServerStore::getInstance()->resetLockDiscovery();
         }
     }
 }
