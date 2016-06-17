@@ -52,9 +52,8 @@ class SystemLogger extends BaseLogger
     {
         $header = $this->buildHeader($level);
         $topic = $this->buildTopic();
-        $module = $this->config['module'];
         $body = $this->buildBody($level, $message, $context);
-        $result = $header . 'topic=' . $topic . ' ' . $module . ' ' . $body;
+        $result = $header . 'topic=' . $topic . ' ' . $body;
 
         return $result;
     }
@@ -78,9 +77,6 @@ class SystemLogger extends BaseLogger
     {
         $config = $this->config;
         $result = SystemLogger::TOPIC_PREFIX . '.' . $config['storeType'];
-        if (isset($config['module'])) {
-            $result = $result . '.' . $config['module'];
-        }
         return $result;
     }
 
@@ -99,7 +95,7 @@ class SystemLogger extends BaseLogger
             'platform' => 'php',
             'app' => $this->config['app'],
             'module' => $this->config['module'],
-            'type' => '',
+            'type' => 'normal',
             'level' => $level,
             'tag' => $message,
             'detail' => $detail
