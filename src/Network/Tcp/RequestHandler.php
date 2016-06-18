@@ -90,7 +90,12 @@ class RequestHandler {
     public function handleTimeout()
     {
         if (Debug::get()) {
-            printf("[%s] TIMEOUT %s", $this->request->getRoute());
+            printf(
+                "[%s] TIMEOUT %s %s\n",
+                Time::current('Y-m-d H:i:s'),
+                $this->request->getRoute(),
+                http_build_query($this->request->getArgs())
+            );
         }
         
         $this->task->setStatus(Signal::TASK_KILLED);
