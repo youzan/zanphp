@@ -188,7 +188,13 @@ class Client implements Async
             $allApiConfig = require $configFile;
 
             $runMode = RunMode::get();
-            self::$apiConfig = isset($allApiConfig[$runMode]) ? $allApiConfig[$runMode] : $allApiConfig['test'];
+            if (isset($allApiConfig[$runMode])) {
+                self::$apiConfig = $allApiConfig[$runMode];
+            } elseif ($runMode == 'pre' && isset($allApiConfig['online'])) {
+                self::$apiConfig = $allApiConfig['online'];
+            } else {
+                throw new SystemException('service_host 配置文件不完整');
+            }
         }
 
         $pos = stripos ($api, ".");
