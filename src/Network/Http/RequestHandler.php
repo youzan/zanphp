@@ -10,6 +10,7 @@ use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\InternalErrorResponse;
+use Zan\Framework\Network\Http\Response\JsonResponse;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
@@ -95,7 +96,18 @@ class RequestHandler
     public function handleTimeout()
     {
         $this->task->setStatus(Signal::TASK_KILLED);
-        $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        $request = $this->context->get('request');
+        if ($request && $request->wantsJson()) {
+            // @TODO 分配code
+            $data = [
+                'code' => 10000,
+                'msg' => '网络超时',
+                'data' => '',
+            ];
+            $response = new JsonResponse($data, BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        } else {
+            $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        }
         $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);
