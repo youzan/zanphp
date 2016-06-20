@@ -26,7 +26,7 @@ class Server extends ServerBase {
 
     protected $workerStartItems = [
         InitializeConnectionPool::class,
-        InitializeWorkerMonitor::class
+        InitializeWorkerMonitor::class,
     ];
 
     /**

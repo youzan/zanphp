@@ -10,7 +10,7 @@ namespace Zan\Framework\Network\Connection\Exception;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class CanNotFindModuleMethodByServiceNameException extends ZanException
+class CanNotFindAppNameByMethodException extends ZanException
 {
 
 }

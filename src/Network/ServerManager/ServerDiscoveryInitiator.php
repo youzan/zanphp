@@ -11,6 +11,7 @@ use Zan\Framework\Network\ServerManager\ServerDiscovery;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\ServerManager\ServerStore;
 
 use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 
@@ -18,16 +19,32 @@ class ServerDiscoveryInitiator
 {
     use Singleton;
 
+    private $lockDiscovery = 0;
+
     public function init()
     {
         $config = Config::get('haunt');
         if (empty($config)) {
             throw new ServerConfigException();
         }
-        foreach ($config['modules'] as $module) {
-            $serverDiscovery = new ServerDiscovery($config, $module);
-            $serverDiscovery->start();
+        if (ServerStore::getInstance()->lockDiscovery()) {
+            $this->lockDiscovery = 1;
+            foreach ($config['app_names'] as $appName) {
+                $serverDiscovery = new ServerDiscovery($config, $appName);
+                $serverDiscovery->workByEtcd();
+            }
+        } else {
+            foreach ($config['app_names'] as $appName) {
+                $serverDiscovery = new ServerDiscovery($config, $appName);
+                $serverDiscovery->workByStore();
+            }
         }
     }
 
+    public function resetLockDiscovery()
+    {
+        if (1 == $this->lockDiscovery) {
+            return ServerStore::getInstance()->resetLockDiscovery();
+        }
+    }
 }

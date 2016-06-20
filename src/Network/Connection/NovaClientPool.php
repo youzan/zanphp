@@ -24,7 +24,7 @@ class NovaClientPool
 
     private $config;
 
-    private $module;
+    private $appName;
 
     private $loadBalancingStrategyMap = [
         'polling' => Polling::class,
@@ -40,15 +40,15 @@ class NovaClientPool
      */
     private $loadBalancingStrategy;
 
-    public function __construct($module, array $config, $loadBalancingStrategy)
+    public function __construct($appName, array $config, $loadBalancingStrategy)
     {
-        $this->init($module, $config, $loadBalancingStrategy);
+        $this->init($appName, $config, $loadBalancingStrategy);
     }
 
-    private function init($module, $config, $loadBalancingStrategy)
+    private function init($appName, $config, $loadBalancingStrategy)
     {
         $this->config = $config;
-        $this->module = $module;
+        $this->appName = $appName;
         $this->createConnections();
         $this->initLoadBalancingStrategy($loadBalancingStrategy);
     }
@@ -133,7 +133,7 @@ class NovaClientPool
     private function checkCanReload($config)
     {
         $canReload = false;
-        $services = ServerStore::getInstance()->getServices($this->module);
+        $services = ServerStore::getInstance()->getServices($this->appName);
         if (null == $services || [] == $services) {
             return false;
         }
