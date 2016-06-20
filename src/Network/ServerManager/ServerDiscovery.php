@@ -77,7 +77,8 @@ class ServerDiscovery
     {
         $servers = $this->getByStore();
         if (null == $servers) {
-            Timer::after(self::DISCOVERY_LOOP_TIME, [$this, 'discoverByStore'], $this->getGetServicesJobId());
+            $discoveryLoopTime = isset($this->config['discovery']['loop_time']) ? $this->config['discovery']['loop_time'] : self::DISCOVERY_LOOP_TIME;
+            Timer::after($discoveryLoopTime, [$this, 'discoverByStore'], $this->getGetServicesJobId());
         } else {
             NovaClientConnectionManager::getInstance()->work($this->appName, $servers);
             $this->checkWatchingByEtcd();
@@ -260,7 +261,8 @@ class ServerDiscovery
             $this->watchByEtcdTask();
             return;
         }
-        Timer::after(self::WATCH_LOOP_TIME, [$this, 'checkWatchingByEtcd'], $this->getWatchServicesJobId());
+        $watchLoopTime = isset($this->config['watch']['loop_time']) ? $this->config['watch']['loop_time'] : self::WATCH_LOOP_TIME;
+        Timer::after($watchLoopTime, [$this, 'checkWatchingByEtcd'], $this->getWatchServicesJobId());
     }
 
     private function checkIsWatchingByEtcdTimeout()
@@ -277,7 +279,8 @@ class ServerDiscovery
 
     public function watchByStore()
     {
-        Timer::after(self::WATCH_STORE_LOOP_TIME, [$this, 'watchByStoreTask']);
+        $watchStoreLoopTime = isset($this->config['watch_store']['loop_time']) ? $this->config['watch_store']['loop_time'] : self::WATCH_STORE_LOOP_TIME;
+        Timer::after($watchStoreLoopTime, [$this, 'watchByStoreTask']);
     }
 
     public function watchByStoreTask()
