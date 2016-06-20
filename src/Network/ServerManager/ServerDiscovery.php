@@ -59,8 +59,6 @@ class ServerDiscovery
     public function workByStore()
     {
         $this->discoverByStore();
-        $this->checkWatchingByEtcd();
-        $this->watchByStore();
     }
 
     public function discoverByEtcdTask()
@@ -76,6 +74,8 @@ class ServerDiscovery
             Timer::after($this->config['discovery']['loop_time'], [$this, 'discoverByStore'], $this->getGetServicesJobId());
         } else {
             NovaClientConnectionManager::getInstance()->work($this->appName, $servers);
+            $this->checkWatchingByEtcd();
+            $this->watchByStore();
         }
     }
 
