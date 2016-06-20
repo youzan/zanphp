@@ -20,9 +20,13 @@ class TraceTerminator implements RequestTerminator
     public function terminate(Request $request, Response $response, Context $context)
     {
         $trace = $context->get('trace');
-        $exception = $response->getException();
-        if ($exception) {
-            $trace->commit($exception);
+        if (method_exists($response, 'getException')) {
+            $exception = $response->getException();
+            if ($exception) {
+                $trace->commit($exception);
+            } else {
+                $trace->commit(Constant::SUCCESS);
+            }
         } else {
             $trace->commit(Constant::SUCCESS);
         }
