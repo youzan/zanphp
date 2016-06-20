@@ -18,6 +18,7 @@ class Response implements BaseResponse {
      */
     private $swooleServer;
     private $request;
+    private $exception;
 
     public function __construct(SwooleServer $swooleServer, Request $request)
     {
@@ -30,6 +31,11 @@ class Response implements BaseResponse {
         return $this->swooleServer;
     }
 
+    public function getException()
+    {
+        return $this->exception;
+    }
+
     public function end($content='')
     {
         $this->send($content);
@@ -39,6 +45,7 @@ class Response implements BaseResponse {
 
     public function sendException($e)
     {
+        $this->exception = $e->getMessage();
         $serviceName = $this->request->getServiceName();
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();

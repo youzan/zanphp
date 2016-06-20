@@ -10,6 +10,9 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class Request implements BaseRequest {
     private $data;

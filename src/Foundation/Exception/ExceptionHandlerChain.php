@@ -56,6 +56,7 @@ class ExceptionHandlerChain
         
         if (is_a($response, BaseResponse::class)) {
             $swooleResponse = (yield getContext('swoole_response'));
+            $response->exception = $e->getMessage();
             yield $response->sendBy($swooleResponse);
             return;
         }

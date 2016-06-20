@@ -19,7 +19,6 @@ use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
-use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 
 class Server extends ServerBase implements ServerContract
