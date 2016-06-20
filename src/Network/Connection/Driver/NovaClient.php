@@ -75,7 +75,7 @@ class NovaClient extends Base implements Connection
             $coroutine = $this->ping();
             Task::execute($coroutine);
         } else {
-            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'ping']);
+            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'heartbeating']);
         }
     }
 
