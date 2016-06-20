@@ -11,9 +11,9 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Connection\Exception\CanNotFindServiceNamePoolException;
+use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientPoolByAppNameException;
 use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientAppNameByServiceNameException;
-use Zan\Framework\Network\Connection\Exception\CanNotFindAppNameMethodByServiceNameException;
+use Zan\Framework\Network\Connection\Exception\CanNotFindAppNameByMethodException;
 
 class NovaClientConnectionManager
 {
@@ -58,7 +58,7 @@ class NovaClientConnectionManager
     public function getPool($appName)
     {
         if (!isset($this->novaClientPool[$appName])) {
-            throw new CanNotFindServiceNamePoolException();
+            throw new CanNotFindNovaClientPoolByAppNameException();
         }
         return $this->novaClientPool[$appName];
     }
@@ -101,7 +101,7 @@ class NovaClientConnectionManager
             throw new CanNotFindNovaClientAppNameByServiceNameException();
         }
         if (!in_array($method, $this->serviceToAppNameMap[$serviceName]['methods'])) {
-            throw new CanNotFindAppNameMethodByServiceNameException();
+            throw new CanNotFindAppNameByMethodException();
         }
         return $this->serviceToAppNameMap[$serviceName]['app_name'];
     }
