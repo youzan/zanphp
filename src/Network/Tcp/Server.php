@@ -2,8 +2,8 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Foundation\Booting\InitializeEnv;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
-use Zan\Framework\Network\Server\WorkerStart\InitEnv;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
@@ -28,7 +28,7 @@ class Server extends ServerBase {
     protected $workerStartItems = [
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
-        InitEnv::class,
+        InitializeEnv::class,
     ];
 
     /**

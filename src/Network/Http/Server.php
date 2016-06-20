@@ -9,7 +9,6 @@ use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
-use Zan\Framework\Network\Server\WorkerStart\InitEnv;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Http\WorkerStart\InitializeServerDiscovery;
