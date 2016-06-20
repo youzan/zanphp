@@ -91,6 +91,11 @@ class Pool implements ConnectionPool
 
     public function recycle(Connection $conn)
     {
+        $evtName = null;
+        if ($this->freeConnection->isEmpty()) {
+            $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
+        }
+        
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
         if (count($this->freeConnection) == 1) {

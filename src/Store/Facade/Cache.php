@@ -11,6 +11,7 @@ use RuntimeException;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\ConfigLoader;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\Redis\Redis;
@@ -72,7 +73,8 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->set($realKey, $value));
         if ($result) {
-            yield $redis->expire($realKey, $config['exp']);
+            $ttl = isset($config['exp']) ? $config['exp'] : 0;
+            yield $redis->expire($realKey, $ttl);
         }
         yield $result;
     }
@@ -112,8 +114,11 @@ class Cache {
     }
 
     private static function getRealKey($config, $keys){
-        $format = $config['key'];
-        if($keys == null){
+        $format = isset($config['key']) ? $config['key'] : null ;
+        if($keys === null){
+            if ($format === null) {
+                throw new InvalidArgumentException('expect keys is string or array, null given');
+            }
             return $format;
         }
         if(!is_array($keys)){

@@ -102,7 +102,7 @@ class Mysqli implements DriverInterface
             } else {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliQueryException($error . ':' . $this->sql);
+                $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }
 
             if ($this->trace) {

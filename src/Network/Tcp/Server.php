@@ -14,14 +14,15 @@ use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
-use Zan\Framework\Network\Tcp\ServerStart\InitializeCache;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
+use Zan\Framework\Foundation\Container\Di;
 
 class Server extends ServerBase {
 
     protected $serverStartItems = [
         InitializeSqlMap::class,
         InitLogConfig::class,
-        InitializeCache::class
     ];
 
     protected $workerStartItems = [
@@ -29,7 +30,7 @@ class Server extends ServerBase {
         InitializeWorkerMonitor::class,
         InitEnv::class,
     ];
-    
+
     /**
      * @var SwooleServer
      */
@@ -80,11 +81,8 @@ class Server extends ServerBase {
     private function registerServices()
     {
         $config = Config::get('nova.platform');
-        $config['services'] = Nova::getAvailableService();
-
         $appName = Application::getInstance()->getName();
         $config['module'] = $appName;
-
         $this->swooleServer->nova_config($config);
     }
 
@@ -101,6 +99,7 @@ class Server extends ServerBase {
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
+        Di::make(InitializeServerRegister::class)->bootstrap($this);
         echo "server starting .....\n";
     }
 
@@ -113,7 +112,6 @@ class Server extends ServerBase {
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        
         echo "worker #$workerId starting .....\n";
     }
 
