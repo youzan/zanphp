@@ -12,8 +12,8 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Exception\CanNotFindServiceNamePoolException;
-use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientModuleByServiceNameException;
-use Zan\Framework\Network\Connection\Exception\CanNotFindModuleMethodByServiceNameException;
+use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientAppNameByServiceNameException;
+use Zan\Framework\Network\Connection\Exception\CanNotFindAppNameMethodByServiceNameException;
 
 class NovaClientConnectionManager
 {
@@ -21,58 +21,58 @@ class NovaClientConnectionManager
 
     private $novaClientPool = [];
 
-    private $serviceToModuleMap = [];
+    private $serviceToAppNameMap = [];
 
     private $serverConfig = [];
 
-    public function work($module, $servers)
+    public function work($appName, $servers)
     {
         $novaConfig = Config::get('connection.nova');
         $config = [];
         foreach ($servers as $server) {
-            $this->serverConfig[$module][$server['host'].':'.$server['port']] = $server;
+            $this->serverConfig[$appName][$server['host'].':'.$server['port']] = $server;
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $this->addServiceToModuleMap($module, $server['services']);
+            $this->addServiceToAppNameMap($appName, $server['services']);
             $config[$novaConfig['host'].':'.$novaConfig['port']] = $novaConfig;
         }
-        $this->novaClientPool[$module] = new NovaClientPool($module, $config, $novaConfig['load_balancing_strategy']);
+        $this->novaClientPool[$appName] = new NovaClientPool($appName, $config, $novaConfig['load_balancing_strategy']);
     }
 
-    private function addServiceToModuleMap($module, $services)
+    private function addServiceToAppNameMap($appName, $services)
     {
         foreach ($services as $service) {
-            $this->serviceToModuleMap[$service['service']] = ['module' => $module, 'methods' => $service['methods']];
+            $this->serviceToAppNameMap[$service['service']] = ['app_name' => $appName, 'methods' => $service['methods']];
         }
     }
 
-    public function getSeverConfig($module)
+    public function getSeverConfig($appName)
     {
-        return isset($this->serverConfig[$module]) ? $this->serverConfig[$module] : [];
+        return isset($this->serverConfig[$appName]) ? $this->serverConfig[$appName] : [];
     }
 
     /**
-     * @param $module
+     * @param $appName
      * @return NovaClientPool | null
      */
-    public function getPool($module)
+    public function getPool($appName)
     {
-        if (!isset($this->novaClientPool[$module])) {
+        if (!isset($this->novaClientPool[$appName])) {
             throw new CanNotFindServiceNamePoolException();
         }
-        return $this->novaClientPool[$module];
+        return $this->novaClientPool[$appName];
     }
 
     public function get($serviceName, $method)
     {
-        $module = $this->getModule($serviceName, $method);
-        $pool = $this->getPool($module);
+        $appName = $this->getAppName($serviceName, $method);
+        $pool = $this->getPool($appName);
         yield $pool->get();
     }
 
-    public function offline($module, $servers)
+    public function offline($appName, $servers)
     {
-        $pool = $this->getPool($module);
+        $pool = $this->getPool($appName);
         foreach ($servers as $server) {
             $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
             if (null !== $connection && $connection instanceof Connection) {
@@ -82,38 +82,38 @@ class NovaClientConnectionManager
         }
     }
 
-    public function addOnline($module, $servers)
+    public function addOnline($appName, $servers)
     {
         $novaConfig = Config::get('connection.nova');
-        $pool = $this->getPool($module);
+        $pool = $this->getPool($appName);
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $this->addServiceToModuleMap($module, $server['services']);
+            $this->addServiceToAppNameMap($appName, $server['services']);
             $pool->createConnection($novaConfig);
             $pool->addConfig($novaConfig);
         }
     }
 
-    private function getModule($serviceName, $method)
+    private function getAppName($serviceName, $method)
     {
-        if (!isset($this->serviceToModuleMap[$serviceName])) {
-            throw new CanNotFindNovaClientModuleByServiceNameException();
+        if (!isset($this->serviceToAppNameMap[$serviceName])) {
+            throw new CanNotFindNovaClientAppNameByServiceNameException();
         }
-        if (!in_array($method, $this->serviceToModuleMap[$serviceName]['methods'])) {
-            throw new CanNotFindModuleMethodByServiceNameException();
+        if (!in_array($method, $this->serviceToAppNameMap[$serviceName]['methods'])) {
+            throw new CanNotFindAppNameMethodByServiceNameException();
         }
-        return $this->serviceToModuleMap[$serviceName]['module'];
+        return $this->serviceToAppNameMap[$serviceName]['app_name'];
     }
 
-    public function update($module, $servers)
+    public function update($appName, $servers)
     {
         $novaConfig = Config::get('connection.nova');
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             foreach ($server['services'] as $service) {
-                $this->serviceToModuleMap[$service['service']] = ['module' => $module, 'methods' => $service['methods']];
+                $this->serviceToAppNameMap[$service['service']] = ['app_name' => $appName, 'methods' => $service['methods']];
             }
         }
     }
