@@ -2,7 +2,6 @@
 
 namespace Zan\Framework\Network\Http;
 
-use Zan\Framework\Foundation\Booting\InitializeEnv;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
@@ -38,7 +37,6 @@ class Server extends ServerBase implements ServerContract
     protected $workerStartItems = [
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
-        InitializeEnv::class,
         InitializeServerDiscovery::class,
     ];
 
