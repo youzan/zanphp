@@ -20,6 +20,7 @@ use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
+use Zan\Framework\Foundation\Core\Config;
 
 class Server extends ServerBase implements ServerContract
 {
@@ -69,6 +70,10 @@ class Server extends ServerBase implements ServerContract
 
     private function init()
     {
+        $config = Config::get('haunt');
+        if (!isset($config['app_names']) || [] === $config['app_names']) {
+            return;
+        }
         ServerStore::getInstance()->resetLockDiscovery();
     }
 

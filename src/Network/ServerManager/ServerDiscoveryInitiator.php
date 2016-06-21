@@ -27,6 +27,9 @@ class ServerDiscoveryInitiator
         if (empty($config)) {
             throw new ServerConfigException();
         }
+        if (!isset($config['app_names']) || [] === $config['app_names']) {
+            return;
+        }
         if (ServerStore::getInstance()->lockDiscovery()) {
             $this->lockDiscovery = 1;
             foreach ($config['app_names'] as $appName) {
