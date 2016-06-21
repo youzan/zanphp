@@ -30,7 +30,8 @@ class NovaClientConnectionManager
         $novaConfig = Config::get('connection.nova');
         $config = [];
         foreach ($servers as $server) {
-            $this->serverConfig[$appName][$server['host'].':'.$server['port']] = $server;
+            $this->addServerConfig($appName, $server);
+
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $this->addServiceToAppNameMap($appName, $server['services']);
@@ -44,6 +45,21 @@ class NovaClientConnectionManager
         foreach ($services as $service) {
             $this->serviceToAppNameMap[$service['service']] = ['app_name' => $appName, 'methods' => $service['methods']];
         }
+    }
+
+    private function addServerConfig($appName, $servers)
+    {
+        foreach ($servers as $server) {
+            $this->serverConfig[$appName][$server['host'].':'.$server['port']] = $server;
+        }
+    }
+
+    private function deleteServerConfig($appName, $server)
+    {
+        if (isset($this->serverConfig[$appName][$server['host'].':'.$server['port']])) {
+            unset($this->serverConfig[$appName][$server['host'].':'.$server['port']]);
+        }
+        return true;
     }
 
     public function getSeverConfig($appName)
@@ -74,6 +90,7 @@ class NovaClientConnectionManager
     {
         $pool = $this->getPool($appName);
         foreach ($servers as $server) {
+            $this->deleteServerConfig($appName, $server);
             $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
             if (null !== $connection && $connection instanceof Connection) {
                 $pool->remove($connection);
@@ -90,6 +107,8 @@ class NovaClientConnectionManager
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $this->addServiceToAppNameMap($appName, $server['services']);
+            $this->addServerConfig($appName, $server);
+
             $pool->createConnection($novaConfig);
             $pool->addConfig($novaConfig);
         }
