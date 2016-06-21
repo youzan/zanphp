@@ -47,11 +47,9 @@ class NovaClientConnectionManager
         }
     }
 
-    private function addServerConfig($appName, $servers)
+    private function addServerConfig($appName, $server)
     {
-        foreach ($servers as $server) {
-            $this->serverConfig[$appName][$server['host'].':'.$server['port']] = $server;
-        }
+        $this->serverConfig[$appName][$server['host'].':'.$server['port']] = $server;
     }
 
     private function deleteServerConfig($appName, $server)
