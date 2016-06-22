@@ -58,32 +58,36 @@ class ServerDiscoveryInitiator
 
     public function noNeedDiscovery($config)
     {
-        if (!isset($config['no_need_discovery']) || !is_array($config['no_need_discovery']) || [] === $config['no_need_discovery']) {
+        $noNeedDiscovery = Config::get('service_discovery');
+        if (empty($noNeedDiscovery)) {
+            return $config;
+        }
+        if (!isset($noNeedDiscovery['app_names']) || !is_array($noNeedDiscovery['app_names']) || [] === $noNeedDiscovery['app_names']) {
             return $config;
         }
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
             foreach ($config['app_names'] as $key => $appName) {
-                if (in_array($appName, $config['no_need_discovery'])) {
+                if (in_array($appName, $noNeedDiscovery['app_names'])) {
                     unset($config['app_names'][$key]);
                 }
             }
         }
-        foreach ($config['no_need_discovery'] as $appName) {
-            if (!isset($config['novaApi'][$appName])) {
+        foreach ($noNeedDiscovery['app_names'] as $appName) {
+            if (!isset($noNeedDiscovery['novaApi'][$appName])) {
                 continue;
             }
-            if (!isset($config['connection'][$appName])) {
+            if (!isset($noNeedDiscovery['connection'][$appName])) {
                 continue;
             }
-            $novaConfig = $config['novaApi'][$appName];
-            $novaConfig['path'] = Path::getRootPath() . $config['novaApi'][$appName]['path'];
+            $novaConfig = $noNeedDiscovery['novaApi'][$appName];
+            $novaConfig['path'] = Path::getRootPath() . $noNeedDiscovery['novaApi'][$appName]['path'];
             Nova::init($novaConfig);
             $services = Nova::getAvailableService();
 
-            $servers[$config['connection'][$appName]['host'].':'.$config['connection'][$appName]['port']] = [
+            $servers[$noNeedDiscovery['connection'][$appName]['host'].':'.$noNeedDiscovery['connection'][$appName]['port']] = [
                 'app_name' => $appName,
-                'host' => $config['connection'][$appName]['host'],
-                'port' => $config['connection'][$appName]['port'],
+                'host' => $noNeedDiscovery['connection'][$appName]['host'],
+                'port' => $noNeedDiscovery['connection'][$appName]['port'],
                 'services' => $services,
             ];
             NovaClientConnectionManager::getInstance()->work($appName, $servers);
