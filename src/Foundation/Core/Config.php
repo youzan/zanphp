@@ -17,6 +17,12 @@ class Config
         $runModeConfig = ConfigLoader::getInstance()->load($runModeConfigPath);
 
         self::$configMap = Arr::merge(self::$configMap,$shareConfigMap,$runModeConfig);
+        //add private dir
+        $privatePath = Path::getConfigPath() . '.private/';
+        if (is_dir($privatePath)) {
+            $privateConfig = ConfigLoader::getInstance()->load($privatePath);
+            self::$configMap = Arr::merge(self::$configMap, $privateConfig);
+        }
     }
 
     public static function get($key, $default = null)
