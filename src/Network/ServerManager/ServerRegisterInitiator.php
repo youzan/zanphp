@@ -18,12 +18,18 @@ class ServerRegisterInitiator
 {
     use Singleton;
 
+    const ENABLE_REGISTER  = 1;
+
     public function init()
     {
         //TODO: check config position
         $config = Config::get('nova.platform');
         $config['services'] = Nova::getAvailableService();
-        
+        $haunt = Config::get('haunt.register');
+        $enableRegister = isset($haunt['enable_register']) ? $haunt['enable_register'] : self::ENABLE_REGISTER;
+        if (0 === $enableRegister) {
+            return;
+        }
         $register = new ServerRegister();
         $coroutine = $register->register($config);
         Task::execute($coroutine);
