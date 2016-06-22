@@ -18,7 +18,10 @@ class Constant
     const HTTP = "Http";
     const REMOTE_CALL = "RemoteCall";
     const SQL = "SQL";
+    const HTTP_CALL = "HttpCall";
 
     /******************Event Type ******************/
     const NOVA_PROCCESS = 'Nova.Proccess.Event';
+    const POST = "POST";
+    const GET = "GET";
 }
