@@ -59,7 +59,7 @@ class ServerDiscoveryInitiator
     public function noNeedDiscovery($config)
     {
         if (!isset($config['no_need_discovery']) || !is_array($config['no_need_discovery']) || [] === $config['no_need_discovery']) {
-            return;
+            return $config;
         }
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
             foreach ($config['app_names'] as $key => $appName) {
