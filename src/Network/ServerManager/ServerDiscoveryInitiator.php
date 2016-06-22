@@ -30,6 +30,7 @@ class ServerDiscoveryInitiator
         if (empty($config)) {
             throw new ServerConfigException();
         }
+        $config = $this->noNeedDiscovery($config);
         if (!isset($config['app_names']) || [] === $config['app_names']) {
             return;
         }
@@ -74,11 +75,11 @@ class ServerDiscoveryInitiator
             if (!isset($config['connection'][$appName])) {
                 continue;
             }
-
-            $config['path'] = Path::getRootPath() . $config['novaApi'][$appName]['path'];
-            Nova::init($config);
-
+            $novaConfig = $config['novaApi'][$appName];
+            $novaConfig['path'] = Path::getRootPath() . $config['novaApi'][$appName]['path'];
+            Nova::init($novaConfig);
             $services = Nova::getAvailableService();
+
             $servers[$config['connection'][$appName]['host'].':'.$config['connection'][$appName]['port']] = [
                 'app_name' => $appName,
                 'host' => $config['connection'][$appName]['host'],
