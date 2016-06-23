@@ -115,6 +115,8 @@ class HttpClient implements Async
 
     private function build()
     {
+        $this->trace = (yield getContext('trace'));
+
         if ($this->method != 'POST' and $this->method != 'PUT') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -128,7 +130,7 @@ class HttpClient implements Async
             $this->setBody($body);
         }
 
-        return $this;
+        yield $this;
     }
 
     public function setCallback(Callable $callback)
@@ -153,7 +155,6 @@ class HttpClient implements Async
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         }
 
-        $this->trace = (yield getContext('trace'));
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
