@@ -106,4 +106,9 @@ class Response extends BaseResponse implements ResponseContract
 
         return $this;
     }
+
+    public function getException()
+    {
+        return $this->exception;
+    }
 }

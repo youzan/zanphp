@@ -147,9 +147,8 @@ class Timer
     private static function formateAfterCallback($jobId, Callable $callback)
     {
         return function() use ($jobId, $callback) {
-            call_user_func($callback, $jobId);
-
             Timer::clearAfterMap($jobId);
+            call_user_func($callback, $jobId);
         };
     }
 

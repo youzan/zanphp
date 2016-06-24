@@ -11,9 +11,10 @@ namespace Zan\Framework\Network\Connection\Factory;
 use Zan\Framework\Contract\Network\ConnectionFactory;
 use swoole_client as SwooleClient;
 
-class NovaClient implements ConnectionFactory
+class Tcp implements ConnectionFactory
 {
     private $config;
+    private $conn;
 
     public function __construct(array $config)
     {
@@ -23,22 +24,22 @@ class NovaClient implements ConnectionFactory
     public function create()
     {
         $clientFlags = SWOOLE_SOCK_TCP;
-        $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-        $socket->set($this->config['config']);
+        $this->conn = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+        $this->conn->set($this->config['config']);
 
-        $connection = new \Zan\Framework\Network\Connection\Driver\NovaClient();
-        $connection->setSocket($socket);
+        $connection = new \Zan\Framework\Network\Connection\Driver\Tcp();
+        $connection->setSocket($this->conn);
         $connection->setConfig($this->config);
         $connection->init();
 
         //call connect
-        $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
         return $connection;
     }
 
     public function close()
     {
-
+        $this->conn->close();
     }
 
 }

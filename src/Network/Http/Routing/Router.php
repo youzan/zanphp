@@ -74,11 +74,17 @@ class Router {
     private function parseRequestFormat($requestUri)
     {
         if(false === strpos($requestUri, '.')) {
-            return $this->setDefaultFormat();
+            $this->setDefaultFormat();
+            return;
         }
         $explodeArr = explode('.', $requestUri);
-        $this->format = in_array($explodeArr[1], $this->config['format_whitelist']) ? trim($explodeArr[1]) : $this->getDefaultFormat();
-        $this->url = $explodeArr[0];
+        if(in_array(end($explodeArr), $this->config['format_whitelist'])){
+            $this->format = end($explodeArr);
+            array_pop($explodeArr);
+            $this->url = implode('.', $explodeArr);
+        }else{
+            $this->setDefaultFormat();
+        }
     }
 
     private function repairRoute()

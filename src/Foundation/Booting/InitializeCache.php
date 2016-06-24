@@ -18,7 +18,11 @@ class InitializeCache implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        $cacheMap = ConfigLoader::getInstance()->load(Path::getCachePath());
-        Cache::initConfigMap($cacheMap);
+        try {
+            $cacheMap = ConfigLoader::getInstance()->load(Path::getCachePath());
+            Cache::initConfigMap($cacheMap);
+        } catch (\Exception $e) {
+            //do nothing..
+        }
     }
 }

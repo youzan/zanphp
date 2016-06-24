@@ -16,6 +16,7 @@ use Zan\Framework\Utilities\Types\Time;
 class RequestHandler {
     private $swooleServer = null;
     private $context = null;
+    private $request = null;
     private $response = null;
     private $fd = null;
     private $fromId = null;
@@ -52,9 +53,10 @@ class RequestHandler {
         $this->context->set('request_end_event_name', $this->getRequestFinishJobId());
 
         try {
-            $request->decode();
+            $result = $request->decode();
+            $this->request = $request;
             if ($request->getIsHeartBeat()) {
-                $this->swooleServer->send($this->fd, $data);
+                $this->swooleServer->send($this->fd, $result);
                 return;
             }
 
@@ -87,6 +89,15 @@ class RequestHandler {
     }
     public function handleTimeout()
     {
+        if (Debug::get()) {
+            printf(
+                "[%s] TIMEOUT %s %s\n",
+                Time::current('Y-m-d H:i:s'),
+                $this->request->getRoute(),
+                http_build_query($this->request->getArgs())
+            );
+        }
+        
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
         $this->response->sendException($e);
