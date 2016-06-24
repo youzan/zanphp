@@ -49,7 +49,8 @@ class ServerRegister
     {
         $haunt = Config::get('haunt');
         $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), null);
+        $register = (yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), null));
+        echo $register;
     }
 
 

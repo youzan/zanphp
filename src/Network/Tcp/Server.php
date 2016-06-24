@@ -2,6 +2,8 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Network\ServerManager\ServerStore;
+use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
@@ -26,7 +28,8 @@ class Server extends ServerBase {
 
     protected $workerStartItems = [
         InitializeConnectionPool::class,
-        InitializeWorkerMonitor::class
+        InitializeWorkerMonitor::class,
+        InitializeServerDiscovery::class,
     ];
 
     /**
@@ -74,6 +77,11 @@ class Server extends ServerBase {
         }
         $config['path'] = Path::getRootPath() . $config['path'];
         Nova::init($config);
+
+        $config = Config::get('haunt');
+        if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
+            ServerStore::getInstance()->resetLockDiscovery();
+        }
     }
 
     private function registerServices()

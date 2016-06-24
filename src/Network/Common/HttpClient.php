@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Sdk\Trace\Constant;
 
 class HttpClient implements Async
 {
@@ -30,6 +31,7 @@ class HttpClient implements Async
     private $body;
 
     private $callback;
+    private $trace;
 
     public function __construct($host, $port = 80)
     {
@@ -113,6 +115,8 @@ class HttpClient implements Async
 
     private function build()
     {
+        $this->trace = (yield getContext('trace'));
+
         if ($this->method != 'POST' and $this->method != 'PUT') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -126,7 +130,7 @@ class HttpClient implements Async
             $this->setBody($body);
         }
 
-        return $this;
+        yield $this;
     }
 
     public function setCallback(Callable $callback)
@@ -150,9 +154,20 @@ class HttpClient implements Async
         if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         }
+
+        if ($this->trace) {
+            $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
+        }
+
         if('GET' === $this->method){
+            if ($this->trace) {
+                $this->trace->logEvent(Constant::GET, Constant::SUCCESS);
+            }
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
+            if ($this->trace) {
+                $this->trace->logEvent(Constant::POST, Constant::SUCCESS, $this->body);
+            }
             $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
         }
     }
@@ -166,6 +181,9 @@ class HttpClient implements Async
     public function onReceive($cli)
     {
         Timer::clearAfterJob(spl_object_hash($this));
+        if ($this->trace) {
+            $this->trace->commit(Constant::SUCCESS);
+        }
         call_user_func($this->callback, $cli->body);
     }
 
@@ -182,6 +200,9 @@ class HttpClient implements Async
     {
         $this->client->close();
         $exception = new HttpClientTimeoutException();
+        if ($this->trace) {
+            $this->trace->commit($exception);
+        }
         call_user_func_array($this->callback, [null, $exception]);
     }
 }

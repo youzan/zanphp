@@ -14,6 +14,7 @@ use Zan\Framework\Network\Connection\Factory\KVStore;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
+use Zan\Framework\Network\Connection\Factory\Tcp;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
@@ -31,6 +32,7 @@ class ConnectionInitiator
         'novaClient',
         'kVStore',
         'es',
+        'tcp',
     ];
 
     public $directory = '';
@@ -110,6 +112,9 @@ class ConnectionInitiator
                 break;
             case 'KVStore':
                 $factory = new KVStore($config);
+                break;
+            case 'Tcp':
+                $factory = new Tcp($config);
                 break;
             default:
                 break;
