@@ -9,54 +9,42 @@
 namespace Zan\Framework\Foundation\Core;
 
 
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Utilities\Types\Dir;
+use Zan\Framework\Utilities\Types\Arr;
+
 class IronConfig
 {
 
-    private static $data = [];
+    private static $configMap = [];
 
-    private static $fileCache = [];
-
-    private static function get($key,$default=null)
+    public static function init()
     {
-        $keys = explode('.',$key);
-        $map  = & self::$data;
-        do{
-            $key = array_shift($keys);
-            if(!isset($map[$key])){
-                self::loadConfig($key);
-            }
-            if(!isset($map[$key])){
-                return $default;
-            }
-            $map = &$map[$key];
-            $runMode = self::getRunMode($map);
-            if(isset($map[$runMode]) ){
-                $map = &$map[$runMode];
-            }
-
-        }while(!empty($keys));
-
-        return $map;
+        $whiteList = Config::get('iron_config.files');
+        if(empty($config)){
+            return;
+        }
+        self::$configMap = self::load($whiteList);
     }
 
 
-
-    private static function loadConfig($fileName)
+    public static function get($key, $default = null)
     {
-        $configPath = Path::getIronPath();
-        $config = null;
-        $file   = $configPath . $fileName . '.php';
-        if(isset(self::$fileCache[$fileName])){
-            $config = self::$fileCache[$fileName];
-        }elseif(is_file($file)){
-            $config  = require_once $file;
-            self::$fileCache[$fileName] = $config;
+        $routes = explode('.',$key);
+        if(empty($routes)){
+            return $default;
         }
-        $runMode = self::getRunMode($config);
-        if(isset($config[$runMode])){
-            $config = $config[$runMode];
+
+        $result = &self::$configMap;
+        foreach($routes as $route){
+            if(!isset($result[$route])){
+                return $default;
+            }
+
+            $result = &$result[$route];
         }
-        self::$data[$fileName] = $config;
+
+        return $result;
     }
 
 
@@ -73,6 +61,33 @@ class IronConfig
             $runMode = 'online';
         }
         return $runMode;
+    }
+
+
+    private static function load(array $files,$ignoreStructure = false)
+    {
+
+
+        $path = Dir::formatPath(Path::getIronPath());
+        $configMap = [];
+        foreach($files as $file){
+            $configFile = $path.$file;
+            $loadedConfig = require $configFile;
+            if(!is_array($loadedConfig)){
+                throw new InvalidArgumentException("syntax error find in config file: " . $configFile);
+            }
+            $runMode = self::getRunMode($loadedConfig);
+            if(isset($loadedConfig[$runMode])) {
+                $loadedConfig = $loadedConfig[$runMode];
+            }
+            if(!$ignoreStructure){
+                $keyString = substr($configFile, strlen($path), -4);
+                $loadedConfig = Arr::createTreeByList(explode('/',$keyString),$loadedConfig);
+            }
+            $configMap = Arr::merge($configMap,$loadedConfig);
+        }
+
+        return $configMap;
     }
 
 }

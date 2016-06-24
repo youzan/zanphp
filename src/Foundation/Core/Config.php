@@ -33,14 +33,17 @@ class Config
         }
 
         $result = &self::$configMap;
+        $hasConfig = true;
         foreach($routes as $route){
             if(!isset($result[$route])){
-                return $default;
+                $hasConfig = false;
+                break;
             }
-
             $result = &$result[$route];
         }
-
+        if(!$hasConfig){
+            $result = IronConfig::get($key,$default);
+        }
         return $result;
     }
 
