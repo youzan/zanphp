@@ -29,6 +29,7 @@ class Config
 
     public static function get($key, $default = null)
     {
+        $preKey = $key;
         $routes = explode('.',$key);
         if(empty($routes)){
             return $default;
@@ -44,7 +45,7 @@ class Config
             $result = &$result[$route];
         }
         if(!$hasConfig){
-            $result = IronConfig::get($key,$default);
+            $result = IronConfig::get($preKey,$default);
         }
         return $result;
     }
