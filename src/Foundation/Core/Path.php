@@ -22,6 +22,7 @@ class Path {
     const DEFAULT_TABLE_PATH    = 'resource/config/share/table/';
     const DEFAULT_ROUTING_PATH  = 'resource/routing/';
     const DEFAULT_MIDDLEWARE_PATH = 'resource/middleware';
+    const DEFAULT_IRON_PATH = 'vendor/zan-config/iron/files/';
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
     const CONFIG_PATH_CONFIG_KEY  = 'path.config';
@@ -33,6 +34,7 @@ class Path {
     const TABLE_PATH_CONFIG_KEY   = 'path.table';
     const ROUTING_PATH_CONFIG_KEY = 'path.routing';
     const MIDDLEWARE_PATH_CONFIG_KEY = 'path.middleware';
+    const IRON_PATH_CONFIG_KEY = 'path.iron';
 
 
     private static $rootPath    = null;
@@ -45,6 +47,7 @@ class Path {
     private static $tablePath   = null;
     private static $routingPath = null;
     private static $middlewarePath = null;
+    private static $ironConfigPath = null;
 
     public static function init($rootPath)
     {
@@ -111,6 +114,10 @@ class Path {
         return self::$middlewarePath;
     }
 
+    public static function getIronPath(){
+        return self::$ironConfigPath;
+    }
+
     private static function setRootPath($rootPath)
     {
         self::$rootPath = Dir::formatPath($rootPath);
@@ -127,6 +134,7 @@ class Path {
         self::$tablePath = self::$rootPath . self::DEFAULT_TABLE_PATH;
         self::$routingPath = self::$rootPath . self::DEFAULT_ROUTING_PATH;
         self::$middlewarePath = self::$rootPath . self::DEFAULT_MIDDLEWARE_PATH;
+        self::$ironConfigPath = self::$rootPath .self::DEFAULT_IRON_PATH;
     }
 
     private static function setInConfig()
@@ -141,5 +149,7 @@ class Path {
         Config::set(self::TABLE_PATH_CONFIG_KEY, self::$tablePath);
         Config::set(self::ROUTING_PATH_CONFIG_KEY, self::$routingPath);
         Config::set(self::MIDDLEWARE_PATH_CONFIG_KEY, self::$middlewarePath);
+        Config::set(self::IRON_PATH_CONFIG_KEY, self::$ironConfigPath);
+
     }
 }
