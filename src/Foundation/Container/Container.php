@@ -41,18 +41,18 @@ class Container
             $this->mockInstances[$abstract] = $instance;
         }
     }
-    
+
     public function addStub(Stub $stub)
     {
         $className = $stub->getRealClassName();
-        
+
         $this->setMockInstance($className, $stub);
     }
-    
-    public function singleton($abstract, array $parameters=[])
+
+    public function singleton($abstract, array $parameters = [])
     {
         $abstract = $this->normalize($abstract);
-        
+
         if (isset($this->mockInstances[$abstract])) {
             return $this->mockInstances[$abstract];
         }
