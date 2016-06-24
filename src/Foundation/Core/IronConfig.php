@@ -21,7 +21,7 @@ class IronConfig
     public static function init()
     {
         $whiteList = Config::get('iron_config.files');
-        if(empty($config)){
+        if(empty($whiteList)){
             return;
         }
         self::$configMap = self::load($whiteList);
