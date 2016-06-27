@@ -107,7 +107,7 @@ return [
                 ],
                 [
                     'mod' => 'account.userTagWrite',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ]
             ]
