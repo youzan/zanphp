@@ -7,7 +7,7 @@ return [
             'sub' => [
                 [
                     'mod' => 'account.admin',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [

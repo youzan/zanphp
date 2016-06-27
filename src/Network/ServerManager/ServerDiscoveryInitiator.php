@@ -83,7 +83,7 @@ class ServerDiscoveryInitiator
             $novaConfig['path'] = Path::getRootPath() . $noNeedDiscovery['novaApi'][$appName]['path'];
             Nova::init($novaConfig);
             $services = Nova::getAvailableService();
-
+            $servers = [];
             $servers[$noNeedDiscovery['connection'][$appName]['host'].':'.$noNeedDiscovery['connection'][$appName]['port']] = [
                 'app_name' => $appName,
                 'host' => $noNeedDiscovery['connection'][$appName]['host'],
