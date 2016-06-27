@@ -77,32 +77,32 @@ return [
                 ],
                 [
                     'mod' => 'account.platformUser',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'account.userRead',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'account.userWrite',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'account.platformUserRead',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'account.platformUserWrite',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'account.userTagRead',
-                    'host' => 'http://192.168.66.207:8025',
+                    'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
                 ],
                 [
