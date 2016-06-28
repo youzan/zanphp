@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Http\Middleware;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Store\Facade\Cache;
 use Zan\Framework\Store\Facade\KV;
@@ -55,7 +56,7 @@ class Session
 
         $session = (yield Cache::get($this->config['store_key'], [$this->session_id]));
         if ($session) {
-            $this->session_map = unserialize($session);
+            $this->session_map = $this->unserialize($session);
         }
         yield true;
     }
@@ -100,5 +101,24 @@ class Session
         if ($this->isChanged) {
             yield Cache::set($this->config['store_key'], [$this->session_id], serialize($this->session_map));
         }
+    }
+
+
+    private static function unserialize($session) {
+        $sessionTable = array();
+        $offset = 0;
+        while ($offset < strlen($session)) {
+            if (!strstr(substr($session, $offset), "|")) {
+                throw new InvalidArgumentException("invalid data, remaining: " . substr($session, $offset));
+            }
+            $pos = strpos($session, "|", $offset);
+            $num = $pos - $offset;
+            $varname = substr($session, $offset, $num);
+            $offset += $num + 1;
+            $data = unserialize(substr($session, $offset));
+            $sessionTable[$varname] = $data;
+            $offset += strlen(serialize($data));
+        }
+        return $sessionTable;
     }
 }
