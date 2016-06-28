@@ -203,10 +203,11 @@ function getServerHandler()
 
 function getRequestUri($exclude='', $params=false,$hasProtocol = true){
     return new SysCall(function (Task $task) use ($exclude,$params,$hasProtocol) {
-        //$protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
-        $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https'?'https':'http';
         $context = $task->getContext();
         $request = $context->get('request');
+        $serverPotocol = $request->server->get('SERVER_PROTOCOL');;
+        //$protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+        $protocol = strtolower(substr($serverPotocol,0,5))=='https' ? 'https' : 'http';
         $uri = $request->server->get('REQUEST_URI');
         $host = $request->server->get('HTTP_HOST');
         $request_uri = $host . $uri;
