@@ -201,13 +201,18 @@ function getServerHandler()
     });
 }
 
-function getRequestUri($exclude='', $params=false){
-    return new SysCall(function (Task $task) use ($exclude,$params) {
+function getRequestUri($exclude='', $params=false,$hasProtocol = true){
+    return new SysCall(function (Task $task) use ($exclude,$params,$hasProtocol) {
+        //$protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
+        $protocol = strtolower(substr($_SERVER["SERVER_PROTOCOL"],0,5))=='https'?'https':'http';
         $context = $task->getContext();
         $request = $context->get('request');
         $uri = $request->server->get('REQUEST_URI');
         $host = $request->server->get('HTTP_HOST');
         $request_uri = $host . $uri;
+        if($hasProtocol){
+            $request_uri = $protocol.'://'.$request_uri;
+        }
         if($exclude) {
             $request_uri = preg_replace($exclude, '', $request_uri);
         }
