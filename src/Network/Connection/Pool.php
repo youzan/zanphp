@@ -49,6 +49,12 @@ class Pool implements ConnectionPool
 
     private function createConnect()
     {
+        $max = $this->poolConfig['pool']['maximum-connection-count'];
+        $min = $this->poolConfig['pool']['minimum-connection-count'];
+        $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
+        if($sumCount >= $max) {
+            return null;
+        }
         $connection = $this->factory->create();
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
@@ -79,7 +85,7 @@ class Pool implements ConnectionPool
     public function get()
     {
         if ($this->freeConnection->isEmpty()) {
-            return null;
+            return $this->createConnect();
         }
         $conn = $this->freeConnection->pop();
         $this->activeConnection->push($conn);
