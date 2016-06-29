@@ -36,10 +36,7 @@ class Container
     public function setMockInstance($abstract, $instance)
     {
         $abstract = $this->normalize($abstract);
-
-        if (!isset($this->mockInstances[$abstract])) {
-            $this->mockInstances[$abstract] = $instance;
-        }
+        $this->mockInstances[$abstract] = $instance;
     }
     
     public function addStub(Stub $stub)
