@@ -11,6 +11,7 @@ namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\KV\KVStore;
@@ -21,6 +22,7 @@ class KV
     private $namespace;
     private $setName;
 
+    private static $_configMap = null;
     private static $_instance = null;
 
 
@@ -49,113 +51,195 @@ class KV
     }
 
     /**
-     * @param $config
-     * @param $key
+     * @param $configMap
+     */
+    public static function initConfigMap($configMap)
+    {
+        self::$_configMap = $configMap;
+    }
+
+    /**
+     * @param $configKey
+     * @param $keys
+     * @param string|int|double $value
+     * @return \Generator|void
+     */
+    public static function set($configKey, $keys, $value)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $realKey = self::getRealKey($config, $keys);
+
+        $kvObj = self::init($config['namespace'], $config['set']);
+        $conn = (yield $kvObj->getConnection($config['connection']));
+        $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+        yield $kv->set($realKey, KVStore::DEFAULT_BIN_NAME, $value, $ttl);
+    }
+
+    /**
+     * @param $configKey
+     * @param $keys
+     * @param $binName
      * @param $value
-     * @param int $ttl
      * @return \Generator|void
-     * @throws Exception
+     * @throws InvalidArgumentException
      */
-    public static function set($config, $key, $value, $ttl = 0)
+    public static function hSet($configKey, $keys, $binName, $value)
     {
-        $config = Config::get('kvstore.' . $config);
+        $config = self::getConfigCacheKey($configKey);
         if (!self::validConfig($config)) {
             yield false;
             return;
         }
+        $realKey = self::getRealKey($config, $keys);
+
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->set($key, $value, $ttl);
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+        yield $kv->set($realKey, $binName, $value, $ttl);
     }
 
     /**
-     * @param $config
-     * @param $key
-     * @param array $value
-     * @param int $ttl
+     * @param $configKey
+     * @param $keys
+     * @param array $binList
      * @return \Generator|void
+     * @throws InvalidArgumentException
      */
-    public static function setList($config, $key, array $value, $ttl = 0)
+    public static function hMSet($configKey, $keys, array $binList)
     {
-        $config = Config::get('kvstore.' . $config);
+        $config = self::getConfigCacheKey($configKey);
         if (!self::validConfig($config)) {
             yield false;
             return;
         }
+        $realKey = self::getRealKey($config, $keys);
+
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->setList($key, $value, $ttl);
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+        yield $kv->setMulti($realKey, $binList, $ttl);
     }
 
     /**
-     * @param $config
-     * @param $key
-     * @param array $value
-     * @param int $ttl
+     * @param $configKey
+     * @param $keys
+     * @param null $binName
+     * @param int $value
      * @return \Generator|void
      */
-    public static function setMap($config, $key, array $value, $ttl = 0)
+    public static function incr($configKey, $keys, $binName = null, $value = 1)
     {
-        $config = Config::get('kvstore.' . $config);
+        $config = self::getConfigCacheKey($configKey);
         if (!self::validConfig($config)) {
             yield false;
             return;
         }
-        $kvObj = self::init($config['namespace'], $config['set']);
-        $conn = (yield $kvObj->getConnection($config['connection']));
-        $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->setMap($key, $value, $ttl);
-    }
+        $realKey = self::getRealKey($config, $keys);
 
-    public static function incr($config, $key, $value = 1)
-    {
-        $config = Config::get('kvstore.' . $config);
-        if (!self::validConfig($config)) {
-            yield false;
-            return;
-        }
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->incr($key, $value);
+        yield $kv->incr($realKey, $value, $binName);
     }
 
     /**
-     * @param $key
-     * @param string $config
+     * @param $configKey
+     * @param $keys
      * @return \Generator|void
+     * @throws InvalidArgumentException
      */
-    public static function get($config, $key)
+    public static function get($configKey, $keys)
     {
-        $config = Config::get('kvstore.' . $config);
+        $config = self::getConfigCacheKey($configKey);
         if (!self::validConfig($config)) {
             yield false;
             return;
         }
+        $realKey = self::getRealKey($config, $keys);
+
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->get($key);
+        yield $kv->get($realKey);
     }
 
     /**
-     * @param $key
-     * @return \Generator
-     * @throws Exception
+     * @param $configKey
+     * @param $keys
+     * @param $binName
+     * @return \Generator|void
+     * @throws InvalidArgumentException
      */
-    public static function remove($config, $key)
+    public static function hGet($configKey, $keys, $binName)
     {
-        $config = Config::get('kvstore.' . $config);
+        $config = self::getConfigCacheKey($configKey);
         if (!self::validConfig($config)) {
             yield false;
             return;
         }
+        $realKey = self::getRealKey($config, $keys);
+
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->remove($key);
+        yield $kv->get($realKey, $binName);
+    }
+
+    public static function hMGet($configKey, $keys, array $binNameList)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $realKey = self::getRealKey($config, $keys);
+
+        $kvObj = self::init($config['namespace'], $config['set']);
+        $conn = (yield $kvObj->getConnection($config['connection']));
+        $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
+        yield $kv->getMulti($realKey, $binNameList);
+    }
+
+    public static function hGetAll($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $realKey = self::getRealKey($config, $keys);
+
+        $kvObj = self::init($config['namespace'], $config['set']);
+        $conn = (yield $kvObj->getConnection($config['connection']));
+        $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
+        yield $kv->getAll($realKey);
+    }
+
+        /**
+     * @param $configKey
+     * @param $keys
+     * @return \Generator|void
+     */
+    public static function remove($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $realKey = self::getRealKey($config, $keys);
+
+        $kvObj = self::init($config['namespace'], $config['set']);
+        $conn = (yield $kvObj->getConnection($config['connection']));
+        $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
+        yield $kv->remove($realKey);
     }
 
     /**
@@ -191,5 +275,38 @@ class KV
         }
 
         return true;
+    }
+
+    private static function getRealKey($config, $keys){
+        $format = isset($config['key']) ? $config['key'] : null ;
+        if($keys === null){
+            if ($format === null) {
+                throw new InvalidArgumentException('expect keys is string or array, null given');
+            }
+            return $format;
+        }
+        if(!is_array($keys)){
+            $keys = [$keys];
+        }
+
+        array_unshift($keys, $format);
+        $key = call_user_func_array('sprintf', $keys);
+        return $key;
+    }
+
+    private static function getConfigCacheKey($configKey)
+    {
+        $result = self::$_configMap;
+        $routes = explode('.', $configKey);
+        if (empty($routes)) {
+            return null;
+        }
+        foreach ($routes as $route) {
+            if (!isset($result[$route])) {
+                return null;
+            }
+            $result = &$result[$route];
+        }
+        return $result;
     }
 }

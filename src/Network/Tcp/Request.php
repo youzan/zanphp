@@ -10,6 +10,9 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class Request implements BaseRequest {
     private $data;
@@ -170,8 +173,10 @@ class Request implements BaseRequest {
             
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;
-                echo "heartbeating ...\n";
-                return ;
+//                echo "heartbeating ...\n";
+                $data = null;
+                nova_encode($this->serviceName, 'pong', $this->remoteIp, $this->remotePort, $this->seqNo, '', '', $data);
+                return $data;
             }
             
             $this->formatRoute();

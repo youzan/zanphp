@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Http\Response\BaseResponse;
@@ -52,8 +53,12 @@ class RequestTask
         try{
             yield $this->doRun();
         } catch (\Exception $e) {
+            if (Debug::get()) {
+                echo_exception($e);
+            }
             $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
             Task::execute($coroutine, $this->context);
+            echo_exception($e);
             $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
     }

@@ -10,8 +10,8 @@
 namespace Zan\Framework\Network\Connection\Factory;
 
 use Zan\Framework\Contract\Network\ConnectionFactory;
+use swoole_redis as SwooleRedis;
 use \Zan\Framework\Network\Connection\Driver\Redis as Client;
-use Zan\Framework\Store\NoSQL\Redis\RedisClient;
 
 class Redis implements ConnectionFactory
 {
@@ -28,15 +28,18 @@ class Redis implements ConnectionFactory
     
     public function create()
     {
-        $this->conn = new RedisClient($this->config['host'], $this->config['port']);
-        $redis = new Client();
-        $redis->setSocket($this->conn);
-        $redis->setConfig($this->config);
-        return $redis;
+        $this->conn = new SwooleRedis();
+        $connection = new Client();
+        $connection->setSocket($this->conn);
+        $connection->setConfig($this->config);
+        $connection->init();
+
+        //call connect
+        $this->conn->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
+        return $connection;
     }
 
     public function close()
     {
     }
-
 }

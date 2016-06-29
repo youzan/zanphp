@@ -16,6 +16,7 @@ use Zan\Framework\Utilities\Types\Time;
 class RequestHandler {
     private $swooleServer = null;
     private $context = null;
+    private $request = null;
     private $response = null;
     private $fd = null;
     private $fromId = null;
@@ -33,10 +34,10 @@ class RequestHandler {
 
     public function handle(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
+
         $this->swooleServer = $swooleServer;
         $this->fd = $fd;
         $this->fromId = $fromId;
-
         $this->doRequest($data);
     }
 
@@ -52,10 +53,10 @@ class RequestHandler {
         $this->context->set('request_end_event_name', $this->getRequestFinishJobId());
 
         try {
-            $request->decode();
+            $result = $request->decode();
+            $this->request = $request;
             if ($request->getIsHeartBeat()) {
-                $this->swooleServer->send($this->fd, $data);
-                Worker::instance()->reactionRelease();
+                $this->swooleServer->send($this->fd, $result);
                 return;
             }
 
@@ -67,10 +68,10 @@ class RequestHandler {
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
             Timer::after($request_timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
 
+            Worker::instance()->reactionReceive();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
         } catch(\Exception $e) {
-            Worker::instance()->reactionRelease();
             if (Debug::get()) {
                 echo_exception($e);
             }
@@ -88,6 +89,15 @@ class RequestHandler {
     }
     public function handleTimeout()
     {
+        if (Debug::get()) {
+            printf(
+                "[%s] TIMEOUT %s %s\n",
+                Time::current('Y-m-d H:i:s'),
+                $this->request->getRoute(),
+                http_build_query($this->request->getArgs())
+            );
+        }
+        
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
         $this->response->sendException($e);

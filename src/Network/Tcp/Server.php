@@ -2,7 +2,8 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Network\ServerManager\ServerStore;
+use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
@@ -14,6 +15,9 @@ use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
+use Zan\Framework\Foundation\Container\Di;
 
 class Server extends ServerBase {
 
@@ -24,9 +28,10 @@ class Server extends ServerBase {
 
     protected $workerStartItems = [
         InitializeConnectionPool::class,
-        InitializeWorkerMonitor::class
+        InitializeWorkerMonitor::class,
+        InitializeServerDiscovery::class,
     ];
-    
+
     /**
      * @var SwooleServer
      */
@@ -72,16 +77,17 @@ class Server extends ServerBase {
         }
         $config['path'] = Path::getRootPath() . $config['path'];
         Nova::init($config);
+
+        $config = Config::get('haunt');
+        if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
+            ServerStore::getInstance()->resetLockDiscovery();
+        }
     }
 
     private function registerServices()
     {
-        $config = Config::get('nova.platform');
-        $config['services'] = Nova::getAvailableService();
-
         $appName = Application::getInstance()->getName();
         $config['module'] = $appName;
-
         $this->swooleServer->nova_config($config);
     }
 
@@ -98,6 +104,7 @@ class Server extends ServerBase {
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
+        Di::make(InitializeServerRegister::class)->bootstrap($this);
         echo "server starting .....\n";
     }
 
@@ -110,7 +117,6 @@ class Server extends ServerBase {
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        
         echo "worker #$workerId starting .....\n";
     }
 
@@ -131,7 +137,6 @@ class Server extends ServerBase {
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-        Worker::instance()->reactionReceive();
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
     

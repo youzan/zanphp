@@ -10,6 +10,7 @@ use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
@@ -32,6 +33,8 @@ class Mysqli implements DriverInterface
     private $callback;
 
     private $result;
+
+    private $trace;
 
     const DEFAULT_QUERY_TIMEOUT = 3000;
 
@@ -61,6 +64,11 @@ class Mysqli implements DriverInterface
      */
     public function query($sql)
     {
+        $this->trace = (yield getContext('trace'));
+        if ($this->trace) {
+            $this->trace->transactionBegin(Constant::SQL, $sql);
+        }
+
         $config = $this->connection->getConfig();
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_QUERY_TIMEOUT;
         $this->sql = $sql;
@@ -77,6 +85,7 @@ class Mysqli implements DriverInterface
     public function onSqlReady($link, $result)
     {
         Timer::clearAfterJob(spl_object_hash($this));
+
         $exception = null;
         if ($result === false) {
             if (in_array($link->_errno, [2013, 2006])) {
@@ -85,7 +94,7 @@ class Mysqli implements DriverInterface
             } elseif ($link->_errno == 1064) {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliSqlSyntaxException($error);
+                $exception = new MysqliSqlSyntaxException($error . ':' . $this->sql);
             } elseif ($link->_errno == 1062) {
                 $error = $link->_error;
                 $this->connection->release();
@@ -93,15 +102,25 @@ class Mysqli implements DriverInterface
             } else {
                 $error = $link->_error;
                 $this->connection->release();
-                $exception = new MysqliQueryException($error);
+                $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }
+
+            if ($this->trace) {
+                $this->trace->commit($exception->getTraceAsString());
+            }
+        } else if ($this->trace) {
+            $this->trace->commit(Constant::SUCCESS);
         }
+
         $this->result = $result;
         call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
     }
 
     public function onQueryTimeout()
     {
+        if ($this->trace) {
+            $this->trace->commit("SQL query timeout");
+        }
         $this->connection->close();
         //TODO: sql记入日志
         call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException()]);

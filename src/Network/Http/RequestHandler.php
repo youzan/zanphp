@@ -6,11 +6,11 @@ use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
-use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\InternalErrorResponse;
+use Zan\Framework\Network\Http\Response\JsonResponse;
 use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
@@ -49,11 +49,11 @@ class RequestHandler
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
             Timer::after($timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
 
+            Worker::instance()->reactionReceive();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
 
         } catch (\Exception $e) {
-            Worker::instance()->reactionRelease();
             if (Debug::get()) {
                 echo_exception($e); 
             }
@@ -71,8 +71,7 @@ class RequestHandler
         $this->context->set('swoole_response', $swooleResponse);
 
         $router = Router::getInstance();
-        $router->route($request);
-        $route = $router->parseRoute();
+        $route = $router->route($request);
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
 
@@ -97,7 +96,18 @@ class RequestHandler
     public function handleTimeout()
     {
         $this->task->setStatus(Signal::TASK_KILLED);
-        $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        $request = $this->context->get('request');
+        if ($request && $request->wantsJson()) {
+            // @TODO 分配code
+            $data = [
+                'code' => 10000,
+                'msg' => '网络超时',
+                'data' => '',
+            ];
+            $response = new JsonResponse($data, BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        } else {
+            $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        }
         $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);

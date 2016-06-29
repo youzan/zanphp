@@ -42,14 +42,23 @@ class Request extends BaseRequest implements Arrayable, RequestContract
                 $server[$newKey] = $value;
             }
         }
-
         $request = new static($get, $post, $attributes, $cookie, $files, $server);
 
-        if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
-            && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
-        ) {
-            parse_str($request->getContent(), $data);
-            $request->request = new ParameterBag($data);
+        // parse http body
+        $contentType = $request->headers->get('CONTENT_TYPE');
+        $requestMethod = strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
+        if (in_array($requestMethod, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
+            $data = [];
+
+            if ($request->isJson()) {
+                $data = json_decode($swooleRequest->rawContent(), true, 512, JSON_BIGINT_AS_STRING);
+                $request->json = new ParameterBag($data);
+            } elseif (0 === strpos($contentType, 'application/x-www-form-urlencoded')) {
+                parse_str($swooleRequest->rawContent(), $data);
+            }
+            if ($data) {
+                $request->request = new ParameterBag($data);
+            }
         }
 
         return $request;
@@ -121,8 +130,8 @@ class Request extends BaseRequest implements Arrayable, RequestContract
     public function getFullUrlWithAddedQuery(array $query)
     {
         return count($this->get()) > 0
-                        ? $this->getUrl().'/?'.http_build_query(array_merge($this->get(), $query))
-                        : $this->getFullUrl().'?'.http_build_query($query);
+            ? $this->getUrl().'/?'.http_build_query(array_merge($this->get(), $query))
+            : $this->getFullUrl().'?'.http_build_query($query);
     }
 
     /**
@@ -631,6 +640,18 @@ class Request extends BaseRequest implements Arrayable, RequestContract
         if (Str::startsWith($header, 'Bearer ')) {
             return Str::substr($header, 7);
         }
+    }
+
+    /**
+     * Returns the request body content.
+     *
+     * @param bool $asResource
+     * @return string The request body content.
+     *
+     */
+    public function getContent($asResource = false)
+    {
+        return $this->content;
     }
 
     public function getRoute()

@@ -25,7 +25,15 @@ class KVStore implements ConnectionFactory
     public function create()
     {
         $this->conn = new \swoole_aerospike();
-        $this->conn->init($this->config['user'], $this->config['password'], $this->config['ip_list']);
+
+        $hosts = '';
+        if (is_array($this->config['ip_list'])) {
+            $hosts = implode(';', $this->config['ip_list']);
+        } else {
+            $hosts = $this->config['ip_list'];
+        }
+
+        $this->conn->init($this->config['user'], $this->config['password'], $hosts);
 
         $connection = new Client();
         $connection->setSocket($this->conn);
