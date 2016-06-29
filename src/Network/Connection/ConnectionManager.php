@@ -48,6 +48,7 @@ class ConnectionManager
             yield $connection;
             return;
         }
+        $pool->waitNum++;
         yield new FutureConnection($this, $connKey, $timeout);
     }
 

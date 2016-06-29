@@ -28,6 +28,8 @@ class Pool implements ConnectionPool
 
     private $type = null;
 
+    public $waitNum = 0;
+
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
         $this->poolConfig = $config;
@@ -39,6 +41,10 @@ class Pool implements ConnectionPool
     public function init()
     {
         $initConnection = $this->poolConfig['pool']['init-connection'];
+        $min = $this->poolConfig['pool']['minimum-connection-count'];
+        if ($initConnection < $min) {
+            $initConnection = $min;
+        }
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
         for ($i = 0; $i < $initConnection; $i++) {
@@ -50,7 +56,6 @@ class Pool implements ConnectionPool
     private function createConnect()
     {
         $max = $this->poolConfig['pool']['maximum-connection-count'];
-        $min = $this->poolConfig['pool']['minimum-connection-count'];
         $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
         if($sumCount >= $max) {
             return null;
@@ -107,6 +112,7 @@ class Pool implements ConnectionPool
         if (count($this->freeConnection) == 1) {
             $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
+            $this->waitNum = $this->waitNum >0 ? $this->waitNum-- : 0 ;
         }
     }
 
