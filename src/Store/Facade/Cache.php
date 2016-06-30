@@ -58,6 +58,23 @@ class Cache {
         yield call_user_func_array([$redis, $func], $args);
     }
 
+    public static function get($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->get($realKey));
+        $result = self::decode($result);
+        yield $result;
+    }
+
     public static function set($configKey, $keys, $value)
     {
         $config = self::getConfigCacheKey($configKey);
@@ -71,6 +88,7 @@ class Cache {
 
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
+        $value = json_encode($value);
         $result = (yield $redis->set($realKey, $value));
         if ($result) {
             $ttl = isset($config['exp']) ? $config['exp'] : 0;
@@ -144,5 +162,20 @@ class Cache {
             $result = &$result[$route];
         }
         return $result;
+    }
+
+    /**
+     * @param $value
+     * @return mixed
+     */
+    private static function decode($value)
+    {
+        if(strpos($value,'a:') === 0){
+            $value = unserialize($value);
+        }elseif(preg_match('/^\s*[\[|\{].*[\]|\}\s*$]/',$value)){
+            $value = json_decode($value,true);
+        }
+
+        return $value;
     }
 }
