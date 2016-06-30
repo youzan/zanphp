@@ -29,9 +29,8 @@ class Flow
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
         $dbResult = (yield $driver->query($sqlMap['sql']));
-
         if (isset($sqlMap['count_alias'])) {
-            $dbResult->setCountAlias($sqlMap['count_alias']);
+            $driver->setCountAlias($sqlMap['count_alias']);
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();

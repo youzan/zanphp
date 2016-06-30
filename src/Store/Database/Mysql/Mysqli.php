@@ -36,6 +36,8 @@ class Mysqli implements DriverInterface
 
     private $trace;
 
+    private $countAlias;
+
     const DEFAULT_QUERY_TIMEOUT = 3000;
 
     public function __construct(Connection $connection)
@@ -51,6 +53,16 @@ class Mysqli implements DriverInterface
     public function getConnection()
     {
         return $this->connection;
+    }
+
+    public function setCountAlias($countAlias)
+    {
+        $this->countAlias = $countAlias;
+    }
+
+    public function getCountAlias()
+    {
+        return $this->countAlias;
     }
 
     public function execute(callable $callback, $task)
