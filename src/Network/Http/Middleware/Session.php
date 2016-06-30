@@ -56,7 +56,7 @@ class Session
 
         $session = (yield Cache::get($this->config['store_key'], [$this->session_id]));
         if ($session) {
-            $this->session_map = $this->unserialize($session);
+            $this->session_map = $this->sessionDecode($session);
         }
         yield true;
     }
@@ -99,12 +99,12 @@ class Session
 
     public function writeBack() {
         if ($this->isChanged) {
-            yield Cache::set($this->config['store_key'], [$this->session_id], serialize($this->session_map));
+            yield Cache::set($this->config['store_key'], [$this->session_id], $this->sessionEncode($this->session_map));
         }
     }
 
 
-    private static function unserialize($session) {
+    private static function sessionDecode($session) {
         $sessionTable = array();
         $offset = 0;
         while ($offset < strlen($session)) {
@@ -120,5 +120,24 @@ class Session
             $offset += strlen(serialize($data));
         }
         return $sessionTable;
+    }
+
+
+    public static function sessionEncode( array $data ) {
+        $ret = '';
+        foreach ( $data as $key => $value ) {
+            if ( strcmp( $key, intval( $key ) ) === 0 ) {
+                throw new InvalidArgumentException( "Ignoring unsupported integer key \"$key\"" );
+            }
+            if ( strcspn( $key, '|!' ) !== strlen( $key ) ) {
+                throw new InvalidArgumentException( "Serialization failed: Key with unsupported characters \"$key\"" );
+            }
+            $v = serialize( $value );
+            if ( $v === null ) {
+                return null;
+            }
+            $ret .= "$key|$v";
+        }
+        return $ret;
     }
 }
