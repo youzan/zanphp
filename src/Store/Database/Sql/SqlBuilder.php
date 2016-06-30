@@ -67,8 +67,9 @@ class SqlBuilder
         if (!$data || !isset($data['count']) || '' == $data['count']) {
             throw new SqlBuilderException('what field do you want count?');
         }
-        $count = 'count(' . $data['count'] . ') as count_sql_rows';
+        $count = 'count(' . $data['count'] . ')';
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
+        $this->sqlMap['count_alias'] = 'count[' . $data['count'] . ']';
         return $this;
     }
 
