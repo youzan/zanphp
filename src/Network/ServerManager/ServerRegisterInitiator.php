@@ -23,7 +23,6 @@ class ServerRegisterInitiator
     public function init()
     {
         //TODO: check config position
-        $config = Config::get('nova.platform');
         $config['services'] = Nova::getAvailableService();
         $haunt = Config::get('haunt.register');
         $enableRegister = isset($haunt['enable_register']) ? $haunt['enable_register'] : self::ENABLE_REGISTER;

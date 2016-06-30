@@ -18,6 +18,8 @@ class MysqliResult implements DbResultInterface
      */
     private $driver;
 
+    private $countAlias;
+
     /**
      * FutureResult constructor.
      * @param DriverInterface $driver
@@ -54,5 +56,12 @@ class MysqliResult implements DbResultInterface
     {
         yield $this->driver->releaseConnection();
         yield $this->driver->getResult();
+    }
+
+    public function getCountRows()
+    {
+        $rows = (yield $this->fetchRows());
+        $countAlias = $this->driver->getCountAlias();
+        yield !isset($rows[0][$countAlias]) ? 0 : (int)$rows[0][$countAlias];
     }
 }

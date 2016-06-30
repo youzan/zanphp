@@ -19,7 +19,7 @@ class Flow
     const CONNECTION_STACK = 'connection_stack';
 
     private $engineMap = [
-        'Mysqli' => 'Zan\Framework\Store\Database\Mysql\Mysqli',
+        'Mysqli' => Mysqli::class,
     ];
 
     public function query($sid, $data, $options)
@@ -29,6 +29,9 @@ class Flow
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
         $dbResult = (yield $driver->query($sqlMap['sql']));
+        if (isset($sqlMap['count_alias'])) {
+            $driver->setCountAlias($sqlMap['count_alias']);
+        }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         yield $resultFormatter->format();
     }
