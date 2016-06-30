@@ -58,13 +58,10 @@ class MysqliResult implements DbResultInterface
         yield $this->driver->getResult();
     }
 
-    public function setCountAlias($countAlias)
+    public function getCountRows()
     {
-        $this->countAlias = $countAlias;
-    }
-
-    public function getCountAlias()
-    {
-        yield $this->countAlias;
+        $rows = (yield $this->fetchRows());
+        $countAlias = $this->driver->getCountAlias();
+        yield !isset($rows[0][$countAlias]) ? 0 : (int)$rows[0][$countAlias];
     }
 }
