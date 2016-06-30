@@ -69,7 +69,7 @@ class SqlBuilder
         }
         $count = 'count(' . $data['count'] . ')';
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
-        $this->sqlMap['count_alias'] = 'count[' . $data['count'] . ']';
+        $this->sqlMap['count_alias'] = $count;
         return $this;
     }
 
