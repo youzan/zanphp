@@ -47,7 +47,6 @@ class Cache {
             yield false;
             return;
         }
-
         $redisObj = self::init($config['connection']);
         $conn = (yield $redisObj->getConnection($config['connection']));
 
@@ -82,7 +81,6 @@ class Cache {
             yield false;
             return;
         }
-
         $redisObj = self::init($config['connection']);
         $conn = (yield $redisObj->getConnection($config['connection']));
 
