@@ -117,7 +117,7 @@ class Mysqli implements DriverInterface
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
             } else {
                 $error = $link->_error;
-                $this->connection->release();
+                $this->connection->close();
                 $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }
 
