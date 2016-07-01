@@ -88,7 +88,9 @@ class Cache {
 
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
-        $value = json_encode($value);
+        if (is_array($value)) {
+            $value = json_encode($value);
+        }
         $result = (yield $redis->set($realKey, $value));
         if ($result) {
             $ttl = isset($config['exp']) ? $config['exp'] : 0;
