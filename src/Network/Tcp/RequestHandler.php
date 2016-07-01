@@ -7,6 +7,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
@@ -97,7 +98,7 @@ class RequestHandler {
                 http_build_query($this->request->getArgs())
             );
         }
-        
+        ConnectionManager::getInstance()->reloadConnectionByRequestTimeout();
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
         $this->response->sendException($e);

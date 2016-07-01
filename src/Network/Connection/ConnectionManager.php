@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Connection;
 
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
@@ -43,8 +44,8 @@ class ConnectionManager
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
         }     
         $pool = self::$poolMap[$connKey];
-        $connection = $pool->get();
-        if($connection){
+        $connection = (yield $pool->get());
+        if ($connection) {
             yield $connection;
             return;
         }
@@ -98,5 +99,19 @@ class ConnectionManager
 
     public function setServer($server) {
         self::$server = $server;
+    }
+
+    public function reloadConnectionByRequestTimeout()
+    {
+        foreach (self::$poolMap as $pool) {
+            if ($pool instanceof Pool) {
+                $connections =$pool->getActiveConnectionsFromContext();
+                foreach ($connections as $connection) {
+                    if (null != $connection && $connection instanceof Connection) {
+                        $connection->close();
+                    }
+                }
+            }
+        }
     }
 }
