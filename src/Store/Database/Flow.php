@@ -38,7 +38,9 @@ class Flow
 
     public function beginTransaction()
     {
-        yield setContext('begin_transaction', true);
+        $taskId = (yield getTaskId());
+        $key = (string)('begin_transaction_' . $taskId); 
+        yield setContext($key, true);
     }
 
     public function commit()
@@ -73,7 +75,9 @@ class Flow
 
     private function getConnection($database)
     {
-        $beginTransaction = (yield getContext('begin_transaction', false));
+        $taskId = (yield getTaskId());
+        $key = (string)('begin_transaction_' . $taskId);
+        $beginTransaction = (yield getContext($key, false));
         if (!$beginTransaction) {
             yield $this->getConnectionByConnectionManager($database);
             return;
@@ -100,7 +104,9 @@ class Flow
         $connection = $connectionStack->pop();
         yield setContext(self::CONNECTION_STACK, $connectionStack->isEmpty() === true ? null : $connectionStack);
         if (true === $connectionStack->isEmpty()) {
-            yield setContext('begin_transaction', false);
+            $taskId = (yield getTaskId());
+            $key = (string)('begin_transaction_' . $taskId);
+            yield setContext($key, false);
         }
         yield $connection;
     }
