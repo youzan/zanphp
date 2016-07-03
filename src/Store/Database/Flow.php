@@ -113,9 +113,10 @@ class Flow
             throw new GetConnectionException('commit or rollback get connection error');
         }
         /**
-         * 从stack里取出最后存进去的链接 不能pop 要保留链接
+         * 从stack里取出最后存进去的链接 pop后要放回去 要保留链接
          */
-        $connection = $connectionStack->current();
+        $connection = $connectionStack->pop();
+        $connectionStack->push($connection);
         yield $connection;
     }
 
