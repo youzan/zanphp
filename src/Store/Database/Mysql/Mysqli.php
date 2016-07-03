@@ -174,7 +174,9 @@ class Mysqli implements DriverInterface
 
     public function releaseConnection()
     {
-        $beginTransaction = (yield getContext('begin_transaction', false));
+        $taskId = (yield getTaskId());
+        $key = (string)('begin_transaction_' . $taskId);
+        $beginTransaction = (yield getContext($key, false));
         if ($beginTransaction === false) {
             $this->connection->release();
         }
