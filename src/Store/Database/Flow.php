@@ -12,6 +12,7 @@ use Zan\Framework\Store\Database\Sql\SqlMap;
 use Zan\Framework\Store\Database\Sql\Table;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Connection\Driver\Mysqli as MysqliConnection;
 
 class Flow
 {
@@ -57,6 +58,7 @@ class Flow
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
         yield $driver->commit();
+        yield $this->finishTransaction();
         return;
     }
 
@@ -65,6 +67,7 @@ class Flow
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
         yield $driver->rollback();
+        yield $this->finishTransaction();
         return;
     }
 
@@ -106,16 +109,46 @@ class Flow
     {
         $taskId = (yield getTaskId());
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
-        if (null == $connectionStack) {
+        if (null == $connectionStack or $connectionStack->isEmpty()) {
             throw new GetConnectionException('commit or rollback get connection error');
         }
+        /**
+         * 从stack里取出最后存进去的链接 不能pop 要保留链接
+         */
+        $connection = $connectionStack->current();
+        yield $connection;
+    }
+
+    private function finishTransaction()
+    {
+        $taskId = (yield getTaskId());
+        $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
+        if (null == $connectionStack or $connectionStack->isEmpty()) {
+            return;
+        }
+        /**
+         *  出栈,丢弃已经成功commit或者rollback的链接
+         */
+        /** @var MysqliConnection $connection */
         $connection = $connectionStack->pop();
-        yield setContext(sprintf(self::CONNECTION_STACK, $taskId), $connectionStack->isEmpty() === true ? null : $connectionStack);
+        if ($connection === null or !$connection instanceof MysqliConnection) {
+            return;
+        }
+        $config = $connection->getConfig();
+        /**
+         * 重置CONNECTION_CONTEXT中的链接
+         */
+        if (isset($config['database'])) {
+            yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['database']), null);
+        }
+        yield setContext(sprintf(self::CONNECTION_STACK, $taskId), $connectionStack->isEmpty() ? null : $connectionStack);
+        /**
+         * 这里不方便取database 所以没有重置CONNECTION_CONTEXT里保存的链接 bug
+         */
         if (true === $connectionStack->isEmpty()) {
             $taskId = (yield getTaskId());
             yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
         }
-        yield $connection;
     }
 
     private function getConnectionByConnectionManager($database)
