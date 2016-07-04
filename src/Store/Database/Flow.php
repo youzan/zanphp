@@ -12,7 +12,8 @@ use Zan\Framework\Store\Database\Sql\SqlMap;
 use Zan\Framework\Store\Database\Sql\Table;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Network\Connection\Driver\Mysqli as MysqliConnection;
+use Zan\Framework\Store\Database\Exception\CanNotGetConnectionException;
+use Zan\Framework\Store\Database\Exception\DbCommitFailException;
 
 class Flow
 {
@@ -57,7 +58,15 @@ class Flow
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
-        yield $driver->commit();
+        try {
+            $commit = (yield $driver->commit());
+        } catch (\Exception $e) {
+            throw new DbCommitFailException();
+        }
+        if (true === $commit) {
+            $connection->release();
+            return;
+        }
         yield $this->finishTransaction();
         return;
     }
@@ -80,7 +89,7 @@ class Flow
     private function parseEngine($engine)
     {
         if (!isset($this->engineMap[$engine])) {
-            throw new GetConnectionException('can\'t find database engine : '.$engine);
+            throw new CanNotGetConnectionException('can\'t find database engine : '.$engine);
         }
         return $this->engineMap[$engine];
     }
@@ -130,9 +139,9 @@ class Flow
         /**
          *  出栈,丢弃已经成功commit或者rollback的链接
          */
-        /** @var MysqliConnection $connection */
+        /** @var Connection $connection */
         $connection = $connectionStack->pop();
-        if ($connection === null or !$connection instanceof MysqliConnection) {
+        if ($connection === null or !$connection instanceof Connection) {
             return;
         }
         $config = $connection->getConfig();

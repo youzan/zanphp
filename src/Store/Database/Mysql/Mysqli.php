@@ -162,7 +162,6 @@ class Mysqli implements DriverInterface
         if (!$commit) {
             throw new MysqliTransactionException('mysqli commit error');
         }
-        $this->connection->release();
         yield $commit;
     }
 
