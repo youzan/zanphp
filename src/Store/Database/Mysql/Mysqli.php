@@ -171,7 +171,6 @@ class Mysqli implements DriverInterface
         if (!$rollback) {
             throw new MysqliTransactionException('mysqli rollback error');
         }
-        $this->connection->release();
         yield $rollback;
     }
 

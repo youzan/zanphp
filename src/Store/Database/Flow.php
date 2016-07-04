@@ -12,8 +12,11 @@ use Zan\Framework\Store\Database\Sql\SqlMap;
 use Zan\Framework\Store\Database\Sql\Table;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Store\Database\Exception\CanNotGetConnectionException;
+use Zan\Framework\Store\Database\Exception\CanNotFindDatabaseEngineException;
 use Zan\Framework\Store\Database\Exception\DbCommitFailException;
+use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByStackException;
+use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByConnectionManagerException;
+use Zan\Framework\Store\Database\Exception\DbRollbackFailException;
 
 class Flow
 {
@@ -64,20 +67,28 @@ class Flow
             throw new DbCommitFailException();
         }
         if (true === $commit) {
-            $connection->release();
+            $this->finishTransaction();
             return;
         }
-        yield $this->finishTransaction();
-        return;
+        throw new DbCommitFailException();
     }
 
     public function rollback()
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
-        yield $driver->rollback();
-        yield $this->finishTransaction();
-        return;
+        try {
+            $rollback = (yield $driver->rollback());
+        } catch (\Exception $e) {
+            $this->dealRollbackError();
+            throw new DbRollbackFailException();
+        }
+        if (true === $rollback) {
+            $this->finishTransaction();
+            return;
+        }
+        $this->dealRollbackError();
+        throw new DbRollbackFailException();
     }
 
     private function getDriver(Connection $connection)
@@ -89,7 +100,7 @@ class Flow
     private function parseEngine($engine)
     {
         if (!isset($this->engineMap[$engine])) {
-            throw new CanNotGetConnectionException('can\'t find database engine : '.$engine);
+            throw new CanNotFindDatabaseEngineException('can\'t find database engine : '.$engine);
         }
         return $this->engineMap[$engine];
     }
@@ -119,13 +130,10 @@ class Flow
         $taskId = (yield getTaskId());
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
         if (null == $connectionStack or $connectionStack->isEmpty()) {
-            throw new GetConnectionException('commit or rollback get connection error');
+            throw new CanNotGetConnectionByStackException('commit or rollback get connection error');
         }
-        /**
-         * 从stack里取出最后存进去的链接 pop后要放回去 要保留链接
-         */
         $connection = $connectionStack->pop();
-        $connectionStack->push($connection);
+        $connectionStack->add($connectionStack->count(), $connection);
         yield $connection;
     }
 
@@ -134,30 +142,42 @@ class Flow
         $taskId = (yield getTaskId());
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
         if (null == $connectionStack or $connectionStack->isEmpty()) {
+            yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
             return;
         }
-        /**
-         *  出栈,丢弃已经成功commit或者rollback的链接
-         */
-        /** @var Connection $connection */
+
         $connection = $connectionStack->pop();
-        if ($connection === null or !$connection instanceof Connection) {
-            return;
+        $connection->release();
+        
+        if ($connectionStack->isEmpty()) {
+            yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
+            yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
         }
         $config = $connection->getConfig();
-        /**
-         * 重置CONNECTION_CONTEXT中的链接
-         */
-        if (isset($config['database'])) {
-            yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['database']), null);
+        if (isset($config['pool']['pool_name'])) {
+            yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['pool']['pool_name']), null);
         }
-        yield setContext(sprintf(self::CONNECTION_STACK, $taskId), $connectionStack->isEmpty() ? null : $connectionStack);
-        /**
-         * 这里不方便取database 所以没有重置CONNECTION_CONTEXT里保存的链接 bug
-         */
-        if (true === $connectionStack->isEmpty()) {
-            $taskId = (yield getTaskId());
+    }
+
+    private function dealRollbackError()
+    {
+        $taskId = (yield getTaskId());
+        $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
+        if (null == $connectionStack or $connectionStack->isEmpty()) {
             yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
+            return;
+        }
+
+        $connection = $connectionStack->pop();
+        $connection->close();
+
+        if ($connectionStack->isEmpty()) {
+            yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
+            yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
+        }
+        $config = $connection->getConfig();
+        if (isset($config['pool']['pool_name'])) {
+            yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['pool']['pool_name']), null);
         }
     }
 
@@ -165,7 +185,7 @@ class Flow
     {
         $connection = (yield ConnectionManager::getInstance()->get($database));
         if (!($connection instanceof Connection)) {
-            throw new GetConnectionException('get connection error database:'.$database);
+            throw new CanNotGetConnectionByConnectionManagerException('get connection error database:'.$database);
         }
         yield $connection;
     }
