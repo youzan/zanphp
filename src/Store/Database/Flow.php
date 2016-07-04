@@ -67,7 +67,7 @@ class Flow
             throw new DbCommitFailException();
         }
         if (true === $commit) {
-            $this->finishTransaction();
+            yield $this->finishTransaction();
             return;
         }
         throw new DbCommitFailException();
@@ -80,14 +80,14 @@ class Flow
         try {
             $rollback = (yield $driver->rollback());
         } catch (\Exception $e) {
-            $this->dealRollbackError();
+            yield $this->dealRollbackError();
             throw new DbRollbackFailException();
         }
         if (true === $rollback) {
-            $this->finishTransaction();
+            yield $this->finishTransaction();
             return;
         }
-        $this->dealRollbackError();
+        yield $this->dealRollbackError();
         throw new DbRollbackFailException();
     }
 
@@ -148,7 +148,7 @@ class Flow
 
         $connection = $connectionStack->pop();
         $connection->release();
-        
+
         if ($connectionStack->isEmpty()) {
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
             yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
