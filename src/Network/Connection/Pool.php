@@ -80,7 +80,8 @@ class Pool implements ConnectionPool
     public function get()
     {
         if ($this->freeConnection->isEmpty()) {
-            return null;
+            yield null;
+            return;
         }
         $conn = $this->freeConnection->pop();
         $this->activeConnection->push($conn);
