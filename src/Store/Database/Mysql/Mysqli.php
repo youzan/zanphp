@@ -85,7 +85,11 @@ class Mysqli implements DriverInterface
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_QUERY_TIMEOUT;
         $this->sql = $sql;
 
-        swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
+        $res = swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
+        if (false === $res) {
+            $this->connection->close();
+            throw new MysqliConnectionLostException('Mysql close the connection');
+        }
         Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
 
         yield $this;
@@ -113,7 +117,7 @@ class Mysqli implements DriverInterface
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
             } else {
                 $error = $link->_error;
-                $this->connection->release();
+                $this->connection->close();
                 $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }
 
