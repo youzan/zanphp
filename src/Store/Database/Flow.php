@@ -135,7 +135,7 @@ class Flow
             throw new CanNotGetConnectionByStackException('commit or rollback get connection error');
         }
         $connection = $connectionStack->pop();
-        $connection->push($connection);
+        $connectionStack->push($connection);
         yield $connection;
     }
 
