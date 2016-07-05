@@ -88,6 +88,7 @@ class RequestHandler {
         $coroutine = $this->middleWareManager->executeTerminators($this->response);
         Task::execute($coroutine, $this->context);
     }
+
     public function handleTimeout()
     {
         if (Debug::get()) {

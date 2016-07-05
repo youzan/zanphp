@@ -106,6 +106,9 @@ class ConnectionManager
         foreach (self::$poolMap as $pool) {
             if ($pool instanceof Pool) {
                 $connections =$pool->getActiveConnectionsFromContext();
+                if ([] == $connections) {
+                    continue;
+                }
                 foreach ($connections as $connection) {
                     if (null != $connection && $connection instanceof Connection) {
                         $connection->close();
