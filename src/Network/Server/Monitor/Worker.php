@@ -26,6 +26,7 @@ class Worker
 
     const GAP_TIME = 180000;
     const GAP_REACTION_NUM = 1500;
+    const DEFAULT_MAX_CONCURRENCY = 2000;
 
     public $classHash;
     public $workerId;
@@ -34,6 +35,7 @@ class Worker
 
     public $reactionNum;
     public $totalReactionNum;
+    public $maxConcurrency;
 
     /* @var $server Server */
     public function init($server,$config){
@@ -47,6 +49,9 @@ class Worker
         $this->config = $config;
         $this->reactionNum = 0;
         $this->totalReactionNum = 0;
+        $this->maxConcurrency = isset($this->config['max_concurrency']) ?
+                                        $this->config['max_concurrency'] :
+                                        self::DEFAULT_MAX_CONCURRENCY;
 
         $this->restart();
         $this->checkStart();
@@ -143,8 +148,13 @@ class Worker
     }
 
     public function reactionReceive(){
+        //触发限流
+        if ($this->reactionNum > $this->maxConcurrency) {
+            return false;
+        }
         $this->totalReactionNum++;
         $this->reactionNum ++;
+        return true;
     }
 
     public function reactionRelease(){
