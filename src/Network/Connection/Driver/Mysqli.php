@@ -23,7 +23,11 @@ class Mysqli extends Base implements Connection
 
     public function closeSocket()
     {
-        return true;
+        try {
+            $this->getSocket()->close();
+        } catch (\Exception $e) {
+            //todo log
+        }
     }
     
     public function heartbeat()
