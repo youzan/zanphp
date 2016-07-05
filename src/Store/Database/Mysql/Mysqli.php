@@ -174,14 +174,4 @@ class Mysqli implements DriverInterface
         yield $rollback;
     }
 
-    public function releaseConnection()
-    {
-        $taskId = (yield getTaskId());
-        $key = (string)('begin_transaction_' . $taskId);
-        $beginTransaction = (yield getContext($key, false));
-        if ($beginTransaction === false) {
-            $this->connection->release();
-        }
-        yield true;
-    }
 }

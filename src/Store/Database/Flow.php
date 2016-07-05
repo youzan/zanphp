@@ -48,7 +48,9 @@ class Flow
             $driver->setCountAlias($sqlMap['count_alias']);
         }
         $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
-        yield $resultFormatter->format();
+        $result = (yield $resultFormatter->format());
+        yield $this->releaseConnection($connection);
+        yield $result;
     }
 
     public function beginTransaction()
@@ -211,5 +213,15 @@ class Flow
         $connectionStack = new \SplStack();
         $connectionStack->push($connection);
         yield setContext(sprintf(self::CONNECTION_STACK, $taskId), $connectionStack);
+    }
+
+    private function releaseConnection($connection)
+    {
+        $taskId = (yield getTaskId());
+        $beginTransaction = (yield getContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false));
+        if ($beginTransaction === false) {
+            $connection->release();
+        }
+        yield true;
     }
 }
