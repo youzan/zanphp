@@ -101,7 +101,7 @@ class ConnectionManager
         self::$server = $server;
     }
 
-    public function reloadConnectionByRequestTimeout()
+    public function closeConnectionByRequestTimeout()
     {
         foreach (self::$poolMap as $pool) {
             if ($pool instanceof Pool) {
@@ -117,4 +117,6 @@ class ConnectionManager
             }
         }
     }
+
+
 }

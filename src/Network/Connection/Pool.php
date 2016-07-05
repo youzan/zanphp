@@ -85,6 +85,7 @@ class Pool implements ConnectionPool
         }
         $conn = $this->freeConnection->pop();
         $this->activeConnection->push($conn);
+        $conn->setUnReleased();
         $conn->lastUsedTime = Time::current(true);
         yield $this->insertActiveConnectionIntoContext($conn);
         yield $conn;
