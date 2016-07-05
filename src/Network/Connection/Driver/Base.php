@@ -72,12 +72,12 @@ abstract class Base implements Connection
         if (true === $this->isClose) {
             return;
         }
+        $this->isClose = true;
 
         $this->closeSocket();
         if (null !== $this->pool) {
             $this->pool->remove($this);
         }
-        $this->isClose = true;
     }
 
     public function heartbeat()
