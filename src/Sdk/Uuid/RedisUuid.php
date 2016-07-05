@@ -16,25 +16,22 @@ class RedisUuid extends UuidAbstract
 
     public function get($tableName)
     {
-        $ret = (yield Cache::hGet('uuid.step', $tableName));
-        yield $this->backToInt($ret);
+        yield Cache::hGet('uuid.step', [], $tableName);
     }
 
     public function getSerialId()
     {
-        $ret = (yield Cache::hGet('uuid.serialid',''));
-        yield $this->backToInt($ret);
+        yield Cache::hGet('uuid.serialid', []);
     }
 
     public function getSnowflake()
     {
-        $ret = (yield Cache::hGet('uuid.snowflake',''));
-        yield $this->backToInt($ret);
+        yield Cache::hGet('uuid.snowflake', []);
     }
 
     public function getObjectId()
     {
-        yield Cache::hGet('uuid.objectid','');
+        yield Cache::hGet('uuid.objectid', []);
     }
 
     private function backToInt($string)
