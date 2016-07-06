@@ -7,6 +7,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Exception\ExcessConcurrencyException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
@@ -59,8 +60,14 @@ class RequestHandler {
                 $this->swooleServer->send($this->fd, $result);
                 return;
             }
-
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
+
+            $isAccept = Worker::instance()->reactionReceive();
+            //限流
+            if (!$isAccept) {
+                throw new ExcessConcurrencyException('现在访问的人太多,请稍后再试..', 503);
+            }
+
             $requestTask = new RequestTask($request, $response, $this->context, $this->middleWareManager);
             $coroutine = $requestTask->run();
 
