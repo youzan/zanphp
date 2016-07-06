@@ -192,7 +192,9 @@ class Client implements Async
                 self::$apiConfig = $allApiConfig[$runMode];
             } elseif ($runMode == 'pre' && isset($allApiConfig['online'])) {
                 self::$apiConfig = $allApiConfig['online'];
-            } else {
+            } elseif($runMode == 'pubtest' && isset($allApiConfig['test'])){
+                self::$apiConfig = $allApiConfig['test'];
+            }else{
                 throw new SystemException('service_host 配置文件不完整');
             }
         }
