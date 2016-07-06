@@ -39,4 +39,10 @@ class Db {
         $flow = new Flow();
         yield $flow->rollback();
     }
+
+    public static function terminate()
+    {
+        $flow = new Flow();
+        yield $flow->terminate();
+    }
 }

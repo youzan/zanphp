@@ -109,11 +109,10 @@ class Pool implements ConnectionPool
 
     public function remove(Connection $conn)
     {
-        $this->activeConnection->remove($conn);
-
         $coroutine = $this->deleteActiveConnectionFromContext($conn);
         Task::execute($coroutine);
 
+        $this->activeConnection->remove($conn);
         $this->createConnect();
     }
 

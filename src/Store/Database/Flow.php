@@ -17,6 +17,7 @@ use Zan\Framework\Store\Database\Exception\DbCommitFailException;
 use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByStackException;
 use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use Zan\Framework\Store\Database\Exception\DbRollbackFailException;
+use SplStack;
 
 class Flow
 {
@@ -32,6 +33,8 @@ class Flow
      * 保存以Task为单位的开启事务的连接的栈, (目的是为了commit的时候不用传database name, 针对被调用接口有自己的事务的情况)
      */
     const CONNECTION_STACK = 'connection_stack_%s'; //format with taskId
+
+    const CONNECTION_TASKID_STACK = 'connection_taskid_stack';
 
     private $engineMap = [
         'Mysqli' => Mysqli::class,
@@ -131,7 +134,7 @@ class Flow
     {
         $taskId = (yield getTaskId());
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
-        if (null == $connectionStack or $connectionStack->isEmpty()) {
+        if (null == $connectionStack || $connectionStack->isEmpty()) {
             throw new CanNotGetConnectionByStackException('commit or rollback get connection error');
         }
         $connection = $connectionStack->pop();
@@ -143,7 +146,7 @@ class Flow
     {
         $taskId = (yield getTaskId());
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
-        if (null == $connectionStack or $connectionStack->isEmpty()) {
+        if (null == $connectionStack || $connectionStack->isEmpty()) {
             yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
             return;
         }
@@ -165,7 +168,7 @@ class Flow
     {
         $taskId = (yield getTaskId());
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
-        if (null == $connectionStack or $connectionStack->isEmpty()) {
+        if (null == $connectionStack || $connectionStack->isEmpty()) {
             yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false);
             return;
         }
@@ -199,20 +202,34 @@ class Flow
         yield $driver->beginTransaction();
         yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $database), $connection);
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
-        if (null !== $connectionStack && $connectionStack instanceof \SplStack) {
+        if (null !== $connectionStack && $connectionStack instanceof SplStack) {
             $connectionStack->push($connection);
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), $connectionStack);
             return;
         }
         yield $this->resetConnectionStack($connection);
+        yield $this->pushTaskIdInConnectionTaskIdStack();
     }
 
     private function resetConnectionStack($connection)
     {
         $taskId = (yield getTaskId());
-        $connectionStack = new \SplStack();
+        $connectionStack = new SplStack();
         $connectionStack->push($connection);
         yield setContext(sprintf(self::CONNECTION_STACK, $taskId), $connectionStack);
+    }
+
+    private function pushTaskIdInConnectionTaskIdStack()
+    {
+        $taskId = (yield getTaskId());
+        $taskIdStack = (yield getContext(self::CONNECTION_TASKID_STACK, null));
+        if (null !== $taskIdStack && $taskIdStack instanceof SplStack) {
+            $taskIdStack->push($taskId);
+            return;
+        }
+        $taskIdStack = new SplStack();
+        $taskIdStack->push($taskId);
+        yield setContext(self::CONNECTION_TASKID_STACK, $taskIdStack);
     }
 
     private function releaseConnection($connection)
@@ -223,5 +240,33 @@ class Flow
             $connection->release();
         }
         yield true;
+    }
+
+    public function terminate()
+    {
+        $taskIdStack = (yield getContext(self::CONNECTION_TASKID_STACK, null));
+        if (null == $taskIdStack || !($taskIdStack instanceof SplStack)) {
+            return;
+        }
+
+        while (!$taskIdStack->isEmpty()) {
+            $taskId = $taskIdStack->pop();
+            $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
+            if (null == $connectionStack || !($connectionStack instanceof SplStack)) {
+                continue;
+            }
+            while (!$connectionStack->isEmpty()) {
+                $connection = $connectionStack->pop();
+                //close
+                $connection->close();
+                $config = $connection->getConfig();
+                if (isset($config['pool']['pool_name'])) {
+                    yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['pool']['pool_name']), null);
+                }
+            }
+            yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), null);
+            yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
+        }
+        yield setContext(self::CONNECTION_TASKID_STACK, null);
     }
 }

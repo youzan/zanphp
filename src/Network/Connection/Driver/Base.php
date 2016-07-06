@@ -64,17 +64,13 @@ abstract class Base implements Connection
         $this->isReleased = false;
     }
 
-    public function setBeReleased()
-    {
-        $this->isReleased = true;
-    }
-
     public function release()
     {
         if (true === $this->isReleased) {
             return;
         }
         if (null !== $this->pool) {
+            $this->isReleased = true;
             return $this->pool->recycle($this);
         }
 

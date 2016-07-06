@@ -90,6 +90,7 @@ class MiddlewareConfig
         $baseTerminators = [
             WorkerTerminator::class,
             TraceTerminator::class,
+            DbTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }
