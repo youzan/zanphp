@@ -10,9 +10,8 @@ namespace Zan\Framework\Network\Http\Exception\Handler;
 
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Core\Path;
-use Zan\Framework\Network\Http\Response\BaseResponse;
+use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Network\Http\Response\JsonResponse;
-use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
 
 class BizErrorHandler implements ExceptionHandler
@@ -24,7 +23,7 @@ class BizErrorHandler implements ExceptionHandler
         $errorPage = require $errorPagePath;
 
         $code = $e->getCode();
-        if ($code < 10000 || ($code > 60000 && $code < 100000000)) {
+        if (!BusinessException::isValidCode($code)) {
             yield false;
             return;
         }

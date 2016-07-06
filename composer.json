@@ -3,39 +3,39 @@
     "repositories": [
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/qiniu-php-sdk.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/qiniu-php-sdk.git"
         },
         {
             "type": "git",
-            "url": "http://gitlab.qima-inc.com/php-3rd-lib/symfony-console.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/symfony-console.git"
         },
         {
             "type": "git",
-            "url": "http://gitlab.qima-inc.com/php-3rd-lib/yz-elasticsearch.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/yz-elasticsearch.git"
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/psr-log.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/psr-log.git"
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/monolog-monolog.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/monolog-monolog.git"
         },
         {
             "type": "git",
-            "url": "http://gitlab.qima-inc.com/php-lib/nsq-async.git"
+            "url": "git@gitlab.qima-inc.com:php-lib/nsq-async.git"
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/pimple-pimple.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/pimple-pimple.git"
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/guzzle-guzzle.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/guzzle-guzzle.git"
         },
         {
             "type": "git",
-            "url": "http://git.qima-inc.com/php-3rd-lib/symfony-event-dispatcher.git"
+            "url": "git@gitlab.qima-inc.com:php-3rd-lib/symfony-event-dispatcher.git"
         },
         {
             "packagist": false
