@@ -11,6 +11,7 @@ namespace Zan\Framework\Network\Http\Exception\Handler;
 use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;

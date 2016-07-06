@@ -11,6 +11,6 @@ namespace Zan\Framework\Network\Exception;
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class ExcessConcurrency extends ZanException {
+class ExcessConcurrencyException extends ZanException {
 
 }
