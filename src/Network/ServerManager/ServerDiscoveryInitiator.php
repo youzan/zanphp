@@ -80,6 +80,8 @@ class ServerDiscoveryInitiator
                 continue;
             }
             $novaConfig = $noNeedDiscovery['novaApi'][$appName];
+            //reset $servers
+            $servers = [];
             $servers[$noNeedDiscovery['connection'][$appName]['host'].':'.$noNeedDiscovery['connection'][$appName]['port']] = [
                 'app_name' => $appName,
                 'host' => $noNeedDiscovery['connection'][$appName]['host'],
