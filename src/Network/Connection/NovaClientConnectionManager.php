@@ -30,17 +30,17 @@ class NovaClientConnectionManager
 
     private $appNameToServerMap = [];
 
-    public function work($appName, $servers)
+    public function work($appName, $servers, $novaClientPoolName = '')
     {
         $novaConfig = Config::get('connection.nova');
         $config = [];
 
-        $novaClientPoolName = '';
         foreach ($servers as $server) {
             $services = $server['services'];
-            $novaClientPoolName = $this->formatNovaServiceNameToMethodsMap($services);
-            $this->addAppNameToServerMap($appName, $server);
-
+            if (is_array($services) && [] !== $services) {
+                $novaClientPoolName = $this->formatNovaServiceNameToMethodsMap($services);
+                $this->addAppNameToServerMap($appName, $server);
+            }
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $config[$novaConfig['host'].':'.$novaConfig['port']] = $novaConfig;
