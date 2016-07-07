@@ -26,7 +26,7 @@ class Worker
 
     const GAP_TIME = 180000;
     const GAP_REACTION_NUM = 1500;
-    const DEFAULT_MAX_CONCURRENCY = 2000;
+    const DEFAULT_MAX_CONCURRENCY = 500;
 
     public $classHash;
     public $workerId;
