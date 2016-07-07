@@ -75,7 +75,6 @@ class RequestHandler {
             $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
             Timer::after($request_timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
 
-            Worker::instance()->reactionReceive();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
         } catch(\Exception $e) {
