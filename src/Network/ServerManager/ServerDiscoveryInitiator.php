@@ -80,14 +80,13 @@ class ServerDiscoveryInitiator
                 continue;
             }
             $novaConfig = $noNeedDiscovery['novaApi'][$appName];
-            $servers = [];
             $servers[$noNeedDiscovery['connection'][$appName]['host'].':'.$noNeedDiscovery['connection'][$appName]['port']] = [
                 'app_name' => $appName,
                 'host' => $noNeedDiscovery['connection'][$appName]['host'],
                 'port' => $noNeedDiscovery['connection'][$appName]['port'],
                 'services' => [],
             ];
-            NovaClientConnectionManager::getInstance()->work($appName, $servers, str_replace('\\', '.', strtolower($novaConfig['namespace'])));
+            NovaClientConnectionManager::getInstance()->work($appName, $servers, substr(str_replace('\\', '.', strtolower($novaConfig['namespace'])), 0, -1));
         }
 
         return $config;
