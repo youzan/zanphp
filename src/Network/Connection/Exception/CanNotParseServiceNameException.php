@@ -2,15 +2,15 @@
 /**
  * Created by PhpStorm.
  * User: xiaoniu
- * Date: 16/6/3
- * Time: 下午3:58
+ * Date: 16/7/7
+ * Time: 下午12:03
  */
 namespace Zan\Framework\Network\Connection\Exception;
 
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class CanNotFindNovaClientPoolByAppNameException extends ZanException
+class CanNotParseServiceNameException extends ZanException
 {
 
 }
