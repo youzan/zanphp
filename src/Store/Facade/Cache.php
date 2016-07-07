@@ -165,17 +165,16 @@ class Cache {
     }
 
     /**
+     * !!!这是一个为了兼容Iron的过渡方案, Iron废弃后需要移除!!!
      * @param $value
      * @return mixed
      */
     private static function decode($value)
     {
-        if(strpos($value,'a:') === 0){
-            $value = unserialize($value);
-        }elseif(preg_match('/^\s*[\[|\{].*[\]|\}\s*$]/',$value)){
-            $value = json_decode($value,true);
+        if (($ret = json_decode($value, true)) === NULL) {
+            $ret = $value;
         }
 
-        return $value;
+        return $ret;
     }
 }
