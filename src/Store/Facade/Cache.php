@@ -91,6 +91,8 @@ class Cache {
         }
         $result = (yield $redis->set($realKey, $value));
         if ($result) {
+            $conn = (yield $redisObj->getConnection($config['connection']));
+            $redis = new Redis($conn);
             $ttl = isset($config['exp']) ? $config['exp'] : 0;
             yield $redis->expire($realKey, $ttl);
         }
