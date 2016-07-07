@@ -14,6 +14,7 @@ use Zan\Framework\Network\Http\Exception\Handler\InternalErrorHandler;
 use Zan\Framework\Network\Http\Exception\Handler\InvalidRouteHandler;
 use Zan\Framework\Network\Http\Exception\Handler\PageNotFoundHandler;
 use Zan\Framework\Network\Http\Exception\Handler\RedirectHandler;
+use Zan\Framework\Network\Http\Exception\Handler\ServerUnavailableHandler;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class RequestExceptionHandlerChain extends ExceptionHandlerChain
@@ -25,6 +26,7 @@ class RequestExceptionHandlerChain extends ExceptionHandlerChain
         PageNotFoundHandler::class,
         InvalidRouteHandler::class,
         BizErrorHandler::class,
+        ServerUnavailableHandler::class,
         InternalErrorHandler::class,
     ];
 
