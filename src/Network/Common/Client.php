@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
@@ -137,7 +138,7 @@ class Client implements Async
             $code = $jsonData['code'];
             if ($code > 0) {
                 $msg = isset($jsonData['msg']) ? $jsonData['msg'] : '网络错误';
-                $e = new SystemException($msg, $code);
+                $e = $this->generateException($code, $msg);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -155,7 +156,7 @@ class Client implements Async
                     // 请保持该条件独立判断
                     if ($jsonData['data']['success'] == false) {
                         $msg = $jsonData['data']['message'];
-                        $e = new SystemException($msg, $code);
+                        $e = $this->generateException($code, $msg);
                         call_user_func($callback, null, $e);
                         return;
                     }
@@ -163,7 +164,7 @@ class Client implements Async
                     $code = $jsonData['data']['code'];
                     if ($code > 0) {
                         $msg = $jsonData['data']['message'];
-                        $e = new SystemException($msg, $code);
+                        $e = $this->generateException($code, $msg);
                         call_user_func($callback, null, $e);
                         return;
                     }
@@ -178,6 +179,22 @@ class Client implements Async
         };
     }
 
+    /**
+     * @param $code
+     * @param $msg
+     * @return BusinessException|SystemException
+     */
+    private function generateException($code, $msg)
+    {
+        if (BusinessException::isValidCode($code)) {
+            $e = new BusinessException($msg, $code);
+        } else {
+            $e = new SystemException($msg, $code);
+        }
+        
+        return $e;
+    }
+    
     private static function getApiConfig($api)
     {
         if (is_null(self::$apiConfig)) {
