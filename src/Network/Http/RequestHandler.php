@@ -20,6 +20,7 @@ use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Network\Connection\ConnectionManager;
 
 class RequestHandler
 {
@@ -114,6 +115,8 @@ class RequestHandler
         } else {
             $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
         }
+        
+        ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
         $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);
