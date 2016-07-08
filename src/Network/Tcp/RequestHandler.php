@@ -7,6 +7,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Exception\ExcessConcurrencyException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
@@ -93,6 +94,7 @@ class RequestHandler {
         $coroutine = $this->middleWareManager->executeTerminators($this->response);
         Task::execute($coroutine, $this->context);
     }
+
     public function handleTimeout()
     {
         if (Debug::get()) {
@@ -103,7 +105,9 @@ class RequestHandler {
                 http_build_query($this->request->getArgs())
             );
         }
-        
+        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+        Task::execute($coroutine);
+
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
         $this->response->sendException($e);

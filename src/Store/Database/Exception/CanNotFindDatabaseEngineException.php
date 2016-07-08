@@ -5,12 +5,12 @@
  * Date: 16/4/19
  * Time: 上午12:54
  */
-namespace Zan\Framework\Store\Database;
+namespace Zan\Framework\Store\Database\Exception;
 
 
 use Zan\Framework\Foundation\Exception\ZanException;
 
-class GetConnectionException extends ZanException
+class CanNotFindDatabaseEngineException extends ZanException
 {
 
 }

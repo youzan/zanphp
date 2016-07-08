@@ -21,6 +21,8 @@ abstract class Base implements Connection
     protected $socket = null;
     protected $engine = null;
     protected $isAsync = false;
+    protected $isClose = false;
+    protected $isReleased = false;
 
     abstract protected function closeSocket();
 
@@ -56,23 +58,36 @@ abstract class Base implements Connection
     {
         $this->socket = $socket;
     }
-    
+
+    public function setUnReleased()
+    {
+        $this->isReleased = false;
+    }
+
     public function release()
     {
-        if(null !== $this->pool){
+        if (true === $this->isReleased) {
+            return;
+        }
+        if (null !== $this->pool) {
+            $this->isReleased = true;
             return $this->pool->recycle($this);
         }
-        
-        return $this->closeSocket();
+
+        $this->closeSocket();
     }
     
     public function close()
     {
-        if(null !== $this->pool){  
+        if (true === $this->isClose) {
+            return;
+        }
+        $this->isClose = true;
+
+        $this->closeSocket();
+        if (null !== $this->pool) {
             $this->pool->remove($this);
         }
-        
-        $this->closeSocket();
     }
 
     public function heartbeat()

@@ -20,6 +20,7 @@ use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Network\Connection\ConnectionManager;
 
 class RequestHandler
 {
@@ -101,6 +102,9 @@ class RequestHandler
     }
     public function handleTimeout()
     {
+        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+        Task::execute($coroutine);
+
         $this->task->setStatus(Signal::TASK_KILLED);
         $request = $this->context->get('request');
         if ($request && $request->wantsJson()) {
@@ -114,6 +118,7 @@ class RequestHandler
         } else {
             $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
         }
+
         $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);
