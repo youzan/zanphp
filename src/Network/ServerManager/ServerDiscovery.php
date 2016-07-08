@@ -293,7 +293,7 @@ class ServerDiscovery
     {
         $storeServices = $this->serverStore->getServices($this->appName);
         $onLine = $offLine = $update = [];
-        $useServices = NovaClientConnectionManager::getInstance()->getSeverConfig($this->appName);
+        $useServices = NovaClientConnectionManager::getInstance()->getServersFromAppNameToServerMap($this->appName);
         if (!empty($storeServices)) {
             foreach ($useServices as $key => $service) {
                 if (!isset($storeServices[$key])) {
