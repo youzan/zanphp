@@ -102,6 +102,9 @@ class RequestHandler
     }
     public function handleTimeout()
     {
+        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+        Task::execute($coroutine);
+        
         $this->task->setStatus(Signal::TASK_KILLED);
         $request = $this->context->get('request');
         if ($request && $request->wantsJson()) {
@@ -115,8 +118,7 @@ class RequestHandler
         } else {
             $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
         }
-        
-        ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+
         $this->context->set('response', $response);
         $swooleResponse = $this->context->get('swoole_response');
         $response->sendBy($swooleResponse);

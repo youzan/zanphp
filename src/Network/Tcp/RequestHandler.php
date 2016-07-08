@@ -105,7 +105,9 @@ class RequestHandler {
                 http_build_query($this->request->getArgs())
             );
         }
-        ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+        Task::execute($coroutine);
+
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
         $this->response->sendException($e);
