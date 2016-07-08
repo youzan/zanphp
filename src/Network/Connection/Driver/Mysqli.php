@@ -55,7 +55,7 @@ class Mysqli extends Base implements Connection
             $this->heartbeatLater();
             return ;
         }
-
+        $this->setUnReleased();
         $this->pool->getFreeConnection()->remove($this);
         $coroutine = $this->ping();
         Task::execute($coroutine);
