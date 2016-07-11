@@ -46,7 +46,7 @@ class TraceFilter implements RequestFilter
                 $eventId = $attachArr[Trace::TRACE_KEY][Trace::CHILD_ID_KEY];
             }
             $name = $request->getServiceName() . '.' . $request->getMethodName();
-            $type = Constant::NOVA;
+            $type = Constant::NOVA_SERVER;
         } else {
             $type = Constant::HTTP;
             $name = $request->getUrl();
