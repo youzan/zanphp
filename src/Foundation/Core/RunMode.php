@@ -19,6 +19,7 @@ class RunMode {
         'online'    => 5,
         'unittest'  => 6,
         'qatest'    => 7,
+        'pubtest'   => 8
     ];
     private static $runMode = null;
     private static $cliInput = null;

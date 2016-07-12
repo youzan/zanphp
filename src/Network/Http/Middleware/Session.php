@@ -9,7 +9,9 @@
 namespace Zan\Framework\Network\Http\Middleware;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Store\Facade\Cache;
 use Zan\Framework\Store\Facade\KV;
 use Zan\Framework\Utilities\Encrpt\Uuid;
 
@@ -18,14 +20,12 @@ class Session
 {
     const YZ_SESSION_KEY = 'KDTSESSIONID';
     const CONFIG_KEY = 'server.session';
-    const SESSION_PREFIX = 'YZ_SESSION:';
 
     private $request;
     private $cookie;
     private $session_id;
     private $session_map = array();
     private $config;
-    private $ttl;
     private $isChanged = false;
 
     public function __construct(Request $request, $cookie)
@@ -34,7 +34,6 @@ class Session
 
         $this->request = $request;
         $this->cookie = $cookie;
-        $this->ttl = $this->config['ttl'];
 
     }
 
@@ -55,9 +54,9 @@ class Session
             return;
         }
 
-        $session = (yield KV::get($this->config['kv'], self::SESSION_PREFIX.$this->session_id));
+        $session = (yield Cache::get($this->config['store_key'], [$this->session_id]));
         if ($session) {
-            $this->session_map = unserialize($session);
+            $this->session_map = $this->sessionDecode($session);
         }
         yield true;
     }
@@ -83,7 +82,7 @@ class Session
 
     public function destory()
     {
-        $ret = (yield KV::remove($this->config['kv'], self::SESSION_PREFIX . $this->session_id));
+        $ret = (yield Cache::del($this->config['store_key'], [$this->session_id]));
         if (!$ret) {
             yield false;
             return;
@@ -100,7 +99,45 @@ class Session
 
     public function writeBack() {
         if ($this->isChanged) {
-            yield KV::set($this->config['kv'], self::SESSION_PREFIX . $this->session_id, serialize($this->session_map), $this->ttl);
+            yield Cache::set($this->config['store_key'], [$this->session_id], $this->sessionEncode($this->session_map));
         }
+    }
+
+
+    private static function sessionDecode($session) {
+        $sessionTable = array();
+        $offset = 0;
+        while ($offset < strlen($session)) {
+            if (!strstr(substr($session, $offset), "|")) {
+                throw new InvalidArgumentException("invalid data, remaining: " . substr($session, $offset));
+            }
+            $pos = strpos($session, "|", $offset);
+            $num = $pos - $offset;
+            $varname = substr($session, $offset, $num);
+            $offset += $num + 1;
+            $data = unserialize(substr($session, $offset));
+            $sessionTable[$varname] = $data;
+            $offset += strlen(serialize($data));
+        }
+        return $sessionTable;
+    }
+
+
+    public static function sessionEncode( array $data ) {
+        $ret = '';
+        foreach ( $data as $key => $value ) {
+            if ( strcmp( $key, intval( $key ) ) === 0 ) {
+                throw new InvalidArgumentException( "Ignoring unsupported integer key \"$key\"" );
+            }
+            if ( strcspn( $key, '|!' ) !== strlen( $key ) ) {
+                throw new InvalidArgumentException( "Serialization failed: Key with unsupported characters \"$key\"" );
+            }
+            $v = serialize( $value );
+            if ( $v === null ) {
+                return null;
+            }
+            $ret .= "$key|$v";
+        }
+        return $ret;
     }
 }

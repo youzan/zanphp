@@ -23,7 +23,11 @@ class Mysqli extends Base implements Connection
 
     public function closeSocket()
     {
-        return true;
+        try {
+            $this->getSocket()->close();
+        } catch (\Exception $e) {
+            //todo log
+        }
     }
     
     public function heartbeat()
@@ -51,7 +55,7 @@ class Mysqli extends Base implements Connection
             $this->heartbeatLater();
             return ;
         }
-
+        $this->setUnReleased();
         $this->pool->getFreeConnection()->remove($this);
         $coroutine = $this->ping();
         Task::execute($coroutine);

@@ -15,6 +15,7 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Utilities\Types\ObjectArray;
 use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Foundation\Coroutine\Task;
 
 class Pool implements ConnectionPool
 {
@@ -79,25 +80,27 @@ class Pool implements ConnectionPool
     public function get()
     {
         if ($this->freeConnection->isEmpty()) {
-            return null;
+            yield null;
+            return;
         }
         $conn = $this->freeConnection->pop();
         $this->activeConnection->push($conn);
+        $conn->setUnReleased();
         $conn->lastUsedTime = Time::current(true);
-
-//        deferRelease($conn);
-        return $conn;
+        yield $this->insertActiveConnectionIntoContext($conn);
+        yield $conn;
     }
 
     public function recycle(Connection $conn)
     {
         $evtName = null;
-        if ($this->freeConnection->isEmpty()) {
-            $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
-        }
         
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
+
+        $coroutine = $this->deleteActiveConnectionFromContext($conn);
+        Task::execute($coroutine);
+
         if (count($this->freeConnection) == 1) {
             $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
@@ -106,8 +109,36 @@ class Pool implements ConnectionPool
 
     public function remove(Connection $conn)
     {
+        $coroutine = $this->deleteActiveConnectionFromContext($conn);
+        Task::execute($coroutine);
+
         $this->activeConnection->remove($conn);
         $this->createConnect();
     }
 
+    private function insertActiveConnectionIntoContext($connection)
+    {
+        $activeConnections = (yield getContext($this->getActiveConnectionContextKey(), []));
+        $activeConnections[spl_object_hash($connection)] = $connection;
+        yield setContext($this->getActiveConnectionContextKey(), $activeConnections);
+    }
+
+    private function deleteActiveConnectionFromContext($connection)
+    {
+        $activeConnections = (yield getContext($this->getActiveConnectionContextKey(), []));
+        if (isset($activeConnections[spl_object_hash($connection)])) {
+            unset($activeConnections[spl_object_hash($connection)]);
+        }
+        return;
+    }
+
+    private function getActiveConnectionContextKey()
+    {
+        return $this->type . '_active_connections';
+    }
+
+    public function getActiveConnectionsFromContext()
+    {
+        yield getContext($this->getActiveConnectionContextKey(), []);
+    }
 }

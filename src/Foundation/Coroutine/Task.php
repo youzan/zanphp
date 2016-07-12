@@ -54,6 +54,7 @@ class Task
             try {
                 if ($this->status === Signal::TASK_KILLED) {
                     $this->fireTaskDoneEvent();
+                    $this->status = Signal::TASK_DONE;
                     break;
                 }
                 $this->status = $this->scheduler->schedule();

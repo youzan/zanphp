@@ -19,7 +19,8 @@ class LoadFiles implements Bootable
     {
         $basePath = $app->getBasePath();
         $paths = [
-            $basePath . '/vendor/zanphp',
+            $basePath . '/vendor/zanphp/zan/src',
+            $basePath . '/vendor/zanphp/nova/src',
             $basePath . '/src',
         ];
 

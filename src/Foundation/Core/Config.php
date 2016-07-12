@@ -29,20 +29,24 @@ class Config
 
     public static function get($key, $default = null)
     {
+        $preKey = $key;
         $routes = explode('.',$key);
         if(empty($routes)){
             return $default;
         }
 
         $result = &self::$configMap;
+        $hasConfig = true;
         foreach($routes as $route){
             if(!isset($result[$route])){
-                return $default;
+                $hasConfig = false;
+                break;
             }
-
             $result = &$result[$route];
         }
-
+        if(!$hasConfig){
+            return IronConfig::get($preKey,$default);
+        }
         return $result;
     }
 

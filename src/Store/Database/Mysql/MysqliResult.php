@@ -18,6 +18,8 @@ class MysqliResult implements DbResultInterface
      */
     private $driver;
 
+    private $countAlias;
+
     /**
      * FutureResult constructor.
      * @param DriverInterface $driver
@@ -33,7 +35,6 @@ class MysqliResult implements DbResultInterface
     public function getLastInsertId()
     {
         $insertId = $this->driver->getConnection()->getSocket()->_insert_id;
-        yield $this->driver->releaseConnection();
         yield $insertId;
     }
 
@@ -43,7 +44,6 @@ class MysqliResult implements DbResultInterface
     public function getAffectedRows()
     {
         $affectedRows = $this->driver->getConnection()->getSocket()->_affected_rows;
-        yield $this->driver->releaseConnection();
         yield $affectedRows;
     }
 
@@ -52,7 +52,13 @@ class MysqliResult implements DbResultInterface
      */
     public function fetchRows()
     {
-        yield $this->driver->releaseConnection();
         yield $this->driver->getResult();
+    }
+
+    public function getCountRows()
+    {
+        $rows = (yield $this->fetchRows());
+        $countAlias = $this->driver->getCountAlias();
+        yield !isset($rows[0][$countAlias]) ? 0 : (int)$rows[0][$countAlias];
     }
 }

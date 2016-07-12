@@ -47,7 +47,6 @@ class Cache {
             yield false;
             return;
         }
-
         $redisObj = self::init($config['connection']);
         $conn = (yield $redisObj->getConnection($config['connection']));
 
@@ -58,6 +57,23 @@ class Cache {
         yield call_user_func_array([$redis, $func], $args);
     }
 
+    public static function get($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->get($realKey));
+        $result = self::decode($result);
+        yield $result;
+    }
+
     public static function set($configKey, $keys, $value)
     {
         $config = self::getConfigCacheKey($configKey);
@@ -65,14 +81,18 @@ class Cache {
             yield false;
             return;
         }
-
         $redisObj = self::init($config['connection']);
         $conn = (yield $redisObj->getConnection($config['connection']));
 
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
+        if (is_array($value)) {
+            $value = json_encode($value);
+        }
         $result = (yield $redis->set($realKey, $value));
         if ($result) {
+            $conn = (yield $redisObj->getConnection($config['connection']));
+            $redis = new Redis($conn);
             $ttl = isset($config['exp']) ? $config['exp'] : 0;
             yield $redis->expire($realKey, $ttl);
         }
@@ -144,5 +164,19 @@ class Cache {
             $result = &$result[$route];
         }
         return $result;
+    }
+
+    /**
+     * !!!这是一个为了兼容Iron的过渡方案, Iron废弃后需要移除!!!
+     * @param $value
+     * @return mixed
+     */
+    private static function decode($value)
+    {
+        if (($ret = json_decode($value, true)) === NULL) {
+            $ret = $value;
+        }
+
+        return $ret;
     }
 }
