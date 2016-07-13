@@ -81,6 +81,7 @@ class Log
 
         if (isset($config['query'])) {
             parse_str($config['query'], $params);
+            $params = self::fixBooleanValue($params);
             $result = Arr::merge($result, $params);
         }
 
@@ -96,6 +97,21 @@ class Log
         $result['app'] = Application::getInstance()->getName();
 
         return $result;
+    }
+
+    private static function fixBooleanValue($params)
+    {
+        if (empty($params)) {
+            return $params;
+        }
+        foreach ($params as $key => $val) {
+            if ($val == "true") {
+                $params[$key] = true;
+            } else if ($val == "false") {
+                $params[$key] = false;
+            }
+        }
+        return $params;
     }
 
     /**
