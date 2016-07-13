@@ -56,14 +56,24 @@ class Request extends BaseRequest implements Arrayable, RequestContract
                 $server[$newKey] = $value;
             }
         }
-
         $request = new static($get, $post, $attributes, $cookie, $files, $server);
 
-        if (0 === strpos($request->headers->get('CONTENT_TYPE'), 'application/x-www-form-urlencoded')
-            && in_array(strtoupper($request->server->get('REQUEST_METHOD', 'GET')), array('PUT', 'DELETE', 'PATCH'))
-        ) {
-            parse_str($request->getContent(), $data);
-            $request->request = new ParameterBag($data);
+        // parse http body
+        $contentType = $request->headers->get('CONTENT_TYPE');
+        $requestMethod = strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
+        if (in_array($requestMethod, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
+            $request->content = $swooleRequest->rawContent();
+
+            $data = [];
+            if ($request->isJson()) {
+                $data = json_decode($request->content, true, 512, JSON_BIGINT_AS_STRING);
+                $request->json = new ParameterBag($data);
+            } elseif (0 === strpos($contentType, 'application/x-www-form-urlencoded')) {
+                parse_str($request->content, $data);
+            }
+            if ($data) {
+                $request->request = new ParameterBag($data);
+            }
         }
 
         return $request;
@@ -622,6 +632,18 @@ class Request extends BaseRequest implements Arrayable, RequestContract
         if (Str::startsWith($header, 'Bearer ')) {
             return Str::substr($header, 7);
         }
+    }
+
+    /**
+     * Returns the request body content.
+     *
+     * @param bool $asResource
+     * @return string The request body content.
+     *
+     */
+    public function getContent($asResource = false)
+    {
+        return $this->content;
     }
 
     public function getRoute()
