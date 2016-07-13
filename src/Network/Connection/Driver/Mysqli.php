@@ -73,5 +73,4 @@ class Mysqli extends Base implements Connection
         $this->release();
         $this->heartbeatLater();
     }
-        
 }
