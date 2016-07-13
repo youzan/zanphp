@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation;
 
 use RuntimeException;
+use Zan\Framework\Foundation\Booting\InitializeArgvInput;
 use Zan\Framework\Foundation\Booting\InitializeCache;
 use Zan\Framework\Foundation\Booting\InitializeKv;
 use Zan\Framework\Foundation\Booting\LoadFiles;
@@ -85,6 +86,7 @@ class Application
             InitializeEnv::class,
             InitializeRunMode::class,
             InitializeDebug::class,
+            InitializeArgvInput::class,
             InitializePathes::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
