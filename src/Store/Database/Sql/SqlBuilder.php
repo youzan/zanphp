@@ -67,8 +67,9 @@ class SqlBuilder
         if (!$data || !isset($data['count']) || '' == $data['count']) {
             throw new SqlBuilderException('what field do you want count?');
         }
-        $count = 'count(' . $data['count'] . ') as count_sql_rows';
+        $count = 'count(' . $data['count'] . ')';
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'count', $count);
+        $this->sqlMap['count_alias'] = $count;
         return $this;
     }
 
@@ -279,6 +280,12 @@ class SqlBuilder
             return $this;
         }
         $parseWhere = $this->parseWhereStyleData($where, 'and');
+        preg_match('/where([^#]*)#where#/i', $this->sqlMap['sql'], $match);
+        if (isset($match[1])) {
+            if ('' != trim($match[1])) {
+                $parseWhere = ' and ' . $parseWhere;
+            }
+        }
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', $parseWhere);
         return $this;
     }

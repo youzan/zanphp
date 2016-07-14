@@ -113,10 +113,10 @@ class ServerDiscovery
     private function parseEtcdData($raw)
     {
         if (null === $raw || [] === $raw) {
-            throw new ServerDiscoveryEtcdException('get etcd data error');
+            throw new ServerDiscoveryEtcdException('Service Discovery can not find key of the app:'.$this->appName);
         }
         if (!isset($raw['node']['nodes']) || count($raw['node']['nodes']) < 1) {
-            throw new ServerDiscoveryEtcdException('get etcd can\' find anything');
+            throw new ServerDiscoveryEtcdException('Service Discovery can not find anything app_name:'.$this->appName);
         }
         $servers = [];
         foreach ($raw['node']['nodes'] as $server) {
@@ -198,10 +198,10 @@ class ServerDiscovery
     private function parseWatchByEtcdData($raw)
     {
         if (null === $raw || [] === $raw) {
-            throw new ServerDiscoveryEtcdException('watch etcd data error');
+            throw new ServerDiscoveryEtcdException('watch Service Discovery data error app_name :'.$this->appName);
         }
         if (!isset($raw['node']) && !isset($raw['prevNode'])) {
-            throw new ServerDiscoveryEtcdException('watch etcd can\' find anything');
+            throw new ServerDiscoveryEtcdException('watch Service Discovery can not find anything app_name:'.$this->appName);
         }
         $nowStore = $this->getByStore();
         if (isset($raw['node']['value']) && isset($raw['prevNode']['value'])) {
@@ -293,7 +293,7 @@ class ServerDiscovery
     {
         $storeServices = $this->serverStore->getServices($this->appName);
         $onLine = $offLine = $update = [];
-        $useServices = NovaClientConnectionManager::getInstance()->getSeverConfig($this->appName);
+        $useServices = NovaClientConnectionManager::getInstance()->getServersFromAppNameToServerMap($this->appName);
         if (!empty($storeServices)) {
             foreach ($useServices as $key => $service) {
                 if (!isset($storeServices[$key])) {

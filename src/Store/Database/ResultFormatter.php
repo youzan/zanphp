@@ -78,8 +78,7 @@ class ResultFormatter implements ResultFormatterInterface
 
     private function count()
     {
-        $rows = (yield $this->dbResult->fetchRows());
-        yield !isset($rows[0]['count_sql_rows']) ? 0 : (int)$rows[0]['count_sql_rows'];
+        yield $this->dbResult->getCountRows();
     }
 
     private function insert()

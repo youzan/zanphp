@@ -23,7 +23,11 @@ class Mysqli extends Base implements Connection
 
     public function closeSocket()
     {
-        return true;
+        try {
+            $this->getSocket()->close();
+        } catch (\Exception $e) {
+            //todo log
+        }
     }
     
     public function heartbeat()
@@ -47,18 +51,18 @@ class Mysqli extends Base implements Connection
             return;
         }
 
-        if (!$this->pool->getFreeConnection()->get($this->classHash)) {
-            $this->heartbeatLater();
-            return ;
-        }
-
-        $this->pool->getFreeConnection()->remove($this);
         $coroutine = $this->ping();
         Task::execute($coroutine);
     }
-    
+
     public function ping()
     {
+        $connection = (yield $this->pool->get($this));
+        if (null == $connection) {
+            $this->heartbeatLater();
+            return;
+        }
+        $this->setUnReleased();
         $engine = new Engine($this);
         try{
             $result = (yield $engine->query('select 1'));
@@ -69,6 +73,4 @@ class Mysqli extends Base implements Connection
         $this->release();
         $this->heartbeatLater();
     }
-    
-    
 }

@@ -36,6 +36,8 @@ class Mysqli implements DriverInterface
 
     private $trace;
 
+    private $countAlias;
+
     const DEFAULT_QUERY_TIMEOUT = 3000;
 
     public function __construct(Connection $connection)
@@ -51,6 +53,16 @@ class Mysqli implements DriverInterface
     public function getConnection()
     {
         return $this->connection;
+    }
+
+    public function setCountAlias($countAlias)
+    {
+        $this->countAlias = $countAlias;
+    }
+
+    public function getCountAlias()
+    {
+        return $this->countAlias;
     }
 
     public function execute(callable $callback, $task)
@@ -73,7 +85,11 @@ class Mysqli implements DriverInterface
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_QUERY_TIMEOUT;
         $this->sql = $sql;
 
-        swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
+        $res = swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
+        if (false === $res) {
+            $this->connection->close();
+            throw new MysqliConnectionLostException('Mysql close the connection');
+        }
         Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
 
         yield $this;
@@ -101,7 +117,7 @@ class Mysqli implements DriverInterface
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
             } else {
                 $error = $link->_error;
-                $this->connection->release();
+                $this->connection->close();
                 $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }
 
@@ -146,7 +162,6 @@ class Mysqli implements DriverInterface
         if (!$commit) {
             throw new MysqliTransactionException('mysqli commit error');
         }
-        $this->connection->release();
         yield $commit;
     }
 
@@ -156,16 +171,7 @@ class Mysqli implements DriverInterface
         if (!$rollback) {
             throw new MysqliTransactionException('mysqli rollback error');
         }
-        $this->connection->release();
         yield $rollback;
     }
 
-    public function releaseConnection()
-    {
-        $beginTransaction = (yield getContext('begin_transaction', false));
-        if ($beginTransaction === false) {
-            $this->connection->release();
-        }
-        yield true;
-    }
 }

@@ -15,6 +15,8 @@ class Constant
 
     /******************** TYPE ******************/
     const NOVA = "Nova";
+    const NOVA_CLIENT = 'Nova.Client';
+    const NOVA_SERVER = 'Nova.Server';
     const HTTP = "Http";
     const REMOTE_CALL = "RemoteCall";
     const SQL = "SQL";

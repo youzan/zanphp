@@ -80,17 +80,15 @@ class ServerDiscoveryInitiator
                 continue;
             }
             $novaConfig = $noNeedDiscovery['novaApi'][$appName];
-            $novaConfig['path'] = Path::getRootPath() . $noNeedDiscovery['novaApi'][$appName]['path'];
-            Nova::init($novaConfig);
-            $services = Nova::getAvailableService();
+            //reset $servers
             $servers = [];
             $servers[$noNeedDiscovery['connection'][$appName]['host'].':'.$noNeedDiscovery['connection'][$appName]['port']] = [
                 'app_name' => $appName,
                 'host' => $noNeedDiscovery['connection'][$appName]['host'],
                 'port' => $noNeedDiscovery['connection'][$appName]['port'],
-                'services' => $services,
+                'services' => [],
             ];
-            NovaClientConnectionManager::getInstance()->work($appName, $servers);
+            NovaClientConnectionManager::getInstance()->work($appName, $servers, substr(str_replace('\\', '.', strtolower($novaConfig['namespace'])), 0, -1));
         }
 
         return $config;

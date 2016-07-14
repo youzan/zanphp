@@ -24,7 +24,7 @@ class SqlParser
     public function parse()
     {
         foreach ($this->sqlMap as $key => $map) {
-            if ($key == 'table') {
+            if ($key == 'table' || !isset($map['sql'])) {
                 continue;
             }
             $expKey = explode('_', $key);

@@ -21,6 +21,7 @@ use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Http\ServerStart\InitializeSqlMap;
 
 class Server extends ServerBase implements ServerContract
 {
@@ -33,6 +34,7 @@ class Server extends ServerBase implements ServerContract
         InitializeMiddleware::class,
         InitializeExceptionHandlerChain::class,
         InitLogConfig::class,
+        InitializeSqlMap::class,
     ];
 
     protected $workerStartItems = [
