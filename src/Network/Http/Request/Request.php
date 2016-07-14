@@ -48,13 +48,14 @@ class Request extends BaseRequest implements Arrayable, RequestContract
         $contentType = $request->headers->get('CONTENT_TYPE');
         $requestMethod = strtoupper($request->server->get('REQUEST_METHOD', 'GET'));
         if (in_array($requestMethod, ['POST', 'PUT', 'DELETE', 'PATCH'])) {
-            $data = [];
+            $request->content = $swooleRequest->rawContent();
 
+            $data = [];
             if ($request->isJson()) {
-                $data = json_decode($swooleRequest->rawContent(), true, 512, JSON_BIGINT_AS_STRING);
+                $data = json_decode($request->content, true, 512, JSON_BIGINT_AS_STRING);
                 $request->json = new ParameterBag($data);
             } elseif (0 === strpos($contentType, 'application/x-www-form-urlencoded')) {
-                parse_str($swooleRequest->rawContent(), $data);
+                parse_str($request->content, $data);
             }
             if ($data) {
                 $request->request = new ParameterBag($data);
