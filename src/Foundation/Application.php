@@ -84,9 +84,9 @@ class Application
         // TODO 配置化
         $bootstrapItems = [
             InitializeEnv::class,
+            InitializeArgvInput::class,
             InitializeRunMode::class,
             InitializeDebug::class,
-            InitializeArgvInput::class,
             InitializePathes::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
