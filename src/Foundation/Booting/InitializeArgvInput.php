@@ -17,7 +17,7 @@ class InitializeArgvInput implements Bootable
         $debug = $input->getParameterOption('--debug');
         if ($debug === 'true') {
             Config::set('debug', true);
-        } else {
+        } else if ($debug === 'false') {
             Config::set('debug', false);
         }
 
@@ -25,6 +25,13 @@ class InitializeArgvInput implements Bootable
         if (!empty($env)) {
             RunMode::set($env);
             var_dump($env);
+        }
+
+        $enableRegister = $input->getParameterOption('--enable-register');
+        if ($enableRegister === 'true') {
+
+        } else if ($enableRegister === 'false') {
+
         }
     }
 }
