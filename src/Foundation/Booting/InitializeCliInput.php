@@ -27,10 +27,10 @@ class InitializeCliInput implements Bootable
             RunMode::setCliInput($env);
         }
 
-        $enableRegister = $input->getParameterOption('--enable-register');
-        if ($enableRegister === 'true') {
+        $serviceRegister = $input->getParameterOption('--service-register');
+        if ($serviceRegister === 'true') {
             ServerRegisterInitiator::setCliInput(true);
-        } else if ($enableRegister === 'false') {
+        } else if ($serviceRegister === 'false') {
             ServerRegisterInitiator::setCliInput(false);
         }
     }
