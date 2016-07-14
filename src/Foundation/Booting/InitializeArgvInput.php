@@ -8,6 +8,7 @@ use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Network\ServerManager\ServerRegisterInitiator;
 
 class InitializeArgvInput implements Bootable
 {
@@ -28,9 +29,9 @@ class InitializeArgvInput implements Bootable
 
         $enableRegister = $input->getParameterOption('--enable-register');
         if ($enableRegister === 'true') {
-
+            ServerRegisterInitiator::setCliInput(true);
         } else if ($enableRegister === 'false') {
-
+            ServerRegisterInitiator::setCliInput(false);
         }
     }
 }

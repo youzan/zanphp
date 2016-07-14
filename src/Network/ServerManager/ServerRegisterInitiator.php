@@ -20,15 +20,28 @@ class ServerRegisterInitiator
 
     const ENABLE_REGISTER  = 1;
 
+    private static $cliInput = null;
+
+    public static function setCliInput($mode)
+    {
+        self::$cliInput = $mode ? true : false;
+    }
+
     public function init()
     {
         //TODO: check config position
         $config['services'] = Nova::getAvailableService();
         $haunt = Config::get('haunt.register');
         $enableRegister = isset($haunt['enable_register']) ? $haunt['enable_register'] : self::ENABLE_REGISTER;
+
+        if (null !== self::$cliInput) {
+            $enableRegister = self::$cliInput ? 1 : 0;
+        }
+
         if (0 === $enableRegister) {
             return;
         }
+
         $register = new ServerRegister();
         $coroutine = $register->register($config);
         Task::execute($coroutine);
