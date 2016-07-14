@@ -10,7 +10,7 @@ use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\ServerManager\ServerRegisterInitiator;
 
-class InitializeArgvInput implements Bootable
+class InitializeCliInput implements Bootable
 {
     public function bootstrap(Application $app)
     {
