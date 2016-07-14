@@ -28,6 +28,9 @@ class SqlMapInitiator
     public function init()
     {
         $sqlPath = Path::getSqlPath();
+        if (!is_dir($sqlPath)) {
+            return false;
+        }
         $sqlMaps = ConfigLoader::getInstance()->loadDistinguishBetweenFolderAndFile($sqlPath);
         if (null == $sqlMaps || [] == $sqlMaps) {
             return false;
