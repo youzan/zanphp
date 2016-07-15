@@ -13,6 +13,7 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\Types\ObjectArray;
 use Zan\Framework\Utilities\Types\Time;
 use Zan\Framework\Foundation\Coroutine\Task;
@@ -30,6 +31,8 @@ class Pool implements ConnectionPool
     private $type = null;
 
     public $waitNum = 0;
+
+    private $reconnectTime=[];
 
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
@@ -54,7 +57,7 @@ class Pool implements ConnectionPool
         }
     }
 
-    private function createConnect()
+    private function createConnect($connKey=null)
     {
         $max = $this->poolConfig['pool']['maximum-connection-count'];
         $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
@@ -62,6 +65,16 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
+
+        if ($connKey != null && $this->type == 'Mysqli') {
+            if (!$connection->getSocket()->connect_errno){
+                $this->reconnectTime[$connKey] = 0;
+            } else {
+                $this->remove($connection);
+            }
+        }
+        $this->reconnectTime[$connKey] = 0;
+
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
         } else {
@@ -128,9 +141,24 @@ class Pool implements ConnectionPool
     {
         $coroutine = $this->deleteActiveConnectionFromContext($conn);
         Task::execute($coroutine);
-
         $this->activeConnection->remove($conn);
-        $this->createConnect();
+
+        $this->reConnect($conn);
+    }
+
+    public function reConnect($conn)
+    {
+        $connHashCode = spl_object_hash($conn);
+        if (!isset($this->reconnectTime[$connHashCode])) {
+            $this->reconnectTime[$connHashCode] = 0;
+            $this->createConnect($connHashCode);
+            return;
+        }
+        $reconnectTime =$this->reconnectTime[spl_object_hash($conn)];
+        $this->reconnectTime[$connHashCode] = ($reconnectTime+$this->poolConfig['pool']['interval-reconnect-time'])
+        >= $this->poolConfig['pool']['max-reconnect-time'] ? $this->poolConfig['pool']['max-reconnect-time'] :
+            ($reconnectTime+$this->poolConfig['pool']['interval-reconnect-time']);
+        Timer::after($reconnectTime*1000, [$this, 'createConnect']);
     }
 
     private function insertActiveConnectionIntoContext($connection)
