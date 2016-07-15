@@ -9,6 +9,7 @@ use swoole_http_server as SwooleHttpServer;
 use swoole_server as SwooleTcpServer;
 use Zan\Framework\Network\Http\Server as HttpServer;
 use Zan\Framework\Network\Tcp\Server as TcpServer;
+use Zan\Framework\Network\MqSubscribe\Server as MqServer;
 
 class Factory
 {
@@ -56,6 +57,30 @@ class Factory
         $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port], true);
 
         $server = Di::make(TcpServer::class, [$swooleServer, $config]);
+
+        return $server;
+    }
+
+    /**
+     * @return \Zan\Framework\Network\MqSubscribe\Server
+     */
+    public function createMqServer()
+    {
+        $config = Config::get('subscribe_server');
+        if (empty($config)) {
+            throw new RuntimeException('subscribe server config not found');
+        }
+
+        $host = $config['host'];
+        $port = $config['port'];
+        $config = $config['config'];
+        if (empty($host) || empty($port)) {
+            throw new RuntimeException('subscribe server config error: empty ip/port');
+        }
+
+        $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port], true);
+
+        $server = Di::make(MqServer::class, [$swooleServer, $config]);
 
         return $server;
     }

@@ -252,4 +252,16 @@ class Application
             ->make(ServerFactory::class)
             ->createTcpServer();
     }
+
+    /**
+     * get mq subscribe server.
+     *
+     * @return \Zan\Framework\Network\Http\Server
+     */
+    public function createMqServer()
+    {
+        return $this->getContainer()
+            ->make(ServerFactory::class)
+            ->createMqServer();
+    }
 }
