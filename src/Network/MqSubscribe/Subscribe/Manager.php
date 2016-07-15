@@ -11,9 +11,16 @@ class Manager
     private $initialized;
 
     private $config;
-    
+
+    /**
+     * @var array Topic[]
+     */
     private $topics = [];
     
+    final private function __construct()
+    {
+    }
+
     public function loadConfig($config)
     {
         $this->config = $config;
@@ -38,7 +45,16 @@ class Manager
 
     public function start()
     {
-
+        foreach ($this->topics as $topic) {
+            /** @var Topic $topic*/
+            foreach ($topic->getChannels() as $channel) {
+                /** @var Channel $channel */
+                foreach ($channel->getClients() as $client) {
+                    /** @var Client $client */
+                    $client->start();
+                }
+            }
+        }
     }
     
     private function initTopic($name, $config)

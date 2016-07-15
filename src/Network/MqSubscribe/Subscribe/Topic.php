@@ -16,6 +16,11 @@ class Topic
         $this->name = $name;
         $this->manager = $manager;
     }
+    
+    public function getName()
+    {
+        return $this->name;
+    }
 
     public function initChannel($name, $config)
     {
@@ -26,5 +31,10 @@ class Topic
         }
 
         $this->channels[$name] = $channel;
+    }
+    
+    public function getChannels()
+    {
+        return $this->channels;
     }
 }

@@ -19,6 +19,11 @@ class Channel
         $this->name = $name;
         $this->topic = $topic;
     }
+
+    public function getName()
+    {
+        return $this->name;
+    }
     
     public function getTopic()
     {
@@ -30,5 +35,10 @@ class Channel
         $client = new Client($consumer, $this);
         
         $this->clients[] = $client;
+    }
+    
+    public function getClients()
+    {
+        return $this->clients;
     }
 }
