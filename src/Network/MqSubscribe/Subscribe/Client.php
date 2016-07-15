@@ -1,6 +1,7 @@
 <?php
 namespace Zan\Framework\Network\MqSubscribe\Subscribe;
 
+use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Sdk\Queue\NSQ\Queue;
 
@@ -24,6 +25,11 @@ class Client
         $this->channel = $channel;
     }
 
+    public function getConsumer()
+    {
+        return $this->consumer;
+    }
+
     public function start()
     {
         $this->task = new Task($this->cortinue());
@@ -35,8 +41,10 @@ class Client
         $queue = new Queue();
         $client = $this;
 
-        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($payload) use ($client){
-            var_dump('vvvvv');
+        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
+            $consumer = $client->getConsumer();
+            $handle = Di::make($consumer)->handle($msg);
+            Task::execute($handle);
         });
     }
 }
