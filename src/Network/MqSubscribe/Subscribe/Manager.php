@@ -9,9 +9,7 @@ class Manager
     use Singleton;
 
     private $initialized;
-
-    private $config;
-
+    
     /**
      * @var array Topic[]
      */
@@ -21,12 +19,8 @@ class Manager
     {
     }
 
-    public function loadConfig($config)
-    {
-        $this->config = $config;
-    }
     
-    public function init()
+    public function init($config)
     {
         if ($this->initialized) {
 
@@ -34,7 +28,7 @@ class Manager
 
         $this->topics = []; // ? 注意这里是否应该这样
         
-        foreach ($this->config as $topicName => $topicConfig) {
+        foreach ($config as $topicName => $topicConfig) {
             $this->initTopic($topicName, $topicConfig);
         }
 
@@ -45,6 +39,10 @@ class Manager
 
     public function start()
     {
+        if (!$this->initialized) {
+            
+        }
+        
         foreach ($this->topics as $topic) {
             /** @var Topic $topic*/
             foreach ($topic->getChannels() as $channel) {

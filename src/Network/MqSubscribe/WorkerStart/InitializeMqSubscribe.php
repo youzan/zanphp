@@ -22,6 +22,6 @@ class InitializeMqSubscribe
         ];
         
         Checker::handle($config);
-        Manager::singleton()->loadConfig($config);
+        Manager::singleton()->init($config);
     }
 } 

@@ -44,7 +44,6 @@ class Server extends ServerBase implements ServerContract
         InitializeServerDiscovery::class,
 
         InitializeMqSubscribe::class,
-        MqSubscribeStart::class
     ];
 
     /**
@@ -109,6 +108,9 @@ class Server extends ServerBase implements ServerContract
     {
         $this->bootWorkerStartItem($workerId);
         echo "worker #$workerId starting .....\n";
+
+        (new MqSubscribe)->start();
+        echo "mq subscribe in worker #$workerId starting .....\n";
     }
 
     public function onWorkerStop($swooleServer, $workerId)
