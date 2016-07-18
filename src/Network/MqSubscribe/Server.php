@@ -24,10 +24,12 @@ use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 
 class Server extends ServerBase implements ServerContract
 {
     protected $serverStartItems = [
+        InitializeSqlMap::class,
         InitializeRouter::class,
         InitializeUrlRule::class,
         InitializeUrlConfig::class,

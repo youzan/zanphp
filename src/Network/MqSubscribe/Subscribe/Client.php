@@ -43,7 +43,10 @@ class Client
 
         yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
             $consumer = $client->getConsumer();
-            $handle = Di::make($consumer)->handle($msg);
+            $instance = Di::make($consumer);
+            $instance->setMsg($msg);
+            $instance->checkMsg();
+            $handle = $instance->fire();
             Task::execute($handle);
         });
     }

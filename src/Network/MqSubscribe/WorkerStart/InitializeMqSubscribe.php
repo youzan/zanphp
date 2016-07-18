@@ -2,6 +2,7 @@
 namespace Zan\Framework\Network\MqSubscribe\WorkerStart;
 
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\MqSubscribe\Subscribe\Checker;
 use Zan\Framework\Network\MqSubscribe\Subscribe\Manager;
 
@@ -12,15 +13,7 @@ class InitializeMqSubscribe
      */
     public function bootstrap($server)
     {
-        $config = [
-            'fenxiao_goods_index_create' => [
-                'default' => [
-                    'consumer' => 'xx',
-                    'num' => 1
-                ]
-            ]
-        ];
-        
+        $config = Config::get('nsq_config', []);
         Checker::handle($config);
         Manager::singleton()->init($config);
     }
