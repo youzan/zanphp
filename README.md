@@ -1,6 +1,6 @@
-<<<<<<< Updated upstream
 # Youzan Zan PHP framework
 =======
+
 #Overview##
 ----
 Zan是基于协程的PHP网络服务框架，以最简单的方式开发C10K+并发的web服务或SOA服务
@@ -21,14 +21,10 @@ Zan是基于协程的PHP网络服务框架，以最简单的方式开发C10K+并
 ##DOC##
 ----
 https://github.com/youzan/zan-doc/blob/master/zh/SUMMARY.md
->>>>>>> Stashed changes
 
-基于Swoole和PHP协程构建的高性能服务框架。路由、过滤器、SQL Map、单元测试（实现了对yield的支持）、调用链、可无限继承的View、服务监控等特性，便于构建大型 SOA 应用。
-
-<<<<<<< Updated upstream
 ## 官方文档
 
-Zan PHP 框架的文档我们托管在了 [GitBook/zan-doc](https://agalwood.gitbooks.io/zan-doc/content/zh/)。
+文档 [GitBook/zan-doc](https://agalwood.gitbooks.io/zan-doc/content/zh/)。
 
 
 ## 常用链接
@@ -40,19 +36,10 @@ Zan PHP 框架的文档我们托管在了 [GitBook/zan-doc](https://agalwood.git
 
 
 ## 开发交流
-
 QQ群：115728122
 
 
 ## License
 
 我们[有赞](https://youzan.com/)的 [Zan PHP框架](https://github.com/youzan/zan)基于 [Apache-2.0 license](https://opensource.org/licenses/Apache-2.0) 进行开源。
-=======
-##Demo##
-----
-Demo: https://github.com/youzan/zan-installer
 
-##交流方式##
-----
-QQ群: 115728122
->>>>>>> Stashed changes
