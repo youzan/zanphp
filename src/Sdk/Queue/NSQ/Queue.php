@@ -12,12 +12,9 @@ use Kdt\Iron\NSQ\Message\MsgInterface;
 use Kdt\Iron\NSQ\Queue as NSQueue;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Queue implements Async
 {
-    use Singleton;
-
     /**
      * @var callable
      */
