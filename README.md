@@ -1,5 +1,5 @@
 # Zan PHP Framework
-Zan PHP是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务
+Zan PHP是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务。
 
 ## 核心特效
 1. 基于 `yield` 实现了独立堆栈的协程
