@@ -5,6 +5,7 @@ namespace Zan\Framework\Sdk\Monitor;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\HttpClient;
+use Zan\Framework\Utilities\Types\Json;
 
 
 /**
@@ -76,7 +77,7 @@ class Hawk
 
         $response = (yield $this->httpClient->post($this->config['uri'], $this->data));
         $raw = $response->getBody();
-        $jsonData = json_decode($raw, true);
+        $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
         $this->data = [];
