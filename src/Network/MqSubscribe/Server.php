@@ -11,6 +11,7 @@ use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\MqSubscribe\WorkerStart\InitializeMqSubscribe;
 use Zan\Framework\Network\MqSubscribe\WorkerStart\MqSubscribeStart;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
@@ -110,8 +111,7 @@ class Server extends ServerBase implements ServerContract
     {
         $this->bootWorkerStartItem($workerId);
         echo "worker #$workerId starting .....\n";
-
-        (new MqSubscribe)->start();
+        Timer::after(5000, [new MqSubscribe, 'start']);
         echo "mq subscribe in worker #$workerId starting .....\n";
     }
 
