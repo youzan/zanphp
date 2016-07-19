@@ -50,6 +50,10 @@ class Manager
                 foreach ($channel->getClients() as $client) {
                     /** @var Client $client */
                     $client->start();
+                    
+                    if ($client->isError()) {
+                        echo $client->getErrorMessage() . "\n";
+                    }
                 }
             }
         }

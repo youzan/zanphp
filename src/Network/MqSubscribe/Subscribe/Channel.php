@@ -30,9 +30,9 @@ class Channel
         return $this->topic;
     }
 
-    public function initClient($consumer)
+    public function initClient($config)
     {
-        $client = new Client($consumer, $this);
+        $client = new Client($config, $this);
         
         $this->clients[] = $client;
     }

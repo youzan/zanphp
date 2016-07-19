@@ -7,7 +7,10 @@ use Zan\Framework\Sdk\Queue\NSQ\Queue;
 
 class Client
 {
+    const TIMEOUT = 1800;
+    
     private $consumer;
+    private $timeout;
 
     /**
      * @var Channel
@@ -18,10 +21,14 @@ class Client
     private $task;
     
     private $sum;
+    
+    private $error;
+    private $errorMessage;
 
-    public function __construct($consumer, Channel $channel)
+    public function __construct($config, Channel $channel)
     {
-        $this->consumer = $consumer;
+        $this->consumer = $config['consumer'];
+        $this->timeout = isset($config['timeout']) ? $config['timeout'] : self::TIMEOUT;
         $this->channel = $channel;
     }
 
@@ -32,22 +39,49 @@ class Client
 
     public function start()
     {
+        if (!$this->valid()) {
+            return;
+        }
         $this->task = new Task($this->cortinue());
         $this->task->run();
     }
+    
+    public function isError()
+    {
+        return $this->error;
+    }
+    
+    public function getErrorMessage()
+    {
+        return $this->errorMessage;
+    }
+    
+    private function valid()
+    {
+        $consumer = $this->getConsumer();
+        if (class_exists($consumer) and method_exists($consumer, 'fire')) {
+            $this->error = false;
+        }
+        
+        $this->error = true;
+        $this->errorMessage = $this->channel->getTopic()->getName() . '/' . $this->channel->getName() . '/Error';
+        return !$this->error;
+    }
+    
 
     private function cortinue()
     {
         $queue = new Queue();
-        $client = $this;
+        $consumer = $this->getConsumer();
 
-        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
-            $consumer = $client->getConsumer();
+        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($consumer){
             $instance = Di::make($consumer);
             $instance->setMsg($msg);
-            $instance->checkMsg();
+            if (!$instance->checkMsg()) {
+                $instance->handleMsgError();
+            }
             $handle = $instance->fire();
             Task::execute($handle);
-        });
+        }, $this->timeout);
     }
 }

@@ -27,7 +27,7 @@ class Topic
         $channel = new Channel($name, $this);
 
         for ($i = 0; $i < $config['num']; $i++) {
-            $channel->initClient($config['consumer']);
+            $channel->initClient($config);
         }
 
         $this->channels[$name] = $channel;

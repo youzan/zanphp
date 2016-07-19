@@ -30,6 +30,8 @@ abstract class JobAbstract
     }
     
     abstract public function checkMsg();
+    
+    abstract public function handleMsgError();
 
     final protected function checkData()
     {
