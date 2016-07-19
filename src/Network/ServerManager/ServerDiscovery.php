@@ -18,6 +18,7 @@ use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Types\Json;
 use Zan\Framework\Utilities\Types\Time;
 
 class ServerDiscovery
@@ -104,8 +105,12 @@ class ServerDiscovery
             $this->config['discovery']['protocol'] . ':' .
             $this->config['discovery']['namespace'] . '/'.
             $this->appName;
-        $raw = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
-        $servers = $this->parseEtcdData($raw);
+        $response = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
+        $raw = $response->getBody();
+        $jsonData = Json::decode($raw, true);
+        $result = $jsonData ? $jsonData : $raw;
+
+        $servers = $this->parseEtcdData($result);
         $this->saveServices($servers);
         yield $servers;
     }
@@ -175,7 +180,12 @@ class ServerDiscovery
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
             $this->appName;
-        yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+        $response = (yield $httpClient->get($uri, $params, $this->config['watch']['timeout']));
+        $raw = $response->getBody();
+        $jsonData = Json::decode($raw, true);
+        $result = $jsonData ? $jsonData : $raw;
+
+        yield $result;
     }
 
     private function updateServersByEtcd($raw)

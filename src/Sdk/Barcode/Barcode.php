@@ -47,11 +47,13 @@ class Barcode {
         // TODO 1. 判断接口返回的状态码
         // TODO 2. timeout
         $response = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/', $params));
-        if ($response) {
+        $body = $response->getBody();
+
+        if ($body) {
             if (false === $base64) {
-                yield $response;
+                yield $body;
             } else {
-                yield 'data:image/png;base64,' . base64_encode($response);
+                yield 'data:image/png;base64,' . base64_encode($body);
             }
             return;
         }
