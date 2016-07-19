@@ -11,9 +11,7 @@ class Channel
     private $topic;
 
     private $clients = [];
-
-    private $sum;
-
+    
     public function __construct($name, Topic $topic)
     {
         $this->name = $name;

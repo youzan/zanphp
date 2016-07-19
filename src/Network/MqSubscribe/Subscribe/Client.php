@@ -20,7 +20,7 @@ class Client
     /** @var  Task */
     private $task;
     
-    private $sum;
+    private $sum = 0;
     
     private $error;
     private $errorMessage;
@@ -55,6 +55,16 @@ class Client
     {
         return $this->errorMessage;
     }
+
+    public function incrMsgCount()
+    {
+        $this->sum++;
+    }
+
+    public function getMsgCount()
+    {
+        return $this->sum;
+    }
     
     private function valid()
     {
@@ -67,18 +77,21 @@ class Client
         $this->errorMessage = $this->channel->getTopic()->getName() . '/' . $this->channel->getName() . '/Error';
         return !$this->error;
     }
-    
 
     private function cortinue()
     {
         $queue = new Queue();
-        $consumer = $this->getConsumer();
+        $client = $this;
 
-        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($consumer){
+        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
+            $client->incrMsgCount();
+            $consumer = $this->getConsumer();
             $instance = Di::make($consumer);
             $instance->setMsg($msg);
             if (!$instance->checkMsg()) {
                 $instance->handleMsgError();
+                $instance->ack();
+                return;
             }
             $handle = $instance->fire();
             Task::execute($handle);

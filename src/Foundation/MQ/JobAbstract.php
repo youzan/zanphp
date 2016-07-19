@@ -94,19 +94,25 @@ abstract class JobAbstract
         return $this->data;
     }
 
-    final protected function ack()
+    final public function ack()
     {
-        $this->msg->done();
+        if ($this->msg instanceof Msg) {
+            $this->msg->done();
+        }
     }
 
-    final protected function retry()
+    final public function retry()
     {
-        $this->msg->retry();
+        if ($this->msg instanceof Msg) {
+            $this->msg->retry();
+        }
     }
 
-    final protected function delay($seconds)
+    final public function delay($seconds)
     {
-        $this->msg->delay($seconds);
+        if ($this->msg instanceof Msg) {
+            $this->msg->delay($seconds);
+        }
     }
     
     final public static function publish($abstract, $data)

@@ -9,8 +9,6 @@ class Topic
     
     private $channels = [];
     
-    private $sum;
-    
     public function __construct($name, $manager)
     {
         $this->name = $name;
