@@ -104,10 +104,11 @@ class Client
         $consumer = $this->getConsumer();
         if (class_exists($consumer) and method_exists($consumer, 'fire')) {
             $this->error = false;
+        } else {
+            $this->error = true;
+            $this->errorMessage = $this->channel->getTopic()->getName() . '/' . $this->channel->getName() . '/Error';
         }
         
-        $this->error = true;
-        $this->errorMessage = $this->channel->getTopic()->getName() . '/' . $this->channel->getName() . '/Error';
         return !$this->error;
     }
 

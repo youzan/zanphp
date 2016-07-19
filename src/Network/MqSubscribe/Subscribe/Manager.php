@@ -82,7 +82,7 @@ class Manager
         $this->topics[$name] = $topic;
     }
 
-    private function beginStop()
+    public function beginStop()
     {
         foreach ($this->topics as $topic) {
             /** @var Topic $topic*/
@@ -99,7 +99,7 @@ class Manager
         Timer::after(self::TIME_LIVE_LIMIT_DELAY, [$this, 'tryStop']);
     }
 
-    private function tryStop()
+    public function tryStop()
     {
         $readyClosed = true;
         foreach ($this->topics as $topic) {
