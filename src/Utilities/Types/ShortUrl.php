@@ -20,14 +20,17 @@ class ShortUrl
             throw new InvalidArgumentException('链接地址错误');
         }
         $config = Config::get('shorturl');
-        $resp = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/shorten?longUrl='.$url));
-        $response = $resp->getResponseJson();
+        $response = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/shorten?longUrl='.$url));
+        $body = $response->getBody();
 
-        if(!isset($response['status_code']) || 200 != $response['status_code']){
+        $jsonData = json_decode($body, true);
+        $result = $jsonData ? $jsonData : $body;
+
+        if(!isset($result['status_code']) || 200 != $result['status_code']){
             yield '';
             return;
         }
-        yield $response['data']['url'];
+        yield $result['data']['url'];
     }
 
 

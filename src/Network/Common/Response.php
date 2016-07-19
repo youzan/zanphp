@@ -3,38 +3,34 @@ namespace Zan\Framework\Network\Common;
 
 class Response
 {
-    private $response;
-    private $header;
-    private $code;
+    private $body;
+    private $headers;
+    private $statusCode;
 
-    public function __construct($response, $header, $code)
+    public function __construct($statusCode, $headers = null, $body = null)
     {
-        $this->response = $response;
-        $this->header = $header;
-        $this->code = $code;
+        $this->body = $body;
+        $this->statusCode = $statusCode;
+        $this->headers = $headers;
     }
 
-    public function getResponseJson()
+    public function getBody()
     {
-        $response = $this->response;
-        $jsonData = json_decode($response, true);
-        $response = $jsonData ? $jsonData : $response;
-
-        return $response;
+        return $this->body;
     }
 
-    public function getResponse()
+    public function getHeaders()
     {
-        return $this->response;
+        return $this->headers;
     }
 
-    public function getResponseHeader()
+    public function getHeader($header)
     {
-        return $this->header;
+        return $this->headers[$header];
     }
 
-    public function getResponseCode()
+    public function getStatusCode()
     {
-        return $this->code;
+        return $this->statusCode;
     }
 }

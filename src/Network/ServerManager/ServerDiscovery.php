@@ -104,10 +104,12 @@ class ServerDiscovery
             $this->config['discovery']['protocol'] . ':' .
             $this->config['discovery']['namespace'] . '/'.
             $this->appName;
-        $resp = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
-        $raw = $resp->getResponseJson();
+        $response = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
+        $raw = $response->getBody();
+        $jsonData = json_decode($raw, true);
+        $result = $jsonData ? $jsonData : $raw;
 
-        $servers = $this->parseEtcdData($raw);
+        $servers = $this->parseEtcdData($result);
         $this->saveServices($servers);
         yield $servers;
     }
@@ -177,10 +179,12 @@ class ServerDiscovery
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
             $this->appName;
-        $resp = yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
-        $raw = $resp->getResponseJson();
+        $response = yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+        $raw = $response->getBody();
+        $jsonData = json_decode($raw, true);
+        $result = $jsonData ? $jsonData : $raw;
 
-        yield $raw;
+        yield $result;
     }
 
     private function updateServersByEtcd($raw)
