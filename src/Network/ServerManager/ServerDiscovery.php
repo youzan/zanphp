@@ -179,7 +179,7 @@ class ServerDiscovery
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
             $this->appName;
-        $response = yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+        $response = (yield $httpClient->get($uri, $params, $this->config['watch']['timeout']));
         $raw = $response->getBody();
         $jsonData = json_decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
