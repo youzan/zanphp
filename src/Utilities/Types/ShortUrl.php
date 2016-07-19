@@ -23,7 +23,7 @@ class ShortUrl
         $response = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/shorten?longUrl='.$url));
         $body = $response->getBody();
 
-        $jsonData = json_decode($body, true);
+        $jsonData = Json::decode($body, true);
         $result = $jsonData ? $jsonData : $body;
 
         if(!isset($result['status_code']) || 200 != $result['status_code']){

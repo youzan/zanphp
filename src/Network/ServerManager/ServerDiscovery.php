@@ -18,6 +18,7 @@ use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Types\Json;
 use Zan\Framework\Utilities\Types\Time;
 
 class ServerDiscovery
@@ -106,7 +107,7 @@ class ServerDiscovery
             $this->appName;
         $response = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
         $raw = $response->getBody();
-        $jsonData = json_decode($raw, true);
+        $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
         $servers = $this->parseEtcdData($result);
@@ -181,7 +182,7 @@ class ServerDiscovery
             $this->appName;
         $response = (yield $httpClient->get($uri, $params, $this->config['watch']['timeout']));
         $raw = $response->getBody();
-        $jsonData = json_decode($raw, true);
+        $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
         yield $result;
