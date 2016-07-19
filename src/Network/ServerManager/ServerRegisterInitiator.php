@@ -18,13 +18,19 @@ class ServerRegisterInitiator
 {
     use Singleton;
 
-    const ENABLE_REGISTER  = 1;
+    CONST ENABLE_REGISTER = 1;
+    CONST DISABLE_REGISTER = 0;
 
-    private static $cliInput = null;
+    private $register;
 
-    public static function setCliInput($mode)
+    public function enableRegister()
     {
-        self::$cliInput = $mode ? true : false;
+        $this->register = self::ENABLE_REGISTER;
+    }
+
+    public function disableRegister()
+    {
+        $this->register = self::DISABLE_REGISTER;
     }
 
     public function init()
@@ -34,11 +40,11 @@ class ServerRegisterInitiator
         $haunt = Config::get('haunt.register');
         $enableRegister = isset($haunt['enable_register']) ? $haunt['enable_register'] : self::ENABLE_REGISTER;
 
-        if (null !== self::$cliInput) {
-            $enableRegister = self::$cliInput ? 1 : 0;
+        if (null !== $this->register) {
+            $enableRegister = $this->register;
         }
 
-        if (0 === $enableRegister) {
+        if (self::DISABLE_REGISTER === $enableRegister) {
             return;
         }
 
