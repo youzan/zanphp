@@ -128,40 +128,39 @@ class Client
         $queue = new Queue();
         $client = $this;
 
+        $this->init();
 
-            $this->init();
-            
+        /**
+         * 为了避免cortinue内存不释放,造成递归调用,内存溢出, 这里在sub回调里判断count是否超过limit重开client
+         *
+         * sub回调里面的调用是不会导致内存溢出的
+         */
+        yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
+            /** @var $msg Msg */
             /**
-             * 为了避免cortinue内存不释放,造成递归调用,内存溢出, 这里在sub回调里判断count是否超过limit重开client
-             * 
-             * sub回调里面的调用是不会导致内存溢出的
+             * 检查是否超过msg接受数量限制或者等待关闭中, 超过就关闭连接, 连接关闭后会跳出callback
              */
-            yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
-                /** @var $msg Msg */
-                /**
-                 * 检查是否超过msg接受数量限制或者等待关闭中, 超过就关闭连接, 连接关闭后会跳出callback
-                 */
-                if ($client->getMsgCount() >= Client::LIMIT_MSG_COUNT or $client->isWaitingClosed()) {
-                    $msg->close();
-                    Timer::after(2000, [$client, 'start']);
-                    return;
-                }
-                
-                $client->processing();
+            if ($client->getMsgCount() >= Client::LIMIT_MSG_COUNT or $client->isWaitingClosed()) {
+                $msg->close();
+                Timer::after(2000, [$client, 'start']);
+                return;
+            }
 
-                $client->incrMsgCount();
-                $consumer = $this->getConsumer();
-                $instance = Di::make($consumer);
-                $instance->setMsg($msg);
-                if (!$instance->checkMsg()) {
-                    $instance->handleMsgError();
-                    $msg->done();
-                    return;
-                }
-                $handle = $instance->fire();
-                Task::execute($handle);
+            $client->processing();
 
-                $client->free();
-            }, $this->timeout);
+            $client->incrMsgCount();
+            $consumer = $this->getConsumer();
+            $instance = Di::make($consumer);
+            $instance->setMsg($msg);
+            if (!$instance->checkMsg()) {
+                $instance->handleMsgError();
+                $msg->done();
+                return;
+            }
+            $handle = $instance->fire();
+            Task::execute($handle);
+
+            $client->free();
+        }, $this->timeout);
     }
 }
