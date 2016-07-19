@@ -33,7 +33,8 @@ class HttpClientTest extends TaskTest
             'fg_color' => '000000',
             'bg_color' => 'ffffff',
         ];
-        $result = (yield HttpClient::newInstance('192.168.66.202', 8888)->get('', $params));
+        $response = (yield HttpClient::newInstance('192.168.66.202', 8888)->get('', $params));
+        $result = $response->getBody();
 
         var_dump($result);
         exit;

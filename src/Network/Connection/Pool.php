@@ -77,18 +77,25 @@ class Pool implements ConnectionPool
     {
     }
 
-    public function get()
+    public function get($connection = null)
     {
         if ($this->freeConnection->isEmpty()) {
             yield null;
             return;
         }
-        $conn = $this->freeConnection->pop();
-        $this->activeConnection->push($conn);
-        $conn->setUnReleased();
-        $conn->lastUsedTime = Time::current(true);
-        yield $this->insertActiveConnectionIntoContext($conn);
-        yield $conn;
+
+        if (null == $connection) {
+            $connection = $this->freeConnection->pop();
+            $this->activeConnection->push($connection);
+        } else {
+            $this->freeConnection->remove($connection);
+            $this->activeConnection->push($connection);
+        }
+
+        $connection->setUnReleased();
+        $connection->lastUsedTime = Time::current(true);
+        yield $this->insertActiveConnectionIntoContext($connection);
+        yield $connection;
     }
 
     public function recycle(Connection $conn)

@@ -280,6 +280,12 @@ class SqlBuilder
             return $this;
         }
         $parseWhere = $this->parseWhereStyleData($where, 'and');
+        preg_match('/where([^#]*)#where#/i', $this->sqlMap['sql'], $match);
+        if (isset($match[1])) {
+            if ('' != trim($match[1])) {
+                $parseWhere = ' and ' . $parseWhere;
+            }
+        }
         $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'where', $parseWhere);
         return $this;
     }
