@@ -118,7 +118,8 @@ class Client implements Async
 
     private function getCallback(callable $callback)
     {
-        return function($response) use ($callback) {
+        return function($cli) use ($callback) {
+            $response = $cli->body;
             $jsonData = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
             if (false === $jsonData || !is_array($jsonData)) {
                 // TODO 分配 code

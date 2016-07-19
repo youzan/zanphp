@@ -40,7 +40,11 @@ class Qrcode {
             'bg_color' => isset($styles['bg_color']) ? $styles['bg_color'] : 'ffffff',
         ];
         $config = Config::get('qrcode');
-        $response = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/',$params));
+        $cli = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/',$params));
+        $response = $cli->body;
+        $jsonData = json_decode($response, true);
+        $response = $jsonData ? $jsonData : $response;
+
         if ($response) {
             if (false === $base64){
                 yield $response;

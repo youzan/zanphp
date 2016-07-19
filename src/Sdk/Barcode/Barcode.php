@@ -46,7 +46,11 @@ class Barcode {
 
         // TODO 1. 判断接口返回的状态码
         // TODO 2. timeout
-        $response = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/', $params));
+        $cli = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/', $params));
+        $response = $cli->body;
+        $jsonData = json_decode($response, true);
+        $response = $jsonData ? $jsonData : $response;
+
         if ($response) {
             if (false === $base64) {
                 yield $response;
