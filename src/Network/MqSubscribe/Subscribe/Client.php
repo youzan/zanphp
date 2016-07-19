@@ -8,6 +8,8 @@ use Zan\Framework\Sdk\Queue\NSQ\Queue;
 class Client
 {
     const TIMEOUT = 1800;
+
+    const LIMIT_MSG_COUNT = 1000; //待议
     
     private $consumer;
     private $timeout;
@@ -20,7 +22,7 @@ class Client
     /** @var  Task */
     private $task;
     
-    private $sum = 0;
+    private $count = 0;
     
     private $error;
     private $errorMessage;
@@ -42,6 +44,7 @@ class Client
         if (!$this->valid()) {
             return;
         }
+
         $this->task = new Task($this->cortinue());
         $this->task->run();
     }
@@ -58,12 +61,12 @@ class Client
 
     public function incrMsgCount()
     {
-        $this->sum++;
+        $this->count++;
     }
 
     public function getMsgCount()
     {
-        return $this->sum;
+        return $this->count;
     }
     
     private function valid()
@@ -83,6 +86,11 @@ class Client
         $queue = new Queue();
         $client = $this;
 
+        /**
+         * 为了避免cortinue内存不释放,造成递归调用,内存溢出, 这里在sub回调里判断count是否超过limit重开client
+         * 改由定时器触发检查
+         * sub回调里面的调用是不会导致内存溢出的
+         */
         yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
             $client->incrMsgCount();
             $consumer = $this->getConsumer();
@@ -94,6 +102,10 @@ class Client
                 return;
             }
             $handle = $instance->fire();
+            /**
+             * job里的ack等改为标记
+             * 真正的ack在Task外面 也就是下面做 根据是否count超过limit了选择 rdy还是仅仅Fin后重启client
+             */
             Task::execute($handle);
         }, $this->timeout);
     }
