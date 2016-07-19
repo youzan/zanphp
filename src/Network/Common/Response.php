@@ -26,7 +26,11 @@ class Response
 
     public function getHeader($header)
     {
-        return $this->headers[$header];
+        if (isset($this->headers) && isset($this->headers[$header])) {
+            return $this->headers[$header];
+        } else {
+            return null;
+        }
     }
 
     public function getStatusCode()
