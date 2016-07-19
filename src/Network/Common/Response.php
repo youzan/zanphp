@@ -27,4 +27,14 @@ class Response
     {
         return $this->response;
     }
+
+    public function getResponseHeader()
+    {
+        return $this->header;
+    }
+
+    public function getResponseCode()
+    {
+        return $this->code;
+    }
 }
