@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\MqSubscribe\Subscribe;
 use Kdt\Iron\NSQ\Message\Msg;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Queue\NSQ\Queue;
 
 class Client
@@ -46,6 +47,9 @@ class Client
     public function start()
     {
         if (!$this->valid()) {
+            return;
+        }
+        if ($this->isWaitingClosed()) {
             return;
         }
 
@@ -108,7 +112,7 @@ class Client
             $this->error = true;
             $this->errorMessage = $this->channel->getTopic()->getName() . '/' . $this->channel->getName() . '/Error';
         }
-        
+
         return !$this->error;
     }
 
@@ -124,11 +128,7 @@ class Client
         $queue = new Queue();
         $client = $this;
 
-        while (true) {
-            
-            if ($this->isWaitingClosed()) {
-                break;
-            }
+
             $this->init();
             
             /**
@@ -143,6 +143,7 @@ class Client
                  */
                 if ($client->getMsgCount() >= Client::LIMIT_MSG_COUNT or $client->isWaitingClosed()) {
                     $msg->close();
+                    Timer::after(2000, [$client, 'start']);
                     return;
                 }
                 
@@ -161,8 +162,6 @@ class Client
                 Task::execute($handle);
 
                 $client->free();
-
             }, $this->timeout);
-        }
     }
 }

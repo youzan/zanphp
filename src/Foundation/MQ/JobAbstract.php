@@ -45,10 +45,9 @@ abstract class JobAbstract
             || !isset($data['job_data'])) {
             return false;
         }
-
         if (static::$name != $data['job_name']) {
             return false;
-        } elseif (self::makeKey($data['job_data']) != $data['job_key']) {
+        } elseif (static::makeKey($data['job_data']) != $data['job_key']) {
             return false;
         }
 
