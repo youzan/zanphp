@@ -22,4 +22,9 @@ class Response
 
         return $response;
     }
+
+    public function getResponse()
+    {
+        return $this->response;
+    }
 }
