@@ -104,9 +104,8 @@ class ServerDiscovery
             $this->config['discovery']['protocol'] . ':' .
             $this->config['discovery']['namespace'] . '/'.
             $this->appName;
-        $cli = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
-        $jsonData = json_decode($cli->body, true);
-        $raw = $jsonData ? $jsonData : $cli->body;
+        $resp = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
+        $raw = $resp->getResponseJson();
 
         $servers = $this->parseEtcdData($raw);
         $this->saveServices($servers);
@@ -178,9 +177,9 @@ class ServerDiscovery
             $this->config['watch']['protocol'] . ':' .
             $this->config['watch']['namespace'] . '/'.
             $this->appName;
-        $cli = yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
-        $jsonData = json_decode($cli->body, true);
-        $raw = $jsonData ? $jsonData : $cli->body;
+        $resp = yield $httpClient->get($uri, $params, $this->config['watch']['timeout']);
+        $raw = $resp->getResponseJson();
+
         yield $raw;
     }
 

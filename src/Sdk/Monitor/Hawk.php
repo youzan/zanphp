@@ -74,10 +74,9 @@ class Hawk
             return;
         }
 
-        $cli = (yield $this->httpClient->post($this->config['uri'], $this->data));
-        $jsonData = json_decode($cli->body, true);
-        $result = $jsonData ? $jsonData : $cli->body;
-        
+        $resp = (yield $this->httpClient->post($this->config['uri'], $this->data));
+        $result = $resp->getResponseJson();
+
         $this->data = [];
 
         if (!isset($result['code']) || $result['code'] != self::SUCCESS) {

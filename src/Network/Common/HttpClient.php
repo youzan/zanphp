@@ -184,7 +184,8 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
-        call_user_func($this->callback, $cli);
+        $response = new Response($cli->body, $cli->headers, $cli->statusCode);
+        call_user_func($this->callback, $response);
     }
 
     private function getCallback(callable $callback)

@@ -49,9 +49,9 @@ class ServerRegister
     {
         $haunt = Config::get('haunt');
         $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        $cli = (yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), null));
-        $jsonData = json_decode($cli->body, true);
-        $register = $jsonData ? $jsonData : $cli->body;
+        $resp = (yield $httpClient->post($haunt['register']['uri'], $this->parseConfig($config), null));
+        $register = $resp->getResponseJson();
+
         echo $register;
     }
 

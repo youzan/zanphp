@@ -20,10 +20,8 @@ class ShortUrl
             throw new InvalidArgumentException('链接地址错误');
         }
         $config = Config::get('shorturl');
-        $cli = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/shorten?longUrl='.$url));
-        $response = $cli->body;
-        $jsonData = json_decode($response, true);
-        $response = $jsonData ? $jsonData : $response;
+        $resp = (yield HttpClient::newInstance($config['host'],$config['port'])->get('/shorten?longUrl='.$url));
+        $response = $resp->getResponseJson();
 
         if(!isset($response['status_code']) || 200 != $response['status_code']){
             yield '';
