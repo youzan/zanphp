@@ -17,14 +17,14 @@ class InitializeCliInput implements Bootable
         $input = new ArgvInput();
         $debug = $input->getParameterOption('--debug');
         if ($debug === 'true') {
-            Debug::setCliInput(true);
+            Debug::enableDebug();
         } else if ($debug === 'false') {
-            Debug::setCliInput(false);
+            Debug::disableDebug();
         }
 
         $env = $input->getParameterOption('--env');
         if (!empty($env)) {
-            RunMode::setCliInput($env);
+            RunMode::set($env);
         }
 
         $serviceRegister = $input->getParameterOption('--service-register');
