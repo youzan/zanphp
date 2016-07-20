@@ -7,6 +7,7 @@ use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Network\Common\HttpClient as HClient;
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Utilities\Types\Json;
 
 class Client implements Async
 {
@@ -119,7 +120,9 @@ class Client implements Async
     private function getCallback(callable $callback)
     {
         return function($response) use ($callback) {
-            $jsonData = json_decode($response, true, 512, JSON_BIGINT_AS_STRING);
+            $body = $response->getBody();
+
+            $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING);
             if (false === $jsonData || !is_array($jsonData)) {
                 // TODO 分配 code
                 $e = new SystemException('网络错误', 10000);
