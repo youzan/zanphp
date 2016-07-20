@@ -29,9 +29,9 @@ class InitializeCliInput implements Bootable
 
         $serviceRegister = $input->getParameterOption('--service-register');
         if ($serviceRegister === 'true') {
-            ServerRegisterInitiator::setCliInput(true);
+            ServerRegisterInitiator::instance()->enableRegister();
         } else if ($serviceRegister === 'false') {
-            ServerRegisterInitiator::setCliInput(false);
+            ServerRegisterInitiator::instance()->disableRegister();
         }
     }
 }
