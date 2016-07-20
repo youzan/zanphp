@@ -11,7 +11,11 @@ class Response
     {
         $this->body = $body;
         $this->statusCode = $statusCode;
-        $this->headers = $headers;
+        if (is_array($headers)) {
+            $this->headers = $headers;
+        } else {
+            $this->headers = [];
+        }
     }
 
     public function getBody()
@@ -26,7 +30,7 @@ class Response
 
     public function getHeader($header)
     {
-        if (isset($this->headers) && isset($this->headers[$header])) {
+        if (isset($this->headers[$header])) {
             return $this->headers[$header];
         } else {
             return null;
