@@ -10,13 +10,12 @@ namespace Zan\Framework\Test\Foundation\Coroutine\Task;
 
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Network\Contract\Response;
 
 class AsyncTest implements  Async
 {
     private $callback = null;
 
-    public function execute(callable $callback)
+    public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
     }

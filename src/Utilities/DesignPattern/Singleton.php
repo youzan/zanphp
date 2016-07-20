@@ -13,6 +13,11 @@ trait Singleton {
      */
     final public static function instance()
     {
+        return static::singleton();
+    }
+    
+    final public static function singleton()
+    {
         if (null === static::$_instance) {
             static::$_instance = new static();
         }
@@ -24,6 +29,12 @@ trait Singleton {
      */
     final public static function getInstance()
     {
-        return static::instance();
+        return static::singleton();
     }
+
+    final public static function swap($instance)
+    {
+        static::$_instance = $instance;
+    }
+
 }

@@ -28,7 +28,7 @@ class Event
         }
     }
 
-    public static function once($evtName, \Closure $callback)
+    public static function once($evtName, $callback)
     {
         self::register($evtName);
 
@@ -38,7 +38,7 @@ class Event
         ];
     }
 
-    public static function bind($evtName, \Closure $callback)
+    public static function bind($evtName, $callback)
     {
         self::register($evtName);
 
@@ -48,7 +48,7 @@ class Event
         ];
     }
 
-    public static function unbind($evtName, \Closure $callback)
+    public static function unbind($evtName, $callback)
     {
         if (!isset(self::$evtMap[$evtName]) || !self::$evtMap[$evtName]) {
             return false;
@@ -64,20 +64,29 @@ class Event
         return false;
     }
 
-    public static function fire($evtName, $args = null)
+    public static function fire($evtName, $args=null, $loop=true)
     {
         if (isset(self::$evtMap[$evtName]) && self::$evtMap[$evtName]) {
-            foreach (self::$evtMap[$evtName] as $key => $evt) {
-                $callback = $evt['callback'];
-                $evtType = $evt['evtType'];
-                call_user_func($callback, $args);
-
-                if (Event::ONCE_EVENT === $evtType) {
-                    unset(self::$evtMap[$evtName][$key]);
-                }
-            }
+            self::fireEvents($evtName, $args, $loop);
         }
 
         EventChain::fireEventChain($evtName);
+    }
+
+    private static function fireEvents($evtName, $args=null, $loop=true)
+    {
+        foreach (self::$evtMap[$evtName] as $key => $evt) {
+            $callback = $evt['callback'];
+            $evtType = $evt['evtType'];
+
+            if (Event::ONCE_EVENT === $evtType) {
+                unset(self::$evtMap[$evtName][$key]);
+            }
+            call_user_func($callback, $args);
+
+            if(false === $loop){
+                break;
+            }
+        }
     }
 }

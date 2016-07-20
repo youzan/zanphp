@@ -8,13 +8,12 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
-//load commands
-Commands::load();
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Task
 {
     protected $taskId = 0;
-    protected $parentId = 0;
+    protected $parentTask;
     protected $coroutine = null;
     protected $context = null;
 
@@ -22,11 +21,23 @@ class Task
     protected $scheduler = null;
     protected $status = 0;
 
-    public function __construct(\Generator $coroutine, $taskId = 0, $parentId = 0, Context $context = null)
+    public static function execute($coroutine, Context $context = null, $taskId = 0, Task $parentTask = null)
+    {
+        if ($coroutine instanceof \Generator) {
+            $task = new Task($coroutine, $context, $taskId, $parentTask);
+            $task->run();
+
+            return $task;
+        }
+
+        return $coroutine;
+    }
+
+    public function __construct(\Generator $coroutine, Context $context = null, $taskId = 0, Task $parentTask = null)
     {
         $this->coroutine = $coroutine;
         $this->taskId = $taskId ? $taskId : TaskId::create();
-        $this->parentId = $parentId;
+        $this->parentTask = $parentTask;
 
         if ($context) {
             $this->context = $context;
@@ -41,6 +52,11 @@ class Task
     {
         while (true) {
             try {
+                if ($this->status === Signal::TASK_KILLED) {
+                    $this->fireTaskDoneEvent();
+                    $this->status = Signal::TASK_DONE;
+                    break;
+                }
                 $this->status = $this->scheduler->schedule();
                 switch ($this->status) {
                     case Signal::TASK_KILLED:
@@ -54,18 +70,21 @@ class Task
                         return null;
                 }
             } catch (\Exception $e) {
-                if ($this->scheduler->isStackEmpty()) {
-                    return;
-                }
                 $this->scheduler->throwException($e);
             }
         }
     }
 
+    public function sendException($e)
+    {
+        $this->scheduler->throwException($e);
+    }
+
     public function send($value)
     {
-        $this->coroutine->send($value);
         $this->sendValue = $value;
+
+        return $this->coroutine->send($value);
     }
 
     public function getTaskId()
@@ -106,6 +125,11 @@ class Task
     public function setCoroutine(\Generator $coroutine)
     {
         $this->coroutine = $coroutine;
+    }
+
+    public function getParentTask()
+    {
+        return $this->parentTask;
     }
 
     public function fireTaskDoneEvent()

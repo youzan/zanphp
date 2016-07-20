@@ -7,16 +7,17 @@
  */
 namespace Zan\Framework\Test\Foundation\Coroutine;
 
-require __DIR__ . '/../../../' . 'src/Test.php';
-
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
+use Zan\Framework\Test\Foundation\Coroutine\Task\ErrorException;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
+use Zan\Framework\Test\Foundation\Coroutine\Task\Steps;
+use Zan\Framework\Test\Foundation\Coroutine\Task\YieldValues;
+use Zan\Framework\Test\Foundation\Coroutine\Task\Response;
 
-
-class TaskTest extends \UnitTest {
+class TaskTest extends \TestCase {
     public function setUp() {
         parent::setUp();
     }
@@ -95,7 +96,7 @@ class TaskTest extends \UnitTest {
         $this->assertEquals('call', $context->get('call()'), 'async job get wrong context value');
 
         $this->assertArrayHasKey('response',$result, 'async job failed to set context');
-        $this->assertInstanceOf('Zan\Framework\Network\Contract\Response',$context->get('response'),'async job get response fail');
+        $this->assertInstanceOf(Response::class,$context->get('response'),'async job get response fail');
 
         $response = $context->get('response');
         $responseData = $response->getData();
@@ -120,10 +121,10 @@ class TaskTest extends \UnitTest {
 
         $job = new Error($context);
         $coroutine = $job->run();
-
+        
         $task = new Task($coroutine);
         $task->run();
-
+    
         $result = $context->show();
 
         $this->assertArrayHasKey('step1_response',$result, 'exception job failed to set context');
@@ -138,9 +139,51 @@ class TaskTest extends \UnitTest {
         $this->assertArrayHasKey('exception',$result, 'exception job failed to set context');
         $this->assertEquals('Zan\Framework\Test\Foundation\Coroutine\Task\ErrorException', $context->get('exception'), 'exception job get wrong context value');
 
-        $this->assertArrayNotHasKey('work_response',$result, 'exception job failed to set context');
+        //$this->assertArrayNotHasKey('work_response',$result, 'exception job failed to set context');
 
         $taskData = $task->getResult();
         $this->assertEquals('Error.catch.exception', $taskData, 'get exception task final output fail');
+    }
+
+    public function testStepsWorkFine()
+    {
+        $context = new Context();
+
+        $job = new Steps($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+
+        $result = $context->show();
+
+        $this->assertArrayHasKey('result',$result, 'steps job failed to set context');
+        $this->assertEquals('stepN', $context->get('result'), 'steps job get wrong context value');
+
+        $taskData = $task->getResult();
+        $this->assertEquals('stepN', $taskData, 'get steps task final output fail');
+
+    }
+
+    public function testYieldValuesWorkFine()
+    {
+        $context = new Context();
+
+        $job = new YieldValues($context);
+        $coroutine = $job->run();
+
+        $task = new Task($coroutine);
+        $task->run();
+
+        $job->fakeResponse();
+
+        $result = $context->show();
+
+        $this->assertArrayHasKey('step4_response',$result, 'YieldValues job failed to set context');
+        $this->assertEquals('coroutine.step44444444()', $context->get('step4_response'), 'YieldValues job get wrong context value');
+
+        $taskData = $task->getResult();
+        $this->assertEquals('YieldValues job done', $taskData, 'get YieldValues task final output fail');
+
     }
 }

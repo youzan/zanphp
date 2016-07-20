@@ -9,7 +9,7 @@
 namespace Zan\Framework\Utilities\Types;
 
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgument;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Number {
     public static function floatToString($float) /* string */
@@ -19,7 +19,7 @@ class Number {
         }
 
         if(!is_float($float)) {
-            throw new InvalidArgument('invalid argument for Number::floatToString(' . $float . ')');
+            throw new InvalidArgumentException('invalid argument for Number::floatToString(' . $float . ')');
         }
 
         $string = (string) $float;

@@ -9,7 +9,6 @@
 pids
 logs
 node_modules
-*.log
 *.sqlite
 .DS_Store
 .DS_Store?

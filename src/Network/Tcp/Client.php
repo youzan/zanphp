@@ -3,7 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 use \swoole_client as TcpClient;
-use Zan\Framework\Network\Exception\ConnectionException;
+use Zan\Framework\Network\Exception\ConnectionFailedException;
 
 class Client implements \Zan\Framework\Network\Contract\Client{
 
@@ -25,7 +25,8 @@ class Client implements \Zan\Framework\Network\Contract\Client{
     {
         $connected = $this->client->connect($config['host'], $config['port'], $config['timeout']);
         if (false == $connected) {
-            throw new ConnectionException(socket_strerror($this->client->errCode), $this->client->errCode);
+            $errMsg = socket_strerror($this->client->errCode);
+            throw new ConnectionFailedException($errMsg, $this->client->errCode);
         }
         $this->setConnected();
     }

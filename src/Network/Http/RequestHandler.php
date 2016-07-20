@@ -2,35 +2,136 @@
 
 namespace Zan\Framework\Network\Http;
 
-class RequestHandler {
+use swoole_http_request as SwooleHttpRequest;
+use swoole_http_response as SwooleHttpResponse;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
+use Zan\Framework\Foundation\Coroutine\Signal;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Exception\ExcessConcurrency;
+use Zan\Framework\Network\Exception\ExcessConcurrencyException;
+use Zan\Framework\Network\Http\Response\BaseResponse;
+use Zan\Framework\Network\Http\Response\InternalErrorResponse;
+use Zan\Framework\Network\Http\Response\JsonResponse;
+use Zan\Framework\Network\Http\Routing\Router;
+use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
+use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Network\Http\Request\Request;
+use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Network\Connection\ConnectionManager;
 
-    private $route;
+class RequestHandler
+{
+    private $context = null;
+    private $middleWareManager = null;
+    private $task = null;
+    private $event = null;
+
+    const DEFAULT_TIMEOUT = 30 * 1000;
 
     public function __construct()
     {
-        $this->route = new Router();
+        $this->context = new Context();
+        $this->event = $this->context->getEvent();
     }
 
-    public function handle(\swoole_http_request $req, \swoole_http_response $resp)
+    public function handle(SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
-        $request  = $this->buildRequest($req);
-        $response = $this->buildResponse($resp);
+        try {
+            $request = Request::createFromSwooleHttpRequest($swooleRequest);
+            $this->initContext($request, $swooleResponse);
+            $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
-        $routes = $this->route->parse($request);
+            $isAccept = Worker::instance()->reactionReceive();
+            //限流
+            if (!$isAccept) {
+                throw new ExcessConcurrencyException('现在访问的人太多,请稍后再试..', 503);
+            }
 
-        (new RequestProcessor($request, $response))->run($routes);
+            //bind event
+            $timeout = $this->context->get('request_timeout');
+            $this->event->once($this->getRequestFinishJobId(), [$this, 'handleRequestFinish']);
+            Timer::after($timeout, [$this, 'handleTimeout'], $this->getRequestTimeoutJobId());
+
+            $requestTask = new RequestTask($request, $swooleResponse, $this->context, $this->middleWareManager);
+            $coroutine = $requestTask->run();
+            $this->task = new Task($coroutine, $this->context);
+            $this->task->run();
+
+        } catch (\Exception $e) {
+            if (Debug::get()) {
+                echo_exception($e); 
+            }
+            $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
+            Task::execute($coroutine, $this->context);
+            $this->event->fire($this->getRequestFinishJobId());
+        }
+
     }
 
-    private function buildRequest($request)
+    private function initContext($request, SwooleHttpResponse $swooleResponse)
     {
-        $requestBuilder = new RequestBuilder($request);
 
-        return $requestBuilder->build();
+        $this->context->set('request', $request);
+        $this->context->set('swoole_response', $swooleResponse);
+
+        $router = Router::getInstance();
+        $route = $router->route($request);
+        $this->context->set('controller_name', $route['controller_name']);
+        $this->context->set('action_name', $route['action_name']);
+
+        $cookie = new Cookie($request, $swooleResponse);
+        $this->context->set('cookie', $cookie);
+
+        $this->context->set('request_time', Time::stamp());
+        $request_timeout = Config::get('server.request_timeout');
+        $request_timeout = $request_timeout ? $request_timeout : self::DEFAULT_TIMEOUT;
+        $this->context->set('request_timeout', $request_timeout);
+
+        $this->context->set('request_end_event_name', $this->getRequestFinishJobId());
     }
 
-    private function buildResponse($response)
+    public function handleRequestFinish()
     {
-        return new Response($response);
+        Timer::clearAfterJob($this->getRequestTimeoutJobId());
+        $response = $this->context->get('response');
+        $coroutine = $this->middleWareManager->executeTerminators($response);
+        Task::execute($coroutine, $this->context);
+    }
+    public function handleTimeout()
+    {
+        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
+        Task::execute($coroutine);
+
+        $this->task->setStatus(Signal::TASK_KILLED);
+        $request = $this->context->get('request');
+        if ($request && $request->wantsJson()) {
+            // @TODO 分配code
+            $data = [
+                'code' => 10000,
+                'msg' => '网络超时',
+                'data' => '',
+            ];
+            $response = new JsonResponse($data, BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        } else {
+            $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
+        }
+
+        $this->context->set('response', $response);
+        $swooleResponse = $this->context->get('swoole_response');
+        $response->sendBy($swooleResponse);
+        $this->event->fire($this->getRequestFinishJobId());
     }
 
+    private function getRequestFinishJobId()
+    {
+        return spl_object_hash($this) . '_request_finish';
+    }
+
+    private function getRequestTimeoutJobId()
+    {
+        return spl_object_hash($this) . '_handle_timeout';
+    }
 }

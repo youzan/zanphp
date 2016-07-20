@@ -1,7 +1,10 @@
 <?php
+
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Contract\Future;
+use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Exception\ServerTimeoutException;
+use Zan\Framework\Utilities\Types\Time;
 
 class Scheduler
 {
@@ -17,6 +20,7 @@ class Scheduler
     public function schedule()
     {
         $coroutine = $this->task->getCoroutine();
+
         $value = $coroutine->current();
 
         $signal = $this->handleSysCall($value);
@@ -28,19 +32,17 @@ class Scheduler
         $signal = $this->handleAsyncJob($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleAsyncCallback($value);
+        $signal = $this->handleYieldValue($value);
         if ($signal !== null) return $signal;
 
         $signal = $this->handleTaskStack($value);
         if ($signal !== null) return $signal;
 
-        $signal = $this->handleYieldValue($value);
-        if ($signal !== null) return $signal;
 
         $signal = $this->checkTaskDone($value);
         if ($signal !== null) return $signal;
 
-        return Signal::TASK_CONTINUE;
+        return Signal::TASK_DONE;
     }
 
     public function isStackEmpty()
@@ -48,27 +50,54 @@ class Scheduler
         return $this->stack->isEmpty();
     }
 
-    public function throwException($e)
+    public function throwException($e, $isFirstCall = false)
     {
-        $coroutine = $this->stack->pop();
-        $coroutine->throw($e);
+        if ($this->isStackEmpty()) {
+            $parent = $this->task->getParentTask();
+            if (null !== $parent && $parent instanceof Task) {
+                $parent->sendException($e);
+            } else {
+                $this->task->getCoroutine()->throw($e);
+            }
+            return;
+        }
 
-        $this->task->setCoroutine($coroutine);
+        try{
+            if ($isFirstCall) {
+                $coroutine = $this->task->getCoroutine();
+            } else {
+                $coroutine = $this->stack->pop();
+            }
+
+            $this->task->setCoroutine($coroutine);
+            $coroutine->throw($e);
+
+            $this->task->run();
+        }catch (\Exception $e){
+            $this->throwException($e);
+        }
     }
 
-    public function asyncCallback(Future $response)
+    //TODO: 规范化response
+    public function asyncCallback($response, $exception = null)
     {
-        $coroutine = $this->stack->pop();
-        $this->task->setCoroutine($coroutine);
-        $this->task->send($response);
-        $this->task->run();
+        if (Signal::TASK_DONE == $this->task->getStatus()) {
+            return ;
+        }
+        if ($exception !== null
+            && $exception instanceof \Exception) {
+                $this->throwException($exception, true);
+        } else {
+            $this->task->send($response);
+            $this->task->run();
+        }
     }
 
     //TODO:  move handlers out of this class
     private function handleSysCall($value)
     {
         if (!($value instanceof SysCall)
-            && !is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Coroutine\\Syscall')
+            && !is_subclass_of($value, SysCall::class)
         ) {
             return null;
         }
@@ -96,29 +125,13 @@ class Scheduler
 
     private function handleAsyncJob($value)
     {
-        if (!is_subclass_of($value, '\\Zan\\Framework\\Foundation\\Contract\\Async')) {
+        if (!is_subclass_of($value, Async::class)) {
             return null;
         }
 
-        $coroutine = $this->task->getCoroutine();
-        $this->stack->push($coroutine);
-        $value->execute([$this, 'asyncCallback']);
+        $value->execute([$this, 'asyncCallback'], $this->task);
 
         return Signal::TASK_WAIT;
-    }
-
-    private function handleAsyncCallback($value)
-    {
-        if (Signal::TASK_WAIT !== $this->task->getStatus()) {
-            return null;
-        }
-
-        if (is_null($value) && !$this->isStackEmpty()) {
-            $coroutine = $this->stack->pop();
-            $coroutine->send($this->task->getSendValue());
-        }
-
-        return Signal::TASK_CONTINUE;
     }
 
     private function handleTaskStack($value)
@@ -129,6 +142,8 @@ class Scheduler
 
         $coroutine = $this->stack->pop();
         $this->task->setCoroutine($coroutine);
+
+        $value = $this->task->getSendValue();
         $this->task->send($value);
 
         return Signal::TASK_CONTINUE;
@@ -141,7 +156,7 @@ class Scheduler
             return null;
         }
 
-        $this->task->send($value);
+        $status = $this->task->send($value);
         return Signal::TASK_CONTINUE;
     }
 

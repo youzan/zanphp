@@ -7,7 +7,7 @@
  */
 namespace Zan\Framework\Foundation\Coroutine;
 
-use Zan\Framework\Foundation\Core\ClassLoader;
+//use Zan\Framework\Foundation\Core\ClassLoader;
 use Zan\Framework\Utilities\Types\Dir;
 
 class Commands
@@ -19,8 +19,9 @@ class Commands
 
         if (!$files) return false;
 
-        ClassLoader::loadFiles($files);
-        return true;
+        foreach($files as $file){
+            require_once($file);
+        }
     }
 }
 
