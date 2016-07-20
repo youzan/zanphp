@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
@@ -143,7 +144,14 @@ class HttpClient implements Async
 
     public function handle()
     {
-        $this->request('10.200.175.195');
+        $runMode = RunMode::get();
+        if ($runMode === 'online' || $runMode === 'pre') {
+            $this->request('10.200.175.195');
+        } else {
+            swoole_async_dns_lookup($this->host, function($host, $ip) {
+                $this->request($ip);
+            });
+        }
     }
 
 
@@ -182,6 +190,7 @@ class HttpClient implements Async
         if ($this->https) {
             $this->header['scheme'] = 'https';
         }
+
         $this->client->setHeaders($this->header);
     }
 
