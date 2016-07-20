@@ -5,6 +5,9 @@ namespace Zan\Framework\Sdk\Barcode;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\HttpClient;
+use Zan\Framework\Network\Common\Response;
+use Zan\Framework\Sdk\Barcode\Exception\BadRequestException;
+use Zan\Framework\Sdk\Barcode\Exception\ServiceUnavailableException;
 
 /**
  * Class Barcode
@@ -14,12 +17,12 @@ use Zan\Framework\Network\Common\HttpClient;
 class Barcode {
 
     public static function create($text, $height = 10, $styles = [], $barcode = 20) {
-        return self::generate($text, $height, $styles, $barcode);
+        yield self::generate($text, $height, $styles, $barcode);
     }
 
     public static function createDataUrl($text, $height = 10, $styles = [], $barcode = 20)
     {
-        return self::generate($text, $height, $styles, $barcode, true);
+        yield self::generate($text, $height, $styles, $barcode, true);
     }
 
     private static function generate($text, $height = 10, $styles = [], $barcode = 20, $base64 = false) {
@@ -39,24 +42,36 @@ class Barcode {
             'fg' => isset($styles['fg']) ? $styles['fg'] : '000000',
         ];
 
+        if (isset($styles['hrt'])) {
+            $params['hrt'] = $styles['hrt'];
+        }
+
         $config = Config::get('services.barcode');
         if (!isset($config['host']) || !isset($config['port'])) {
             throw new InvalidArgumentException('条形码服务配置为空');
         }
+        $timeout = isset($config['timeout']) ? $config['timeout'] : 1500;
 
-        // TODO 1. 判断接口返回的状态码
-        // TODO 2. timeout
-        $response = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/', $params));
+        /** @var Response $response */
+        $response = (yield HttpClient::newInstance($config['host'], $config['port'])->get('/barcode', $params, $timeout));
+        $statusCode = $response->getStatusCode();
+        if (200 != $statusCode) {
+            if (400 == $statusCode) {
+                throw new BadRequestException('调用条形码服务参数错误');
+            } else {
+                throw new ServiceUnavailableException('条形码服务错误');
+            }
+        }
+
         $body = $response->getBody();
-
         if ($body) {
             if (false === $base64) {
                 yield $body;
             } else {
                 yield 'data:image/png;base64,' . base64_encode($body);
             }
-            return;
+        } else {
+            yield '';
         }
-        yield '';
     }
 }
