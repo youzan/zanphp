@@ -35,6 +35,8 @@ class HttpClient implements Async
     private $callback;
     private $trace;
 
+    private $gateway = false;
+
     public function __construct($host, $port = 80, $https = false)
     {
         $this->host = $host;
@@ -70,6 +72,12 @@ class HttpClient implements Async
     public function execute(callable $callback, $task)
     {
         $this->setCallback($this->getCallback($callback))->handle();
+    }
+
+    public function setGateway($gateway)
+    {
+        $this->gateway = $gateway;
+        return $this;
     }
 
     public function setMethod($method)
@@ -145,7 +153,7 @@ class HttpClient implements Async
     public function handle()
     {
         $runMode = RunMode::get();
-        if ($runMode === 'online' || $runMode === 'pre') {
+        if (($runMode === 'online' || $runMode === 'pre') && $this->gateway) {
             $this->request('10.200.175.195');
         } else {
             swoole_async_dns_lookup($this->host, function($host, $ip) {
