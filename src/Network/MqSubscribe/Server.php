@@ -111,7 +111,7 @@ class Server extends ServerBase implements ServerContract
     {
         $this->bootWorkerStartItem($workerId);
         echo "worker #$workerId starting .....\n";
-        Timer::after(5000, [new MqSubscribe, 'start']);
+        Timer::after(3000, [new MqSubscribe, 'start']);
         echo "mq subscribe in worker #$workerId starting .....\n";
     }
 
