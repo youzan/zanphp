@@ -17,6 +17,7 @@ class HttpClient implements Async
 
     private $host;
     private $port;
+    private $https;
 
     /**
      * @var int [millisecond]
@@ -33,15 +34,16 @@ class HttpClient implements Async
     private $callback;
     private $trace;
 
-    public function __construct($host, $port = 80)
+    public function __construct($host, $port = 80, $https = false)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->https = $https;
     }
 
-    public static function newInstance($host, $port = 80)
+    public static function newInstance($host, $port = 80, $https = false)
     {
-        return new static($host, $port);
+        return new static($host, $port, $https);
     }
 
     public function get($uri = '', $params = [], $timeout = 3000)
@@ -141,9 +143,7 @@ class HttpClient implements Async
 
     public function handle()
     {
-        swoole_async_dns_lookup($this->host, function($host, $ip) {
-            $this->request($ip);
-        });
+        $this->request('10.200.175.195');
     }
 
 
@@ -174,7 +174,14 @@ class HttpClient implements Async
 
     private function buildHeader()
     {
-        $this->header['Host'] = $this->host;
+        if ($this->port !== 80) {
+            $this->header['Host'] = $this->host . ':' . $this->port;
+        } else {
+            $this->header['Host'] = $this->host;
+        }
+        if ($this->https) {
+            $this->header['scheme'] = 'https';
+        }
         $this->client->setHeaders($this->header);
     }
 
