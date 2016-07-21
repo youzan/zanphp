@@ -9,16 +9,20 @@
 namespace Zan\Framework\Network\Connection;
 
 
-use Qiniu\Config;
 
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class MonitorConnectionNum {
 
     use Singleton;
 
-    public function controlLinkNum()
+    private static $poolMap=[];
+
+    public function controlLinkNum($poolMap)
     {
+        self::$poolMap = $poolMap;
         $config = Config::get('connection.reconnection');
         $time = isset($config['interval-reduce-link'])?  $config['interval-reduce-link'] : 60000;
         Timer::tick($time, [$this, 'reduceLinkNum']);
