@@ -41,7 +41,7 @@ class HttpClient implements Async
     {
         $this->host = $host;
         $this->port = $port;
-        $this->$ssl = $ssl;
+        $this->ssl = $ssl;
     }
 
     public static function newInstance($host, $port = 80, $ssl = false)
