@@ -23,14 +23,14 @@ class MonitorConnectionNum {
     public function controlLinkNum($poolMap)
     {
         self::$poolMap = $poolMap;
-        $config = Config::get('connection.reconnection');
+        $config = Config::get('reconnection');
         $time = isset($config['interval-reduce-link'])?  $config['interval-reduce-link'] : 60000;
         Timer::tick($time, [$this, 'reduceLinkNum']);
     }
 
     public function reduceLinkNum()
     {
-        $config = Config::get('connection.reconnection');
+        $config = Config::get('reconnection');
         $reduceNum = isset($config['num-reduce-link']) ? $config['num-reduce-link'] : 1 ;
         foreach (self::$poolMap as $poolKey => $pool) {
             $activeNums = $pool->getActiveConnection()->length();

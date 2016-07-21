@@ -24,7 +24,7 @@ class ReconnectionPloy {
 
     public function init()
     {
-        $this->config = Config::get('connection.reconnection');
+        $this->config = Config::get('reconnection');
     }
 
     public function reconnect($conn, $pool)
