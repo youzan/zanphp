@@ -52,7 +52,7 @@ class Pool implements ConnectionPool
         $this->activeConnection = new ObjectArray();
         for ($i = 0; $i < $initConnection; $i++) {
             //todo 创建链接,存入数组
-           yield $this->createConnect();
+            $this->createConnect();
         }
     }
 
@@ -62,8 +62,7 @@ class Pool implements ConnectionPool
             $this->poolConfig['pool']['maximum-connection-count'] : 30;
         $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
         if($sumCount >= $max) {
-            yield null;
-            return;
+            return null;
         }
         $connection = $this->factory->create();
 
@@ -104,7 +103,7 @@ class Pool implements ConnectionPool
     public function get($connection = null)
     {
         if ($this->freeConnection->isEmpty()) {
-            yield $this->createConnect();
+            $this->createConnect();
         }
 
         if (null == $connection) {
@@ -147,7 +146,7 @@ class Pool implements ConnectionPool
         $connHashCode = spl_object_hash($conn);
         if ((yield ReconnectionPloy::getInstance()->getReconnectTime($connHashCode))) {
             yield ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
-            yield$this->createConnect($connHashCode);
+            $this->createConnect($connHashCode);
             return;
         }
 
