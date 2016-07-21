@@ -32,8 +32,6 @@ class Pool implements ConnectionPool
 
     public $waitNum = 0;
 
-    private $reconnectTime=[];
-
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
         $this->poolConfig = $config;
@@ -54,7 +52,7 @@ class Pool implements ConnectionPool
         $this->activeConnection = new ObjectArray();
         for ($i = 0; $i < $initConnection; $i++) {
             //todo 创建链接,存入数组
-            $this->createConnect();
+           yield $this->createConnect();
         }
     }
 
@@ -64,18 +62,19 @@ class Pool implements ConnectionPool
             $this->poolConfig['pool']['maximum-connection-count'] : 30;
         $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
         if($sumCount >= $max) {
-            return null;
+            yield null;
+            return;
         }
         $connection = $this->factory->create();
 
         if ($connKey != null && $this->type == 'Mysqli') {
             if (!$connection->getSocket()->connect_errno){
-                unset($this->reconnectTime[$connKey]);
+                ReconnectionPloy::getInstance()->cleanReconnectTime($connKey);
             } else {
                 $this->remove($connection);
             }
         }
-        unset($this->reconnectTime[$connKey]);
+        ReconnectionPloy::getInstance()->cleanReconnectTime($connKey);
 
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
@@ -146,9 +145,10 @@ class Pool implements ConnectionPool
         $this->activeConnection->remove($conn);
 
         $connHashCode = spl_object_hash($conn);
-        if (!isset($this->reconnectTime[$connHashCode])) {
-            $this->reconnectTime[$connHashCode] = 0;
-            $this->createConnect($connHashCode);
+        if ((yield ReconnectionPloy::getInstance()->getReconnectTime($connHashCode))) {
+            yield ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
+            yield$this->createConnect($connHashCode);
+            return;
         }
 
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
