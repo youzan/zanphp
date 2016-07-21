@@ -46,11 +46,10 @@ class ReconnectionPloy {
     public function getReconnectTime($key)
     {
         if(isset($this->reconnectTime[$key])){
-            yield $this->reconnectTime[$key];
+            return $this->reconnectTime[$key];
         } else {
-            yield false;
+            return false;
         }
-        return;
     }
 
     public function setReconnectTime($key, $value)

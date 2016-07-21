@@ -144,8 +144,8 @@ class Pool implements ConnectionPool
         $this->activeConnection->remove($conn);
 
         $connHashCode = spl_object_hash($conn);
-        if ((yield ReconnectionPloy::getInstance()->getReconnectTime($connHashCode))) {
-            yield ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
+        if (ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
+            ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
             $this->createConnect($connHashCode);
             return;
         }
