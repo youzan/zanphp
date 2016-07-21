@@ -12,6 +12,8 @@ class Channel
 
     private $clients = [];
     
+    private $totalMsgCount = 0;
+    
     public function __construct($name, Topic $topic)
     {
         $this->name = $name;
@@ -38,5 +40,11 @@ class Channel
     public function getClients()
     {
         return $this->clients;
+    }
+    
+    public function incrMsgCount()
+    {
+        $this->totalMsgCount++;
+        $this->topic->incrMsgCount();
     }
 }

@@ -4,25 +4,26 @@ namespace Zan\Framework\Network\MqSubscribe\Subscribe;
 use Kdt\Iron\NSQ\Message\Msg;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Queue\NSQ\Queue;
 
 class Client
 {
-    const TIMEOUT = 1800; //秒
-    
+    /**
+     * @var string
+     */
     private $consumer;
-    private $timeout;
 
     /**
      * @var Channel
      */
     private $channel;
 
-    /** @var  Task */
+    /**
+     * @var  Task
+     */
     private $task;
     
-    private $count = 0;
+    private $totalMsgCount = 0;
 
     private $isWaitingClosed = false;
     private $isProcessing = false;
@@ -34,7 +35,6 @@ class Client
     public function __construct($config, Channel $channel)
     {
         $this->consumer = $config['consumer'];
-        $this->timeout = isset($config['timeout']) ? $config['timeout'] : self::TIMEOUT;
         $this->channel = $channel;
     }
 
@@ -69,12 +69,13 @@ class Client
 
     public function incrMsgCount()
     {
-        $this->count++;
+        $this->totalMsgCount++;
+        $this->channel->incrMsgCount();
     }
 
     public function getMsgCount()
     {
-        return $this->count;
+        return $this->totalMsgCount;
     }
 
     public function waitingClosed()
@@ -117,7 +118,7 @@ class Client
 
     private function init()
     {
-        $this->count = 0;
+        $this->totalMsgCount = 0;
         $this->isWaitingClosed = false;
         $this->isProcessing = false;
         $this->isWorking = false;
@@ -127,9 +128,6 @@ class Client
     {
         $queue = new Queue();
         $client = $this;
-
-        $this->init();
-        
         $this->isWorking = true;
 
         /**
@@ -140,7 +138,9 @@ class Client
         yield $queue->subscribe($this->channel->getTopic()->getName(), $this->channel->getName(), function($msg) use ($client){
             /** @var $msg Msg */
             /**
-             * 检查是否超过msg接受数量限制或者等待关闭中, 超过就关闭连接, 连接关闭后会跳出callback
+             * 检查是否被通知到不要再接受msg了
+             * 直接return后 会在超时内不会再收到server发送的msg,
+             * 消息没有ack, 会重新发送, 就算不是REQ server发送的msg数据包内的计数也会增加
              */
             if ($client->isWaitingClosed()) {
                 return;
@@ -161,6 +161,6 @@ class Client
             Task::execute($handle);
 
             $client->free();
-        }, $this->timeout);
+        }, 0); //0表示 不需要lib强制断开连接
     }
 }

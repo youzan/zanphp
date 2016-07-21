@@ -5,9 +5,12 @@ class Topic
 {
     private $name;
     
+    /** @var  Manager */
     private $manager;
     
     private $channels = [];
+    
+    private $totalMsgCount = 0;
     
     public function __construct($name, $manager)
     {
@@ -34,5 +37,11 @@ class Topic
     public function getChannels()
     {
         return $this->channels;
+    }
+    
+    public function incrMsgCount()
+    {
+        $this->totalMsgCount++;
+        $this->manager->incrMsgCount();
     }
 }

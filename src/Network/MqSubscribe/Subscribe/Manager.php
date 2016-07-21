@@ -1,7 +1,7 @@
 <?php
 namespace Zan\Framework\Network\MqSubscribe\Subscribe;
 
-use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class Manager
@@ -19,6 +19,8 @@ class Manager
      * @var array Topic[]
      */
     private $topics = [];
+
+    private $totalMsgCount = 0;
     
     final private function __construct()
     {
@@ -53,8 +55,6 @@ class Manager
             
         }
 
-        Timer::after(self::TIME_LIVE_LIMIT, [$this, 'beginStop']);
-        
         foreach ($this->topics as $topic) {
             /** @var Topic $topic*/
             foreach ($topic->getChannels() as $channel) {
@@ -62,7 +62,7 @@ class Manager
                 foreach ($channel->getClients() as $client) {
                     /** @var Client $client */
                     $client->start();
-                    
+
                     if ($client->isError()) {
                         echo $client->getErrorMessage() . "\n";
                     }
@@ -82,7 +82,7 @@ class Manager
         $this->topics[$name] = $topic;
     }
 
-    public function beginStop()
+    public function closePre()
     {
         foreach ($this->topics as $topic) {
             /** @var Topic $topic*/
@@ -94,12 +94,9 @@ class Manager
                 }
             }
         }
-        $this->server->swooleServer->deny_request($this->server->swooleServer->workerId);
-
-        Timer::after(self::TIME_LIVE_LIMIT_DELAY, [$this, 'tryStop']);
     }
 
-    public function tryStop()
+    public function checkReadyClose()
     {
         $readyClosed = true;
         foreach ($this->topics as $topic) {
@@ -115,10 +112,12 @@ class Manager
             }
         }
 
-        if ($readyClosed) {
-            $this->server->swooleServer->exit();
-        } else {
-            Timer::after(self::TIME_LIVE_LIMIT_DELAY, [$this, 'tryStop']);
-        }
+        return $readyClosed;
+    }
+
+    public function incrMsgCount()
+    {
+        $this->totalMsgCount++;
+        Worker::singleton()->incrMsgCount();
     }
 }
