@@ -78,6 +78,16 @@ class HttpClient implements Async
         yield $this->build();
     }
 
+    public function postJson($uri = '', $params = [], $timeout = 3000)
+    {
+        $this->setMethod(self::POST);
+        $this->setTimeout($timeout);
+        $this->setUri($uri);
+        $this->setParams($params);
+
+        yield $this->build(true);
+    }
+
     public function execute(callable $callback, $task)
     {
         $this->setCallback($this->getCallback($callback))->handle();
@@ -127,20 +137,25 @@ class HttpClient implements Async
         return $this;
     }
 
-    private function build()
+    private function build($isJson = false)
     {
         $this->trace = (yield getContext('trace'));
 
-        if ($this->method != 'POST' and $this->method != 'PUT') {
+        if ($this->method === 'GET') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
             }
-        } else {
-            $body = json_encode($this->params);
-            $contentType = 'application/json';
-            $this->setHeader([
-                'Content-Type' => $contentType
-            ]);
+        } else if ($this->method === 'POST') {
+            if ($isJson) {
+                $body = json_encode($this->params);
+                $contentType = 'application/json';
+                $this->setHeader([
+                    'Content-Type' => $contentType
+                ]);
+            } else {
+                $body = $this->params;
+            }
+
             $this->setBody($body);
         }
 
