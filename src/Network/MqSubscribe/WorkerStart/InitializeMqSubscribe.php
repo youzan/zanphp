@@ -15,6 +15,6 @@ class InitializeMqSubscribe
     {
         $config = Config::get('nsq_config', []);
         Checker::handle($config);
-        Manager::singleton()->setServer($server)->init($config);
+        Manager::singleton()->init($config);
     }
 } 

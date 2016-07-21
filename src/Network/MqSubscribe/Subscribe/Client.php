@@ -28,8 +28,14 @@ class Client
     private $isWaitingClosed = false;
     private $isProcessing = false;
     private $isWorking = false;
-    
+
+    /**
+     * @var bool
+     */
     private $error;
+    /**
+     * @var string
+     */
     private $errorMessage;
 
     public function __construct($config, Channel $channel)
@@ -38,6 +44,11 @@ class Client
         $this->channel = $channel;
     }
 
+    /**
+     * 获取执行消息的类名
+     *
+     * @return string
+     */
     public function getConsumer()
     {
         return $this->consumer;
@@ -56,12 +67,22 @@ class Client
         $this->task = new Task($this->cortinue());
         $this->task->run();
     }
-    
+
+    /**
+     * 获取是否启动错误
+     *
+     * @return bool
+     */
     public function isError()
     {
         return $this->error;
     }
-    
+
+    /**
+     * 获取启动错误信息
+     *
+     * @return string
+     */
     public function getErrorMessage()
     {
         return $this->errorMessage;
@@ -78,31 +99,56 @@ class Client
         return $this->totalMsgCount;
     }
 
+    /**
+     * 标记Client为等待关闭状态
+     * 被标记后Client不再接受新的Msg
+     * 新接受到的Msg不再处理, 不FIN 也不REQ
+     */
     public function waitingClosed()
     {
         $this->isWaitingClosed = true;
     }
 
+    /**
+     * 判断当前是否已经被标记为等待关闭状态
+     *
+     * @return bool
+     */
     public function isWaitingClosed()
     {
         return $this->isWaitingClosed;
     }
 
+    /**
+     * 设置当前为正在处理Msg状态
+     */
     public function processing()
     {
         $this->isProcessing = true;
     }
 
+    /**
+     * 设置当前为不在处理Msg状态
+     */
     public function free()
     {
         $this->isProcessing = false;
     }
-    
+
+    /**
+     * 判断当前是否正在处理Msg
+     *
+     * @return bool
+     */
     public function isProcessing()
     {
         return $this->isProcessing;
     }
-    
+
+    /**
+     * 检查consumer 是否可以执行
+     * @return bool
+     */
     private function valid()
     {
         $consumer = $this->getConsumer();

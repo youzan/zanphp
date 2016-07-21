@@ -7,16 +7,11 @@ use Zan\Framework\Utilities\DesignPattern\Singleton;
 class Manager
 {
     use Singleton;
-
-    const TIME_LIVE_LIMIT = 1000 * 60 * 60; //毫秒, 1个小时
-    const TIME_LIVE_LIMIT_DELAY = 2000; //毫秒, 3秒
-
-    private $server;
-
+    
     private $initialized;
     
     /**
-     * @var array Topic[]
+     * @var array Topic[topicName]
      */
     private $topics = [];
 
@@ -26,16 +21,16 @@ class Manager
     {
     }
 
-    public function setServer($server)
-    {
-        $this->server = $server;
-        return $this;
-    }
-    
-    public function init($config)
+    /**
+     * 初始化所有Topic
+     * 
+     * @param array $config
+     * @return $this
+     */
+    public function init(array $config)
     {
         if ($this->initialized) {
-
+            return $this;
         }
 
         $this->topics = []; // ? 注意这里是否应该这样
@@ -52,7 +47,7 @@ class Manager
     public function start()
     {
         if (!$this->initialized) {
-            
+            return;
         }
 
         foreach ($this->topics as $topic) {
@@ -70,8 +65,14 @@ class Manager
             }
         }
     }
-    
-    private function initTopic($name, $config)
+
+    /**
+     * 初始化Topic
+     * 
+     * @param $name
+     * @param array $config
+     */
+    private function initTopic($name, array $config)
     {
         $topic = new Topic($name, $this);
 
@@ -82,6 +83,9 @@ class Manager
         $this->topics[$name] = $topic;
     }
 
+    /**
+     * 通知到所有client, 标记后不再接受msg
+     */
     public function closePre()
     {
         foreach ($this->topics as $topic) {
@@ -96,6 +100,11 @@ class Manager
         }
     }
 
+    /**
+     * 检查所有client是否已经可以关闭
+     * 
+     * @return bool
+     */
     public function checkReadyClose()
     {
         $readyClosed = true;
@@ -105,6 +114,9 @@ class Manager
                 /** @var Channel $channel */
                 foreach ($channel->getClients() as $client) {
                     /** @var Client $client */
+                    /**
+                     * 判断是否被标记了等待关闭 并且 没有msg正在处理中
+                     */
                     if (!$client->isWaitingClosed() or !$client->isProcessing()) {
                         $readyClosed = false;
                     }
