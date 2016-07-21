@@ -45,7 +45,8 @@ class Pool implements ConnectionPool
     public function init()
     {
         $initConnection = $this->poolConfig['pool']['init-connection'];
-        $min = $this->poolConfig['pool']['minimum-connection-count'];
+        $min = isset($this->poolConfig['pool']['minimum-connection-count']) ?
+            $this->poolConfig['pool']['minimum-connection-count'] : 2;
         if ($initConnection < $min) {
             $initConnection = $min;
         }
