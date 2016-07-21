@@ -212,7 +212,7 @@ class HttpClient implements Async
         } else {
             $this->header['Host'] = $this->host;
         }
-        if ($this->https) {
+        if ($this->ssl) {
             $this->header['scheme'] = 'https';
         }
 
