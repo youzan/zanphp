@@ -50,7 +50,7 @@ class ReconnectionPloy {
         if(isset($this->reconnectTime[$key])){
             return $this->reconnectTime[$key];
         } else {
-            return false;
+            return null;
         }
     }
 
