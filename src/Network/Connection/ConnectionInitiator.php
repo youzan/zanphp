@@ -58,7 +58,7 @@ class ConnectionInitiator
         $connectionManager->setServer($server);
         $connectionManager->monitor();
         ReconnectionPloy::getInstance()->init();
-        $connectionManager->controlLinkNum();
+        MonitorConnectionNum::getInstance()->controlLinkNum();
     }
 
     private function initConfig($config)
