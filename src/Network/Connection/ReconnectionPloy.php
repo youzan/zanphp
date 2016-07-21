@@ -30,12 +30,11 @@ class ReconnectionPloy {
     public function reconnect($conn, $pool)
     {
         $connHashCode = spl_object_hash($conn);
-        $reconnectTime =$this->reconnectTime[$connHashCode];
         $intervalTime = isset($this->config['interval-reconnect-time']) ? $this->config['interval-reconnect-time'] : 5000;
         $maxTime = isset($this->config['max-reconnect-time']) ? $this->config['max-reconnect-time'] : 30000;
-        $this->reconnectTime[$connHashCode] = ($reconnectTime+$intervalTime) >= $maxTime ?
-            $maxTime :($reconnectTime+$intervalTime);
-        Timer::after($reconnectTime, function() use ($pool, $connHashCode) {
+        $this->reconnectTime[$connHashCode] = ($this->reconnectTime[$connHashCode]+$intervalTime) >= $maxTime ?
+            $maxTime :($this->reconnectTime[$connHashCode]+$intervalTime);
+        Timer::after($this->reconnectTime[$connHashCode], function() use ($pool, $connHashCode) {
             $pool->createConnect($connHashCode);
         });
     }

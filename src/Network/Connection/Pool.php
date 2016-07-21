@@ -56,7 +56,7 @@ class Pool implements ConnectionPool
         }
     }
 
-    private function createConnect($previousConnectionHash = '')
+    public function createConnect($previousConnectionHash = '')
     {
         $max = isset($this->poolConfig['pool']['maximum-connection-count']) ?
             $this->poolConfig['pool']['maximum-connection-count'] : 30;
@@ -69,8 +69,11 @@ class Pool implements ConnectionPool
         if  ('' !== $previousConnectionHash) {
             if ($this->type == 'Mysqli') {
                 if (!$connection->getSocket()->connect_errno){
+                    $connection->setPool($this);
+                    $connection->heartbeat();
                     ReconnectionPloy::getInstance()->cleanReconnectTime($previousConnectionHash);
                 } else {
+                    $connection->setPool($this);
                     ReconnectionPloy::getInstance()->setReconnectTime(
                         spl_object_hash($connection), ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash)
                     );
@@ -84,15 +87,16 @@ class Pool implements ConnectionPool
                 ReconnectionPloy::getInstance()->cleanReconnectTime($previousConnectionHash);
             }
         }
-
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
         } else {
             $this->freeConnection->push($connection);
         }
+        if ('' == $previousConnectionHash || $this->type !== 'Mysqli') {
+            $connection->setPool($this);
+            $connection->heartbeat();
+        }
 
-        $connection->setPool($this);
-        $connection->heartbeat();
         $connection->setEngine($this->type);
     }
 
@@ -152,14 +156,12 @@ class Pool implements ConnectionPool
         $coroutine = $this->deleteActiveConnectionFromContext($conn);
         Task::execute($coroutine);
         $this->activeConnection->remove($conn);
-
         $connHashCode = spl_object_hash($conn);
         if (null === ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
             ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
             $this->createConnect($connHashCode);
             return;
         }
-
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
     }
 
