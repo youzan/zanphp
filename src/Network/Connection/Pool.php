@@ -104,7 +104,7 @@ class Pool implements ConnectionPool
     public function get($connection = null)
     {
         if ($this->freeConnection->isEmpty()) {
-            return $this->createConnect();
+            yield $this->createConnect();
         }
 
         if (null == $connection) {
