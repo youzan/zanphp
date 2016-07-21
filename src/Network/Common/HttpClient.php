@@ -12,13 +12,14 @@ class HttpClient implements Async
 {
     const GET = 'GET';
     const POST = 'POST';
+    const HTTP_PROXY = '10.200.175.195';
 
     /** @var  swoole_http_client */
     private $client;
 
     private $host;
     private $port;
-    private $https;
+    private $ssl;
 
     /**
      * @var int [millisecond]
@@ -35,19 +36,28 @@ class HttpClient implements Async
     private $callback;
     private $trace;
 
-    private $gateway = false;
+    private $useHttpProxy = false;
 
-    public function __construct($host, $port = 80, $https = false)
+    public function __construct($host, $port = 80, $ssl = false)
     {
         $this->host = $host;
         $this->port = $port;
-        $this->https = $https;
+        $this->$ssl = $ssl;
     }
 
-    public static function newInstance($host, $port = 80, $https = false)
+    public static function newInstance($host, $port = 80, $ssl = false)
     {
-        return new static($host, $port, $https);
+        return new static($host, $port, $ssl);
     }
+
+    public static function newInstanceUsingProxy($host, $port = 80, $ssl = false)
+    {
+        $instance = new static($host, $port, $ssl);
+        $instance->useHttpProxy = true;
+
+        return $instance;
+    }
+
 
     public function get($uri = '', $params = [], $timeout = 3000)
     {
@@ -72,12 +82,6 @@ class HttpClient implements Async
     public function execute(callable $callback, $task)
     {
         $this->setCallback($this->getCallback($callback))->handle();
-    }
-
-    public function setGateway($gateway)
-    {
-        $this->gateway = $gateway;
-        return $this;
     }
 
     public function setMethod($method)
@@ -152,9 +156,8 @@ class HttpClient implements Async
 
     public function handle()
     {
-        $runMode = RunMode::get();
-        if (($runMode === 'online' || $runMode === 'pre') && $this->gateway) {
-            $this->request('10.200.175.195');
+        if ($this->useHttpProxy) {
+            $this->request(self::HTTP_PROXY);
         } else {
             swoole_async_dns_lookup($this->host, function($host, $ip) {
                 $this->request($ip);
