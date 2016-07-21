@@ -17,7 +17,7 @@ class Tcp extends Base implements Connection
     private $clientCb;
     protected $isAsync = true;
     
-    protected function closeSocket()
+    public function closeSocket()
     {
         try {
             $this->getSocket()->close();

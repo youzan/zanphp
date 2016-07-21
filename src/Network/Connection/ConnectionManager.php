@@ -119,5 +119,29 @@ class ConnectionManager
         }
     }
 
+    public function controlLinkNum()
+    {
+        $config = Config::get('connection.base');
+        $time = isset($config['interval-reduce-link'])?  $config['interval-reduce-link'] * 1000 : 60000;
+        Timer::tick($time, [$this, 'reduceLinkNum']);
+    }
+
+    public function reduceLinkNum()
+    {
+        $config = Config::get('connection.base');
+        $reduceNum = isset($config['num-reduce-link']) ? $config['num-reduce-link'] : 1 ;
+        foreach (self::$poolMap as $poolKey => $pool) {
+            $activeNums = $pool->getActiveConnection()->length();
+            $freeNums = $pool->getFreeConnection()->length();
+            $sumNums = $activeNums + $freeNums;
+            if ($sumNums <=0 || $freeNums*3 < $sumNums) {
+                continue;
+            }
+            for ($i=0; $i<$reduceNum; $i++) {
+                $conn = $pool->getFreeConnection()->pop();
+                $conn->closeSocket();
+            }
+        }
+    }
 
 }

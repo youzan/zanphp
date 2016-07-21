@@ -15,7 +15,7 @@ class Redis extends Base implements Connection
 {
     protected $isAsync = true;
 
-    protected function closeSocket()
+    public function closeSocket()
     {
         try {
             $this->getSocket()->close();

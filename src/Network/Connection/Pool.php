@@ -59,7 +59,8 @@ class Pool implements ConnectionPool
 
     private function createConnect($connKey=null)
     {
-        $max = $this->poolConfig['pool']['maximum-connection-count'];
+        $max = isset($this->poolConfig['pool']['maximum-connection-count']) ?
+            $this->poolConfig['pool']['maximum-connection-count'] : 30;
         $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
         if($sumCount >= $max) {
             return null;

@@ -15,6 +15,7 @@ use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Network\Connection\Factory\Tcp;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
@@ -56,6 +57,7 @@ class ConnectionInitiator
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->setServer($server);
         $connectionManager->monitor();
+        $connectionManager->controlLinkNum();
     }
 
     private function initConfig($config)
