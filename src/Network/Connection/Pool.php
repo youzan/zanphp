@@ -69,12 +69,12 @@ class Pool implements ConnectionPool
 
         if ($connKey != null && $this->type == 'Mysqli') {
             if (!$connection->getSocket()->connect_errno){
-                $this->reconnectTime[$connKey] = 0;
+                unset($this->reconnectTime[$connKey]);
             } else {
                 $this->remove($connection);
             }
         }
-        $this->reconnectTime[$connKey] = 0;
+        unset($this->reconnectTime[$connKey]);
 
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
@@ -144,22 +144,13 @@ class Pool implements ConnectionPool
         Task::execute($coroutine);
         $this->activeConnection->remove($conn);
 
-        $this->reConnect($conn);
-    }
-
-    public function reConnect($conn)
-    {
         $connHashCode = spl_object_hash($conn);
         if (!isset($this->reconnectTime[$connHashCode])) {
             $this->reconnectTime[$connHashCode] = 0;
             $this->createConnect($connHashCode);
-            return;
         }
-        $reconnectTime =$this->reconnectTime[spl_object_hash($conn)];
-        $this->reconnectTime[$connHashCode] = ($reconnectTime+$this->poolConfig['pool']['interval-reconnect-time'])
-        >= $this->poolConfig['pool']['max-reconnect-time'] ? $this->poolConfig['pool']['max-reconnect-time'] :
-            ($reconnectTime+$this->poolConfig['pool']['interval-reconnect-time']);
-        Timer::after($reconnectTime*1000, [$this, 'createConnect']);
+
+        ReconnectionPloy::getInstance()->reconnect($conn, $this);
     }
 
     private function insertActiveConnectionIntoContext($connection)

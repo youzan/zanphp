@@ -57,6 +57,7 @@ class ConnectionInitiator
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->setServer($server);
         $connectionManager->monitor();
+        ReconnectionPloy::getInstance()->init();
         $connectionManager->controlLinkNum();
     }
 
