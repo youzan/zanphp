@@ -70,10 +70,19 @@ class Pool implements ConnectionPool
             if (!$connection->getSocket()->connect_errno){
                 ReconnectionPloy::getInstance()->cleanReconnectTime($connKey);
             } else {
+                ReconnectionPloy::getInstance()->setReconnectTime(
+                    spl_object_hash($connection), ReconnectionPloy::getInstance()->getReconnectTime($connKey)
+                );
+                ReconnectionPloy::getInstance()->cleanReconnectTime($connKey);
                 $this->remove($connection);
             }
+        } else {
+            ReconnectionPloy::getInstance()->setReconnectTime(
+                spl_object_hash($connection), ReconnectionPloy::getInstance()->getReconnectTime($connKey)
+            );
+            ReconnectionPloy::getInstance()->cleanReconnectTime($connKey);
         }
-        ReconnectionPloy::getInstance()->cleanReconnectTime($connKey);
+
 
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
