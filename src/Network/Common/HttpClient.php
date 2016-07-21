@@ -3,7 +3,6 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
