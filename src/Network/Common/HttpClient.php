@@ -184,14 +184,13 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
-        call_user_func($this->callback, $cli->body);
+        $response = new Response($cli->statusCode, $cli->headers, $cli->body);
+        call_user_func($this->callback, $response);
     }
 
     private function getCallback(callable $callback)
     {
         return function($response) use ($callback) {
-            $jsonData = json_decode($response, true);
-            $response = $jsonData ? $jsonData : $response;
             call_user_func($callback, $response);
         };
     }

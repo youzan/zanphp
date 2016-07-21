@@ -87,6 +87,7 @@ class Server extends ServerBase {
     private function registerServices()
     {
         $appName = Application::getInstance()->getName();
+        $config = Config::get('server.hawk_collection');
         $config['module'] = $appName;
         $this->swooleServer->nova_config($config);
     }

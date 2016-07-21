@@ -15,6 +15,7 @@ use Zan\Framework\Network\Connection\Exception\CanNotFindLoadBalancingStrategeMa
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Core\RunMode;
 
 class NovaClientPool
 {
@@ -132,6 +133,9 @@ class NovaClientPool
 
     private function checkCanReload($config)
     {
+        if ('test' == RunMode::get()) {
+            return true;
+        }
         $canReload = false;
         $services = ServerStore::getInstance()->getServices($this->appName);
         if (null == $services || [] == $services) {
