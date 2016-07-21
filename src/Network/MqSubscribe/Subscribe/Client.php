@@ -10,8 +10,6 @@ use Zan\Framework\Sdk\Queue\NSQ\Queue;
 class Client
 {
     const TIMEOUT = 1800; //秒
-
-    const LIMIT_MSG_COUNT = 1000; //待议
     
     private $consumer;
     private $timeout;
@@ -28,6 +26,7 @@ class Client
 
     private $isWaitingClosed = false;
     private $isProcessing = false;
+    private $isWorking = false;
     
     private $error;
     private $errorMessage;
@@ -121,6 +120,7 @@ class Client
         $this->count = 0;
         $this->isWaitingClosed = false;
         $this->isProcessing = false;
+        $this->isWorking = false;
     }
 
     private function cortinue()
@@ -129,6 +129,8 @@ class Client
         $client = $this;
 
         $this->init();
+        
+        $this->isWorking = true;
 
         /**
          * 为了避免cortinue内存不释放,造成递归调用,内存溢出, 这里在sub回调里判断count是否超过limit重开client
@@ -140,9 +142,7 @@ class Client
             /**
              * 检查是否超过msg接受数量限制或者等待关闭中, 超过就关闭连接, 连接关闭后会跳出callback
              */
-            if ($client->getMsgCount() >= Client::LIMIT_MSG_COUNT or $client->isWaitingClosed()) {
-                $msg->close();
-                Timer::after(2000, [$client, 'start']);
+            if ($client->isWaitingClosed()) {
                 return;
             }
 
