@@ -31,7 +31,6 @@ class Mysqli implements ConnectionFactory
         $this->conn->connect($this->config['host'], $this->config['user'], $this->config['password'],
             $this->config['database'], $this->config['port']);
         $this->conn->autocommit(true);
-
         $connection = new \Zan\Framework\Network\Connection\Driver\Mysqli();
         $connection->setSocket($this->conn);
         $connection->setConfig($this->config);
@@ -42,16 +41,4 @@ class Mysqli implements ConnectionFactory
     {
         mysqli_close($this->conn);
     }
-
-    public function reConnection($conn)
-    {
-        if (!mysqli_connect_errno()) {
-            return true;
-        }
-
-        $rTime=0;
-        Timer::after(0*1000, [$this, 'create']);
-
-    }
-
 }
