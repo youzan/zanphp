@@ -65,9 +65,11 @@ class Task
                         return null;
                     case Signal::TASK_WAIT:
                         return null;
-                    case Signal::TASK_DONE;
+                    case Signal::TASK_DONE:
                         $this->fireTaskDoneEvent();
                         return null;
+                    default:
+                        continue;
                 }
             } catch (\Exception $e) {
                 $this->scheduler->throwException($e);
