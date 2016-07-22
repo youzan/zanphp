@@ -18,6 +18,7 @@ use Kdt\Iron\Nova\Exception\NetworkException;
 
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Network\Connection\ReconnectionPloy;
 
 class NovaClient extends Base implements Connection
 {
@@ -43,6 +44,7 @@ class NovaClient extends Base implements Connection
         $this->release();
         $this->getPool()->connecting($this);
         $this->heartbeat();
+        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
         echo "nova client connect to server\n";
     }
 

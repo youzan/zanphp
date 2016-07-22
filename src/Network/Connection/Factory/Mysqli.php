@@ -10,6 +10,7 @@
 namespace Zan\Framework\Network\Connection\Factory;
 
 use Zan\Framework\Contract\Network\ConnectionFactory;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 class Mysqli implements ConnectionFactory
 {
@@ -40,6 +41,17 @@ class Mysqli implements ConnectionFactory
     public function close()
     {
         mysqli_close($this->conn);
+    }
+
+    public function reConnection($conn)
+    {
+        if (!mysqli_connect_errno()) {
+            return true;
+        }
+
+        $rTime=0;
+        Timer::after(0*1000, [$this, 'create']);
+
     }
 
 }
