@@ -44,7 +44,6 @@ class NovaClient extends Base implements Connection
         $this->release();
         $this->getPool()->connecting($this);
         $this->heartbeat();
-        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
         echo "nova client connect to server\n";
     }
 
