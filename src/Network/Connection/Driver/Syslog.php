@@ -61,7 +61,7 @@ class Syslog extends Base implements Connection
         $this->clientCb = null;
     }
 
-    protected function closeSocket()
+    public function closeSocket()
     {
         try {
             if ($this->getSocket()->isConnected()) {
