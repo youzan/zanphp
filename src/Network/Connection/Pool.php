@@ -65,28 +65,22 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
-
         if  ('' !== $previousConnectionHash) {
+            $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
             if ($this->type == 'Mysqli') {
                 if (!$connection->getSocket()->connect_errno){
-                    $connection->setPool($this);
                     $connection->heartbeat();
-                    ReconnectionPloy::getInstance()->cleanReconnectTime($previousConnectionHash);
                 } else {
-                    $connection->setPool($this);
-                    ReconnectionPloy::getInstance()->setReconnectTime(
-                        spl_object_hash($connection), ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash)
-                    );
-                    ReconnectionPloy::getInstance()->cleanReconnectTime($previousConnectionHash);
+                    ReconnectionPloy::getInstance()->setReconnectTime( spl_object_hash($connection),$previousKey);
                     $this->remove($connection);
                 }
+                $connection->setPool($this);
             } else {
-                ReconnectionPloy::getInstance()->setReconnectTime(
-                    spl_object_hash($connection), ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash)
-                );
-                ReconnectionPloy::getInstance()->cleanReconnectTime($previousConnectionHash);
+                ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection), $previousKey);
             }
+            ReconnectionPloy::getInstance()->connectSuccess($previousConnectionHash);
         }
+
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
         } else {

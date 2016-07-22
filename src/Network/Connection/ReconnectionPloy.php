@@ -39,7 +39,7 @@ class ReconnectionPloy {
         });
     }
 
-    public function cleanReconnectTime($key)
+    public function connectSuccess($key)
     {
         unset($this->reconnectTime[$key]);
     }
