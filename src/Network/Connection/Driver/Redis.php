@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Connection\ReconnectionPloy;
 
 class Redis extends Base implements Connection
 {
@@ -41,6 +42,7 @@ class Redis extends Base implements Connection
         }
         //put conn to active_pool
         $this->release();
+        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
         echo "redis client connect to server\n";
     }
 
