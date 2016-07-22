@@ -1,5 +1,5 @@
 # Zan PHP Framework
-Zan PHP是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务。
+Zan是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务。
 
 ## 核心特效
 1. 基于 `yield` 实现了独立堆栈的协程
@@ -34,5 +34,5 @@ QQ群：115728122
 
 ## License
 
-我们[有赞](https://youzan.com/)的 [Zan PHP框架](https://github.com/youzan/zan)基于 [Apache-2.0 license](https://opensource.org/licenses/Apache-2.0) 进行开源。
+我们[有赞](https://youzan.com/)的 [Zan PHP框架](https://github.com/youzan/zan)基于 [MIT license](https://opensource.org/licenses/MIT) 进行开源。
 
