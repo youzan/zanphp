@@ -101,22 +101,21 @@ class Mysqli implements DriverInterface
     public function onSqlReady($link, $result)
     {
         Timer::clearAfterJob(spl_object_hash($this));
-
         $exception = null;
         if ($result === false) {
-            if (in_array($link->_errno, [2013, 2006])) {
+            if (in_array($this->connection->getSocket()->errno, [2013, 2006])) {
                 $this->connection->close();
                 $exception = new MysqliConnectionLostException();
-            } elseif ($link->_errno == 1064) {
-                $error = $link->_error;
+            } elseif ($this->connection->getSocket()->errno == 1064) {
+                $error = $this->connection->getSocket()->error;
                 $this->connection->release();
                 $exception = new MysqliSqlSyntaxException($error . ':' . $this->sql);
-            } elseif ($link->_errno == 1062) {
-                $error = $link->_error;
+            } elseif ($this->connection->getSocket()->errno == 1062) {
+                $error = $this->connection->getSocket()->error;
                 $this->connection->release();
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
             } else {
-                $error = $link->_error;
+                $error = $this->connection->getSocket()->error;
                 $this->connection->close();
                 $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }

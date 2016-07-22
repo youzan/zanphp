@@ -18,6 +18,7 @@ use Kdt\Iron\Nova\Exception\NetworkException;
 
 use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Network\Connection\ReconnectionPloy;
 
 class NovaClient extends Base implements Connection
 {

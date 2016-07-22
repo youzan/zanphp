@@ -11,22 +11,25 @@ namespace Zan\Framework\Foundation\Core;
 class Debug {
 
     private static $debug = null;
-    private static $cliInput = null;
 
     public static function get()
     {
         return self::$debug;
     }
 
-    public static function setCliInput($mode)
+    public static function enableDebug()
     {
-        self::$cliInput == $mode ? true : false;
+        self::$debug = true;
+    }
+
+    public static function disableDebug()
+    {
+        self::$debug = false;
     }
 
     public static function detect()
     {
-        if(null !== self::$cliInput){
-            self::$debug = self::$cliInput;
+        if(null !== self::$debug){
             return true;
         }
 

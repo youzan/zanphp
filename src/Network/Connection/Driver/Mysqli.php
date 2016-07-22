@@ -66,7 +66,7 @@ class Mysqli extends Base implements Connection
         $engine = new Engine($this);
         try{
             $result = (yield $engine->query('select 1'));
-        } catch (MysqliConnectionLostException $e){
+        } catch (\Exception $e){
             return; 
         }
 

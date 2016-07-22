@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation;
 
 use RuntimeException;
+use Zan\Framework\Foundation\Booting\InitializeCliInput;
 use Zan\Framework\Foundation\Booting\InitializeCache;
 use Zan\Framework\Foundation\Booting\InitializeKv;
 use Zan\Framework\Foundation\Booting\LoadFiles;
@@ -83,6 +84,7 @@ class Application
         // TODO 配置化
         $bootstrapItems = [
             InitializeEnv::class,
+            InitializeCliInput::class,
             InitializeRunMode::class,
             InitializeDebug::class,
             InitializePathes::class,
