@@ -15,7 +15,7 @@ abstract class JobAbstract
     
     /** @var  array */
     protected $data;
-    
+
     protected $beginTime;
     protected $endTime;
 
@@ -35,21 +35,23 @@ abstract class JobAbstract
 
     final protected function checkData()
     {
-        $data = $this->getData();
+        $jobData = $this->msg->data();
 
-        if (empty($data) ||
-            !is_array($data)
-            || !isset($data['job_name'])
-            || !isset($data['job_key'])
-            || !isset($data['job_time'])
-            || !isset($data['job_data'])) {
+        if (empty($jobData) ||
+            !is_array($jobData)
+            || !isset($jobData['job_name'])
+            || !isset($jobData['job_key'])
+            || !isset($jobData['job_time'])
+            || !isset($jobData['job_data'])) {
             return false;
         }
-        if (static::$name != $data['job_name']) {
+        if (static::$name != $jobData['job_name']) {
             return false;
-        } elseif (static::makeKey($data['job_data']) != $data['job_key']) {
+        } elseif (static::makeKey($jobData['job_data']) != $jobData['job_key']) {
             return false;
         }
+
+        $this->data = $jobData['job_data'];
 
         return true;
     }
