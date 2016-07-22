@@ -116,7 +116,7 @@ abstract class JobAbstract
     
     final public static function publish($abstract, $data)
     {
-        $payload = self::makePayload($data);
+        $payload = static::makePayload($data);
         yield (new Queue())->publish($abstract::TOPIC, Msg::fromClient($payload));
     }
 
