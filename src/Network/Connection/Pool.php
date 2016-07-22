@@ -71,7 +71,7 @@ class Pool implements ConnectionPool
                 if (!$connection->getSocket()->connect_errno){
                     $connection->heartbeat();
                 } else {
-                    ReconnectionPloy::getInstance()->setReconnectTime( spl_object_hash($connection),$previousKey);
+                    ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection),$previousKey);
                     $this->remove($connection);
                 }
                 $connection->setPool($this);
@@ -90,7 +90,6 @@ class Pool implements ConnectionPool
             $connection->setPool($this);
             $connection->heartbeat();
         }
-
         $connection->setEngine($this->type);
     }
 

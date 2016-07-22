@@ -119,10 +119,8 @@ class ConnectionManager
         }
     }
 
-
     public function monitorConnectionNum()
     {
         MonitorConnectionNum::getInstance()->controlLinkNum(self::$poolMap);
     }
-
 }

@@ -57,6 +57,4 @@ class ReconnectionPloy {
     {
         $this->reconnectTime[$key] = $value;
     }
-
-
 }
