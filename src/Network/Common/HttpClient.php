@@ -83,9 +83,13 @@ class HttpClient implements Async
         $this->setMethod(self::POST);
         $this->setTimeout($timeout);
         $this->setUri($uri);
-        $this->setParams($params);
+        $this->setParams(json_encode($params));
 
-        yield $this->build(true);
+        $this->setHeader([
+            'Content-Type' => 'application/json'
+        ]);
+
+        yield $this->build();
     }
 
     public function execute(callable $callback, $task)
@@ -137,7 +141,7 @@ class HttpClient implements Async
         return $this;
     }
 
-    private function build($isJson = false)
+    private function build()
     {
         $this->trace = (yield getContext('trace'));
 
@@ -146,15 +150,7 @@ class HttpClient implements Async
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
             }
         } else if ($this->method === 'POST') {
-            if ($isJson) {
-                $body = json_encode($this->params);
-                $contentType = 'application/json';
-                $this->setHeader([
-                    'Content-Type' => $contentType
-                ]);
-            } else {
-                $body = $this->params;
-            }
+            $body = $this->params;
 
             $this->setBody($body);
         }
