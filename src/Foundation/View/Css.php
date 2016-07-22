@@ -18,7 +18,7 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\View\BaseLoader;
+use Zan\Framework\Utilities\Types\Time;
 use Zan\Framework\Utilities\Types\URL;
 
 class Css extends BaseLoader
