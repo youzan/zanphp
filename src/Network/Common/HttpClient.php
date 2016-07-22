@@ -11,6 +11,7 @@ class HttpClient implements Async
 {
     const GET = 'GET';
     const POST = 'POST';
+    // TODO 改成zan-config里的配置
     const HTTP_PROXY = '10.200.175.195';
 
     /** @var  swoole_http_client */
