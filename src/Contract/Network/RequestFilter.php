@@ -8,9 +8,11 @@
 
 namespace Zan\Framework\Contract\Network;
 
+
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-interface RequestFilter {
+interface RequestFilter
+{
     /**
      * @param Request $request
      * @param Context $context
