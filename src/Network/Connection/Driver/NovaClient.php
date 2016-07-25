@@ -24,7 +24,6 @@ class NovaClient extends Base implements Connection
 {
     private $clientCb;
     protected $isAsync = true;
-    private $lastUsedTime = 0;
 
     protected function closeSocket()
     {
