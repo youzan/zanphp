@@ -13,6 +13,7 @@ namespace Zan\Framework\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Utilities\Types\Time;
 
 class MonitorConnectionNum {
 
@@ -31,17 +32,26 @@ class MonitorConnectionNum {
     public function reduceLinkNum()
     {
         $config = Config::get('reconnection');
-        $reduceNum = isset($config['num-reduce-link']) ? $config['num-reduce-link'] : 1 ;
+        $timeInterval = isset($config['interval-reduce-link'])?  $config['interval-reduce-link'] : 60000;
         foreach (self::$poolMap as $poolKey => $pool) {
-            $activeNums = $pool->getActiveConnection()->length();
-            $freeNums = $pool->getFreeConnection()->length();
-            $sumNums = $activeNums + $freeNums;
-            if ($sumNums <=0 || $freeNums*3 < $sumNums) {
+            $activeNum = $pool->getActiveConnection()->length();
+            $freeNum = $pool->getFreeConnection()->length();
+            $sumNum = $activeNum + $freeNum;
+            if ($sumNum <=0) {
                 continue;
             }
-            for ($i=0; $i<$reduceNum; $i++) {
+            $poolConfig = Config::get('connection.' . $poolKey)['pool'];
+            $minConnectionNum = isset($poolConfig['minimum-connection-count']) ? $poolConfig['minimum-connection-count'] : 1;
+            if ($freeNum <= $minConnectionNum) {
+                continue;
+            }
+            for ($i=0; $i<$freeNum-$minConnectionNum; $i++) {
                 $conn = $pool->getFreeConnection()->pop();
-                $conn->closeSocket();
+                if ($conn->lastUsedTime == 0 || (Time::current(true) - $conn->lastUsedTime) > $timeInterval/1000) {
+                    $conn->closeSocket();
+                } else {
+                    $pool->getFreeConnection()->push($conn);
+                }
             }
         }
     }

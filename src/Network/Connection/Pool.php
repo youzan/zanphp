@@ -115,12 +115,18 @@ class Pool implements ConnectionPool
 
         if (null == $connection) {
             $connection = $this->freeConnection->pop();
-            $this->activeConnection->push($connection);
+            if (null != $connection) {
+                $this->activeConnection->push($connection);
+            }
+
         } else {
             $this->freeConnection->remove($connection);
             $this->activeConnection->push($connection);
         }
-
+        if (null === $connection) {
+            yield null;
+            return;
+        }
         $connection->setUnReleased();
         $connection->lastUsedTime = Time::current(true);
         yield $this->insertActiveConnectionIntoContext($connection);
