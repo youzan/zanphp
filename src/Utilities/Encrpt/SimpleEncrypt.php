@@ -23,17 +23,14 @@ class SimpleEncrypt
         $arr = [];
         $len = strlen($text);
         $keyLen = strlen($key);
-        $i = 0;
         $j = 0;
-        while ($i < $len) {
+        for ($i = 0; $i < $len; $i++) {
             if ($j == $keyLen) {
                 $j -= $keyLen;
             }
             $arr[] = $text[$i] ^ $key[$j];
-            $i++;
             $j++;
         }
-
         return implode('', $arr);
     }
 
