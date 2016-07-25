@@ -8,20 +8,15 @@
 
 namespace Zan\Framework\Network\Http;
 
+use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Core\Debug;
-use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\InternalErrorResponse;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
-use Zan\Framework\Network\Http\Dispatcher;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Foundation\Container\Di;
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Network\Server\Monitor\Worker;
-
-use swoole_http_response as SwooleHttpResponse;
 
 class RequestTask
 {
@@ -50,7 +45,7 @@ class RequestTask
 
     public function run()
     {
-        try{
+        try {
             yield $this->doRun();
         } catch (\Exception $e) {
             if (Debug::get()) {
@@ -66,17 +61,19 @@ class RequestTask
     public function doRun()
     {
         $response = (yield $this->middleWareManager->executeFilters());
-        if(null !== $response){
+        if (null !== $response) {
             $this->context->set('response', $response);
             yield $response->sendBy($this->swooleResponse);
             return;
         }
 
-        $Dispatcher = Di::make(Dispatcher::class);
-        $response = (yield $Dispatcher->dispatch($this->request, $this->context));
+        $dispatcher = Di::make(Dispatcher::class);
+        $response = (yield $dispatcher->dispatch($this->request, $this->context));
         if (null === $response) {
             $response = new InternalErrorResponse('网络错误', BaseResponse::HTTP_INTERNAL_SERVER_ERROR);
         }
+
+        yield $this->middleWareManager->executePostFilters($response);
 
         $this->context->set('response', $response);
         yield $response->sendBy($this->swooleResponse);
