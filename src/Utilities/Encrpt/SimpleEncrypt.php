@@ -18,6 +18,25 @@ class SimpleEncrypt
 {
     const DEFAULT_KEY = 'the answer to life the universe and everything';
 
+    public static function xorText($text, $key)
+    {
+        $arr = [];
+        $len = strlen($text);
+        $keyLen = strlen($key);
+        $i = 0;
+        $j = 0;
+        while ($i < $len) {
+            if ($j == $keyLen) {
+                $j -= $keyLen;
+            }
+            $arr[] = $text[$i] ^ $key[$j];
+            $i++;
+            $j++;
+        }
+
+        return implode('', $arr);
+    }
+
     public static function encrypt($string, $key = null)
     {
         if (strlen($string) > 100) {
@@ -54,26 +73,6 @@ class SimpleEncrypt
 
         $key = $key ?: self::DEFAULT_KEY;
         return trim(base64_encode(self::xorText($yLen . implode('', $str) . $yLenLen, $key)), '=');
-    }
-
-    public static function xorText($text, $key)
-    {
-        $arr = [];
-        $len = strlen($text);
-        $keyLen = strlen($key);
-//        $offset = rand(0, $keyLen);
-        $i = 0;
-        $j = 0;
-        while ($i < $len) {
-            if ($j == $keyLen) {
-                $j -= $keyLen;
-            }
-            $arr[] = $text[$i] ^ $key[$j];
-            $i++;
-            $j++;
-        }
-
-        return implode('', $arr);
     }
 
     public static function decrypt($encrypted, $key = null)
