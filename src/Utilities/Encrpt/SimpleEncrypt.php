@@ -6,9 +6,19 @@ namespace Zan\Framework\Utilities\Encrpt;
 
 use Exception;
 
+/**
+ * Class SimpleEncrypt
+ *
+ * 这个加密算法很弱, 主要用于CSRFToken生成, 不足以加密重要信息, 只是增加破解成本
+ * 需要严肃的加密数据, 请考虑AES, RSA等
+ *
+ * @package Zan\Framework\Utilities\Encrpt
+ */
 class SimpleEncrypt
 {
-    public static function encrypt($string)
+    const DEFAULT_KEY = 'the answer to life the universe and everything';
+
+    public static function encrypt($string, $key = null)
     {
         if (strlen($string) > 100) {
             throw new Exception('too long string');
@@ -42,11 +52,34 @@ class SimpleEncrypt
             }
         }
 
-        return $yLen . implode('', $str) . $yLenLen;
+        $key = $key ?: self::DEFAULT_KEY;
+        return trim(base64_encode(self::xorText($yLen . implode('', $str) . $yLenLen, $key)), '=');
     }
 
-    public static function decrypt($encrypted)
+    public static function xorText($text, $key)
     {
+        $arr = [];
+        $len = strlen($text);
+        $keyLen = strlen($key);
+//        $offset = rand(0, $keyLen);
+        $i = 0;
+        $j = 0;
+        while ($i < $len) {
+            if ($j == $keyLen) {
+                $j -= $keyLen;
+            }
+            $arr[] = $text[$i] ^ $key[$j];
+            $i++;
+            $j++;
+        }
+
+        return implode('', $arr);
+    }
+
+    public static function decrypt($encrypted, $key = null)
+    {
+        $key = $key ?: self::DEFAULT_KEY;
+        $encrypted = self::xorText(base64_decode($encrypted), $key);
         $len = strlen($encrypted);
         $yLenLen = intval($encrypted[$len - 1]);
         if ($yLenLen < 1) {
@@ -94,4 +127,5 @@ class SimpleEncrypt
 
         return $result;
     }
+
 }
