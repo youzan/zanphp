@@ -22,7 +22,6 @@ class RunMode {
         'pubtest'   => 8
     ];
     private static $runMode = null;
-    private static $cliInput = null;
 
     public static function get()
     {
@@ -37,22 +36,9 @@ class RunMode {
         self::$runMode = $runMode;
     }
 
-    public static function setCliInput($mode)
-    {
-        if (!$mode) {
-            return false;
-        }
-
-        if (!isset(self::$modeMap[$mode])) {
-            throw new InvalidArgumentException('invalid runMode from cli');
-        }
-        self::$cliInput = $mode;
-    }
-
     public static function detect()
     {
-        if (null !== self::$cliInput) {
-            self::$runMode = self::$cliInput;
+        if (null !== self::$runMode) {
             return true;
         }
 

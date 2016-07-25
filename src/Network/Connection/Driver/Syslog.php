@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use swoole_client as SwooleClient;
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Connection\ReconnectionPloy;
 
 class Syslog extends Base implements Connection
 {
@@ -36,6 +37,7 @@ class Syslog extends Base implements Connection
     public function onConnect($cli)
     {
         $this->release();
+        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
     }
 
     public function onClose(SwooleClient $cli)
@@ -59,7 +61,7 @@ class Syslog extends Base implements Connection
         $this->clientCb = null;
     }
 
-    protected function closeSocket()
+    public function closeSocket()
     {
         try {
             if ($this->getSocket()->isConnected()) {
