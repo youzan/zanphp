@@ -17,6 +17,13 @@ use Zan\Framework\Store\Database\Exception\DbCommitFailException;
 use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByStackException;
 use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use Zan\Framework\Store\Database\Exception\DbRollbackFailException;
+
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliSqlSyntaxException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
+
 use SplStack;
 
 class Flow
@@ -36,6 +43,8 @@ class Flow
 
     const CONNECTION_TASKID_STACK = 'connection_taskid_stack';
 
+    const ACTIVE_CONNECTION_CONTEXT_KEY= 'mysql_active_connections';
+
     private $engineMap = [
         'Mysqli' => Mysqli::class,
     ];
@@ -46,7 +55,12 @@ class Flow
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
-        $dbResult = (yield $driver->query($sqlMap['sql']));
+        try {
+            $dbResult = (yield $driver->query($sqlMap['sql']));
+        } catch (\Exception $e) {
+            yield $this->queryException($e, $connection);
+            throw $e;
+        }
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
         }
@@ -153,6 +167,7 @@ class Flow
 
         $connection = $connectionStack->pop();
         $connection->release();
+        yield $this->deleteActiveConnectionFromContext($connection);
 
         if ($connectionStack->isEmpty()) {
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
@@ -175,6 +190,7 @@ class Flow
 
         $connection = $connectionStack->pop();
         $connection->close();
+        yield $this->deleteActiveConnectionFromContext($connection);
 
         if ($connectionStack->isEmpty()) {
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
@@ -192,7 +208,23 @@ class Flow
         if (!($connection instanceof Connection)) {
             throw new CanNotGetConnectionByConnectionManagerException('get connection error database:'.$database);
         }
+        yield $this->insertActiveConnectionIntoContext($connection);
         yield $connection;
+    }
+
+    private function insertActiveConnectionIntoContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
+        $activeConnections[spl_object_hash($connection)] = $connection;
+        yield setContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, $activeConnections);
+    }
+
+    private function deleteActiveConnectionFromContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
+        if (isset($activeConnections[spl_object_hash($connection)])) {
+            unset($activeConnections[spl_object_hash($connection)]);
+        }
     }
 
     private function setTransaction($database, $connection)
@@ -238,6 +270,7 @@ class Flow
         $beginTransaction = (yield getContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false));
         if ($beginTransaction === false) {
             $connection->release();
+            yield $this->deleteActiveConnectionFromContext($connection);
         }
         yield true;
     }
@@ -259,6 +292,8 @@ class Flow
                 $connection = $connectionStack->pop();
                 //close
                 $connection->close();
+                yield $this->deleteActiveConnectionFromContext($connection);
+
                 $config = $connection->getConfig();
                 if (isset($config['pool']['pool_name'])) {
                     yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['pool']['pool_name']), null);
@@ -268,5 +303,33 @@ class Flow
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
         }
         yield setContext(self::CONNECTION_TASKID_STACK, null);
+    }
+
+    private function queryException($exception, $connection)
+    {
+        if (!($connection instanceof Connection)) {
+            return;
+        }
+        switch ($exception) {
+            case $exception instanceof MysqliConnectionLostException:
+                $connection->close();
+                break;
+            case $exception instanceof MysqliSqlSyntaxException:
+                $connection->release();
+                break;
+            case $exception instanceof MysqliQueryDuplicateEntryUniqueKeyException:
+                $connection->release();
+                break;
+            case $exception instanceof MysqliQueryException:
+                $connection->close();
+                break;
+            case $exception instanceof MysqliQueryTimeoutException:
+                $connection->close();
+                break;
+            default :
+                $connection->close();
+                break;
+        }
+        yield $this->deleteActiveConnectionFromContext($connection);
     }
 }

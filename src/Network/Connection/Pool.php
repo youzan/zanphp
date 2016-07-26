@@ -129,7 +129,6 @@ class Pool implements ConnectionPool
         }
         $connection->setUnReleased();
         $connection->lastUsedTime = Time::current(true);
-        yield $this->insertActiveConnectionIntoContext($connection);
         yield $connection;
     }
 
@@ -140,9 +139,6 @@ class Pool implements ConnectionPool
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
 
-        $coroutine = $this->deleteActiveConnectionFromContext($conn);
-        Task::execute($coroutine);
-
         if (count($this->freeConnection) == 1) {
             $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
@@ -152,8 +148,6 @@ class Pool implements ConnectionPool
 
     public function remove(Connection $conn)
     {
-        $coroutine = $this->deleteActiveConnectionFromContext($conn);
-        Task::execute($coroutine);
         $this->activeConnection->remove($conn);
         $connHashCode = spl_object_hash($conn);
         if (null === ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
@@ -162,31 +156,5 @@ class Pool implements ConnectionPool
             return;
         }
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
-    }
-
-    private function insertActiveConnectionIntoContext($connection)
-    {
-        $activeConnections = (yield getContext($this->getActiveConnectionContextKey(), []));
-        $activeConnections[spl_object_hash($connection)] = $connection;
-        yield setContext($this->getActiveConnectionContextKey(), $activeConnections);
-    }
-
-    private function deleteActiveConnectionFromContext($connection)
-    {
-        $activeConnections = (yield getContext($this->getActiveConnectionContextKey(), []));
-        if (isset($activeConnections[spl_object_hash($connection)])) {
-            unset($activeConnections[spl_object_hash($connection)]);
-        }
-        return;
-    }
-
-    private function getActiveConnectionContextKey()
-    {
-        return $this->type . '_active_connections';
-    }
-
-    public function getActiveConnectionsFromContext()
-    {
-        yield getContext($this->getActiveConnectionContextKey(), []);
     }
 }

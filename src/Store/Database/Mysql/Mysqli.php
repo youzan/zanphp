@@ -87,7 +87,6 @@ class Mysqli implements DriverInterface
 
         $res = swoole_mysql_query($this->connection->getSocket(), $this->sql, [$this, 'onSqlReady']);
         if (false === $res) {
-            $this->connection->close();
             throw new MysqliConnectionLostException('Mysql close the connection');
         }
         Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
@@ -104,19 +103,15 @@ class Mysqli implements DriverInterface
         $exception = null;
         if ($result === false) {
             if (in_array($this->connection->getSocket()->errno, [2013, 2006])) {
-                $this->connection->close();
                 $exception = new MysqliConnectionLostException();
             } elseif ($this->connection->getSocket()->errno == 1064) {
                 $error = $this->connection->getSocket()->error;
-                $this->connection->release();
                 $exception = new MysqliSqlSyntaxException($error . ':' . $this->sql);
             } elseif ($this->connection->getSocket()->errno == 1062) {
                 $error = $this->connection->getSocket()->error;
-                $this->connection->release();
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
             } else {
                 $error = $this->connection->getSocket()->error;
-                $this->connection->close();
                 $exception = new MysqliQueryException('errno=' . $link->_errno . '&error=' . $error . ':' . $this->sql);
             }
 
@@ -136,7 +131,6 @@ class Mysqli implements DriverInterface
         if ($this->trace) {
             $this->trace->commit("SQL query timeout");
         }
-        $this->connection->close();
         //TODO: sql记入日志
         call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException()]);
     }
