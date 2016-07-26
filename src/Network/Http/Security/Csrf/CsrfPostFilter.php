@@ -26,12 +26,9 @@ class CsrfPostFilter Implements RequestPostFilter
     public function postFilter(Request $request, Response $response, Context $context)
     {
         if ($response instanceof \Zan\Framework\Network\Http\Response\Response) {
-            $csrfTokenManager = Di::make(CsrfTokenManager::class);
-
             /** @var CsrfToken $csrfToken */
             $csrfToken = $context->get('__zan_token');
-            $modules = $this->getModules($request);
-            $response->withCookie(new Cookie('__zan_token', $csrfToken->getRaw(), time() + $csrfTokenManager->getTimeToLive($modules)));
+            $response->withCookie(new Cookie('__zan_token', $csrfToken->getRaw()));
         }
     }
 
