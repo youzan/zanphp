@@ -78,7 +78,6 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
         static $defaultTTL = 60;
         $cfg = $this->getStrategy($this->csrfConfig, $modules);
         $ttl = isset($cfg['ttl']) ? $cfg['ttl'] : $defaultTTL;
-        var_dump($cfg);
         return $ttl;
     }
 
