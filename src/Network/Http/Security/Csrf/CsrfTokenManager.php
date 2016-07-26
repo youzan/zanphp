@@ -63,7 +63,7 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
      */
     public function isTokenValid(CsrfToken $token, array $modules)
     {
-        if ($token and (time() - $token->getTokenTime()) < $this->getTimeToLive($modules)) {
+        if ($token and (time() - $token->getTokenTime()) < $this->getTTL($modules)) {
             return true;
         } else {
             return false;
@@ -73,7 +73,7 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function getTimeToLive(array $modules)
+    public function getTTL(array $modules)
     {
         static $defaultTTL = 60;
         $cfg = $this->getStrategy($this->csrfConfig, $modules);

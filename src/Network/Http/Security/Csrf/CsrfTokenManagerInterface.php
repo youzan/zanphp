@@ -42,8 +42,7 @@ interface CsrfTokenManagerInterface
      *
      * @param array $modules
      * @return int
-     * @internal param $privacy
      */
-    public function getTimeToLive(array $modules);
+    public function getTTL(array $modules);
 
 }
