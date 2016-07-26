@@ -13,13 +13,6 @@ interface CsrfTokenManagerInterface
 {
 
     /**
-     * @var int
-     */
-    const EXPIRE_TIME = 60;
-
-    /**
-     * @param $id
-     * @param $tokenTime
      * @return CsrfToken
      */
     public function createToken();
@@ -38,10 +31,19 @@ interface CsrfTokenManagerInterface
 
     /**
      * @param CsrfToken $token
+     * @param array $modules
      * @return bool
      */
-    public function isTokenValid(CsrfToken $token);
+    public function isTokenValid(CsrfToken $token, array $modules);
 
-//    public function removeToken($tokenId);
+
+    /**
+     * Return expire time in seconds
+     *
+     * @param array $modules
+     * @return int
+     * @internal param $privacy
+     */
+    public function getTimeToLive(array $modules);
 
 }

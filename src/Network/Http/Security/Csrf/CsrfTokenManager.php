@@ -4,38 +4,40 @@
 namespace Zan\Framework\Network\Http\Security\Csrf;
 
 
-use Zan\Framework\Network\Http\Security\Csrf\TokenParser\SimpleTokenParser;
-use Zan\Framework\Network\Http\Security\Csrf\TokenParser\TokenParserInterface;
+use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Http\Security\Csrf\Factory\SimpleTokenFactory;
+use Zan\Framework\Network\Http\Security\Csrf\Factory\TokenFactoryInterface;
 use Zan\Framework\Utilities\Encrpt\Uuid;
 
 class CsrfTokenManager implements CsrfTokenManagerInterface
 {
+    private $csrfConfig;
 
     /**
-     * @var TokenParserInterface
+     * @var TokenFactoryInterface
      */
-    private $parser;
+    private $factory;
 
     /**
-     * Creates a new CSRF provider using PHP's native session storage.
+     * Creates a new CSRF provider using cookie
      *
-     * @param TokenParserInterface|null $generator The token generator
+     * @param TokenFactoryInterface|null $factory The token generator
      */
-    public function __construct(TokenParserInterface $generator = null)
+    public function __construct(TokenFactoryInterface $factory = null)
     {
-        $this->parser = $generator ?: new SimpleTokenParser();
+        $this->factory = $factory ?: Di::make(SimpleTokenFactory::class);
+        $this->csrfConfig = Config::get('csrf', []);
     }
 
     /**
-     * @param $id
-     * @param $tokenTime
-     * @return CsrfToken
+     * {@inheritdoc}
      */
     public function createToken()
     {
         $id = Uuid::get();
         $time = time();
-        return $this->parser->generateToken($id, $time);
+        return $this->factory->buildToken($id, $time);
     }
 
     /**
@@ -43,12 +45,15 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
      */
     public function refreshToken(CsrfToken $token)
     {
-        return $this->parser->generateToken($token->getId(), time());
+        return $this->factory->buildToken($token->getId(), time());
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function parseToken($tokenRaw)
     {
-        $token = $this->parser->parseToken($tokenRaw);
+        $token = $this->factory->buildFromRawText($tokenRaw);
         printf("%s: %s\n", $token->getId(), date('Y-m-d H:i:s', $token->getTokenTime()));
         return $token;
     }
@@ -56,12 +61,38 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
     /**
      * {@inheritdoc}
      */
-    public function isTokenValid(CsrfToken $token)
+    public function isTokenValid(CsrfToken $token, array $modules)
     {
-        if ($token and (time() - $token->getTokenTime()) < self::EXPIRE_TIME) {
+        if ($token and (time() - $token->getTokenTime()) < $this->getTimeToLive($modules)) {
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getTimeToLive(array $modules)
+    {
+        static $defaultTTL = 60;
+        $cfg = $this->getStrategy($this->csrfConfig, $modules);
+        $ttl = isset($cfg['ttl']) ? $cfg['ttl'] : $defaultTTL;
+        var_dump($cfg);
+        return $ttl;
+    }
+
+    private function getStrategy($config, $arr)
+    {
+        $name = array_shift($arr);
+        if (isset($config[$name])) {
+            if (empty($arr)) {
+                return $config[$name];
+            } elseif (is_array($result = $this->getStrategy($config[$name], $arr))) {
+                return $result;
+            }
+        }
+
+        return isset($config['_default']) ? $config['_default'] : $config;
     }
 }

@@ -7,12 +7,14 @@ namespace Zan\Framework\Network\Http\Security\Csrf;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Foundation\Container\Di;
-use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Security\Csrf\Exception\TokenException;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Helper\FilterHelper;
 
 class CsrfFilter Implements RequestFilter
 {
+    use FilterHelper;
+
     /**
      * @var CsrfTokenManagerInterface
      */
@@ -27,6 +29,7 @@ class CsrfFilter Implements RequestFilter
      * @param Request $request
      * @param Context $context
      * @return \Zan\Framework\Contract\Network\Response
+     * @throws TokenException
      */
     public function doFilter(Request $request, Context $context)
     {
@@ -49,7 +52,8 @@ class CsrfFilter Implements RequestFilter
                     throw new TokenException('Invalid token');
                 } else {
                     $token = $this->csrfTokenManager->parseToken($tokenRaw);
-                    if ($this->csrfTokenManager->isTokenValid($token)) {
+                    $modules = $this->getModules($request);
+                    if ($this->csrfTokenManager->isTokenValid($token, $modules)) {
                         $newToken = $this->csrfTokenManager->refreshToken($token);
                     } else {
                         throw new TokenException('Token expired');
@@ -70,4 +74,5 @@ class CsrfFilter Implements RequestFilter
     {
         return in_array($request->getMethod(), ['HEAD', 'GET', 'OPTIONS']);
     }
+
 }
