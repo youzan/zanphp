@@ -21,12 +21,14 @@ class Cache {
 
     const POOL_PREFIX = 'connection.';
 
+    const ACTIVE_CONNECTION_CONTEXT_KEY= 'redis_active_connections';
+
     private static $_instance = null;
     private static $_configMap = null;
-    
+
     private static function init($connection)
     {
-        if (null === self::$_instance[$connection]) {
+        if (!isset(self::$_instance[$connection]) || null === self::$_instance[$connection]) {
             self::$_instance[$connection] = new self;
         }
         return self::$_instance[$connection];
@@ -54,7 +56,12 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         array_unshift($args, $realKey);
 
-        yield call_user_func_array([$redis, $func], $args);
+        $result = (yield call_user_func_array([$redis, $func], $args));
+
+        $conn->release();
+        yield self::deleteActiveConnectionFromContext($conn);
+
+        yield $result;
     }
 
     public static function get($configKey, $keys)
@@ -71,6 +78,10 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->get($realKey));
         $result = self::decode($result);
+
+        $conn->release();
+        yield self::deleteActiveConnectionFromContext($conn);
+
         yield $result;
     }
 
@@ -90,11 +101,18 @@ class Cache {
             $value = json_encode($value);
         }
         $result = (yield $redis->set($realKey, $value));
+
+        $conn->release();
+        yield self::deleteActiveConnectionFromContext($conn);
+
         if ($result) {
             $conn = (yield $redisObj->getConnection($config['connection']));
             $redis = new Redis($conn);
             $ttl = isset($config['exp']) ? $config['exp'] : 0;
             yield $redis->expire($realKey, $ttl);
+
+            $conn->release();
+            yield self::deleteActiveConnectionFromContext($conn);
         }
         yield $result;
     }
@@ -111,8 +129,23 @@ class Cache {
         if (!$conn instanceof Connection) {
             throw new Exception('Redis get connection error');
         }
-
+        yield $this->insertActiveConnectionIntoContext($conn);
         yield $conn;
+    }
+
+    private function insertActiveConnectionIntoContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
+        $activeConnections[spl_object_hash($connection)] = $connection;
+        yield setContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, $activeConnections);
+    }
+
+    private static function deleteActiveConnectionFromContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
+        if (isset($activeConnections[spl_object_hash($connection)])) {
+            unset($activeConnections[spl_object_hash($connection)]);
+        }
     }
 
     /**
