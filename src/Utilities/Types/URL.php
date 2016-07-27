@@ -125,17 +125,10 @@ class URL
         return self::_convertWebp($url);
     }
 
-    public static function getRequestUri($exclude='', $params=false)
-    {
-        yield getRequestUri($exclude,$params);
-    }
 
     public static function removeParams($ps=null,$url=null)
     {
-        if(null === $url){
-            $url    =  (yield self::getRequestUri('',true));
-        }
-        if(!$ps ){
+        if(!$ps || !$url){
             yield $url;
             return;
         }
