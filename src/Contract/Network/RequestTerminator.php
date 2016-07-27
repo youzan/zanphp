@@ -11,7 +11,8 @@ namespace Zan\Framework\Contract\Network;
 
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-interface RequestTerminator {
+interface RequestTerminator
+{
     /**
      * @param Request $request
      * @param Response $response

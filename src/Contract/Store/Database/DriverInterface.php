@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Contract\Store\Database;
 
+
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 
@@ -22,7 +23,6 @@ interface DriverInterface extends Async
     public function query($sql);
 
     /**
-     * @param bool $autoHandleException
      * @return DbResultInterface
      */
     public function beginTransaction();
@@ -38,6 +38,8 @@ interface DriverInterface extends Async
     public function rollback();
 
     /**
+     * @param $link
+     * @param $result
      * @return DbResultInterface
      */
     public function onSqlReady($link, $result);

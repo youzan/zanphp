@@ -15,9 +15,10 @@
  *    limitations under the License.
  */
 namespace Zan\Framework\Store\Database\Mysql;
+
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
@@ -80,6 +81,8 @@ class Mysqli implements DriverInterface
     }
 
     /**
+     * @param $link
+     * @param $result
      * @return DbResultInterface
      */
     public function onSqlReady($link, $result)
