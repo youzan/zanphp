@@ -9,7 +9,6 @@
 namespace Zan\Framework\Contract\Foundation;
 
 
-
 interface ExceptionHandler
 {
     /**

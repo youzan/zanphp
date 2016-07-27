@@ -20,8 +20,8 @@ interface ConnectionFactory
     /**
      * @return \Zan\Framework\Contract\Network\Connection
      * @throws \Zan\Framework\Network\Connection\Exception\CanNotCreateConnectionException
-     * @throws \Zan\Framework\Network\Connection\Exception\ConnectTimeoutException        
-     */ 
+     * @throws \Zan\Framework\Network\Connection\Exception\ConnectTimeoutException
+     */
     public function create();
 
     public function close();

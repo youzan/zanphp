@@ -17,10 +17,9 @@
 
 namespace Zan\Framework\Network\Connection;
 
-
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
@@ -37,9 +36,6 @@ class Pool implements ConnectionPool
 
     private $type = null;
 
-
-
-
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
         $this->poolConfig = $config;
@@ -54,7 +50,7 @@ class Pool implements ConnectionPool
         $initConnection = $this->poolConfig['pool']['init-connection'];
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
-        for ($i=0; $i<$initConnection; $i++) {
+        for ($i = 0; $i < $initConnection; $i++) {
             //todo 创建链接,存入数组
             $this->createConnect();
         }
@@ -70,7 +66,7 @@ class Pool implements ConnectionPool
         } else {
             $this->freeConnection->push($connection);
         }
-        
+
         $connection->setPool($this);
         $connection->heartbeat();
         $connection->setEngine($this->type);
@@ -89,7 +85,7 @@ class Pool implements ConnectionPool
 
     public function reload(array $config)
     {
-        
+
     }
 
     public function get()
@@ -104,7 +100,7 @@ class Pool implements ConnectionPool
 //        deferRelease($conn);
         return $conn;
     }
-    
+
     public function recycle(Connection $conn)
     {
         $this->freeConnection->push($conn);
@@ -115,13 +111,12 @@ class Pool implements ConnectionPool
             Event::fire($evtName, [], false);
         }
     }
-    
+
     public function remove(Connection $conn)
     {
         $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
         //补充删除被删除连接
         $this->createConnect();
-
     }
 }

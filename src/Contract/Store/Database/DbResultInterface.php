@@ -7,7 +7,8 @@
  */
 
 namespace Zan\Framework\Contract\Store\Database;
-use Zan\Framework\Contract\Store\Database\DriverInterface;
+
+
 interface DbResultInterface
 {
     /**
@@ -17,7 +18,7 @@ interface DbResultInterface
     public function __construct(DriverInterface $driver);
 
     /**
-     * @return int 
+     * @return int
      */
     public function getLastInsertId();
 
