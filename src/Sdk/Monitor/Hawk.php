@@ -22,7 +22,7 @@ class Hawk
 
     private $httpClient;
 
-    const SUCCESS = 1001;
+    const SUCCESS = 'success';
     const URI = '/report';
 
     public function __construct()
@@ -79,7 +79,7 @@ class Hawk
 
         $this->data = [];
 
-        if (!isset($result['code']) || $result['code'] != self::SUCCESS) {
+        if ($result != self::SUCCESS) {
             //TODO: 上报失败
             var_dump("hawk上报失败");
         }
