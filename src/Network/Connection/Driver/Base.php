@@ -23,6 +23,7 @@ abstract class Base implements Connection
     protected $isAsync = false;
     protected $isClose = false;
     protected $isReleased = false;
+    public $lastUsedTime=0;
 
     abstract protected function closeSocket();
 

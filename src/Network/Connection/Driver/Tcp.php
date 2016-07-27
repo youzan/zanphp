@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
+use Zan\Framework\Network\Connection\ReconnectionPloy;
 
 
 class Tcp extends Base implements Connection
@@ -17,10 +18,12 @@ class Tcp extends Base implements Connection
     private $clientCb;
     protected $isAsync = true;
     
-    protected function closeSocket()
+    public function closeSocket()
     {
         try {
-            $this->getSocket()->close();
+            if ($this->getSocket()->isConnected()) {
+                $this->getSocket()->close();
+            }
         } catch (\Exception $e) {
             //todo log
         }
@@ -38,6 +41,7 @@ class Tcp extends Base implements Connection
     public function onConnect($cli) {
         //put conn to active_pool
         $this->release();
+        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
         echo "tcp client connect to server\n";
     }
 

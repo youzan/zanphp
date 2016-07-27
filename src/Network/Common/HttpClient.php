@@ -11,12 +11,15 @@ class HttpClient implements Async
 {
     const GET = 'GET';
     const POST = 'POST';
+    // TODO 改成zan-config里的配置
+    const HTTP_PROXY = '10.200.175.195';
 
     /** @var  swoole_http_client */
     private $client;
 
     private $host;
     private $port;
+    private $ssl;
 
     /**
      * @var int [millisecond]
@@ -33,16 +36,28 @@ class HttpClient implements Async
     private $callback;
     private $trace;
 
-    public function __construct($host, $port = 80)
+    private $useHttpProxy = false;
+
+    public function __construct($host, $port = 80, $ssl = false)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->ssl = $ssl;
     }
 
-    public static function newInstance($host, $port = 80)
+    public static function newInstance($host, $port = 80, $ssl = false)
     {
-        return new static($host, $port);
+        return new static($host, $port, $ssl);
     }
+
+    public static function newInstanceUsingProxy($host, $port = 80, $ssl = false)
+    {
+        $instance = new static($host, $port, $ssl);
+        $instance->useHttpProxy = true;
+
+        return $instance;
+    }
+
 
     public function get($uri = '', $params = [], $timeout = 3000)
     {
@@ -60,6 +75,20 @@ class HttpClient implements Async
         $this->setTimeout($timeout);
         $this->setUri($uri);
         $this->setParams($params);
+
+        yield $this->build();
+    }
+
+    public function postJson($uri = '', $params = [], $timeout = 3000)
+    {
+        $this->setMethod(self::POST);
+        $this->setTimeout($timeout);
+        $this->setUri($uri);
+        $this->setParams(json_encode($params));
+
+        $this->setHeader([
+            'Content-Type' => 'application/json'
+        ]);
 
         yield $this->build();
     }
@@ -117,16 +146,13 @@ class HttpClient implements Async
     {
         $this->trace = (yield getContext('trace'));
 
-        if ($this->method != 'POST' and $this->method != 'PUT') {
+        if ($this->method === 'GET') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
             }
-        } else {
-            $body = json_encode($this->params);
-            $contentType = 'application/json';
-            $this->setHeader([
-                'Content-Type' => $contentType
-            ]);
+        } else if ($this->method === 'POST') {
+            $body = $this->params;
+
             $this->setBody($body);
         }
 
@@ -141,9 +167,13 @@ class HttpClient implements Async
 
     public function handle()
     {
-        swoole_async_dns_lookup($this->host, function($host, $ip) {
-            $this->request($ip);
-        });
+        if ($this->useHttpProxy) {
+            $this->request(self::HTTP_PROXY);
+        } else {
+            swoole_async_dns_lookup($this->host, function($host, $ip) {
+                $this->request($ip);
+            });
+        }
     }
 
 
@@ -174,7 +204,15 @@ class HttpClient implements Async
 
     private function buildHeader()
     {
-        $this->header['Host'] = $this->host;
+        if ($this->port !== 80) {
+            $this->header['Host'] = $this->host . ':' . $this->port;
+        } else {
+            $this->header['Host'] = $this->host;
+        }
+        if ($this->ssl) {
+            $this->header['Scheme'] = 'https';
+        }
+
         $this->client->setHeaders($this->header);
     }
 
@@ -184,14 +222,13 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
-        call_user_func($this->callback, $cli->body);
+        $response = new Response($cli->statusCode, $cli->headers, $cli->body);
+        call_user_func($this->callback, $response);
     }
 
     private function getCallback(callable $callback)
     {
         return function($response) use ($callback) {
-            $jsonData = json_decode($response, true);
-            $response = $jsonData ? $jsonData : $response;
             call_user_func($callback, $response);
         };
     }
