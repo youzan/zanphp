@@ -29,7 +29,7 @@ class File implements Async
     }
     public function execute(callable $callback, $task){
         // TODO: Implement execute() method.
-        $this->setCallback($this->getCallback())->readHandle();
+        $this->setCallback($this->getCallback($callback))->readHandle();
     }
 
     public function readHandle(){
@@ -43,8 +43,8 @@ class File implements Async
 
     private function getCallback(callable $callback)
     {
-        return function($response) use ($callback) {
-            call_user_func($callback, $response);
+        return function($fileName,$content) use ($callback) {
+            call_user_func($callback, $content);
         };
     }
 }
