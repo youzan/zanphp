@@ -18,6 +18,10 @@ class File implements Async
 
     protected $callback = null;
 
+    protected $isEof = false;
+
+    protected $fileSize = 0;
+
     public function __construct($fileName,$size=8000,$offset=0){
         $this->fileName = $fileName;
         $this->size = $size;
@@ -27,6 +31,11 @@ class File implements Async
     public function read(){
         yield $this;
     }
+
+    public function eof(){
+        yield $this->isEof;
+    }
+
     public function execute(callable $callback, $task){
         // TODO: Implement execute() method.
         $this->setCallback($this->getCallback($callback))->readHandle();
@@ -44,6 +53,11 @@ class File implements Async
     private function getCallback(callable $callback)
     {
         return function($fileName,$content) use ($callback) {
+            $len = strlen($content);
+            $this->offset += $len;
+            if($len < $this->size){
+                $this->isEof = true;
+            }
             call_user_func($callback, $content);
         };
     }
