@@ -91,6 +91,8 @@ class MiddlewareConfig
             WorkerTerminator::class,
             TraceTerminator::class,
             DbTerminator::class,
+            CacheTerminator::class,
+            KVTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }
