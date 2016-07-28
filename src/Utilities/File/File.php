@@ -18,13 +18,13 @@ class File implements Async
 
     protected $callback = null;
 
-    public function __construct(){
-    }
-
-    public function read($fileName,$size=8000,$offset=0){
+    public function __construct($fileName,$size=8000,$offset=0){
         $this->fileName = $fileName;
         $this->size = $size;
         $this->offset = $offset;
+    }
+
+    public function read(){
         yield $this;
     }
     public function execute(callable $callback, $task){
