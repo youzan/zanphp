@@ -166,8 +166,8 @@ class Flow
         }
 
         $connection = $connectionStack->pop();
-        $connection->release();
         yield $this->deleteActiveConnectionFromContext($connection);
+        $connection->release();
 
         if ($connectionStack->isEmpty()) {
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
@@ -189,8 +189,8 @@ class Flow
         }
 
         $connection = $connectionStack->pop();
-        $connection->close();
         yield $this->deleteActiveConnectionFromContext($connection);
+        $connection->close();
 
         if ($connectionStack->isEmpty()) {
             yield setContext(sprintf(self::CONNECTION_STACK, $taskId), null);
@@ -269,8 +269,8 @@ class Flow
         $taskId = (yield getTaskId());
         $beginTransaction = (yield getContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false));
         if ($beginTransaction === false) {
-            $connection->release();
             yield $this->deleteActiveConnectionFromContext($connection);
+            $connection->release();
         }
         yield true;
     }
@@ -291,8 +291,8 @@ class Flow
             while (!$connectionStack->isEmpty()) {
                 $connection = $connectionStack->pop();
                 //close
-                $connection->close();
                 yield $this->deleteActiveConnectionFromContext($connection);
+                $connection->close();
 
                 $config = $connection->getConfig();
                 if (isset($config['pool']['pool_name'])) {
@@ -310,6 +310,8 @@ class Flow
         if (!($connection instanceof Connection)) {
             return;
         }
+
+        yield $this->deleteActiveConnectionFromContext($connection);
         switch ($exception) {
             case $exception instanceof MysqliConnectionLostException:
                 $connection->close();
@@ -330,6 +332,5 @@ class Flow
                 $connection->close();
                 break;
         }
-        yield $this->deleteActiveConnectionFromContext($connection);
     }
 }

@@ -58,8 +58,8 @@ class Cache {
 
         $result = (yield call_user_func_array([$redis, $func], $args));
 
-        $conn->release();
         yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
 
         yield $result;
     }
@@ -79,8 +79,8 @@ class Cache {
         $result = (yield $redis->get($realKey));
         $result = self::decode($result);
 
-        $conn->release();
         yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
 
         yield $result;
     }
@@ -102,8 +102,8 @@ class Cache {
         }
         $result = (yield $redis->set($realKey, $value));
 
-        $conn->release();
         yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
 
         if ($result) {
             $conn = (yield $redisObj->getConnection($config['connection']));
@@ -111,8 +111,8 @@ class Cache {
             $ttl = isset($config['exp']) ? $config['exp'] : 0;
             yield $redis->expire($realKey, $ttl);
 
-            $conn->release();
             yield self::deleteActiveConnectionFromContext($conn);
+            $conn->release();
         }
         yield $result;
     }
