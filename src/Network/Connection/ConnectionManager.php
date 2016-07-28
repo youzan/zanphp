@@ -85,7 +85,7 @@ class ConnectionManager
                     'active' => $activeNums,
                 ], [
                     'pool_name' => $poolKey,
-                    'worker_id' => self::$server->swooleServer->worker_id
+                    'worker_id' => (string)self::$server->swooleServer->worker_id
                 ]
             );
         }

@@ -138,7 +138,7 @@ class Worker
         $memory =  memory_get_usage();
         $hawk->add(Constant::BIZ_WORKER_MEMORY,
                     ['used' => $memory],
-                    ['worker_id' => $this->workerId]);
+                    ['worker_id' => (string)$this->workerId]);
         $coroutine = $this->runHawkTask($hawk);
         Task::execute($coroutine);
     }

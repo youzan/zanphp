@@ -21,6 +21,7 @@ class Constant
     const REMOTE_CALL = "RemoteCall";
     const SQL = "SQL";
     const HTTP_CALL = "HttpCall";
+    const NSQ_PUB = 'nsq.pub';
 
     /******************Event Type ******************/
     const NOVA_PROCCESS = 'Nova.Proccess.Event';
