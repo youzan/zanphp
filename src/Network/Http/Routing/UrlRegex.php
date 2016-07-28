@@ -22,10 +22,9 @@ class UrlRegex {
     {
         if (!$rules) return false;
         $regexRules = [];
-        foreach ($rules as $rule) {
-            $regex = ltrim($rule['regex'], '/');
-            $realUrl = isset($rule['rewrite']) ? $rule['rewrite'] : '';
-            if (!$regex || !$realUrl){
+        foreach ($rules as $regex => $realUrl) {
+            $regex = ltrim($regex, '/');
+            if(!$regex or !$realUrl) {
                 continue;
             }
             $result = self::parseRule($regex, $realUrl);
@@ -38,7 +37,7 @@ class UrlRegex {
     {
         $regex  = self::parseRegex($regex);
         $regex  = str_replace('/','\/',$regex);
-        $regex  = '#^' . $regex . '#i';
+        $regex  = '#' . $regex . '#i';
         return [
             'regex' => $regex,
             'url'  => $realUrl
@@ -68,6 +67,7 @@ class UrlRegex {
             'parameter' => [],
         ];
         if (!$rules) return $return;
+
         foreach ($rules as $regex => $route) {
             if (preg_match($regex, $url, $matching)) {
                 $parameter = self::getParameter($matching);
