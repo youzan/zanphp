@@ -22,10 +22,9 @@ class UrlRegex {
     {
         if (!$rules) return false;
         $regexRules = [];
-        foreach ($rules as $rule) {
-            $regex = ltrim($rule['regex'], '/');
-            $realUrl = isset($rule['rewrite']) ? $rule['rewrite'] : '';
-            if (!$regex || !$realUrl){
+        foreach ($rules as $regex => $realUrl) {
+            $regex = ltrim($regex, '/');
+            if(!$regex or !$realUrl) {
                 continue;
             }
             $result = self::parseRule($regex, $realUrl);
