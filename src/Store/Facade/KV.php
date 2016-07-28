@@ -15,10 +15,14 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\KV\KVStore;
+use Zan\Framework\Utilities\Types\ObjectArray;
 
 class KV
 {
     const POOL_PREFIX = 'connection.kvstore.';
+
+    const ACTIVE_CONNECTION_CONTEXT_KEY= 'kv_store_active_connections';
+
     private $namespace;
     private $setName;
 
@@ -77,7 +81,12 @@ class KV
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
         $ttl = isset($config['exp']) ? $config['exp'] : 0;
-        yield $kv->set($realKey, KVStore::DEFAULT_BIN_NAME, $value, $ttl);
+        $set = (yield $kv->set($realKey, KVStore::DEFAULT_BIN_NAME, $value, $ttl));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $set;
     }
 
     /**
@@ -101,7 +110,12 @@ class KV
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
         $ttl = isset($config['exp']) ? $config['exp'] : 0;
-        yield $kv->set($realKey, $binName, $value, $ttl);
+        $hSet = (yield $kv->set($realKey, $binName, $value, $ttl));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $hSet;
     }
 
     /**
@@ -124,7 +138,12 @@ class KV
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
         $ttl = isset($config['exp']) ? $config['exp'] : 0;
-        yield $kv->setMulti($realKey, $binList, $ttl);
+        $hMSet = (yield $kv->setMulti($realKey, $binList, $ttl));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $hMSet;
     }
 
     /**
@@ -146,7 +165,12 @@ class KV
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->incr($realKey, $value, $binName);
+        $incr = (yield $kv->incr($realKey, $value, $binName));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $incr;
     }
 
     /**
@@ -167,7 +191,12 @@ class KV
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->get($realKey);
+        $get = (yield $kv->get($realKey));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $get;
     }
 
     /**
@@ -189,7 +218,12 @@ class KV
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->get($realKey, $binName);
+        $hGet = (yield $kv->get($realKey, $binName));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $hGet;
     }
 
     public static function hMGet($configKey, $keys, array $binNameList)
@@ -204,7 +238,12 @@ class KV
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->getMulti($realKey, $binNameList);
+        $hMGet = (yield $kv->getMulti($realKey, $binNameList));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $hMGet;
     }
 
     public static function hGetAll($configKey, $keys)
@@ -219,7 +258,12 @@ class KV
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->getAll($realKey);
+        $hGetAll = (yield $kv->getAll($realKey));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $hGetAll;
     }
 
         /**
@@ -239,7 +283,12 @@ class KV
         $kvObj = self::init($config['namespace'], $config['set']);
         $conn = (yield $kvObj->getConnection($config['connection']));
         $kv = new KVStore($kvObj->namespace, $kvObj->setName, $conn);
-        yield $kv->remove($realKey);
+        $remove = (yield $kv->remove($realKey));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $remove;
     }
 
     /**
@@ -254,8 +303,46 @@ class KV
         if (!$conn instanceof Connection) {
             throw new Exception('KV get connection error');
         }
-
+        yield $this->insertActiveConnectionIntoContext($conn);
         yield $conn;
+    }
+
+    private function insertActiveConnectionIntoContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            $activeConnections = new ObjectArray();
+        }
+        $activeConnections->push($connection);
+        yield setContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, $activeConnections);
+    }
+
+    private static function deleteActiveConnectionFromContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            return;
+        }
+        $activeConnections->remove($connection);
+    }
+
+    private static function closeActiveConnectionFromContext()
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            return;
+        }
+        while (!$activeConnections->isEmpty()) {
+            $connection = $activeConnections->pop();
+            if ($connection instanceof Connection) {
+                $connection->close();
+            }
+        }
+    }
+
+    public static function terminate()
+    {
+        yield self::closeActiveConnectionFromContext();
     }
 
     /**
