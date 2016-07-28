@@ -317,7 +317,7 @@ class KV
         yield setContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, $activeConnections);
     }
 
-    private function deleteActiveConnectionFromContext($connection)
+    private static function deleteActiveConnectionFromContext($connection)
     {
         $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
         if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
@@ -326,7 +326,7 @@ class KV
         $activeConnections->remove($connection);
     }
 
-    private function closeActiveConnectionFromContext()
+    private static function closeActiveConnectionFromContext()
     {
         $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
         if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
