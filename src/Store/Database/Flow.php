@@ -17,7 +17,15 @@ use Zan\Framework\Store\Database\Exception\DbCommitFailException;
 use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByStackException;
 use Zan\Framework\Store\Database\Exception\CanNotGetConnectionByConnectionManagerException;
 use Zan\Framework\Store\Database\Exception\DbRollbackFailException;
+
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliSqlSyntaxException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
+
 use SplStack;
+use Zan\Framework\Utilities\Types\ObjectArray;
 
 class Flow
 {
@@ -36,6 +44,8 @@ class Flow
 
     const CONNECTION_TASKID_STACK = 'connection_taskid_stack';
 
+    const ACTIVE_CONNECTION_CONTEXT_KEY= 'mysql_active_connections';
+
     private $engineMap = [
         'Mysqli' => Mysqli::class,
     ];
@@ -46,7 +56,12 @@ class Flow
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
-        $dbResult = (yield $driver->query($sqlMap['sql']));
+        try {
+            $dbResult = (yield $driver->query($sqlMap['sql']));
+        } catch (\Exception $e) {
+            yield $this->queryException($e, $connection);
+            throw $e;
+        }
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
         }
@@ -152,6 +167,7 @@ class Flow
         }
 
         $connection = $connectionStack->pop();
+        yield $this->deleteActiveConnectionFromContext($connection);
         $connection->release();
 
         if ($connectionStack->isEmpty()) {
@@ -174,6 +190,7 @@ class Flow
         }
 
         $connection = $connectionStack->pop();
+        yield $this->deleteActiveConnectionFromContext($connection);
         $connection->close();
 
         if ($connectionStack->isEmpty()) {
@@ -192,7 +209,41 @@ class Flow
         if (!($connection instanceof Connection)) {
             throw new CanNotGetConnectionByConnectionManagerException('get connection error database:'.$database);
         }
+        yield $this->insertActiveConnectionIntoContext($connection);
         yield $connection;
+    }
+
+    private function insertActiveConnectionIntoContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            $activeConnections = new ObjectArray();
+        }
+        $activeConnections->push($connection);
+        yield setContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, $activeConnections);
+    }
+
+    private function deleteActiveConnectionFromContext($connection)
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            return;
+        }
+        $activeConnections->remove($connection);
+    }
+
+    private function closeActiveConnectionFromContext()
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            return;
+        }
+        while (!$activeConnections->isEmpty()) {
+            $connection = $activeConnections->pop();
+            if ($connection instanceof Connection) {
+                $connection->close();
+            }
+        }
     }
 
     private function setTransaction($database, $connection)
@@ -237,6 +288,7 @@ class Flow
         $taskId = (yield getTaskId());
         $beginTransaction = (yield getContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false));
         if ($beginTransaction === false) {
+            yield $this->deleteActiveConnectionFromContext($connection);
             $connection->release();
         }
         yield true;
@@ -244,6 +296,7 @@ class Flow
 
     public function terminate()
     {
+        yield $this->closeActiveConnectionFromContext();
         $taskIdStack = (yield getContext(self::CONNECTION_TASKID_STACK, null));
         if (null == $taskIdStack || !($taskIdStack instanceof SplStack)) {
             return;
@@ -258,7 +311,9 @@ class Flow
             while (!$connectionStack->isEmpty()) {
                 $connection = $connectionStack->pop();
                 //close
+                yield $this->deleteActiveConnectionFromContext($connection);
                 $connection->close();
+
                 $config = $connection->getConfig();
                 if (isset($config['pool']['pool_name'])) {
                     yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $config['pool']['pool_name']), null);
@@ -269,4 +324,35 @@ class Flow
         }
         yield setContext(self::CONNECTION_TASKID_STACK, null);
     }
+
+    private function queryException($exception, $connection)
+    {
+        if (!($connection instanceof Connection)) {
+            return;
+        }
+
+        yield $this->deleteActiveConnectionFromContext($connection);
+        switch ($exception) {
+            case $exception instanceof MysqliConnectionLostException:
+                $connection->close();
+                break;
+            case $exception instanceof MysqliSqlSyntaxException:
+                $connection->release();
+                break;
+            case $exception instanceof MysqliQueryDuplicateEntryUniqueKeyException:
+                $connection->release();
+                break;
+            case $exception instanceof MysqliQueryException:
+                $connection->close();
+                break;
+            case $exception instanceof MysqliQueryTimeoutException:
+                $connection->close();
+                break;
+            default :
+                $connection->close();
+                break;
+        }
+    }
+
+
 }
