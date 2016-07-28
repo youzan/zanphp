@@ -15,6 +15,7 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\KV\KVStore;
+use Zan\Framework\Utilities\Types\ObjectArray;
 
 class KV
 {
@@ -308,30 +309,34 @@ class KV
 
     private function insertActiveConnectionIntoContext($connection)
     {
-        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
-        $activeConnections[spl_object_hash($connection)] = $connection;
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            $activeConnections = new ObjectArray();
+        }
+        $activeConnections->push($connection);
         yield setContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, $activeConnections);
     }
 
-    private static function deleteActiveConnectionFromContext($connection)
+    private function deleteActiveConnectionFromContext($connection)
     {
-        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
-        if (isset($activeConnections[spl_object_hash($connection)])) {
-            unset($activeConnections[spl_object_hash($connection)]);
-        }
-    }
-
-    private static function closeActiveConnectionFromContext()
-    {
-        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
-        if ([] == $activeConnections) {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
             return;
         }
-        foreach ($activeConnections as $key => $connection) {
+        $activeConnections->remove($connection);
+    }
+
+    private function closeActiveConnectionFromContext()
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, null));
+        if (null === $activeConnections || !($activeConnections instanceof ObjectArray)) {
+            return;
+        }
+        while (!$activeConnections->isEmpty()) {
+            $connection = $activeConnections->pop();
             if ($connection instanceof Connection) {
                 $connection->close();
             }
-            unset($activeConnections[$key]);
         }
     }
 
