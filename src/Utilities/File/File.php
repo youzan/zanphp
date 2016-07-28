@@ -18,20 +18,21 @@ class File implements Async
 
     protected $callback = null;
 
-    public function __construct($fileName,$size=8000,$offset=0){
+    public function __construct(){
+    }
 
+    public function read($fileName,$size=8000,$offset=0){
         $this->fileName = $fileName;
         $this->size = $size;
         $this->offset = $offset;
-
+        yield $this;
     }
-
     public function execute(callable $callback, $task){
         // TODO: Implement execute() method.
-        $this->setCallback($this->getCallback())->read();
+        $this->setCallback($this->getCallback())->readHandle();
     }
 
-    public function read(){
+    public function readHandle(){
         swoole_async_read($this->fileName,$this->callback,$this->size,$this->offset);
     }
 
