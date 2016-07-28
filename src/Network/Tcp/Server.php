@@ -18,6 +18,7 @@ use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Network\ServerManager\ServiceUnregister;
 
 class Server extends ServerBase {
 
@@ -112,6 +113,7 @@ class Server extends ServerBase {
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
+        (new ServiceUnregister())->unregister();
         echo "server shutdown .....\n";
     }
 
