@@ -227,6 +227,20 @@ class Flow
         }
     }
 
+    private function closeActiveConnectionFromContext()
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
+        if ([] == $activeConnections) {
+            return;
+        }
+        foreach ($activeConnections as $key => $connection) {
+            if ($connection instanceof Connection) {
+                $connection->close();
+            }
+            unset($activeConnections[$key]);
+        }
+    }
+
     private function setTransaction($database, $connection)
     {
         $driver = $this->getDriver($connection);
@@ -277,6 +291,7 @@ class Flow
 
     public function terminate()
     {
+        yield $this->closeActiveConnectionFromContext();
         $taskIdStack = (yield getContext(self::CONNECTION_TASKID_STACK, null));
         if (null == $taskIdStack || !($taskIdStack instanceof SplStack)) {
             return;
@@ -333,4 +348,6 @@ class Flow
                 break;
         }
     }
+
+
 }

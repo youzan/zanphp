@@ -148,6 +148,25 @@ class Cache {
         }
     }
 
+    private static function closeActiveConnectionFromContext()
+    {
+        $activeConnections = (yield getContext(self::ACTIVE_CONNECTION_CONTEXT_KEY, []));
+        if ([] == $activeConnections) {
+            return;
+        }
+        foreach ($activeConnections as $key => $connection) {
+            if ($connection instanceof Connection) {
+                $connection->close();
+            }
+            unset($activeConnections[$key]);
+        }
+    }
+
+    public static function terminate()
+    {
+        yield self::closeActiveConnectionFromContext();
+    }
+
     /**
      * @param $config
      * @return bool

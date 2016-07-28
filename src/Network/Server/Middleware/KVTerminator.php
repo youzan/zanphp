@@ -1,0 +1,20 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: xiaoniu
+ * Date: 16/7/28
+ * Time: 下午4:45
+ */
+use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Contract\Network\RequestTerminator;
+use Zan\Framework\Contract\Network\Response;
+use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Store\Facade\KV;
+
+class KVTerminator implements RequestTerminator
+{
+    public function terminate(Request $request, Response $response, Context $context)
+    {
+        yield KV::terminate();
+    }
+}
