@@ -14,6 +14,7 @@ use Zan\Framework\Utilities\Types\Time;
 use Kdt\Iron\Nova\Nova;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\ServerManager\ServerRegisterInitiator;
+use Zan\Framework\Network\Common\Curl;
 
 class ServiceUnregister
 {
@@ -69,17 +70,15 @@ class ServiceUnregister
         if ($isRegistered == ServerRegisterInitiator::DISABLE_REGISTER) {
             return;
         }
-
-        $coroutine = $this->toUnregister();
-        Task::execute($coroutine);
+        $this->toUnregister();
     }
 
     private function toUnregister()
     {
         $haunt = Config::get('haunt');
-        $httpClient = new HttpClient($haunt['unregister']['host'], $haunt['unregister']['port']);
-        $response = (yield $httpClient->postJson($haunt['unregister']['uri'], $this->parseConfig($this->config), null));
-        $register = $response->getBody();
-        echo $register;
+        $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
+        $curl = new Curl();
+        $unregister = $curl->post($url, $this->parseConfig($this->config));
+        echo $unregister;
     }
 }
