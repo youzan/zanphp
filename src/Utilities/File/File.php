@@ -19,6 +19,8 @@ class File implements Async
 
     protected $offset = 0;
 
+    protected $offsetChanged = false;
+
     protected $callback = null;
 
     protected $isEof = false;
@@ -27,14 +29,13 @@ class File implements Async
 
     protected $content = '';
 
-    public function __construct($fileName,$size=8000,$offset=0){
+    public function __construct($fileName){
         $this->fileName = $fileName;
-        $this->size = $size;
-        $this->offset = $offset;
     }
 
-    public function read(){
+    public function read($length = 8000){
         $this->handle = self::READ;
+        $this->size = $length;
         yield $this;
     }
 
@@ -42,8 +43,19 @@ class File implements Async
         yield $this->isEof;
     }
 
-    public function write($content,$offset = -1){
+    public function seek($offset = -1){
         $this->offset = $offset;
+        $this->offsetChanged = true;
+    }
+
+    public function tell(){
+        yield $this->offset;
+    }
+
+    public function write($content){
+        if($this->offset == 0 && !$this->offsetChanged) {
+            $this->offset = -1;
+        }
         $this->handle = self::WRITE;
         $this->content = $content;
         yield $this;
@@ -54,7 +66,6 @@ class File implements Async
             $this->setCallback($this->getReadCallback($callback))->readHandle();
         }else{
             $this->setCallback($this->getWriteCallback($callback))->writeHandle();
-
         }
     }
 
@@ -65,6 +76,7 @@ class File implements Async
     public function writeHandle(){
         swoole_async_write($this->handle,$this->content, $this->offset, $this->callback);
     }
+
     public function setCallback(callable $callback){
         $this->callback = $callback;
         return $this;
