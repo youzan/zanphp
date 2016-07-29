@@ -18,13 +18,13 @@ class OnceFile implements Async
     protected $content = '';
     protected $callback = null;
 
-    public  function getContent($filename){
+    public  function getContents($filename){
         $this->handle = self::READ;
         $this->filename = $filename;
         yield $this;
     }
 
-    public  function putContent($filename,$content){
+    public  function putContents($filename,$content){
         $this->handle = self::WRITE;
         $this->filename = $filename;
         $this->content = $content;
