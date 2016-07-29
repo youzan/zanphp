@@ -54,6 +54,7 @@ class Tcp implements ConnectionFactory
         $clientFlags = SWOOLE_SOCK_TCP;
         $this->socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
         $this->socket->set($this->config['config']);
+
         $this->connection->setSocket($this->socket);
         $this->connection->init();
         $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
