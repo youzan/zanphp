@@ -46,6 +46,7 @@ class File implements Async
     public function seek($offset = -1){
         $this->offset = $offset;
         $this->offsetChanged = true;
+        yield $this->offset;
     }
 
     public function tell(){
