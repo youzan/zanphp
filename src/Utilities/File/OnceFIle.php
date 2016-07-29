@@ -18,15 +18,15 @@ class OnceFile implements Async
     protected $content = '';
     protected $callback = null;
 
-    public  function getContent($fileName){
+    public  function getContent($filename){
         $this->handle = self::READ;
-        $this->filename = $fileName;
+        $this->filename = $filename;
         yield $this;
     }
 
-    public  function putContent($fileName,$content){
+    public  function putContent($filename,$content){
         $this->handle = self::WRITE;
-        $this->filename = $fileName;
+        $this->filename = $filename;
         $this->content = $content;
         yield $this;
     }
@@ -54,15 +54,15 @@ class OnceFile implements Async
 
     private function getReadCallback(callable $callback)
     {
-        return function($fileName,$content) use ($callback) {
+        return function($filename,$content) use ($callback) {
             call_user_func($callback, $content);
         };
     }
 
     private function getWriteCallback(callable $callback)
     {
-        return function($response,$contentLength) use ($callback) {
-            $response = $response ? true : false;
+        return function($filename,$contentLength) use ($callback) {
+            $response = $contentLength > 0 ? true : false;
             call_user_func($callback, $response);
         };
     }
