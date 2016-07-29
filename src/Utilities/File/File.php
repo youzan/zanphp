@@ -19,8 +19,6 @@ class File implements Async
 
     protected $offset = 0;
 
-    protected $offsetChanged = false;
-
     protected $callback = null;
 
     protected $isEof = false;
@@ -44,9 +42,7 @@ class File implements Async
     }
 
     public function seek($offset = -1){
-        $this->offset = $offset;
-        $this->offsetChanged = true;
-        yield $this->offset;
+        yield $this->offset = $offset;
     }
 
     public function tell(){
