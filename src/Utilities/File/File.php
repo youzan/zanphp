@@ -54,9 +54,6 @@ class File implements Async
     }
 
     public function write($content){
-        if($this->offset == 0 && !$this->offsetChanged) {
-            $this->offset = -1;
-        }
         $this->handle = self::WRITE;
         $this->content = $content;
         yield $this;
@@ -75,7 +72,7 @@ class File implements Async
     }
 
     public function writeHandle(){
-        swoole_async_write($this->filename,$this->content, $this->offset, $this->callback);
+        swoole_async_write($this->filename,$this->content, -1, $this->callback);
     }
 
     public function setCallback(callable $callback){
