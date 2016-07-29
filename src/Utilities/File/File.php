@@ -13,7 +13,7 @@ class File implements Async
     CONST READ = 0;
     CONST WRITE = 1;
 
-    protected $fileName = '';
+    protected $filename = '';
 
     protected $size = 8000;
 
@@ -30,7 +30,7 @@ class File implements Async
     protected $content = '';
 
     public function __construct($fileName){
-        $this->fileName = $fileName;
+        $this->filename = $fileName;
     }
 
     public function read($length = 8000){
@@ -70,11 +70,11 @@ class File implements Async
     }
 
     public function readHandle(){
-        swoole_async_read($this->fileName,$this->callback,$this->size,$this->offset);
+        swoole_async_read($this->filename,$this->callback,$this->size,$this->offset);
     }
 
     public function writeHandle(){
-        swoole_async_write($this->fileName,$this->content, $this->offset, $this->callback);
+        swoole_async_write($this->filename,$this->content, $this->offset, $this->callback);
     }
 
     public function setCallback(callable $callback){
@@ -84,7 +84,7 @@ class File implements Async
 
     private function getReadCallback(callable $callback)
     {
-        return function($fileName,$content) use ($callback) {
+        return function($filename,$content) use ($callback) {
             $len = strlen($content);
             $this->offset += $len;
             if($len < $this->size){
