@@ -11,6 +11,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 class Redis extends Base implements Connection
 {
@@ -32,6 +33,7 @@ class Redis extends Base implements Connection
     }
 
     public function onClose($redis){
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
         echo "redis client close\n";
     }
@@ -40,6 +42,7 @@ class Redis extends Base implements Connection
         if (false === $res) {
             //TODO: connect失败
         }
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         //put conn to active_pool
         $this->release();
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));

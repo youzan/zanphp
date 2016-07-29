@@ -10,11 +10,19 @@ namespace Zan\Framework\Network\Connection\Factory;
 
 use Zan\Framework\Contract\Network\ConnectionFactory;
 use swoole_client as SwooleClient;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Network\Connection\Driver\Tcp as TcpConnection;
 
 class Tcp implements ConnectionFactory
 {
+    const CONNECT_TIMEOUT = 30000;
+
     private $config;
-    private $conn;
+    private $socket;
+    /**
+     * @var TcpConnection
+     */
+    private $connection;
 
     public function __construct(array $config)
     {
@@ -24,22 +32,38 @@ class Tcp implements ConnectionFactory
     public function create()
     {
         $clientFlags = SWOOLE_SOCK_TCP;
-        $this->conn = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-        $this->conn->set($this->config['config']);
+        $this->socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+        $this->socket->set($this->config['config']);
 
-        $connection = new \Zan\Framework\Network\Connection\Driver\Tcp();
-        $connection->setSocket($this->conn);
-        $connection->setConfig($this->config);
-        $connection->init();
+        $this->connection = new TcpConnection();
+        $this->connection->setSocket($this->socket);
+        $this->connection->setConfig($this->config);
+        $this->connection->init();
 
         //call connect
-        $this->conn->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
-        return $connection;
+        $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+
+        $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
+        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
+
+        return $this->connection;
+    }
+
+    public function connectTimeout()
+    {
+        $clientFlags = SWOOLE_SOCK_TCP;
+        $this->socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+        $this->socket->set($this->config['config']);
+        $this->connection->setSocket($this->socket);
+        $this->connection->init();
+        $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
+        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
     }
 
     public function close()
     {
-        $this->conn->close();
+        $this->socket->close();
     }
 
 }

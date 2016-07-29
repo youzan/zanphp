@@ -112,4 +112,9 @@ abstract class Base implements Connection
     public function getIsAsync() {
         return $this->isAsync;
     }
+
+    public function getConnectTimeoutJobId()
+    {
+        return spl_object_hash($this) . '_connect_timeout';
+    }
 }

@@ -11,6 +11,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 
 class Tcp extends Base implements Connection
@@ -41,11 +42,13 @@ class Tcp extends Base implements Connection
     public function onConnect($cli) {
         //put conn to active_pool
         $this->release();
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
         echo "tcp client connect to server\n";
     }
 
     public function onClose(SwooleClient $cli){
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
         echo "tcp client close\n";
     }
@@ -55,6 +58,7 @@ class Tcp extends Base implements Connection
     }
 
     public function onError(SwooleClient $cli){
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
         echo "tcp client error\n";
     }
