@@ -47,7 +47,7 @@ class NovaClient extends Base implements Connection
     }
 
     public function onClose(SwooleClient $cli){
-        Timer::clearAfterJob(spl_object_hash($this) . 'heartbeat');
+        Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
         echo "nova client close\n";
     }
@@ -57,7 +57,7 @@ class NovaClient extends Base implements Connection
     }
 
     public function onError(SwooleClient $cli){
-        Timer::clearAfterJob(spl_object_hash($this) . 'heartbeat');
+        Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
         echo "nova client error\n";
     }
@@ -67,7 +67,7 @@ class NovaClient extends Base implements Connection
     }
     public function heartbeat()
     {
-        Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating'], spl_object_hash($this) . 'heartbeat');
+        Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating'], $this->getHeartbeatingJobId());
     }
 
     public function heartbeating()
@@ -77,7 +77,7 @@ class NovaClient extends Base implements Connection
             $coroutine = $this->ping();
             Task::execute($coroutine);
         } else {
-            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'heartbeating'], spl_object_hash($this) . 'heartbeat');
+            Timer::after(($this->config['heartbeat-time'] - $time), [$this, 'heartbeating'], $this->getHeartbeatingJobId());
         }
     }
 
@@ -106,5 +106,10 @@ class NovaClient extends Base implements Connection
     public function setLastUsedTime()
     {
         $this->lastUsedTime = Time::current(true);
+    }
+
+    private function getHeartbeatingJobId()
+    {
+        return spl_object_hash($this) . 'heartbeat';
     }
 }
