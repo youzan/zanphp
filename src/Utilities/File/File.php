@@ -84,8 +84,9 @@ class File implements Async
 
     private function getWriteCallback(callable $callback)
     {
-        return function($fileName,$content) use ($callback) {
-            call_user_func($callback, $content);
+        return function($response,$contentLength) use ($callback) {
+            $response = $response ? true : false;
+            call_user_func($callback, $response);
         };
     }
 }
