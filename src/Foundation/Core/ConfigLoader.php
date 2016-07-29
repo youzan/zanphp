@@ -13,7 +13,7 @@ class ConfigLoader
     public function load($path ,$ignoreStructure = false)
     {
         if(!is_dir($path)){
-            throw new InvalidArgumentException('Invalid path for ConfigLoader');
+            throw new InvalidArgumentException('Invalid path for ConfigLoader :'.$path);
         }
 
         $path = Dir::formatPath($path);
