@@ -74,7 +74,7 @@ class File implements Async
     }
 
     public function writeHandle(){
-        swoole_async_write($this->handle,$this->content, $this->offset, $this->callback);
+        swoole_async_write($this->fileName,$this->content, $this->offset, $this->callback);
     }
 
     public function setCallback(callable $callback){
