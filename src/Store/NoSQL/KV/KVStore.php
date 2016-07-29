@@ -155,7 +155,6 @@ class KVStore implements Async
 
     public function writeCallback($err)
     {
-        $this->conn->release();
         if ($err == self::AEROSPIKE_OK) {
             call_user_func($this->callback, true);
         } else {
@@ -166,7 +165,6 @@ class KVStore implements Async
 
     public function readCallBack($err, $rec)
     {
-        $this->conn->release();
         if ($err != self::AEROSPIKE_OK) {
             //TODO: 日志记录err
             call_user_func($this->callback, null);
@@ -190,7 +188,6 @@ class KVStore implements Async
 
     public function readMultiCallBack($err, $rec)
     {
-        $this->conn->release();
         if ($err != self::AEROSPIKE_OK) {
             //TODO: 日志记录err
             call_user_func($this->callback, null);
