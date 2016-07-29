@@ -1,5 +1,6 @@
 <?php
 namespace Zan\Framework\Utilities\File;
+use Zan\Framework\Foundation\Contract\Async;
 
 /**
  * Created by PhpStorm.
@@ -7,7 +8,7 @@ namespace Zan\Framework\Utilities\File;
  * Date: 16/7/28
  * Time: 下午3:13
  */
-class OnceFile
+class OnceFile implements Async
 {
 
     CONST READ = 0;
