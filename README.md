@@ -18,7 +18,7 @@ zan的定位是高并发web服务或业务中间件。
 Zan参考了很多Golang特性，不过目的绝不是为了替换掉Golang。          
 PHP在业务系统开发上的优势明显，而Golang相信会是将来系统编程的霸主。         
 Zan和Golang的边界是：Zan做业务系统；Golang做系统（中间件或基础服务组件）;     
-而Zan和Golang编程模型的驱近，是希望能给PHP程序员一个更好的桥梁到Golang, 
+而Zan和Golang编程模型的驱近，是希望能给PHP程序员一个更好的桥梁到Golang。            
 理想的技术栈是：Zan + Go + 少量的c/c++           
 当然对于致力于终身coding的码农来说：Java依然很难跨过去的坎。
 
