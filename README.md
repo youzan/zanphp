@@ -1,7 +1,7 @@
 # Zan PHP Framework
 Zan是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务。
 
-## 核心特效
+## 核心特性
 1. 基于 `yield` 实现了独立堆栈的协程
 2. 类似于 Golang 的并发编程模型实现
 3. 基于 swoole 提供非阻塞I/O服务
@@ -12,6 +12,15 @@ Zan是基于PHP协程的网络服务框架，提供最简单的方式开发面�
 8. 提供类似于 [Laravel](https://github.com/laravel/laravel) 的middleware(Filters & Terminators)机制
 9. Di及单元测试的良好支持
 10. 良好的服务化对接支持
+
+## 框架定位
+zan的定位是高并发web服务或业务中间件。          
+Zan参考了很多Golang特性，不过目的绝不是为了替换掉Golang。          
+PHP在业务系统开发上的优势明显，而Golang相信会是将来系统编程的霸主。         
+Zan和Golang的边界是：Zan做业务系统；Golang做系统（中间件或基础服务组件）;     
+而Zan和Golang编程模型的驱近，是希望能给PHP程序员一个更好的桥梁到Golang。            
+理想的技术栈是：Zan + Go + 少量的c/c++           
+当然对于致力于终身coding的码农来说：Java依然很难跨过去的坎。
 
 
 ## 官方文档
