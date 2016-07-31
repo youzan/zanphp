@@ -37,7 +37,7 @@ class UrlRegex {
     {
         $regex  = self::parseRegex($regex);
         $regex  = str_replace('/','\/',$regex);
-        $regex  = '#^' . $regex . '#i';
+        $regex  = '#' . $regex . '#i';
         return [
             'regex' => $regex,
             'url'  => $realUrl
@@ -67,6 +67,7 @@ class UrlRegex {
             'parameter' => [],
         ];
         if (!$rules) return $return;
+
         foreach ($rules as $regex => $route) {
             if (preg_match($regex, $url, $matching)) {
                 $parameter = self::getParameter($matching);
