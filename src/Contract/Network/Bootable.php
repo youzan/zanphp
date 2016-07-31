@@ -8,6 +8,8 @@
 
 namespace Zan\Framework\Contract\Network;
 
-interface Bootable {
+
+interface Bootable
+{
     public function bootstrap($server);
 }

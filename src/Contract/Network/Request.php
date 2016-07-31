@@ -9,7 +9,7 @@
 namespace Zan\Framework\Contract\Network;
 
 
-interface Request {
+interface Request
+{
     public function getRoute();
-
 }

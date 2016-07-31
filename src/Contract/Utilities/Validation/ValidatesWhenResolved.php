@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Contract\Utilities\Validation;
 
+
 interface ValidatesWhenResolved
 {
     /**
