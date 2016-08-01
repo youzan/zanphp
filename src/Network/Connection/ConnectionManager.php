@@ -102,23 +102,6 @@ class ConnectionManager
         self::$server = $server;
     }
 
-    public function closeConnectionByRequestTimeout()
-    {
-        foreach (self::$poolMap as $pool) {
-            if ($pool instanceof Pool) {
-                $connections = (yield $pool->getActiveConnectionsFromContext());
-                if ([] == $connections) {
-                    continue;
-                }
-                foreach ($connections as $connection) {
-                    if (null != $connection && $connection instanceof Connection) {
-                        $connection->close();
-                    }
-                }
-            }
-        }
-    }
-
     public function monitorConnectionNum()
     {
         MonitorConnectionNum::getInstance()->controlLinkNum(self::$poolMap);

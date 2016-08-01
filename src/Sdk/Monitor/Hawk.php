@@ -73,9 +73,13 @@ class Hawk
         }
 
         $response = (yield $this->httpClient->postJson(self::URI, $this->data));
-        $raw = $response->getBody();
-        $jsonData = Json::decode($raw, true);
-        $result = $jsonData ? $jsonData : $raw;
+        $result = false;
+
+        if ($response) {
+            $raw = $response->getBody();
+            $jsonData = Json::decode($raw, true);
+            $result = $jsonData ? $jsonData : $raw;
+        }
 
         $this->data = [];
 
