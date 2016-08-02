@@ -55,7 +55,7 @@ class MiddlewareConfig
                 break;
             }
             $match = $this->config['match'][$i];
-            $pattern = $match[0];
+            $pattern = $this->setDelimit($match[0]);
             if ($this->match($pattern, $route)) {
                 $groupKey = $match[1];
                 break;
@@ -94,5 +94,10 @@ class MiddlewareConfig
         $baseTerminators = [
         ];
         return array_merge($terminators, $this->extendTerminators, $baseTerminators);
+    }
+
+    private function setDelimit($pattern)
+    {
+        return '#' . $pattern . '#i';
     }
 }

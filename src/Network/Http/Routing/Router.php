@@ -43,6 +43,14 @@ class Router {
         $this->rules = UrlRule::getRules();
     }
 
+    private function clear()
+    {
+        $this->url = '';
+        $this->route = '';
+        $this->format = '';
+        $this->parameters = [];
+    }
+
     public function setConfig($config)
     {
         $this->config = $config;
@@ -60,7 +68,10 @@ class Router {
         $this->repairRoute();
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
-        $this->setParameters($this->parameters);
+        $this->setParameters($request, $this->parameters);
+        $route = $this->parseRoute();
+        $this->clear();
+        return $route;
     }
 
     public function parseRoute()
@@ -108,15 +119,12 @@ class Router {
         $this->parameters = $result['parameter'];
     }
 
-    private function setParameters(array $parameters = [])
+    private function setParameters(Request $request, array $parameters = [])
     {
         if(empty($parameters)) {
             return;
         }
-        foreach($parameters as $k => $v) {
-            $_GET[$k] = $v;
-            $_REQUEST[$k] = $v;
-        }
+        $request->query->add($parameters);
     }
 
     public function getParameters()
