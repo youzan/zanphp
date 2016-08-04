@@ -40,6 +40,8 @@ class NovaClient extends Base implements Connection
 
     public function onConnect($cli) {
         //put conn to active_pool
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
+        Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->release();
         $this->getPool()->connecting($this);
         $this->heartbeat();
@@ -47,6 +49,7 @@ class NovaClient extends Base implements Connection
     }
 
     public function onClose(SwooleClient $cli){
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
         echo "nova client close\n";
@@ -57,6 +60,7 @@ class NovaClient extends Base implements Connection
     }
 
     public function onError(SwooleClient $cli){
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
         echo "nova client error\n";

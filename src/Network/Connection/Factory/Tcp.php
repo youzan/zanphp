@@ -18,11 +18,6 @@ class Tcp implements ConnectionFactory
     const CONNECT_TIMEOUT = 30000;
 
     private $config;
-    private $socket;
-    /**
-     * @var TcpConnection
-     */
-    private $connection;
 
     public function __construct(array $config)
     {
@@ -32,39 +27,44 @@ class Tcp implements ConnectionFactory
     public function create()
     {
         $clientFlags = SWOOLE_SOCK_TCP;
-        $this->socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-        $this->socket->set($this->config['config']);
+        $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+        $socket->set($this->config['config']);
 
-        $this->connection = new TcpConnection();
-        $this->connection->setSocket($this->socket);
-        $this->connection->setConfig($this->config);
-        $this->connection->init();
+        $connection = new TcpConnection();
+        $connection->setSocket($socket);
+        $connection->setConfig($this->config);
+        $connection->init();
 
         //call connect
-        $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
 
         $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
+        Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
-        return $this->connection;
+        return $connection;
     }
 
-    public function connectTimeout()
+    public function getConnectTimeoutCallback(TcpConnection $connection)
     {
-        $clientFlags = SWOOLE_SOCK_TCP;
-        $this->socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-        $this->socket->set($this->config['config']);
+        return function() use ($connection) {
+            $connection->getSocket()->close();
 
-        $this->connection->setSocket($this->socket);
-        $this->connection->init();
-        $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
-        $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
+            $clientFlags = SWOOLE_SOCK_TCP;
+            $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
+            $socket->set($this->config['config']);
+
+            $connection->setSocket($socket);
+            $connection->init();
+
+            $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+            $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
+            Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+        };
     }
 
     public function close()
     {
-        $this->socket->close();
+
     }
 
 }

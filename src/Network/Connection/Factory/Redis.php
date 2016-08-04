@@ -22,11 +22,6 @@ class Redis implements ConnectionFactory
      * @var array
      */
     private $config;
-    private $socket;
-    /**
-     * @var Client
-     */
-    private $connection;
 
     public function __construct(array $config)
     {
@@ -35,33 +30,38 @@ class Redis implements ConnectionFactory
     
     public function create()
     {
-        $this->socket = new SwooleRedis();
-        $this->connection = new Client();
-        $this->connection->setSocket($this->socket);
-        $this->connection->setConfig($this->config);
-        $this->connection->init();
+        $socket = new SwooleRedis();
+        $connection = new Client();
+        $connection->setSocket($socket);
+        $connection->setConfig($this->config);
+        $connection->init();
 
         //call connect
-        $this->socket->connect($this->config['host'], $this->config['port'], [$this->connection, 'onConnect']);
+        $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
 
         $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
+        Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
-        return $this->connection;
+        return $connection;
+    }
+
+    public function getConnectTimeoutCallback(Client $connection)
+    {
+        return function() use ($connection) {
+            $connection->getSocket()->close();
+
+            $socket = new SwooleRedis();
+            $connection->setSocket($socket);
+            $connection->init();
+
+            $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
+            $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
+            Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+        };
     }
 
     public function close()
     {
     }
 
-    public function connectTimeout()
-    {
-        $this->socket = new SwooleRedis();
-        $this->connection->setSocket($this->socket);
-        $this->connection->init();
-        $this->socket->connect($this->config['host'], $this->config['port'], [$this->connection, 'onConnect']);
-
-        $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
-    }
 }

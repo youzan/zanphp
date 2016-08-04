@@ -21,12 +21,6 @@ class Syslog implements ConnectionFactory
      * @var array
      */
     private $config;
-    private $socket;
-
-    /**
-     * @var SyslogDriver
-     */
-    private $connection;
 
     public function __construct(array $config)
     {
@@ -35,37 +29,41 @@ class Syslog implements ConnectionFactory
 
     public function create()
     {
-        $this->socket = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
+        $socket = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 
-        $this->connection = new SyslogDriver();
-        $this->connection->setSocket($this->socket);
-        $this->connection->setConfig($this->config);
-        $this->connection->init();
+        $connection = new SyslogDriver();
+        $connection->setSocket($socket);
+        $connection->setConfig($this->config);
+        $connection->init();
 
         //call connect
-        $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
 
         $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
+        Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
-        return $this->connection;
+        return $connection;
     }
 
-    public function connectTimeout()
+    public function getConnectTimeoutCallback(SyslogDriver $connection)
     {
-        $this->socket = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
+        return function() use ($connection) {
+            $connection->getSocket()->close();
 
-        $this->connection->setSocket($this->socket);
-        $this->connection->init();
-        $this->socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+            $socket = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 
-        $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-        Timer::after($connectTimeout, [$this, 'connectTimeout'], $this->connection->getConnectTimeoutJobId());
+            $connection->setSocket($socket);
+            $connection->init();
+
+            $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+            $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
+            Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+        };
     }
 
     public function close()
     {
-        $this->socket->close();
+
     }
 
 }
