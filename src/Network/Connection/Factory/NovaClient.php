@@ -48,6 +48,8 @@ class NovaClient implements ConnectionFactory
     {
         return function() use ($connection) {
             $connection->getSocket()->close();
+            $connection->unsetSocket();
+            
             $clientFlags = SWOOLE_SOCK_TCP;
             $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
             $socket->set($this->config['config']);

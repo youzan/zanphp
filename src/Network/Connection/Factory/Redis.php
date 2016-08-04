@@ -49,6 +49,7 @@ class Redis implements ConnectionFactory
     {
         return function() use ($connection) {
             $connection->getSocket()->close();
+            $connection->unsetSocket();
 
             $socket = new SwooleRedis();
             $connection->setSocket($socket);

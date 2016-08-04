@@ -60,6 +60,12 @@ abstract class Base implements Connection
         $this->socket = $socket;
     }
 
+    public function unsetSocket()
+    {
+        unset($this->socket);
+        $this->socket = null;
+    }
+
     public function setUnReleased()
     {
         $this->isReleased = false;

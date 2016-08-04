@@ -49,6 +49,7 @@ class Syslog implements ConnectionFactory
     {
         return function() use ($connection) {
             $connection->getSocket()->close();
+            $connection->unsetSocket();
 
             $socket = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
 
