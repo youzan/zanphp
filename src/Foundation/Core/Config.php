@@ -1,6 +1,7 @@
 <?php
 namespace Zan\Framework\Foundation\Core;
 
+
 use Zan\Framework\Utilities\Types\Arr;
 
 class Config
@@ -9,44 +10,58 @@ class Config
 
     public static function init()
     {
+        $runMode = RunMode::get();
         $path = Path::getConfigPath();
         $sharePath = $path . 'share/';
         $shareConfigMap = ConfigLoader::getInstance()->load($sharePath);
 
-        $runModeConfigPath = Path::getConfigPath() . RunMode::get();
+        $runModeConfigPath = Path::getConfigPath() . $runMode;
         $runModeConfig = ConfigLoader::getInstance()->load($runModeConfigPath);
 
-        self::$configMap = Arr::merge(self::$configMap,$shareConfigMap,$runModeConfig);
+        self::$configMap = Arr::merge(self::$configMap, $shareConfigMap, $runModeConfig);
+
+        //add private dir
+        if ('test' == $runMode || 'dev' == $runMode) {
+            $privatePath = Path::getConfigPath() . '.private/';
+            if (is_dir($privatePath)) {
+                $privateConfig = ConfigLoader::getInstance()->load($privatePath);
+                self::$configMap = Arr::merge(self::$configMap, $privateConfig);
+            }
+        }
     }
 
     public static function get($key, $default = null)
     {
-        $routes = explode('.',$key);
-        if(empty($routes)){
+        $preKey = $key;
+        $routes = explode('.', $key);
+        if (empty($routes)) {
             return $default;
         }
 
         $result = &self::$configMap;
-        foreach($routes as $route){
-            if(!isset($result[$route])){
-                return $default;
+        $hasConfig = true;
+        foreach ($routes as $route) {
+            if (!isset($result[$route])) {
+                $hasConfig = false;
+                break;
             }
-
             $result = &$result[$route];
         }
-
+        if (!$hasConfig) {
+            return IronConfig::get($preKey, $default);
+        }
         return $result;
     }
 
     public static function set($key, $value)
     {
-        $routes = explode('.',$key);
-        if(empty($routes)){
+        $routes = explode('.', $key);
+        if (empty($routes)) {
             return false;
         }
 
-        $newConfigMap = Arr::createTreeByList($routes,$value);
-        self::$configMap = Arr::merge(self::$configMap,$newConfigMap);
+        $newConfigMap = Arr::createTreeByList($routes, $value);
+        self::$configMap = Arr::merge(self::$configMap, $newConfigMap);
 
         return true;
     }
