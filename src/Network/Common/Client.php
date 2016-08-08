@@ -119,7 +119,12 @@ class Client implements Async
 
     private function getCallback(callable $callback)
     {
-        return function($response) use ($callback) {
+        return function($response, $exception = null) use ($callback) {
+            if ($exception) {
+                call_user_func($callback, $response, $exception);
+                return;
+            }
+
             $body = $response->getBody();
 
             $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING);

@@ -228,8 +228,8 @@ class HttpClient implements Async
 
     private function getCallback(callable $callback)
     {
-        return function($response) use ($callback) {
-            call_user_func($callback, $response);
+        return function($response, $exception = null) use ($callback) {
+            call_user_func($callback, $response, $exception);
         };
     }
 
@@ -240,6 +240,6 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit($exception);
         }
-        call_user_func_array($this->callback, [null, $exception]);
+        call_user_func($this->callback, null, $exception);
     }
 }
