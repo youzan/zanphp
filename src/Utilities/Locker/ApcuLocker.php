@@ -22,7 +22,7 @@ class ApcuLocker
         }
 
         $this->key = $key;
-        apcu_add($this->key, 0);
+        apcu_store($this->key, 0);
     }
 
     public function isLocked()
