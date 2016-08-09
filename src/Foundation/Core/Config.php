@@ -46,9 +46,9 @@ class Config
             }
             $result = &$result[$route];
         }
-        if (!$hasConfig) {
-            return IronConfig::get($preKey, $default);
-        }
+        //if (!$hasConfig) {
+        //    return IronConfig::get($preKey, $default);
+        //}
         return $result;
     }
 
