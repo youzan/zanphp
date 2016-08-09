@@ -16,6 +16,9 @@ class InitializeUrlConfig
     public function bootstrap($server)
     {
         $config = Config::get('url');
+        if (!$config) {
+            return;
+        }
         URL::setConfig($config);
     }
 }
