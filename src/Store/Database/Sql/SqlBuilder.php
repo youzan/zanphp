@@ -78,6 +78,7 @@ class SqlBuilder
         if (isset($data['inserts'])) {
             return $this->batchInserts($data);
         }
+        $this->checkInsertRequire($data);
         $insert = isset($data['insert']) ? $data['insert'] : [];
         if (!is_array($insert) || count($insert) == 0) {
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'insert', '');
@@ -103,7 +104,9 @@ class SqlBuilder
             $this->sqlMap['sql'] = $this->replaceSqlLabel($this->sqlMap['sql'], 'inserts', '');
             return $this;
         }
-
+        foreach ($data['inserts'] as $insert) {
+            $this->checkInsertRequire(['insert' => $insert]);
+        }
         $insertsArr = [];
         $cloumns = array_keys($inserts[0]);
         $replace  = '(' . implode(',', $cloumns) . ') values ';
@@ -189,6 +192,43 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
+                    throw new SqlBuilderException('sql map limit error');
+                }
+            }
+        }
+        if (count($requireMap) > 0) {
+            throw new SqlBuilderException('sql map require error');
+        }
+        return true;
+    }
+
+    private function checkInsertRequire($data)
+    {
+        if (!isset($data['insert'])) {
+            return true;
+        }
+        $insert = $data['insert'];
+        $requireMap = [];
+        $limitMap = [];
+        if (is_array($this->sqlMap['require']) && [] != $this->sqlMap['require']) {
+            $requireMap = array_flip($this->sqlMap['require']);
+        }
+        if (is_array($this->sqlMap['limit']) && [] != $this->sqlMap['limit']) {
+            $limitMap = array_flip($this->sqlMap['limit']);
+        }
+
+        if ([] == $requireMap && [] == $limitMap) {
+            return true;
+        }
+
+        foreach($insert as $column => $value) {
+            if (count($requireMap) > 0) {
+                if (isset($requireMap[$column])) {
+                    unset($requireMap[$column]);
+                }
+            }
+            if (count($limitMap) > 0) {
+                if (!isset($limitMap[$column])) {
                     throw new SqlBuilderException('sql map limit error');
                 }
             }
