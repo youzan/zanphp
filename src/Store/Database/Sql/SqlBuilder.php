@@ -192,12 +192,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    throw new SqlBuilderException('sql map limit error, limit map not have the column :'.$col);
+                    throw new SqlBuilderException('sql map limit error, limit map need your insert not have the column :'.$col);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error, require map mast have the columns:'.implode(', ', array_keys($requireMap)));
+            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:'.implode(', ', array_keys($requireMap)));
         }
         return true;
     }
@@ -229,12 +229,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$column])) {
-                    throw new SqlBuilderException('sql map limit error, limit map not have the column :'.$column);
+                    throw new SqlBuilderException('sql map limit error, limit map need your insert not have the column :'.$column);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error, require map mast have the columns:'.implode(', ', array_keys($requireMap)));
+            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:'.implode(', ', array_keys($requireMap)));
         }
         return true;
     }
