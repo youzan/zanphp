@@ -192,12 +192,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    throw new SqlBuilderException('sql map limit error');
+                    throw new SqlBuilderException('sql map limit error, limit map do not have the cloumn :'.$col);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error');
+            throw new SqlBuilderException('sql map require error, require map mast have the columns:'.implode(', ', $requireMap));
         }
         return true;
     }
@@ -229,12 +229,12 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$column])) {
-                    throw new SqlBuilderException('sql map limit error');
+                    throw new SqlBuilderException('sql map limit error, limit map do not have the column :'.$column);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error');
+            throw new SqlBuilderException('sql map require error, require map mast have the columns:'.implode(', ', $requireMap));
         }
         return true;
     }
