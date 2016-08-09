@@ -192,7 +192,7 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    throw new SqlBuilderException('sql map limit error, limit map need your insert not have the column :'.$col);
+                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:'.$col);
                 }
             }
         }
@@ -229,7 +229,7 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$column])) {
-                    throw new SqlBuilderException('sql map limit error, limit map need your insert not have the column :'.$column);
+                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:'.$column);
                 }
             }
         }
