@@ -14,8 +14,8 @@ class ClassLoader
             return true;
         }
 
-        if (!file_exists($file)) {
-            throw new FileNotFound('No such file:' . $file);
+        if (!is_readable($file)) {
+            throw new FileNotFound('Can not read or No such file:' . $file);
         }
 
         self::$loadedMap[$fileHash] = 1;
