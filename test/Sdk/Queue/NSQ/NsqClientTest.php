@@ -32,14 +32,35 @@ class NsqClientTest
 
     public function pub()
     {
-        $topic = 'fenxiao_goods_index_create';
+        $topicA = 'fenxiao_goods_index_create';
+        $topicB = 'fenxiao_goods_index_update';
         $queue = new Queue();
-
-        $msg = \Kdt\Iron\NSQ\Message\Msg::fromClient('wahahahahahah');
-
-        $result = (yield $queue->publish($topic, $msg));
         
-        var_dump($result);exit;
+        $dataA = [
+            'job_name' => 'fenxiao_goods_index_create',
+            'job_key' => 'fenxiao_goods_index_create_bar_p',
+            'job_data' => [
+                'test' => 'bar_p'
+            ],
+            'job_time' => date('Y-m-d H:i:s'),
+        ];
+
+        $dataB = [
+            'job_name' => 'fenxiao_goods_index_update',
+            'job_key' => 'fenxiao_goods_index_update_foo_p',
+            'job_data' => [
+                'test' => 'foo_p'
+            ],
+            'job_time' => date('Y-m-d H:i:s'),
+        ];
+
+        $msgA = \Kdt\Iron\NSQ\Message\Msg::fromClient($dataA);
+        $msgB = \Kdt\Iron\NSQ\Message\Msg::fromClient($dataB);
+
+        $resultA = (yield $queue->publish($topicA, $msgA));
+        $resultB = (yield $queue->publish($topicB, $msgB));
+
+        var_dump($resultA, $resultB);exit;
 
     }
 
@@ -61,4 +82,4 @@ class NsqClientTest
     }
 }
 
-(new NsqClientTest())->testSub();
+(new NsqClientTest())->testPub();
