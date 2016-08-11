@@ -8,15 +8,29 @@
 namespace Zan\Framework\Network\ServerManager;
 
 use Zan\Framework\Foundation\Application;
-use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Common\Curl;
 use Zan\Framework\Utilities\Types\Time;
+use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\ServerManager\ServerRegisterInitiator;
+use Zan\Framework\Network\Common\Curl;
 
-class ServerRegister
+class ServiceUnregister
 {
-    public function parseConfig($config)
+    private $config = [];
+
+    public function __construct()
+    {
+        $this->init();
+    }
+
+    private function init()
+    {
+        $this->config['services'] = Nova::getAvailableService();
+    }
+
+    private function parseConfig($config)
     {
         $extData = [];
         $ip = nova_get_ip();
@@ -45,15 +59,26 @@ class ServerRegister
         ];
     }
 
-    public function register($config)
+    public function unregister()
     {
-        $haunt = Config::get('haunt');
-        $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        $response = (yield $httpClient->postJson($haunt['register']['uri'], $this->parseConfig($config), null));
-        $register = $response->getBody();
+        $haunt = Config::get('haunt.unregister');
+        if (empty($haunt)) {
+            return;
+        }
 
-        echo $register;
+        $isRegistered = ServerRegisterInitiator::getInstance()->getRegister();
+        if ($isRegistered == ServerRegisterInitiator::DISABLE_REGISTER) {
+            return;
+        }
+        $this->toUnregister();
     }
 
-
+    private function toUnregister()
+    {
+        $haunt = Config::get('haunt');
+        $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
+        $curl = new Curl();
+        $unregister = $curl->post($url, $this->parseConfig($this->config));
+        echo $unregister;
+    }
 }

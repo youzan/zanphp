@@ -32,7 +32,6 @@ class Redis implements Async
 
     public function recv($client, $ret)
     {
-        $this->conn->release();
         call_user_func($this->callback, $ret);
     }
 

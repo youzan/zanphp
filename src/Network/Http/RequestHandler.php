@@ -102,9 +102,6 @@ class RequestHandler
     }
     public function handleTimeout()
     {
-        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
-        Task::execute($coroutine);
-
         $this->task->setStatus(Signal::TASK_KILLED);
         $request = $this->context->get('request');
         if ($request && $request->wantsJson()) {

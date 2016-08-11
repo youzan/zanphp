@@ -18,7 +18,6 @@ use Zan\Framework\Utilities\Types\Time;
 
 class Mysqli extends Base implements Connection
 {
-    public $lastUsedTime=0;
     private $classHash = null;
 
     public function closeSocket()
@@ -39,7 +38,7 @@ class Mysqli extends Base implements Connection
 
     public function heartbeatLater()
     {
-        Timer::after($this->config['pool']['heartbeat-time'], [$this,'heartbeating']);
+        Timer::after($this->config['pool']['heartbeat-time'], [$this,'heartbeating'], $this->getHeartBeatingJobId());
     }
     
     public function heartbeating()
@@ -47,7 +46,7 @@ class Mysqli extends Base implements Connection
         $time = Time::current(true) - $this->lastUsedTime;
         $hearBeatTime = $this->config['pool']['heartbeat-time']/1000;//s
         if ($this->lastUsedTime != 0 && $time <  $hearBeatTime) {
-            Timer::after(($hearBeatTime-$time)*1000, [$this,'heartbeating']);
+            Timer::after(($hearBeatTime-$time)*1000, [$this,'heartbeating'], $this->getHeartBeatingJobId());
             return;
         }
 
@@ -72,5 +71,16 @@ class Mysqli extends Base implements Connection
 
         $this->release();
         $this->heartbeatLater();
+    }
+
+    private function getHeartBeatingJobId()
+    {
+        return spl_object_hash($this) . '_heart_beating_job_id';
+    }
+
+    public function close()
+    {
+        Timer::clearAfterJob($this->getHeartBeatingJobId());
+        parent::close();
     }
 }

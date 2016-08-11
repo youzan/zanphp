@@ -58,7 +58,7 @@ class ConnectionInitiator
         $connectionManager->setServer($server);
         $connectionManager->monitor();
         ReconnectionPloy::getInstance()->init();
-//        $connectionManager->monitorConnectionNum();
+        $connectionManager->monitorConnectionNum();
     }
 
     private function initConfig($config)

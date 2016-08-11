@@ -34,4 +34,24 @@ class Time
         return self::current(true);
     }
 
+    public static function future($seconds,$format=false)
+    {
+        $now    = self::current(true);
+        $future = $now + $seconds;
+
+        if(false === $format){
+            return date('Y-m-d H:i:s', $future);
+        }else if($format){
+            return date($format,$future);
+        }
+
+        return $future;
+    }
+
+    public static function past($seconds,$format=false)
+    {
+        $seconds = -1 * $seconds;
+        return self::future($seconds,$format);
+    }
+
 }
