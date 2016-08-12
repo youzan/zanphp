@@ -16,26 +16,37 @@ class TraceBuilder
     private $data = "";
     private static $hexIp = null;
 
+    protected function lintSeparator(array &$data)
+    {
+        array_walk($data, function(&$str) {
+            $str = str_replace("\t", str_repeat(chr(32), 4), $str);
+        });
+    }
+
     public function buildHeader(array $header)
     {
+        $this->lintSeparator($header);
         array_unshift($header, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $header);
     }
 
     public function buildTransaction(array $transaction)
     {
+        $this->lintSeparator($transaction);
         array_unshift($transaction, "%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $transaction);
     }
 
     public function commitTransaction(array $transaction)
     {
+        $this->lintSeparator($transaction);
         array_unshift($transaction, "%s\t%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $transaction);
     }
 
     public function buildEvent(array $event)
     {
+        $this->lintSeparator($event);
         array_unshift($event, "%s\t%s\t%s\t%s\t%s\t\n");
         $this->data .= call_user_func_array("sprintf", $event);
     }
