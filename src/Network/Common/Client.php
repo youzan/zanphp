@@ -164,7 +164,7 @@ class Client implements Async
                     // 请保持该条件独立判断
                     if ($jsonData['data']['success'] == false) {
                         $msg = $jsonData['data']['message'];
-                        $e = $this->generateException($code, $msg);
+                        $e = $this->generateException($jsonData['data']['code'], $msg);
                         call_user_func($callback, null, $e);
                         return;
                     }
