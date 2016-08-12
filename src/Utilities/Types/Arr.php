@@ -372,4 +372,50 @@ class Arr {
         return array_intersect_key($array, array_flip($keys));
     }
 
+    /**
+     * Return the values from a single column in the input array
+     *
+     * @link http://www.php.net/manual/en/function.array-column.php
+     *
+     * @param array $input
+     * @param mixed $columnKey
+     * @param mixed $indexKey
+     *
+     * @return array Returns an array of values representing a single column from the input array.
+     */
+    public static function column(array $input, $columnKey, $indexKey = null)
+    {
+        $resultArray = array();
+
+        foreach ($input as $row) {
+
+            $key = $value = null;
+            $keySet = $valueSet = false;
+
+            if ($indexKey !== null && array_key_exists($indexKey, $row)) {
+                $keySet = true;
+                $key = (string) $row[$indexKey];
+            }
+
+            if ($columnKey === null) {
+                $valueSet = true;
+                $value = $row;
+            } elseif (is_array($row) && array_key_exists($columnKey, $row)) {
+                $valueSet = true;
+                $value = $row[$columnKey];
+            }
+
+            if ($valueSet) {
+                if ($keySet) {
+                    $resultArray[$key] = $value;
+                } else {
+                    $resultArray[] = $value;
+                }
+            }
+
+        }
+
+        return $resultArray;
+    }
+
 }

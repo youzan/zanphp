@@ -192,12 +192,49 @@ class SqlBuilder
             }
             if (count($limitMap) > 0) {
                 if (!isset($limitMap[$col])) {
-                    throw new SqlBuilderException('sql map limit error');
+                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:'.$col);
                 }
             }
         }
         if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error');
+            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:'.implode(', ', array_keys($requireMap)));
+        }
+        return true;
+    }
+
+    private function checkInsertRequire($data)
+    {
+        if (!isset($data['insert'])) {
+            return true;
+        }
+        $insert = $data['insert'];
+        $requireMap = [];
+        $limitMap = [];
+        if (is_array($this->sqlMap['require']) && [] != $this->sqlMap['require']) {
+            $requireMap = array_flip($this->sqlMap['require']);
+        }
+        if (is_array($this->sqlMap['limit']) && [] != $this->sqlMap['limit']) {
+            $limitMap = array_flip($this->sqlMap['limit']);
+        }
+
+        if ([] == $requireMap && [] == $limitMap) {
+            return true;
+        }
+
+        foreach($insert as $column => $value) {
+            if (count($requireMap) > 0) {
+                if (isset($requireMap[$column])) {
+                    unset($requireMap[$column]);
+                }
+            }
+            if (count($limitMap) > 0) {
+                if (!isset($limitMap[$column])) {
+                    throw new SqlBuilderException('sql map limit error, your insert column not in limit map:'.$column);
+                }
+            }
+        }
+        if (count($requireMap) > 0) {
+            throw new SqlBuilderException('sql map require error, require map need your insert must have the columns:'.implode(', ', array_keys($requireMap)));
         }
         return true;
     }
