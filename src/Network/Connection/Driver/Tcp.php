@@ -22,9 +22,7 @@ class Tcp extends Base implements Connection
     public function closeSocket()
     {
         try {
-            if ($this->getSocket()->isConnected()) {
-                $this->getSocket()->close();
-            }
+            $this->getSocket()->close();
         } catch (\Exception $e) {
             //todo log
         }

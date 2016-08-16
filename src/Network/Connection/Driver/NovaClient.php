@@ -27,7 +27,11 @@ class NovaClient extends Base implements Connection
 
     protected function closeSocket()
     {
-        return true;
+        try {
+            $this->getSocket()->close();
+        } catch (\Exception $e) {
+            //todo log
+        }
     }
 
     public function init() {
