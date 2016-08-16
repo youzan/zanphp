@@ -39,8 +39,9 @@ class Tcp extends Base implements Connection
 
     public function onConnect($cli) {
         //put conn to active_pool
-        $this->release();
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
+        $this->release();
+
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
         echo "tcp client connect to server\n";
     }

@@ -37,8 +37,9 @@ class Syslog extends Base implements Connection
 
     public function onConnect($cli)
     {
-        $this->release();
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
+        $this->release();
+
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
     }
 
