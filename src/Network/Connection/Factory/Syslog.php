@@ -48,17 +48,7 @@ class Syslog implements ConnectionFactory
     public function getConnectTimeoutCallback(SyslogDriver $connection)
     {
         return function() use ($connection) {
-            $connection->getSocket()->close();
-            $connection->unsetSocket();
-
-            $socket = new SwooleClient(SWOOLE_SOCK_TCP, SWOOLE_SOCK_ASYNC);
-
-            $connection->setSocket($socket);
-            $connection->init();
-
-            $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
-            $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-            Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+            $connection->close();
         };
     }
 

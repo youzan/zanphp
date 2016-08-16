@@ -48,16 +48,7 @@ class Redis implements ConnectionFactory
     public function getConnectTimeoutCallback(Client $connection)
     {
         return function() use ($connection) {
-            $connection->getSocket()->close();
-            $connection->unsetSocket();
-
-            $socket = new SwooleRedis();
-            $connection->setSocket($socket);
-            $connection->init();
-
-            $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
-            $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-            Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+            $connection->close();
         };
     }
 

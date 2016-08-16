@@ -47,18 +47,7 @@ class NovaClient implements ConnectionFactory
     public function getConnectTimeoutCallback(NovaClientConnection $connection)
     {
         return function() use ($connection) {
-            $connection->getSocket()->close();
-            $connection->unsetSocket();
-
-            $clientFlags = SWOOLE_SOCK_TCP;
-            $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
-            $socket->set($this->config['config']);
-
-            $connection->setSocket($socket);
-            $connection->init();
-            $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
-            $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
-            Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+            $connection->close();
         };
     }
 
