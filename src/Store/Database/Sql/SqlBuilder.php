@@ -239,43 +239,6 @@ class SqlBuilder
         return true;
     }
 
-    private function checkInsertRequire($data)
-    {
-        if (!isset($data['insert'])) {
-            return true;
-        }
-        $insert = $data['insert'];
-        $requireMap = [];
-        $limitMap = [];
-        if (is_array($this->sqlMap['require']) && [] != $this->sqlMap['require']) {
-            $requireMap = array_flip($this->sqlMap['require']);
-        }
-        if (is_array($this->sqlMap['limit']) && [] != $this->sqlMap['limit']) {
-            $limitMap = array_flip($this->sqlMap['limit']);
-        }
-
-        if ([] == $requireMap && [] == $limitMap) {
-            return true;
-        }
-
-        foreach($insert as $column => $value) {
-            if (count($requireMap) > 0) {
-                if (isset($requireMap[$column])) {
-                    unset($requireMap[$column]);
-                }
-            }
-            if (count($limitMap) > 0) {
-                if (!isset($limitMap[$column])) {
-                    throw new SqlBuilderException('sql map limit error');
-                }
-            }
-        }
-        if (count($requireMap) > 0) {
-            throw new SqlBuilderException('sql map require error');
-        }
-        return true;
-    }
-
     private function parseColumn($data)
     {
         if (!$data || !isset($data['column']) || [] == $data['column'] || '' == $data['column']) {
