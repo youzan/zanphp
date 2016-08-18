@@ -1189,7 +1189,7 @@ return [
             'sub'  => [
                 [
                     'mod' => 'tradetask.message.send',
-                    'host' => 'http://10.10.148.117:7001',
+                    'host' => 'http://trade-message-soa.s.qima-inc.com ',
                     'type' => 'java'
                 ],
             ]
@@ -1303,7 +1303,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.ticket',
-                    'host' => 'http://10.200.175.196:8398',
+                    'host' => 'http://pay-ticket.s.qima-inc.com',
                     'type' => 'java'
                 ],
                 [

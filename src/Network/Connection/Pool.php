@@ -13,6 +13,7 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\Types\ObjectArray;
 use Zan\Framework\Utilities\Types\Time;
 use Zan\Framework\Foundation\Coroutine\Task;
@@ -29,6 +30,8 @@ class Pool implements ConnectionPool
 
     private $type = null;
 
+    public $waitNum = 0;
+
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type)
     {
         $this->poolConfig = $config;
@@ -40,6 +43,11 @@ class Pool implements ConnectionPool
     public function init()
     {
         $initConnection = $this->poolConfig['pool']['init-connection'];
+        $min = isset($this->poolConfig['pool']['minimum-connection-count']) ?
+            $this->poolConfig['pool']['minimum-connection-count'] : 2;
+        if ($initConnection < $min) {
+            $initConnection = $min;
+        }
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
         for ($i = 0; $i < $initConnection; $i++) {
@@ -48,17 +56,40 @@ class Pool implements ConnectionPool
         }
     }
 
-    private function createConnect()
+    public function createConnect($previousConnectionHash = '')
     {
+        $max = isset($this->poolConfig['pool']['maximum-connection-count']) ?
+            $this->poolConfig['pool']['maximum-connection-count'] : 30;
+        $sumCount = $this->activeConnection->length() + $this->freeConnection->length();
+        if($sumCount >= $max) {
+            return null;
+        }
         $connection = $this->factory->create();
+        if  ('' !== $previousConnectionHash) {
+            $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
+            if ($this->type == 'Mysqli') {
+                if (!$connection->getSocket()->connect_errno){
+                    $connection->heartbeat();
+                } else {
+                    ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection),$previousKey);
+                    $this->remove($connection);
+                }
+                $connection->setPool($this);
+            } else {
+                ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection), $previousKey);
+            }
+            ReconnectionPloy::getInstance()->connectSuccess($previousConnectionHash);
+        }
+
         if ($connection->getIsAsync()) {
             $this->activeConnection->push($connection);
         } else {
             $this->freeConnection->push($connection);
         }
-
-        $connection->setPool($this);
-        $connection->heartbeat();
+        if ('' == $previousConnectionHash || $this->type !== 'Mysqli') {
+            $connection->setPool($this);
+            $connection->heartbeat();
+        }
         $connection->setEngine($this->type);
     }
 
@@ -72,7 +103,6 @@ class Pool implements ConnectionPool
         return $this->activeConnection;
     }
 
-
     public function reload(array $config)
     {
     }
@@ -80,21 +110,25 @@ class Pool implements ConnectionPool
     public function get($connection = null)
     {
         if ($this->freeConnection->isEmpty()) {
-            yield null;
-            return;
+            $this->createConnect();
         }
 
         if (null == $connection) {
             $connection = $this->freeConnection->pop();
-            $this->activeConnection->push($connection);
+            if (null != $connection) {
+                $this->activeConnection->push($connection);
+            }
+
         } else {
             $this->freeConnection->remove($connection);
             $this->activeConnection->push($connection);
         }
-
+        if (null === $connection) {
+            yield null;
+            return;
+        }
         $connection->setUnReleased();
         $connection->lastUsedTime = Time::current(true);
-        yield $this->insertActiveConnectionIntoContext($connection);
         yield $connection;
     }
 
@@ -105,47 +139,22 @@ class Pool implements ConnectionPool
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
 
-        $coroutine = $this->deleteActiveConnectionFromContext($conn);
-        Task::execute($coroutine);
-
         if (count($this->freeConnection) == 1) {
             $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
+            $this->waitNum = $this->waitNum >0 ? $this->waitNum-- : 0 ;
         }
     }
 
     public function remove(Connection $conn)
     {
-        $coroutine = $this->deleteActiveConnectionFromContext($conn);
-        Task::execute($coroutine);
-
         $this->activeConnection->remove($conn);
-        $this->createConnect();
-    }
-
-    private function insertActiveConnectionIntoContext($connection)
-    {
-        $activeConnections = (yield getContext($this->getActiveConnectionContextKey(), []));
-        $activeConnections[spl_object_hash($connection)] = $connection;
-        yield setContext($this->getActiveConnectionContextKey(), $activeConnections);
-    }
-
-    private function deleteActiveConnectionFromContext($connection)
-    {
-        $activeConnections = (yield getContext($this->getActiveConnectionContextKey(), []));
-        if (isset($activeConnections[spl_object_hash($connection)])) {
-            unset($activeConnections[spl_object_hash($connection)]);
+        $connHashCode = spl_object_hash($conn);
+        if (null === ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
+            ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
+            $this->createConnect($connHashCode);
+            return;
         }
-        return;
-    }
-
-    private function getActiveConnectionContextKey()
-    {
-        return $this->type . '_active_connections';
-    }
-
-    public function getActiveConnectionsFromContext()
-    {
-        yield getContext($this->getActiveConnectionContextKey(), []);
+        ReconnectionPloy::getInstance()->reconnect($conn, $this);
     }
 }

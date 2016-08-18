@@ -26,6 +26,6 @@ class BufferWriter implements LogWriter
 
     public function write($log)
     {
-        $this->realWriter->write($log);
+        yield $this->realWriter->write($log);
     }
 }

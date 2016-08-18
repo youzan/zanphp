@@ -14,7 +14,7 @@ use swoole_client as SwooleClient;
 
 class KVStore extends Base implements Connection
 {
-    protected function closeSocket()
+    public function closeSocket()
     {
         try {
             $this->getSocket()->close();

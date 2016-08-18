@@ -35,20 +35,21 @@ class ConnectionManager
     /**
      * @param string $connKey
      * @param int $timeout
-     * @return \Zan\Framework\Contract\Network\Connection 
+     * @return \Zan\Framework\Contract\Network\Connection
      * @throws InvalidArgumentException
      */
     public function get($connKey, $timeout=0)
     {
         if(!isset(self::$poolMap[$connKey])){
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
-        }     
+        }
         $pool = self::$poolMap[$connKey];
         $connection = (yield $pool->get());
         if ($connection) {
             yield $connection;
             return;
         }
+        $pool->waitNum++;
         yield new FutureConnection($this, $connKey, $timeout);
     }
 
@@ -84,7 +85,7 @@ class ConnectionManager
                     'active' => $activeNums,
                 ], [
                     'pool_name' => $poolKey,
-                    'worker_id' => self::$server->swooleServer->worker_id
+                    'worker_id' => (string)self::$server->swooleServer->worker_id
                 ]
             );
         }
@@ -101,22 +102,8 @@ class ConnectionManager
         self::$server = $server;
     }
 
-    public function closeConnectionByRequestTimeout()
+    public function monitorConnectionNum()
     {
-        foreach (self::$poolMap as $pool) {
-            if ($pool instanceof Pool) {
-                $connections = (yield $pool->getActiveConnectionsFromContext());
-                if ([] == $connections) {
-                    continue;
-                }
-                foreach ($connections as $connection) {
-                    if (null != $connection && $connection instanceof Connection) {
-                        $connection->close();
-                    }
-                }
-            }
-        }
+        MonitorConnectionNum::getInstance()->controlLinkNum(self::$poolMap);
     }
-
-
 }

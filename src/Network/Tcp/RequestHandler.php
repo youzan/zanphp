@@ -97,16 +97,12 @@ class RequestHandler {
 
     public function handleTimeout()
     {
-        if (Debug::get()) {
-            printf(
-                "[%s] TIMEOUT %s %s\n",
-                Time::current('Y-m-d H:i:s'),
-                $this->request->getRoute(),
-                http_build_query($this->request->getArgs())
-            );
-        }
-        $coroutine = ConnectionManager::getInstance()->closeConnectionByRequestTimeout();
-        Task::execute($coroutine);
+        printf(
+            "[%s] TIMEOUT %s %s\n",
+            Time::current('Y-m-d H:i:s'),
+            $this->request->getRoute(),
+            http_build_query($this->request->getArgs())
+        );
 
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
