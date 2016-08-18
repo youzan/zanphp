@@ -9,31 +9,22 @@
 namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Core\Env;
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 
 class SystemLogger extends BaseLogger
 {
-    const TOPIC_PREFIX = 'track';
+    const TOPIC_PREFIX = 'log';
     private $priority;
     private $hostname;
     private $server;
     private $pid;
     private $conn = null;
     private $connectionConfig;
-    private $supportStoreType = [
-        'normal' => 'normal',
-        'persistence' => 'persistence'
-    ];
 
     public function __construct($config)
     {
         parent::__construct($config);
-
-        if (!isset($this->supportStoreType[$this->config['storeType']])) {
-            throw new InvalidArgumentException('StoreType is invalid' . $this->config['storeType']);
-        }
 
         $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->config['path']);
         $this->priority = LOG_LOCAL3 + LOG_INFO;
@@ -76,7 +67,7 @@ class SystemLogger extends BaseLogger
     private function buildTopic()
     {
         $config = $this->config;
-        $result = SystemLogger::TOPIC_PREFIX . '.' . $config['storeType'];
+        $result = SystemLogger::TOPIC_PREFIX . '.' . $config['app'] . '.' . $config['module'];
         return $result;
     }
 
@@ -95,7 +86,6 @@ class SystemLogger extends BaseLogger
             'platform' => 'php',
             'app' => $this->config['app'],
             'module' => $this->config['module'],
-            'type' => 'normal',
             'level' => $level,
             'tag' => $message,
             'detail' => $detail

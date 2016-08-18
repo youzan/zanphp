@@ -81,13 +81,17 @@ class Scheduler
     //TODO: 规范化response
     public function asyncCallback($response, $exception = null)
     {
-        if (Signal::TASK_DONE == $this->task->getStatus()) {
-            return ;
-        }
         if ($exception !== null
             && $exception instanceof \Exception) {
-                $this->throwException($exception, true);
+            $this->throwException($exception, true);
+
+            if (Signal::TASK_DONE == $this->task->getStatus()) {
+                return ;
+            }
         } else {
+            if (Signal::TASK_DONE == $this->task->getStatus()) {
+                return ;
+            }
             $this->task->send($response);
             $this->task->run();
         }

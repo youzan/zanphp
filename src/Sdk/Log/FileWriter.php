@@ -44,9 +44,7 @@ class FileWriter implements LogWriter, Async
         $callback = $this->async ? [$this, 'ioReady'] : null;
         swoole_async_write($this->path, $log, -1, $callback);
 
-        if (null === $callback) {
-            $this->ioReady();
-        }
+        yield $this;
     }
 
     public function ioReady()

@@ -58,7 +58,6 @@ class RequestTask
             }
             $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
             Task::execute($coroutine, $this->context);
-            echo_exception($e);
             $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
     }
