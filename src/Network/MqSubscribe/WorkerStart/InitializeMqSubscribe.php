@@ -13,7 +13,7 @@ class InitializeMqSubscribe
      */
     public function bootstrap($server)
     {
-        $config = Config::get('nsq_config', []);
+        $config = Config::get('nsqConfig', []);
         Checker::handle($config);
         Manager::singleton()->init($config);
     }
