@@ -66,7 +66,7 @@ class Factory
      */
     public function createMqServer()
     {
-        $config = Config::get('subscribe_server');
+        $config = Config::get('subscribeServer');
         if (empty($config)) {
             throw new RuntimeException('subscribe server config not found');
         }
