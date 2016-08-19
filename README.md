@@ -28,7 +28,7 @@ Zan 和 Golang 的边界是：Zan做业务系统；Golang 做系统（中间件�
 而 Zan 和 Golang 编程模型的驱近，是希望能给PHP程序员一个更好的桥梁到 Golang。            
 理想的技术栈是：Zan + Go + 少量的C/C++。
 
-当然对于致力于终身coding的码农来说：Java依然很难跨过去的坎。
+当然对于致力于终身coding的码农来说：Java依然是很难跨过去的坎。
 
 
 ## 官方文档
