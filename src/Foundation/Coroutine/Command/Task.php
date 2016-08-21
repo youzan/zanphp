@@ -138,7 +138,17 @@ function parallel($coroutines)
     });
 }
 
+function async(callable $callback)
+{
+    return new SysCall(function (Task $task) use ($callback) {
+        $context = $task->getContext();
+        $queue = $context->get('async_task_queue', []);
+        $queue[] = $callback;
+        $context->set('async_task_queue', $queue);
 
+        return Signal::TASK_CONTINUE;
+    });
+}
 
 function getCookieHandler()
 {
