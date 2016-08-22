@@ -239,7 +239,7 @@ class BaseRequest
         $this->query = new ParameterBag($query);
         $this->attributes = new ParameterBag($attributes);
         $this->cookies = new ParameterBag($cookies);
-        //$this->files = new FileBag($files);
+        $this->files = $files;
         $this->server = new ServerBag($server);
         $this->headers = new HeaderBag($this->server->getHeaders());
 
