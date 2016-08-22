@@ -63,6 +63,6 @@ class FileBag
 
     public function valid()
     {
-        return 0 == $this->error;
+        return null !== $this->error && 0 == $this->error;
     }
 }
