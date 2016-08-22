@@ -29,11 +29,11 @@ class FileBag
         if ([] == $files) {
             return;
         }
-        $this->name = $files['name'];
-        $this->type = $files['type'];
-        $this->tmpName = $files['tmp_name'];
-        $this->error = $files['error'];
-        $this->size = $files['size'];
+        $this->name = $files['file']['name'];
+        $this->type = $files['file']['type'];
+        $this->tmpName = $files['file']['tmp_name'];
+        $this->error = $files['file']['error'];
+        $this->size = $files['file']['size'];
     }
 
     public function getName()
