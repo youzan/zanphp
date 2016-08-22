@@ -21,7 +21,7 @@ class AsyncTaskTerminator implements RequestTerminator
     {
         $callbacks = $context->get('async_task_queue');
         for ($i = 0, $l = count($callbacks); $i < $l; $i++) {
-            yield call_user_func($callbacks[$i], [$request, $response, $context]);
+            yield call_user_func($callbacks[$i]);
         }
         $context->set('async_task_queue', []);
     }
