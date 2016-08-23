@@ -245,7 +245,6 @@ abstract class BaseLogger implements LoggerInterface
             'message' => $e->getMessage(),
             'file' => $e->getFile(),
             'line' => $e->getLine(),
-            'param' => $e->getTrace()[0]['args'],
             'stacktraces' => $e->getTraceAsString()
         ];
     }
