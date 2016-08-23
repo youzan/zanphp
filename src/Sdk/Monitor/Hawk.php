@@ -22,7 +22,7 @@ class Hawk
 
     private $httpClient;
 
-    const SUCCESS = 'success';
+    const SUCCESS_CODE = 200;
     const URI = '/report';
 
     public function __construct()
@@ -73,17 +73,15 @@ class Hawk
         }
 
         $response = (yield $this->httpClient->postJson(self::URI, $this->data));
-        $result = false;
+        $statusCode = -1;
 
         if ($response) {
-            $raw = $response->getBody();
-            $jsonData = Json::decode($raw, true);
-            $result = $jsonData ? $jsonData : $raw;
+            $statusCode = $response->getStatusCode();
         }
 
         $this->data = [];
 
-        if ($result != self::SUCCESS) {
+        if ($statusCode != self::SUCCESS_CODE) {
             //TODO: 上报失败
             var_dump("hawk上报失败");
         }
