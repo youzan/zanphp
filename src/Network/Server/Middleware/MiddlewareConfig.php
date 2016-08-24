@@ -89,7 +89,7 @@ class MiddlewareConfig
     {
         $baseTerminators = [
             AsyncTaskTerminator::class,
-            
+
             WorkerTerminator::class,
             DbTerminator::class,
             CacheTerminator::class,
