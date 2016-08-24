@@ -88,6 +88,8 @@ class MiddlewareConfig
     public function addBaseTerminators($terminators)
     {
         $baseTerminators = [
+            AsyncTaskTerminator::class,
+
             WorkerTerminator::class,
             DbTerminator::class,
             CacheTerminator::class,

@@ -6,16 +6,17 @@
  * Date: 15/11/9
  * Time: 14:24
  */
-use Zan\Framework\Foundation\Coroutine\SysCall;
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Contract\Resource;
 use Zan\Framework\Foundation\Coroutine\Parallel;
+use Zan\Framework\Foundation\Coroutine\Signal;
+use Zan\Framework\Foundation\Coroutine\SysCall;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 function taskSleep($ms)
 {
     return new SysCall(function (Task $task) use ($ms) {
-        \Zan\Framework\Network\Server\Timer\Timer::after($ms, function() use ($task) {
+        Timer::after($ms, function () use ($task) {
             $task->send(null);
             $task->run();
         });
@@ -138,7 +139,18 @@ function parallel($coroutines)
     });
 }
 
+function async(callable $callback)
+{
+    return new SysCall(function (Task $task) use ($callback) {
+        $context = $task->getContext();
+        $queue = $context->get('async_task_queue', []);
+        $queue[] = $callback;
+        $context->set('async_task_queue', $queue);
+        $task->send(null);
 
+        return Signal::TASK_CONTINUE;
+    });
+}
 
 function getCookieHandler()
 {
