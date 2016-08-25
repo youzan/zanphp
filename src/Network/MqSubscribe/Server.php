@@ -31,7 +31,6 @@ class Server extends ServerBase implements ServerContract
 {
     protected $serverStartItems = [
         InitializeSqlMap::class,
-        InitializeMiddleware::class,
         InitLogConfig::class,
     ];
 
