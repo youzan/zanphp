@@ -26,6 +26,7 @@ class Worker
 
     const GAP_TIME = 180000;
     const GAP_REACTION_NUM = 1500;
+    const GAP_MSG_NUM = 5000;
     const DEFAULT_MAX_CONCURRENCY = 500;
 
     public $classHash;
@@ -36,6 +37,10 @@ class Worker
     public $reactionNum;
     public $totalReactionNum;
     public $maxConcurrency;
+
+    private $totalMsgNum = 0;
+    private $checkMqReadyClose;
+    private $mqReadyClosePre;
 
     /* @var $server Server */
     public function init($server,$config){
@@ -86,8 +91,11 @@ class Worker
                 : 100000;
         $reaction_limit = $reaction_limit + $this->workerId * self::GAP_REACTION_NUM;
 
+        $msgLimit = isset($this->config['msg_limit']) ? $this->config['msg_limit'] : 100000;
+        $msgLimit = $msgLimit + $this->workerId * self::GAP_MSG_NUM;
+
         if($memory > $memory_limit
-            || $this->totalReactionNum > $reaction_limit
+            || $this->totalReactionNum > $reaction_limit || $this->totalMsgNum > $msgLimit
         ){
             $this->closePre();
         }
@@ -102,6 +110,10 @@ class Worker
 
         /* @var $this->server Server */
         $this->server->swooleServer->deny_request($this->workerId);
+
+        if (is_callable($this->mqReadyClosePre)) {
+            call_user_func($this->mqReadyClosePre);
+        }
         
         $this->closeCheck();
     }
@@ -109,7 +121,9 @@ class Worker
     public function closeCheck(){
         $this->output('CloseCheck');
 
-        if($this->reactionNum > 0){
+        $ready = is_callable($this->checkMqReadyClose) ? call_user_func($this->checkMqReadyClose) : true;
+
+        if($this->reactionNum > 0 or !$ready){
             Timer::after(1000,[$this,'closeCheck']);
         }else{
             $this->close();
@@ -161,6 +175,19 @@ class Worker
         $this->reactionNum --;
     }
 
+    public function incrMsgCount()
+    {
+        $this->totalMsgNum++;
+    }
+
+    public function setCheckMqReadyCloseCallback(callable $callback)
+    {
+        $this->checkMqReadyClose = $callback;
+    }
+    public function setMqReadyClosePreCallback(callable $callback)
+    {
+        $this->mqReadyClosePre = $callback;
+    }
 
     public function output($str){
         if(isset($this->config['debug']) && true == $this->config['debug']){
