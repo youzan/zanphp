@@ -40,6 +40,7 @@ class OnceFile implements Async
     }
 
     public function readHandle(){
+
         swoole_async_readfile($this->filename,$this->callback);
     }
 

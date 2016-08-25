@@ -72,9 +72,11 @@ class Queue implements Async
      */
     public function subscribe($topic, $channel, callable $callback, $timeout = 1800)
     {
-        $this->handler = function ($callback) use ($topic, $channel, $callback, $timeout) {
+        $this->handler = function ($cb) use ($topic, $channel, $callback, $timeout) {
             NSQueue::set(['subTimeout' => $timeout]);
             NSQueue::subscribe($topic, $channel, $callback);
+            
+            call_user_func($cb, [false, null]);
         };
 
         yield $this;
