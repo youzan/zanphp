@@ -31,13 +31,6 @@ class Server extends ServerBase implements ServerContract
 {
     protected $serverStartItems = [
         InitializeSqlMap::class,
-        InitializeRouter::class,
-        InitializeUrlRule::class,
-        InitializeUrlConfig::class,
-        InitializeQiniuConfig::class,
-        InitializeRouterSelfCheck::class,
-        InitializeMiddleware::class,
-        InitializeExceptionHandlerChain::class,
         InitLogConfig::class,
     ];
 
