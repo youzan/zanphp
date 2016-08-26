@@ -40,6 +40,7 @@ class Redis extends Base implements Connection
 
     public function onConnect($redis, $res) {
         if (false === $res) {
+            echo "redis client connect error\n";
             $this->close();
             return;
         }
