@@ -40,7 +40,9 @@ class Redis extends Base implements Connection
 
     public function onConnect($redis, $res) {
         if (false === $res) {
-            //TODO: connect失败
+            echo "redis client connect error\n";
+            $this->close();
+            return;
         }
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         //put conn to active_pool
