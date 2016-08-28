@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Common\Exception\ClientException;
 use Zan\Framework\Utilities\Types\Json;
 
 class Client implements Async
@@ -144,7 +145,7 @@ class Client implements Async
             $code = $jsonData['code'];
             if ($code > 0) {
                 $msg = isset($jsonData['msg']) ? $jsonData['msg'] : '网络错误';
-                $e = $this->generateException($code, $msg);
+                $e = $this->generateException($code, $msg, $response);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -162,7 +163,7 @@ class Client implements Async
                     // 请保持该条件独立判断
                     if ($jsonData['data']['success'] == false) {
                         $msg = $jsonData['data']['message'];
-                        $e = $this->generateException($jsonData['data']['code'], $msg);
+                        $e = $this->generateException($jsonData['data']['code'], $msg, $response);
                         call_user_func($callback, null, $e);
                         return;
                     }
@@ -170,7 +171,7 @@ class Client implements Async
                     $code = $jsonData['data']['code'];
                     if ($code > 0) {
                         $msg = $jsonData['data']['message'];
-                        $e = $this->generateException($code, $msg);
+                        $e = $this->generateException($code, $msg, $response);
                         call_user_func($callback, null, $e);
                         return;
                     }
@@ -190,12 +191,12 @@ class Client implements Async
      * @param $msg
      * @return BusinessException|ClientException
      */
-    private function generateException($code, $msg)
+    private function generateException($code, $msg, $response = null)
     {
         if (BusinessException::isValidCode($code)) {
             $e = new BusinessException($msg, $code);
         } else {
-            $e = new ClientException($msg, $code);
+            $e = new ClientException($msg, $code, null, $response);
         }
         
         return $e;

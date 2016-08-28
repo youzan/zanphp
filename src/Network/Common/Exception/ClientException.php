@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Zan\Framework\Network\Common;
+namespace Zan\Framework\Network\Common\Exception;
 
 
 use Exception;
