@@ -129,7 +129,7 @@ class Client implements Async
             $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING);
             if (false === $jsonData || !is_array($jsonData)) {
                 // TODO 分配 code
-                $e = new UnexpectedResponseException('网络错误', 10000, NULL, ['response' => $response]);
+                $e = new UnexpectedResponseException('网络错误', 10000, NULL, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -137,7 +137,7 @@ class Client implements Async
             // 检查格式
             if (!isset($jsonData['code']) || !array_key_exists('data', $jsonData)) {
                 // TODO 分配 code, 调整提示语
-                $e = new UnexpectedResponseException('服务方返回的数据格式有误', 10000, NULL, ['response' => $response]);
+                $e = new UnexpectedResponseException('服务方返回的数据格式有误', 10000, NULL, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -145,7 +145,7 @@ class Client implements Async
             $code = $jsonData['code'];
             if ($code > 0) {
                 $msg = isset($jsonData['msg']) ? $jsonData['msg'] : '网络错误';
-                $e = $this->generateException($code, $msg, $response);
+                $e = $this->generateException($code, $msg, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -163,7 +163,7 @@ class Client implements Async
                     // 请保持该条件独立判断
                     if ($jsonData['data']['success'] == false) {
                         $msg = $jsonData['data']['message'];
-                        $e = $this->generateException($jsonData['data']['code'], $msg, $response);
+                        $e = $this->generateException($jsonData['data']['code'], $msg, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                         call_user_func($callback, null, $e);
                         return;
                     }
@@ -171,7 +171,7 @@ class Client implements Async
                     $code = $jsonData['data']['code'];
                     if ($code > 0) {
                         $msg = $jsonData['data']['message'];
-                        $e = $this->generateException($code, $msg, $response);
+                        $e = $this->generateException($code, $msg, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                         call_user_func($callback, null, $e);
                         return;
                     }
@@ -189,14 +189,15 @@ class Client implements Async
     /**
      * @param $code
      * @param $msg
+     * @param null $metaData
      * @return BusinessException|UnexpectedResponseException
      */
-    private function generateException($code, $msg, $response = null)
+    private function generateException($code, $msg, $metaData = null)
     {
         if (BusinessException::isValidCode($code)) {
             $e = new BusinessException($msg, $code);
         } else {
-            $e = new UnexpectedResponseException($msg, $code, null, $response);
+            $e = new UnexpectedResponseException($msg, $code, null, $metaData);
         }
         
         return $e;
@@ -277,5 +278,15 @@ class Client implements Async
         }
 
         return $params;
+    }
+
+    private function getRequestMetadata() {
+        return [
+            'host' => $this->host,
+            'port' => $this->port,
+            'method' => $this->method,
+            'params' => $this->params,
+            'uri' => $this->uri
+        ];
     }
 }
