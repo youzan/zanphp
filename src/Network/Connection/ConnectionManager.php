@@ -85,7 +85,7 @@ class ConnectionManager
                     'active' => $activeNums,
                 ], [
                     'pool_name' => $poolKey,
-                    'worker_id' => self::$server->swooleServer->worker_id
+                    'worker_id' => (string)self::$server->swooleServer->worker_id
                 ]
             );
         }
@@ -100,23 +100,6 @@ class ConnectionManager
 
     public function setServer($server) {
         self::$server = $server;
-    }
-
-    public function closeConnectionByRequestTimeout()
-    {
-        foreach (self::$poolMap as $pool) {
-            if ($pool instanceof Pool) {
-                $connections = (yield $pool->getActiveConnectionsFromContext());
-                if ([] == $connections) {
-                    continue;
-                }
-                foreach ($connections as $connection) {
-                    if (null != $connection && $connection instanceof Connection) {
-                        $connection->close();
-                    }
-                }
-            }
-        }
     }
 
     public function monitorConnectionNum()

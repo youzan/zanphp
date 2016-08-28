@@ -88,9 +88,14 @@ class MiddlewareConfig
     public function addBaseTerminators($terminators)
     {
         $baseTerminators = [
+            AsyncTaskTerminator::class,
+
             WorkerTerminator::class,
-            TraceTerminator::class,
             DbTerminator::class,
+            CacheTerminator::class,
+            KVTerminator::class,
+
+            TraceTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }

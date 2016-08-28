@@ -34,7 +34,7 @@ class Request extends BaseRequest implements Arrayable, RequestContract
         $post = isset($swooleRequest->post) ? $swooleRequest->post : [];
         $attributes = [];
         $cookie = isset($swooleRequest->cookie) ? $swooleRequest->cookie : [];
-        $files = [];
+        $files = isset($swooleRequest->files) ? $swooleRequest->files : [];
         $server = isset($swooleRequest->server) ? array_change_key_case($swooleRequest->server, CASE_UPPER) : [];
         if (isset($swooleRequest->header)) {
             foreach ($swooleRequest->header as $key => $value) {

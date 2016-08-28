@@ -60,6 +60,12 @@ abstract class Base implements Connection
         $this->socket = $socket;
     }
 
+    public function unsetSocket()
+    {
+        unset($this->socket);
+        $this->socket = null;
+    }
+
     public function setUnReleased()
     {
         $this->isReleased = false;
@@ -111,5 +117,10 @@ abstract class Base implements Connection
 
     public function getIsAsync() {
         return $this->isAsync;
+    }
+
+    public function getConnectTimeoutJobId()
+    {
+        return spl_object_hash($this) . '_connect_timeout';
     }
 }

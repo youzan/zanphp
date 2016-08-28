@@ -12,16 +12,18 @@ use Kdt\Iron\NSQ\Message\MsgInterface;
 use Kdt\Iron\NSQ\Queue as NSQueue;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Utilities\DesignPattern\Singleton;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class Queue implements Async
 {
-    use Singleton;
-
     /**
      * @var callable
      */
     private $handler = null;
+
+    /** @var  Trace */
+    private $trace;
 
     /**
      * Queue constructor.
@@ -43,12 +45,19 @@ class Queue implements Async
 
     /**
      * @param $topic
-     * @param $message
+     * @param MsgInterface $message
+     * @return $this
      */
     public function publish($topic, MsgInterface $message)
     {
+        $this->trace = (yield getContext('trace'));
+
         $this->handler = function ($callback) use ($topic, $message) {
-            NSQueue::publish($topic, $message, $callback);
+            if ($this->trace) {
+                $this->trace->transactionBegin(Constant::NSQ_PUB, $topic);
+            }
+
+            NSQueue::publish($topic, $message, $this->getPubCallback($callback));
         };
         
         yield $this;
@@ -58,15 +67,41 @@ class Queue implements Async
      * @param $topic
      * @param $channel
      * @param callable $callback
-     * @param $timeout
+     * @param int $timeout
+     * @return $this
      */
     public function subscribe($topic, $channel, callable $callback, $timeout = 1800)
     {
-        $this->handler = function ($callback) use ($topic, $channel, $callback, $timeout) {
+        $this->handler = function ($cb) use ($topic, $channel, $callback, $timeout) {
             NSQueue::set(['subTimeout' => $timeout]);
             NSQueue::subscribe($topic, $channel, $callback);
+            
+            call_user_func($cb, [false, null]);
         };
 
         yield $this;
+    }
+
+    private function getPubCallback($callback)
+    {
+        return function ($response) use ($callback) {
+            if ($this->trace) {
+                if ($this->isOk($response)) {
+                    $this->trace->commit(Constant::SUCCESS);
+                } else {
+                    $this->trace->commit(json_encode($response));
+                }
+            }
+
+            call_user_func($callback, $response);
+        };
+    }
+
+    private function isOk($response)
+    {
+        if (isset($response['result']) and $response['result'] === 'ok') {
+            return true;
+        }
+        return false;
     }
 }

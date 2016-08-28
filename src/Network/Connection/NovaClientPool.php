@@ -153,6 +153,11 @@ class NovaClientPool
     public function remove(Connection $conn)
     {
         $key = spl_object_hash($conn);
+
+        if (isset($this->waitingConnections[$key])) {
+            unset($this->waitingConnections[$key]);
+        }
+
         if (!isset($this->connections[$key])) {
             return false;
         }

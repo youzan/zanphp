@@ -326,6 +326,10 @@ class ServerDiscovery
             if ([] != $update) {
                 NovaClientConnectionManager::getInstance()->update($this->appName, $update);
             }
+        } else {
+            if (!empty($useServices)) {
+                NovaClientConnectionManager::getInstance()->offline($this->appName, $useServices);
+            }
         }
         $this->watchByStore();
     }

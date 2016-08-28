@@ -6,16 +6,17 @@
  * Date: 15/11/9
  * Time: 14:24
  */
-use Zan\Framework\Foundation\Coroutine\SysCall;
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Contract\Resource;
 use Zan\Framework\Foundation\Coroutine\Parallel;
+use Zan\Framework\Foundation\Coroutine\Signal;
+use Zan\Framework\Foundation\Coroutine\SysCall;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 function taskSleep($ms)
 {
     return new SysCall(function (Task $task) use ($ms) {
-        \Zan\Framework\Network\Server\Timer\Timer::after($ms, function() use ($task) {
+        Timer::after($ms, function () use ($task) {
             $task->send(null);
             $task->run();
         });
@@ -138,7 +139,18 @@ function parallel($coroutines)
     });
 }
 
+function async(callable $callback)
+{
+    return new SysCall(function (Task $task) use ($callback) {
+        $context = $task->getContext();
+        $queue = $context->get('async_task_queue', []);
+        $queue[] = $callback;
+        $context->set('async_task_queue', $queue);
+        $task->send(null);
 
+        return Signal::TASK_CONTINUE;
+    });
+}
 
 function getCookieHandler()
 {
@@ -201,36 +213,6 @@ function getServerHandler()
     });
 }
 
-function getRequestUri($exclude='', $params=false,$hasProtocol = true){
-    return new SysCall(function (Task $task) use ($exclude,$params,$hasProtocol) {
-        $context = $task->getContext();
-        $request = $context->get('request');
-        $serverPotocol = $request->server->get('SERVER_PROTOCOL');;
-        //$protocol = isset($_SERVER["HTTPS"]) ? 'https' : 'http';
-        $protocol = strtolower(substr($serverPotocol,0,5))=='https' ? 'https' : 'http';
-        $uri = $request->server->get('REQUEST_URI');
-        $host = $request->server->get('HTTP_HOST');
-        $request_uri = $host . $uri;
-        if($hasProtocol){
-            $request_uri = $protocol.'://'.$request_uri;
-        }
-        if($exclude) {
-            $request_uri = preg_replace($exclude, '', $request_uri);
-        }
 
-        $pPos   = strpos($request_uri,'?');
-        if(false === $params){
-            if(false !== $pPos){
-                $request_uri = substr($request_uri,0,$pPos);
-            }
-        }
-
-        if(false !== $params && !$pPos){
-            $request_uri .= '?';
-        }
-        $task->send($request_uri);
-        return Signal::TASK_CONTINUE;
-    });
-}
 
 

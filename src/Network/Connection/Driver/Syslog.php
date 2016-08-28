@@ -11,6 +11,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 use swoole_client as SwooleClient;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 class Syslog extends Base implements Connection
 {
@@ -36,12 +37,15 @@ class Syslog extends Base implements Connection
 
     public function onConnect($cli)
     {
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->release();
+
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
     }
 
     public function onClose(SwooleClient $cli)
     {
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
     }
 
@@ -53,6 +57,7 @@ class Syslog extends Base implements Connection
 
     public function onError(SwooleClient $cli)
     {
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
     }
 
@@ -64,9 +69,7 @@ class Syslog extends Base implements Connection
     public function closeSocket()
     {
         try {
-            if ($this->getSocket()->isConnected()) {
-                $this->getSocket()->close();
-            }
+            $this->getSocket()->close();
         } catch (\Exception $e) {
             //todo log
         }

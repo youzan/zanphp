@@ -22,8 +22,8 @@ class Hawk
 
     private $httpClient;
 
-    const SUCCESS = 1001;
-    const APPLICATION_PREFIX = 'php_soa_';
+    const SUCCESS_CODE = 200;
+    const URI = '/report';
 
     public function __construct()
     {
@@ -41,7 +41,7 @@ class Hawk
      *  ],
      *  'tags' => [
      *      'application' => 'pf-web',
-     *      'work_id' => 2,
+     *      'work_id' => '2',
      *      'host' => 'bc_sdfs',
      *  ],
      * ),
@@ -51,14 +51,11 @@ class Hawk
      */
     public function add($biz, array $metrics, array $tags)
     {
-        $tags['application'] = self::APPLICATION_PREFIX . $this->application;
+        $tags['application'] = $this->application;
         $tags['host'] = gethostname();
         $metricsArr = [];
         foreach ($metrics as $k => $v) {
-            $metricsArr[] = [
-                "metric" => $k,
-                "value" => $v
-            ];
+            $metricsArr[$k] = $v;
         }
 
         $this->data[] = [
@@ -75,14 +72,16 @@ class Hawk
             return;
         }
 
-        $response = (yield $this->httpClient->postJson($this->config['uri'], $this->data));
-        $raw = $response->getBody();
-        $jsonData = Json::decode($raw, true);
-        $result = $jsonData ? $jsonData : $raw;
+        $response = (yield $this->httpClient->postJson(self::URI, $this->data));
+        $statusCode = -1;
+
+        if ($response) {
+            $statusCode = $response->getStatusCode();
+        }
 
         $this->data = [];
 
-        if (!isset($result['code']) || $result['code'] != self::SUCCESS) {
+        if ($statusCode != self::SUCCESS_CODE) {
             //TODO: 上报失败
             var_dump("hawk上报失败");
         }
