@@ -136,7 +136,7 @@ class Client implements Async
             // 检查格式
             if (!isset($jsonData['code']) || !array_key_exists('data', $jsonData)) {
                 // TODO 分配 code, 调整提示语
-                $e = new ClientException('服务方返回的数据格式有误', 10000, null, ['response' => $response]);
+                $e = new ClientException('服务方返回的数据格式有误', 10000, NULL, ['response' => $response]);
                 call_user_func($callback, null, $e);
                 return;
             }
