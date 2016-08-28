@@ -7,13 +7,14 @@ namespace Zan\Framework\Network\Http\Security\Csrf;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Network\Http\Security\Csrf\Exception\TokenException;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Utilities\Helper\FilterHelper;
 
 class CsrfFilter Implements RequestFilter
 {
-    use FilterHelper;
+    const TOKEN_NAME = '__zan_token';
+    const TOKEN_HEADER_NAME = 'X-ZAN-TOKEN';
 
     /**
      * @var CsrfTokenManagerInterface
@@ -60,19 +61,40 @@ class CsrfFilter Implements RequestFilter
                     }
                 }
             }
-            $context->set('__zan_token', $newToken);
+            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw()));
         }
     }
 
     private function getTokenRaw(\Zan\Framework\Network\Http\Request\Request $request)
     {
-        $token = $request->cookie('__zan_token', null) ?: $request->header('X-ZAN-TOKEN', null);
+        $token = $request->cookie(self::TOKEN_NAME, null) ?: $request->header(self::TOKEN_HEADER_NAME, null);
         return $token;
     }
 
     private function isReading(\Zan\Framework\Network\Http\Request\Request $request)
     {
         return in_array($request->getMethod(), ['HEAD', 'GET', 'OPTIONS']);
+    }
+
+    private function getModules(Request $request)
+    {
+        static $store = [];
+        $route = $request->getRoute();
+        if (!isset($store[$route])) {
+            $routeAry = explode('/', $route);
+            if (2 > count($routeAry)) {
+                throw new SystemException('Error route');
+            }
+            if (!isset($routeAry[2])) {
+                $routeAry[2] = 'index';
+            }
+
+            $result['module'] = $routeAry[0];
+            $result['controller'] = $routeAry[1];
+            $result['action'] = $routeAry[2];
+            $store[$route] = $result;
+        }
+        return $store[$route];
     }
 
 }
