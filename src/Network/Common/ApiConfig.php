@@ -113,7 +113,7 @@ return [
             ]
 
         ],
-        'feeds'  => [
+        'feeds' => [
             'type' => 'java',
             'host' => 'http://10.9.47.164:8026',
         ],
@@ -143,7 +143,7 @@ return [
         'trade' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'trade.buy.bookByParams',
                     'host' => 'http://192.168.66.206:8025',
@@ -259,7 +259,7 @@ return [
         'tradetask' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'tradetask.message.send',
                     'host' => 'http://127.0.0.1:8026',
@@ -270,7 +270,7 @@ return [
         'cart' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'cart.cartService.addGoods',
                     'host' => 'http://192.168.66.206:8026',
@@ -311,7 +311,7 @@ return [
         'timeout' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'timeout.order.delivered.delay.increase',
                     'host' => 'http://127.0.0.1:8025',
@@ -461,7 +461,10 @@ return [
         'scrm' => [
             'type' => 'java',
             'host' => 'http://127.0.0.1:8001',
-
+        ],
+        'novaproxy' => [
+            'type' => 'http',
+            'host' => 'http://dev.novaproxy.s.qima-inc.com:8001',
         ],
         'crm' => [
             'type' => 'yar',
@@ -578,7 +581,7 @@ return [
             ]
 
         ],
-        'feeds'  => [
+        'feeds' => [
             'type' => 'java',
             'host' => 'http://10.9.47.164:8026',
         ],
@@ -605,7 +608,7 @@ return [
         'trade' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'trade.buy.bookByParams',
                     'host' => 'http://10.9.38.65:8025',
@@ -721,7 +724,7 @@ return [
         'tradetask' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'tradetask.message.send',
                     'host' => 'http://10.9.62.147:8025',
@@ -732,7 +735,7 @@ return [
         'cart' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'cart.cartService.addGoods',
                     'host' => 'http://10.9.65.122:7001',
@@ -773,7 +776,7 @@ return [
         'timeout' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'timeout.order.delivered.delay.increase',
                     'host' => 'http://127.0.0.1:8025',
@@ -916,16 +919,19 @@ return [
         'scrm' => [
             'type' => 'java',
             'host' => 'http://qabb-qa-novaproxy0:8000',
-
+        ],
+        'novaproxy' => [
+            'type' => 'http',
+            'host' => 'http://qabb-qa-novaproxy0:8000',
         ],
         'crm' => [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
         ],
     ],
+
     'online' => [
         'account' => [
-
             'type' => 'local',
             'host' => 'http://api.koudaitong.com:80',
             'sub' => [
@@ -1041,7 +1047,7 @@ return [
                 ],
             ]
         ],
-        'feeds'  => [
+        'feeds' => [
             'type' => 'java',
             'host' => 'http://10.10.180.144:8025',
         ],
@@ -1058,8 +1064,8 @@ return [
         ],
         'courier' => [
             'type' => 'java',
-            //					'host' > 'http://10.10.72.5:8011'//预发 10.10.72.5
-//                    'host' => 'http://10.10.127.76:8011'//online bc-msg3/4/5 //todo remove
+            // 'host' > 'http://10.10.72.5:8011'//预发 10.10.72.5
+            // 'host' => 'http://10.10.127.76:8011'//online bc-msg3/4/5 //todo remove
             'host' => 'http://10.200.175.192:8011'//online bc-msg3/4/5
         ],
         'courierold' => [
@@ -1070,34 +1076,34 @@ return [
         'trade' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'trade.buy.bookByParams',
-//								'host' => 'http://10.200.175.193:8011',
+                    // 'host' => 'http://10.200.175.193:8011',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.cashierBook',
-//                                'host' => 'http://10.200.175.193:8011',
+                    // 'host' => 'http://10.200.175.193:8011',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.updateAddressByParams',
-//                                'host' => 'http://10.200.175.193:8011',
+                    // 'host' => 'http://10.200.175.193:8011',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.cashierUpdateBuyWay',
-//								'host' => 'http://10.200.175.193:8011',
+                    // 'host' => 'http://10.200.175.193:8011',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.confirmByParams',
-//								'host' => 'http://10.200.175.193:8011',
+                    // 'host' => 'http://10.200.175.193:8011',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
@@ -1186,7 +1192,7 @@ return [
         'tradetask' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'tradetask.message.send',
                     'host' => 'http://trade-message-soa.s.qima-inc.com ',
@@ -1197,7 +1203,7 @@ return [
         'cart' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'cart.cartService.addGoods',
                     'host' => 'http://trade-cart-soa.s.qima-inc.com',
@@ -1238,17 +1244,17 @@ return [
         'timeout' => [
             'type' => 'local',
             'host' => 'http://trade.api.youzan.com/',
-            'sub'  => [
+            'sub' => [
                 [
                     'mod' => 'timeout.order.delivered.delay.increase',
-//                            'host' => 'http://10.10.12.64:8025',
+                    // 'host' => 'http://10.10.12.64:8025',
                     'host' => 'http://timeoutcenter.s.qima-inc.com',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'timeout.order.delivered.delay.getEndTime',
                     'host' => 'http://timeoutcenter.s.qima-inc.com',
-//                            'host' => 'http://10.10.12.64:8025',
+                    // 'host' => 'http://10.10.12.64:8025',
                     'type' => 'java'
                 ]
             ]
@@ -1372,7 +1378,7 @@ return [
         'open' => [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
-        ] ,
+        ],
         'ic' => [
             'type' => 'java',
             'host' => 'http://ic.s.qima-inc.com',
@@ -1388,6 +1394,14 @@ return [
         'refund_soa' => [
             'type' => 'java',
             'host' => 'http://trade-refund-soa.s.qima-inc.com',
+        ],
+        'scrm' => [
+            'type' => 'http',
+            'host' => 'http://novaproxy.s.qima-inc.com'
+        ],
+        'novaproxy' => [
+            'type' => 'http',
+            'host' => 'http://novaproxy.s.qima-inc.com'
         ],
         'crm' => [
             'type' => 'yar',
