@@ -5,7 +5,7 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Network\Common\Exception\ClientException;
+use Zan\Framework\Network\Common\Exception\UnexpectedResponseException;
 use Zan\Framework\Utilities\Types\Json;
 
 class Client implements Async
@@ -129,7 +129,7 @@ class Client implements Async
             $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING);
             if (false === $jsonData || !is_array($jsonData)) {
                 // TODO 分配 code
-                $e = new ClientException('网络错误', 10000, NULL, ['response' => $response]);
+                $e = new UnexpectedResponseException('网络错误', 10000, NULL, ['response' => $response]);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -137,7 +137,7 @@ class Client implements Async
             // 检查格式
             if (!isset($jsonData['code']) || !array_key_exists('data', $jsonData)) {
                 // TODO 分配 code, 调整提示语
-                $e = new ClientException('服务方返回的数据格式有误', 10000, NULL, ['response' => $response]);
+                $e = new UnexpectedResponseException('服务方返回的数据格式有误', 10000, NULL, ['response' => $response]);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -189,14 +189,14 @@ class Client implements Async
     /**
      * @param $code
      * @param $msg
-     * @return BusinessException|ClientException
+     * @return BusinessException|UnexpectedResponseException
      */
     private function generateException($code, $msg, $response = null)
     {
         if (BusinessException::isValidCode($code)) {
             $e = new BusinessException($msg, $code);
         } else {
-            $e = new ClientException($msg, $code, null, $response);
+            $e = new UnexpectedResponseException($msg, $code, null, $response);
         }
         
         return $e;
@@ -207,7 +207,7 @@ class Client implements Async
         if (is_null(self::$apiConfig)) {
             $configFile = __DIR__ . '/ApiConfig.php';
             if (!file_exists($configFile)) {
-                throw new ClientException('service_host 配置文件不存在');
+                throw new UnexpectedResponseException('service_host 配置文件不存在');
             }
             $allApiConfig = require $configFile;
 
@@ -219,7 +219,7 @@ class Client implements Async
             } elseif($runMode == 'pubtest' && isset($allApiConfig['test'])){
                 self::$apiConfig = $allApiConfig['test'];
             }else{
-                throw new ClientException('service_host 配置文件不完整');
+                throw new UnexpectedResponseException('service_host 配置文件不完整');
             }
         }
 

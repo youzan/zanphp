@@ -7,7 +7,7 @@ namespace Zan\Framework\Network\Common\Exception;
 use Exception;
 use Zan\Framework\Foundation\Exception\SystemException;
 
-class ClientException extends SystemException
+class UnexpectedResponseException extends SystemException
 {
     public $metaData;
 
