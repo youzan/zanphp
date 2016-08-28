@@ -83,15 +83,19 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
 
     private function getStrategy($config, $arr)
     {
-        $name = array_shift($arr);
-        if (isset($config[$name])) {
-            if (empty($arr)) {
-                return $config[$name];
-            } elseif (is_array($result = $this->getStrategy($config[$name], $arr))) {
-                return $result;
+        if (is_array($arr) and count($arr) > 0) {
+            $name = array_shift($arr);
+            if (isset($config[$name])) {
+                if (empty($arr)) {
+                    return $config[$name];
+                } else {
+                    $result = $this->getStrategy($config[$name], $arr);
+                    if (is_array($result)) {
+                        return $result;
+                    }
+                }
             }
         }
-
         return isset($config['_default']) ? $config['_default'] : $config;
     }
 }
