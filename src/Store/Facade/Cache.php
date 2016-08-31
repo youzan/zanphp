@@ -78,6 +78,10 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->get($realKey));
+        //gzdecode
+        if ($result && isset($config['encode']) && $config['encode'] == 'gz') {
+            $result = gzdecode($result);
+        }
         $result = self::decode($result);
 
         yield self::deleteActiveConnectionFromContext($conn);
@@ -100,6 +104,10 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         if (is_array($value)) {
             $value = json_encode($value);
+        }
+
+        if (isset($config['encode']) && $config['encode'] == 'gz') {
+            $value = gzencode($value, 1);
         }
         $result = (yield $redis->set($realKey, $value));
 
