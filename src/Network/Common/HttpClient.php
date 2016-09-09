@@ -179,7 +179,7 @@ class HttpClient implements Async
 
     public function request($ip)
     {
-        $this->client = new \swoole_http_client($ip, $this->port);
+        $this->client = new \swoole_http_client($ip, $this->port, $this->ssl);
         $this->buildHeader();
         if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
