@@ -57,7 +57,7 @@ class Queue implements Async
                 $this->trace->transactionBegin(Constant::NSQ_PUB, $topic);
             }
 
-            NSQueue::publish($topic, $message, $this->getPubCallback($callback));
+            NSQueue::publish($topic, $message, $this->getResultCallback($callback), $this->getExceptionCallBack($callback));
         };
         
         yield $this;
@@ -82,7 +82,7 @@ class Queue implements Async
         yield $this;
     }
 
-    private function getPubCallback($callback)
+    private function getResultCallback($callback)
     {
         return function ($response) use ($callback) {
             if ($this->trace) {
@@ -94,6 +94,17 @@ class Queue implements Async
             }
 
             call_user_func($callback, $response);
+        };
+    }
+
+    private function getExceptionCallBack($callback)
+    {
+        return function (\Exception $exception) use ($callback) {
+            if ($this->trace) {
+                $this->trace->commit($exception->getTraceAsString());
+            }
+
+            call_user_func_array($callback, [null, $exception]);
         };
     }
 
