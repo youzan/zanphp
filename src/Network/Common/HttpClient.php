@@ -28,6 +28,7 @@ class HttpClient implements Async
 
     private $host;
     private $port;
+    private $ssl;
 
     private $timeout;
 
@@ -40,15 +41,16 @@ class HttpClient implements Async
 
     private $callback;
 
-    public function __construct($host, $port = 80)
+    public function __construct($host, $port = 80, $ssl = false)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->ssl = $ssl;
     }
 
-    public static function newInstance($host, $port = 80)
+    public static function newInstance($host, $port = 80, $ssl = false)
     {
-        return new static($host, $port);
+        return new static($host, $port, $ssl);
     }
 
     public function get($uri = '', $params = [], $timeout = 3)
@@ -149,7 +151,7 @@ class HttpClient implements Async
 
     public function request($ip)
     {
-        $this->client = new \swoole_http_client($ip, $this->port);
+        $this->client = new \swoole_http_client($ip, $this->port, $this->ssl);
         $this->buildHeader();
 
         if('GET' === $this->method){

@@ -49,8 +49,9 @@ class DecimalConverter
 
         $result = 0;
         $length = strlen($num);
+        $dict = substr(self::$dict, 0, $from);
         for($i = 0; $i < $length; $i++) {
-            $pos = strpos(self::$dict,$num[$i]);
+            $pos = strpos($dict,$num[$i]);
             if ($pos === false) {
                 throw new InvalidArgumentException('含有非法字符');
             }

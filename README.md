@@ -2,7 +2,7 @@
 
 <img src="https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small@2x.png?raw=true" alt="zanphp logo" srcset="https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small.png?raw=true 1x, https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small@2x.png?raw=true 2x, https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small.png?raw=true" width="210" height="210">
 
-Zan是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务。
+Zan 是基于PHP协程的网络服务框架，提供最简单的方式开发面向C10K+的高并发HTTP服务或SOA服务。
 
 ## 核心特性
 1. 基于 `yield` 实现了独立堆栈的协程
@@ -28,14 +28,14 @@ Zan 和 Golang 的边界是：Zan做业务系统；Golang 做系统（中间件�
 而 Zan 和 Golang 编程模型的驱近，是希望能给PHP程序员一个更好的桥梁到 Golang。            
 理想的技术栈是：Zan + Go + 少量的C/C++。
 
-当然对于致力于终身coding的码农来说：Java依然很难跨过去的坎。
+当然对于致力于终身coding的码农来说：Java依然是很难跨过去的坎。
 
 
 ## 官方文档
 
 Zan PHP的文档仓库地址：[zan-doc](https://github.com/youzan/zan-doc/blob/master/zh/SUMMARY.md)。目前只有中文的文档，欢迎英语大牛翻译成英文的。
 
-你也可以在GitBook上查看Zan PHP 的文档 [GitBook/zan-doc](https://agalwood.gitbooks.io/zan-doc/content/zh/)。
+在线查看文档 [http://doc.zanphp.io/ ✈](http://doc.zanphp.io/)
 
 
 ## 常用链接
