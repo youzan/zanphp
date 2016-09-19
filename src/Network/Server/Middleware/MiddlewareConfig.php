@@ -96,7 +96,7 @@ class MiddlewareConfig
             KVTerminator::class,
 
             TraceTerminator::class,
-            ClearContextTerminator::class,
+//            ClearContextTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }
