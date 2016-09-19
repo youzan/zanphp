@@ -47,8 +47,12 @@ class Context
 
     public function clear()
     {
+        foreach ($this->map as $value) {
+            unset($value);
+        }
         unset($this->map);
         $this->map = null;
+        $this->event = null;
     }
 
     public function getEvent()

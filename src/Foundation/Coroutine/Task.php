@@ -136,6 +136,9 @@ class Task
 
     public function fireTaskDoneEvent()
     {
+        if (null === $this->context) {
+            return;
+        }
         $evtName = 'task_event_' . $this->taskId;
         $this->context->getEvent()->fire($evtName, $this->sendValue);
     }

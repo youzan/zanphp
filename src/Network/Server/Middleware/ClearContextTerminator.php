@@ -21,6 +21,8 @@ class ClearContextTerminator implements RequestTerminator
         if ($context instanceof Context) {
             $context->clear();
         }
+        unset($context);
+        $context = null;
     }
 }
 
