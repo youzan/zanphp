@@ -90,6 +90,23 @@ class Cache {
         yield $result;
     }
 
+    public static function hGet($configKey, $keys, $field = '')
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->hGet($realKey, $field));
+        $result = self::decode($result);
+        yield $result;
+    }
+
     public static function set($configKey, $keys, $value)
     {
         $config = self::getConfigCacheKey($configKey);
