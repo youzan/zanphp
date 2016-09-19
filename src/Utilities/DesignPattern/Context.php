@@ -45,6 +45,12 @@ class Context
         $this->map[$key] = $value;
     }
 
+    public function clear()
+    {
+        unset($this->map);
+        $this->map = null;
+    }
+
     public function getEvent()
     {
         return $this->event;
