@@ -65,6 +65,8 @@ class Server extends ServerBase implements ServerContract
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
 
+        \swoole_async_set(["socket_dontwait" => 1]);
+
         $this->bootServerStartItem();
         $this->init();
         $this->swooleServer->start();

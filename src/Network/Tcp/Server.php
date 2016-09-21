@@ -58,6 +58,8 @@ class Server extends ServerBase {
 
         $this->swooleServer->on('close', [$this, 'onClose']);
 
+        \swoole_async_set(["socket_dontwait" => 1]);
+
         $this->init();
         $this->registerServices();
         
