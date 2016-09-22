@@ -30,7 +30,7 @@ class Client implements Async
 
     private $params;
 
-    private $format = 'yar';
+    private $format = 'form';
 
 
     private function __construct($host, $port)
@@ -39,7 +39,7 @@ class Client implements Async
         $this->port = $port;
     }
 
-    public static function call($api, $params = [],$callback = null, $method = 'POST',$format='yar')
+    public static function call($api, $params = [],$callback = null, $method = 'POST',$format='form')
     {
         $apiConfig = self::getApiConfig($api);
         $params = self::filterParams($params, $apiConfig['type']);
@@ -100,8 +100,17 @@ class Client implements Async
             $this->uri = $this->uri . '?' . http_build_query($this->params);
         } else {
             if ($this->type == self::PHP_TYPE) {
-                $body = http_build_query($this->params);
-                $contentType = 'application/x-www-form-urlencoded';
+                switch ($this->format) {
+                    case 'form':
+                        $body = http_build_query($this->params);
+                        $contentType = 'application/x-www-form-urlencoded';
+                        break;
+                    case 'json':
+                        $body = json_encode($this->params);
+                        $contentType = 'application/json';
+                        break;
+
+                }
             } else {
                 $body = json_encode($this->params);
                 $contentType = 'application/json';
