@@ -205,6 +205,7 @@ class Client implements Async
     
     private static function getApiConfig($api)
     {
+        $runMode = RunMode::get();
         if (is_null(self::$apiConfig)) {
             $configFile = __DIR__ . '/ApiConfig.php';
             if (!file_exists($configFile)) {
@@ -247,8 +248,8 @@ class Client implements Async
         } else {
             $host = isset($hostInfo[0]) ? str_replace('/', '', $hostInfo[0]) : 'api.koudaitong.com';
         }
-
-        $timeout = isset($target['timeout']) ? $target['timeout'] : 3000;
+        $defaultTime = $runMode == 'test' ? 15000 : 3000;
+        $timeout = isset($target['timeout']) ? $target['timeout'] : $defaultTime;
 
         return [
             'host' => $host,
