@@ -104,6 +104,10 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hGet($realKey, $field));
         $result = self::decode($result);
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
         yield $result;
     }
 
