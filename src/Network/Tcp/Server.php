@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
@@ -128,6 +129,9 @@ class Server extends ServerBase {
     public function onWorkerStop($swooleServer, $workerId)
     {
         echo "worker #$workerId stopping ....\n";
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        echo "worker #$workerId still has $num requests in progress...\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
