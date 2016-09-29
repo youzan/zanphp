@@ -7,6 +7,7 @@ use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
@@ -113,6 +114,9 @@ class Server extends ServerBase implements ServerContract
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
         echo "worker #$workerId stopping .....\n";
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        echo "worker #$workerId still has $num requests in progress...\n";
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
