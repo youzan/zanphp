@@ -236,7 +236,28 @@ class HttpClient implements Async
     public function checkTimeout()
     {
         $this->client->close();
-        $exception = new HttpClientTimeoutException();
+
+        $message = sprintf(
+            '[http request timeout] host:%s port:%s uri:%s method:%s ',
+            $this->host,
+            $this->port,
+            $this->uri,
+            $this->method
+        );
+        $metaData = [
+            'host' => $this->host,
+            'port' => $this->port,
+            'ssl' => $this->ssl,
+            'uri' => $this->uri,
+            'method' => $this->method,
+            'params' => $this->params,
+            'body' => $this->body,
+            'header' => $this->header,
+            'timeout' => $this->timeout,
+            'use_http_proxy' => $this->useHttpProxy,
+        ];
+
+        $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
         if ($this->trace) {
             $this->trace->commit($exception);
         }
