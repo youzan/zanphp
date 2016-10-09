@@ -81,6 +81,7 @@ class SystemLogger extends BaseLogger
             unset($context['exception']);
         }
 
+        $level = ($level === 'warning') ? 'warn' : $level;
         $detail['extra'] = $context;
         $result = [
             'platform' => 'php',
