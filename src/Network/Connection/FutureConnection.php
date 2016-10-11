@@ -40,6 +40,9 @@ class FutureConnection implements Async
     {
         $evtName = $this->connKey . '_free';
         Event::once($evtName,[$this,'getConnection' ]);
+
+        $evtName = $this->connKey . '_connect_timeout';
+        Event::once($evtName,[$this,'onConnectTimeout' ]);
     }
 
     public function getConnection()
@@ -51,5 +54,10 @@ class FutureConnection implements Async
     {
         $conn = (yield $this->connectionManager->get($this->connKey));
         call_user_func($this->taskCallback, $conn);
+    }
+
+    public function onConnectTimeout() {
+        call_user_func($this->taskCallback, null, new \RuntimeException("futureConnection connected timeout"));
+        unset($this->taskCallback);
     }
 }

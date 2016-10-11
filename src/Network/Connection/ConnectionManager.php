@@ -36,7 +36,7 @@ class ConnectionManager
      * @param string $connKey
      * @param int $timeout
      * @return \Zan\Framework\Contract\Network\Connection
-     * @throws InvalidArgumentException
+     * @throws InvalidArgumentException | \RuntimeException
      */
     public function get($connKey, $timeout=0)
     {

@@ -48,6 +48,7 @@ class Tcp implements ConnectionFactory
     {
         return function() use ($connection) {
             $connection->close();
+            $connection->onConnectTimeout();
         };
     }
 

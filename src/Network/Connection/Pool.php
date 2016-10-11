@@ -157,4 +157,12 @@ class Pool implements ConnectionPool
         }
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
     }
+
+    /**
+     * @return array|null
+     */
+    public function getPoolConfig()
+    {
+        return $this->poolConfig;
+    }
 }
