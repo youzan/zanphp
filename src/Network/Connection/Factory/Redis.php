@@ -16,7 +16,7 @@ use Zan\Framework\Network\Server\Timer\Timer;
 
 class Redis implements ConnectionFactory
 {
-    const CONNECT_TIMEOUT = 30000;
+    const CONNECT_TIMEOUT = 3000;
 
     /**
      * @var array
