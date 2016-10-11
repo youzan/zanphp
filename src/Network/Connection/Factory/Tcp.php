@@ -36,7 +36,7 @@ class Tcp implements ConnectionFactory
         $connection->init();
 
         //call connect
-        $socket->connect($this->config['host'], $this->config['port'], $this->config['timeout']);
+        $socket->connect($this->config['host'], $this->config['port']);
 
         $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
         Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
