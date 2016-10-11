@@ -15,7 +15,7 @@ use Zan\Framework\Network\Connection\Driver\Tcp as TcpConnection;
 
 class Tcp implements ConnectionFactory
 {
-    const CONNECT_TIMEOUT = 30000;
+    const CONNECT_TIMEOUT = 3000;
 
     private $config;
 
