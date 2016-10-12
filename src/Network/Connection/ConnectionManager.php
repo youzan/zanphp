@@ -13,6 +13,7 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Network\Connection\Exception\ConnectTimeoutException;
 use Zan\Framework\Network\Connection\FutureConnection;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
 use Zan\Framework\Network\Server\Timer\Timer;
@@ -36,7 +37,7 @@ class ConnectionManager
      * @param string $connKey
      * @param int $timeout
      * @return \Zan\Framework\Contract\Network\Connection
-     * @throws InvalidArgumentException | \RuntimeException
+     * @throws InvalidArgumentException | ConnectTimeoutException
      */
     public function get($connKey, $timeout=0)
     {
