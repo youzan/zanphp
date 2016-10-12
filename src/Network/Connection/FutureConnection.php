@@ -12,6 +12,7 @@ use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Foundation\Core\Event;
+use Zan\Framework\Network\Connection\Exception\ConnectTimeoutException;
 
 class FutureConnection implements Async
 {
@@ -57,7 +58,7 @@ class FutureConnection implements Async
     }
 
     public function onConnectTimeout() {
-        call_user_func($this->taskCallback, null, new \RuntimeException("futureConnection connected timeout"));
+        call_user_func($this->taskCallback, null, new ConnectTimeoutException("future $this->connKey connection connected timeout"));
         unset($this->taskCallback);
     }
 }

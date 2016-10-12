@@ -11,6 +11,8 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\ConnectionPool;
+use Zan\Framework\Foundation\Core\Event;
+use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Network\Connection\Pool;
 
 
@@ -122,5 +124,21 @@ abstract class Base implements Connection
     public function getConnectTimeoutJobId()
     {
         return spl_object_hash($this) . '_connect_timeout';
+    }
+
+    public function onConnectTimeout()
+    {
+        $pool = $this->pool;
+
+        if ($pool instanceof Pool) {
+            $evtName = $pool->getPoolConfig()['pool']['pool_name'] . '_connect_timeout';
+            Event::fire($evtName, [], false);
+            $pool->waitNum = $pool->waitNum >0 ? $pool->waitNum-- : 0 ;
+        } else if ($pool instanceof NovaClientPool) {
+            // do nothing
+        }
+
+        $client = substr(static::class, strrpos(static::class, "\\") + 1);
+        echo "$client client connect timeout\n";
     }
 }

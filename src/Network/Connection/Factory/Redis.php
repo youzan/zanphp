@@ -49,6 +49,7 @@ class Redis implements ConnectionFactory
     {
         return function() use ($connection) {
             $connection->close();
+            $connection->onConnectTimeout();
         };
     }
 

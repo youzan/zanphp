@@ -10,8 +10,6 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
-use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Connection\Pool;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
 use Zan\Framework\Network\Server\Timer\Timer;
 
@@ -63,16 +61,7 @@ class Tcp extends Base implements Connection
         $this->close();
         echo "tcp client error\n";
     }
-
-    public function onConnectTimeout(){
-        /* @var $pool Pool */
-        $pool = $this->pool;
-        $evtName = $pool->getPoolConfig()['pool']['pool_name'] . '_connect_timeout';
-        Event::fire($evtName, [], false);
-        $pool->waitNum = $pool->waitNum >0 ? $pool->waitNum-- : 0 ;
-        echo "tcp client connect timeout\n";
-    }
-
+    
     public function setClientCb(callable $cb) {
         $this->clientCb = $cb;
     }
