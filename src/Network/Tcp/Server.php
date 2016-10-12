@@ -137,6 +137,9 @@ class Server extends ServerBase {
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
         echo "worker error happening ....\n";
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        echo "worker #$workerId still has $num requests in progress...\n";
     }
 
     public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
