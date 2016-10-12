@@ -122,6 +122,9 @@ class Server extends ServerBase implements ServerContract
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        echo "worker #$workerId still has $num requests in progress...\n";
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
