@@ -57,9 +57,17 @@ if (! function_exists('data_set')) {
     }
 }
 
+if (! function_exists('sys_echo')) {
+    function sys_echo($context) {
+        $dataStr = date("Y-m-d H:i:s", time());
+        echo "[$dataStr] $context\n";
+    }
+}
+
 if (! function_exists('echo_exception')) {
     function echo_exception(\Exception $e)
     {
+        $time = date('Y-m-d H:i:s', time());
         $code = $e->getCode();
         $msg = $e->getMessage();
         $trace = $e->getTraceAsString();
@@ -69,6 +77,7 @@ if (! function_exists('echo_exception')) {
         
 ###################################################################################
           \033[1;31mGot a exception\033[0m
+          time: $time
           code: $code
           message: $msg
           
@@ -106,3 +115,4 @@ if (! function_exists('d')) {
         var_dump($variables);
     }
 }
+
