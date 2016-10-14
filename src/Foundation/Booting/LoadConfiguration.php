@@ -4,6 +4,7 @@ namespace Zan\Framework\Foundation\Booting;
 
 use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\AppConfig;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\IronConfig;
 
@@ -21,5 +22,6 @@ class LoadConfiguration implements Bootable
 
         Config::init();
         IronConfig::init();
+        AppConfig::init();
     }
 }
