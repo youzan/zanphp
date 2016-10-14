@@ -45,7 +45,7 @@ class FutureConnection implements Async
         $evtName = $this->connKey . '_free';
         Event::once($evtName,[$this,'getConnection' ]);
 
-        Timer::after($this->timeout, [$this, 'onConnectTimeout']);
+        Timer::after($this->timeout, [$this, 'onConnectTimeout'], $this->getConnectTimeoutJobId());
     }
 
     public function getConnection()
@@ -59,6 +59,8 @@ class FutureConnection implements Async
             if (!isset($this->taskCallback)) {
                 return;
             }
+
+            Timer::clearAfterJob($this->getConnectTimeoutJobId());
 
             if (isset($this->pool->waitNum) && $this->pool->waitNum > 0) {
                 $this->pool->waitNum--;
@@ -84,5 +86,10 @@ class FutureConnection implements Async
         
         call_user_func($this->taskCallback, null, new ConnectTimeoutException("future $this->connKey connection connected timeout"));
         unset($this->taskCallback);
+    }
+
+    private function getConnectTimeoutJobId()
+    {
+        return spl_object_hash($this) . '_future_connect_timeout';
     }
 }

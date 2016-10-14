@@ -128,14 +128,6 @@ abstract class Base implements Connection
 
     public function onConnectTimeout()
     {
-        $pool = $this->pool;
-
-        if ($pool instanceof Pool) {
-
-        } else if ($pool instanceof NovaClientPool) {
-
-        }
-
         $client = substr(static::class, strrpos(static::class, "\\") + 1);
         sys_echo("$client client connect timeout");
     }

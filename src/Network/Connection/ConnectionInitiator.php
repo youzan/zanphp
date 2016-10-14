@@ -26,7 +26,7 @@ class ConnectionInitiator
     use Singleton;
 
     const CONNECT_TIMEOUT = 3000;
-    const MAX_WAIT_CONNECTION = 10;
+    const MAX_WAIT_CONNECTION = 30;
 
     private $engineMap = [
         'mysqli', 

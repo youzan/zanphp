@@ -209,7 +209,7 @@ class Trace
             
             yield $tcpClient->send($this->builder->getData());
         } catch (\Exception $e) {
-            //do nothing..
+            echo_exception($e);
         }
     }
 }
