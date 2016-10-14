@@ -23,7 +23,7 @@ class Path {
     const DEFAULT_ROUTING_PATH  = 'resource/routing/';
     const DEFAULT_MIDDLEWARE_PATH = 'resource/middleware';
     const DEFAULT_IRON_PATH = 'vendor/zan-config/iron/files/';
-    const DEFAULT_APP_PATH = 'vendor/app-config/';
+    const DEFAULT_APP_PATH = 'vendor/zan-config/app/';
 
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
