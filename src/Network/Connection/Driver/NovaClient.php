@@ -102,6 +102,7 @@ class NovaClient extends Base implements Connection
 
     public function close()
     {
+        $this->closeSocket();
         $this->getPool()->remove($this);
         $this->getPool()->reload($this->config);
     }

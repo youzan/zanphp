@@ -9,13 +9,11 @@
 namespace Zan\Framework\Network\Connection;
 
 
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Network\Connection\Exception\CanNotCreateConnectionException;
 use Zan\Framework\Network\Connection\Exception\ConnectTimeoutException;
-use Zan\Framework\Network\Connection\FutureConnection;
-use Zan\Framework\Network\Connection\Factory\Mysqli;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Monitor\Constant;
 use Zan\Framework\Sdk\Monitor\Hawk;
@@ -37,21 +35,30 @@ class ConnectionManager
      * @param string $connKey
      * @param int $timeout
      * @return \Zan\Framework\Contract\Network\Connection
-     * @throws InvalidArgumentException | ConnectTimeoutException
+     * @throws InvalidArgumentException | CanNotCreateConnectionException | ConnectTimeoutException
      */
     public function get($connKey, $timeout=0)
     {
         if(!isset(self::$poolMap[$connKey])){
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
         }
+        /* @var $pool Pool */
         $pool = self::$poolMap[$connKey];
+
+        $poolConf = $pool->getPoolConfig();
+        $maxWaitNum = $poolConf['pool']['maximum-wait-connection'];
+        if ($pool->waitNum > $maxWaitNum) {
+            throw new CanNotCreateConnectionException("Connection $connKey has up to the maximum waiting connection number");
+        }
+
         $connection = (yield $pool->get());
         if ($connection) {
             yield $connection;
             return;
         }
+
         $pool->waitNum++;
-        yield new FutureConnection($this, $connKey, $timeout);
+        yield new FutureConnection($this, $connKey, $poolConf['connect_timeout'], $pool);
     }
 
     /**

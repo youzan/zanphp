@@ -131,11 +131,9 @@ abstract class Base implements Connection
         $pool = $this->pool;
 
         if ($pool instanceof Pool) {
-            $evtName = $pool->getPoolConfig()['pool']['pool_name'] . '_connect_timeout';
-            Event::fire($evtName, [], false);
-            $pool->waitNum = $pool->waitNum >0 ? $pool->waitNum-- : 0 ;
+
         } else if ($pool instanceof NovaClientPool) {
-            // do nothing
+
         }
 
         $client = substr(static::class, strrpos(static::class, "\\") + 1);

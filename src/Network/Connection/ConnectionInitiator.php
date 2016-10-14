@@ -25,6 +25,9 @@ class ConnectionInitiator
 {
     use Singleton;
 
+    const CONNECT_TIMEOUT = 3000;
+    const MAX_WAIT_CONNECTION = 10;
+
     private $engineMap = [
         'mysqli', 
         'http', 
@@ -76,6 +79,9 @@ class ConnectionInitiator
                 $this->poolName = '';
                 continue;
             }
+
+            $this->fixConfig($cf);
+
             //创建连接池
             $dir = $this->poolName;
             $this->poolName = '' === $this->poolName ? $k : $this->poolName . '.' . $k;
@@ -88,6 +94,24 @@ class ConnectionInitiator
                 $endKey = end($fileConfigKeys);
                 $this->poolName = $k == $endKey ? '' : $dir;
             }
+        }
+    }
+
+    private function fixConfig(array &$config)
+    {
+        if (!isset($config['connect_timeout'])) {
+            $config['connect_timeout'] = self::CONNECT_TIMEOUT;
+        } else {
+            $config['connect_timeout'] = intval($config['connect_timeout']);
+        }
+        if (!isset($config['pool']['maximum-wait-connection'])) {
+            if (isset($config['pool']['maximum-connection-count'])) {
+                $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-connection-count']);
+            } else {
+                $config['pool']['maximum-wait-connection'] = self::MAX_WAIT_CONNECTION;
+            }
+        } else {
+            $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-wait-connection']);
         }
     }
 
