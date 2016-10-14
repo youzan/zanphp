@@ -56,28 +56,33 @@ class FutureConnection implements Async
     public function doGeting()
     {
         try {
-            if (isset($this->taskCallback)) {
-                if (isset($this->pool->waitNum)) {
-                    $this->pool->waitNum = $this->pool->waitNum >0 ? $this->pool->waitNum-- : 0 ;
-                }
-
-                $conn = (yield $this->connectionManager->get($this->connKey));
-                call_user_func($this->taskCallback, $conn);
-                unset($this->taskCallback);
+            if (!isset($this->taskCallback)) {
+                return;
             }
+
+            if (isset($this->pool->waitNum) && $this->pool->waitNum > 0) {
+                $this->pool->waitNum--;
+            }
+
+            $conn = (yield $this->connectionManager->get($this->connKey));
+            call_user_func($this->taskCallback, $conn);
+            unset($this->taskCallback);
+
         } catch (\Exception $ex) {
             echo_exception($ex);
         }
     }
 
     public function onConnectTimeout() {
-        if (isset($this->taskCallback)) {
-            if (isset($this->pool->waitNum)) {
-                $this->pool->waitNum = $this->pool->waitNum >0 ? $this->pool->waitNum-- : 0 ;
-            }
-
-            call_user_func($this->taskCallback, null, new ConnectTimeoutException("future $this->connKey connection connected timeout"));
-            unset($this->taskCallback);
+        if (!isset($this->taskCallback)) {
+            return;
         }
+
+        if (isset($this->pool->waitNum) && $this->pool->waitNum > 0) {
+            $this->pool->waitNum--;
+        }
+        
+        call_user_func($this->taskCallback, null, new ConnectTimeoutException("future $this->connKey connection connected timeout"));
+        unset($this->taskCallback);
     }
 }

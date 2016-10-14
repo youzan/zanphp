@@ -15,6 +15,8 @@ use Zan\Framework\Network\Server\Timer\Timer;
 
 class NovaClient implements ConnectionFactory
 {
+    const CONNECT_TIMEOUT = 3000;
+
     private $config;
 
     public function __construct(array $config)
@@ -36,7 +38,8 @@ class NovaClient implements ConnectionFactory
         //call connect
         $socket->connect($this->config['host'], $this->config['port']);
 
-        Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
+        $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
+        Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
         return $connection;
     }

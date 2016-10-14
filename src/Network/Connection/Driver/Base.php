@@ -137,6 +137,6 @@ abstract class Base implements Connection
         }
 
         $client = substr(static::class, strrpos(static::class, "\\") + 1);
-        echo "$client client connect timeout\n";
+        sys_echo("$client client connect timeout");
     }
 }

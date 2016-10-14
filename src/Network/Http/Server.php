@@ -123,10 +123,10 @@ class Server extends ServerBase implements ServerContract
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
 
-        echo "worker error happening ....\n";
+        sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        echo "worker #$workerId still has $num requests in progress...\n";
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)

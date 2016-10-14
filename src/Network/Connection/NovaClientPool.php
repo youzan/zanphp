@@ -33,7 +33,6 @@ class NovaClientPool
 
     const CONNECTION_RELOAD_STEP_TIME = 5000;
     const CONNECTION_RELOA_MAX_STEP_TIME = 30000;
-    const CONNECT_TIMEOUT = 3000;
 
     private $reloadTime = [];
 
@@ -57,13 +56,9 @@ class NovaClientPool
 
     private function createConnections()
     {
-        foreach ($this->config as &$config) {
-            if (!isset($config['connect_timeout'])) {
-                $config['connect_timeout'] = self::CONNECT_TIMEOUT;
-            }
+        foreach ($this->config as $config) {
             $this->createConnection($config);
         }
-        unset($config);
     }
 
     public function createConnection($config)
