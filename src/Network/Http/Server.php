@@ -95,28 +95,28 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        echo "server starting .....\n";
+        sys_echo("server starting .....");
     }
 
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
-        echo "server shutdown .....\n";
+        sys_echo("server shutdown .....");
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        echo "worker #$workerId starting .....\n";
+        sys_echo("worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
-        echo "worker #$workerId stopping .....\n";
+        sys_echo("worker #$workerId stopping .....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        echo "worker #$workerId still has $num requests in progress...\n";
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
@@ -124,7 +124,7 @@ class Server extends ServerBase implements ServerContract
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        echo "worker #$workerId still has $num requests in progress...\n";
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)

@@ -52,7 +52,7 @@ class ServerRegister
         $response = (yield $httpClient->postJson($haunt['register']['uri'], $this->parseConfig($config), null));
         $register = $response->getBody();
 
-        echo $register;
+        sys_echo($register);
     }
 
 

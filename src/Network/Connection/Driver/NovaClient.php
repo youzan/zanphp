@@ -49,14 +49,14 @@ class NovaClient extends Base implements Connection
         $this->release();
         $this->getPool()->connecting($this);
         $this->heartbeat();
-        echo "nova client connect to server\n";
+        sys_echo("nova client connect to server");
     }
 
     public function onClose(SwooleClient $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
-        echo "nova client close\n";
+        sys_echo("nova client close");
     }
 
     public function onReceive(SwooleClient $cli, $data) {
@@ -67,7 +67,7 @@ class NovaClient extends Base implements Connection
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
-        echo "nova client error\n";
+        sys_echo("nova client error");
     }
 
     public function setClientCb(callable $cb) {
