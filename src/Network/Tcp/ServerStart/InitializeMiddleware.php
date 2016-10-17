@@ -6,7 +6,7 @@
  * Time: 下午4:58
  */
 
-namespace Zan\Framework\Network\Http\ServerStart;
+namespace Zan\Framework\Network\Tcp\ServerStart;
 
 use Zan\Framework\Network\Server\Middleware\MiddlewareInitiator;
 use Zan\Framework\Foundation\Core\Config;
@@ -14,13 +14,9 @@ use Zan\Framework\Foundation\Core\ConfigLoader;
 
 class InitializeMiddleware
 {
-    private $zanFilters = [
-        \Zan\Framework\Network\Http\Middleware\SessionFilter::class,
-    ];
+    private $zanFilters = [];
 
-    private $zanTerminators = [
-        \Zan\Framework\Network\Http\Middleware\SessionTerminator::class,
-    ];
+    private $zanTerminators = [];
 
     /**
      * @param $server
