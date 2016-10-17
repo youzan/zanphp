@@ -26,7 +26,7 @@ class InitializeMiddleware
         $middlewareInitiator = MiddlewareInitiator::getInstance();
         $middlewareConfig = ConfigLoader::getInstance()->load(Config::get('path.middleware'));
         $middlewareConfig = isset($middlewareConfig['middleware']) ? $middlewareConfig['middleware'] : [];
-        $middlewareConfig = !is_array($middlewareConfig) || [] == $middlewareConfig ? [] : $middlewareConfig;
+        $middlewareConfig = is_array($middlewareConfig) ? $middlewareConfig : [];
         $middlewareInitiator->initConfig($middlewareConfig);
         $middlewareInitiator->initZanFilters($this->zanFilters);
         $middlewareInitiator->initZanTerminators($this->zanTerminators);
