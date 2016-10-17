@@ -79,6 +79,6 @@ class ServiceUnregister
         $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
         $curl = new Curl();
         $unregister = $curl->post($url, $this->parseConfig($this->config));
-        echo $unregister;
+        sys_echo($unregister);
     }
 }

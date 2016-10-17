@@ -80,7 +80,7 @@ class RouterSelfCheck
     protected function output()
     {
         if(self::CHECK_SUCCESS == $this->checkResult) {
-            echo self::OUTPUT_PREFIX . 'check success' . PHP_EOL;
+            sys_echo(self::OUTPUT_PREFIX . 'check success');
         } else {
             throw new RouteCheckFailedException(self::OUTPUT_PREFIX . $this->checkMsg);
         }

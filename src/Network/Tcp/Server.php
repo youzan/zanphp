@@ -98,50 +98,53 @@ class Server extends ServerBase {
 
     public function onConnect()
     {
-        echo "connecting ......\n";
+        sys_echo("connecting ......");
     }
 
     public function onClose()
     {
-        echo "closing .....\n";
+        sys_echo("closing .....");
     }
 
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
         Di::make(InitializeServerRegister::class)->bootstrap($this);
-        echo "server starting .....\n";
+        sys_echo("server starting .....");
     }
 
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
         (new ServiceUnregister())->unregister();
-        echo "server shutdown .....\n";
+        sys_echo("server shutdown .....");
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        echo "worker #$workerId starting .....\n";
+        sys_echo("worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        echo "worker #$workerId stopping ....\n";
+        sys_echo("worker #$workerId stopping ....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        echo "worker #$workerId still has $num requests in progress...\n";
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
-        echo "worker error happening ....\n";
+        sys_echo("worker error happening ....");
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
     {
-        echo "receive packet data\n\n\n\n";
+        sys_echo("receive packet data..");
     }
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)

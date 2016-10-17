@@ -59,7 +59,7 @@ class Manager
                     $client->start();
 
                     if ($client->isError()) {
-                        echo $client->getErrorMessage() . "\n";
+                        sys_echo($client->getErrorMessage());
                     }
                 }
             }
