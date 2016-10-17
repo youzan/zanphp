@@ -27,6 +27,7 @@ class Server extends ServerBase {
     protected $serverStartItems = [
         InitializeSqlMap::class,
         InitLogConfig::class,
+        InitializeMiddleware::class
     ];
 
     protected $workerStartItems = [
