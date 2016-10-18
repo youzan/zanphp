@@ -24,14 +24,15 @@ class InitializeMiddleware
     public function bootstrap($server)
     {
         $middlewarePath = Config::get('path.middleware');
-        if (is_dir($middlewarePath)) {
-            $middlewareInitiator = MiddlewareInitiator::getInstance();
-            $middlewareConfig = ConfigLoader::getInstance()->load($middlewarePath);
-            $middlewareConfig = isset($middlewareConfig['middleware']) ? $middlewareConfig['middleware'] : [];
-            $middlewareConfig = is_array($middlewareConfig) ? $middlewareConfig : [];
-            $middlewareInitiator->initConfig($middlewareConfig);
-            $middlewareInitiator->initZanFilters($this->zanFilters);
-            $middlewareInitiator->initZanTerminators($this->zanTerminators);
+        if (!is_dir($middlewarePath)) {
+            return;
         }
+        $middlewareInitiator = MiddlewareInitiator::getInstance();
+        $middlewareConfig = ConfigLoader::getInstance()->load($middlewarePath);
+        $middlewareConfig = isset($middlewareConfig['middleware']) ? $middlewareConfig['middleware'] : [];
+        $middlewareConfig = is_array($middlewareConfig) ? $middlewareConfig : [];
+        $middlewareInitiator->initConfig($middlewareConfig);
+        $middlewareInitiator->initZanFilters($this->zanFilters);
+        $middlewareInitiator->initZanTerminators($this->zanTerminators);
     }
 }
