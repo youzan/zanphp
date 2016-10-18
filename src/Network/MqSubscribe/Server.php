@@ -91,27 +91,27 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        echo "server starting .....\n";
+        sys_echo("server starting .....");
     }
 
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
-        echo "server shutdown .....\n";
+        sys_echo("server shutdown .....");
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        echo "worker #$workerId starting .....\n";
+        sys_echo("worker #$workerId starting .....");
         (new MqSubscribe())->start();
-        echo "mq subscribe in worker #$workerId starting .....\n";
+        sys_echo("mq subscribe in worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
-        echo "worker #$workerId stopping .....\n";
+        sys_echo("worker #$workerId stopping .....");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
