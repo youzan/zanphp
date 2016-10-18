@@ -12,12 +12,6 @@ use Zan\Framework\Foundation\Exception\SystemException;
 
 class HttpClientTimeoutException extends SystemException
 {
-    /**
-     * @todo change public to protected
-     * @var array
-     */
-    public $metaData;
-    
     public function __construct($message = '', $code = 408, Exception $previous = null, array $metaData = [])
     {
         parent::__construct($message, $code, $previous);
