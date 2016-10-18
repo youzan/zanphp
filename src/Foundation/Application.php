@@ -80,6 +80,8 @@ class Application
 
     protected function bootstrap()
     {
+        Handler::initErrorHandler();
+
         $this->setContainer();
 
         // TODO 配置化
@@ -100,8 +102,6 @@ class Application
         foreach ($bootstrapItems as $bootstrap) {
             $this->make($bootstrap)->bootstrap($this);
         }
-
-        Handler::initErrorHandler();
     }
 
     public function make($abstract, array $parameters = [], $shared = false)
