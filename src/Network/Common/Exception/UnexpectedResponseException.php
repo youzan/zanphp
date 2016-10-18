@@ -20,4 +20,9 @@ class UnexpectedResponseException extends SystemException
         
         $this->metaData = $metaData;
     }
+    
+    public function getMetadata()
+    {
+        return $this->metaData;
+    }
 }
