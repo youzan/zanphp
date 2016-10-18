@@ -15,7 +15,7 @@ class Handler {
 //            set_exception_handler(['Handler', 'handleExceptionProduct']);
 //        }
 
-        set_error_handler(['Handler', 'handleError']);
+        set_error_handler([Handler::class, 'handleError']);
 //        register_shutdown_function(['Handler', 'handleFatalError']);
     }
 
