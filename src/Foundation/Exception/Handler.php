@@ -20,7 +20,7 @@ class Handler {
         if (Debug::get()) {
             set_error_handler([Handler::class, 'handleError']);
         } else {
-            set_error_handler([Handler::class, 'handleError'], E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+            set_error_handler([Handler::class, 'handleError'], E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED & ~E_WARNING);
         }
 //        register_shutdown_function(['Handler', 'handleFatalError']);
     }
