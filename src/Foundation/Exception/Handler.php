@@ -1,6 +1,7 @@
 <?php
 namespace Zan\Framework\Foundation\Exception;
 
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Exception\System\ErrorException;
 
 class Handler {
@@ -15,7 +16,12 @@ class Handler {
 //            set_exception_handler(['Handler', 'handleExceptionProduct']);
 //        }
 
-        set_error_handler([Handler::class, 'handleError']);
+        Debug::detect();
+        if (Debug::get()) {
+            set_error_handler([Handler::class, 'handleError']);
+        } else {
+            set_error_handler([Handler::class, 'handleError'], E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+        }
 //        register_shutdown_function(['Handler', 'handleFatalError']);
     }
 
