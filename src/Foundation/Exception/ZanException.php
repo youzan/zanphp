@@ -16,4 +16,10 @@ class ZanException extends \Exception {
      *  * LogLevel CONST ...
      */
     public $logLevel = null;
+
+    /**
+     * 用于记录异常出现时的上下文信息
+     * @var array
+     */
+    protected $metaData = [];
 }
