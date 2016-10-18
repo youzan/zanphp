@@ -30,8 +30,9 @@ class Handler {
     }
 
     public static function handleError($code, $message, $file, $line) {
-        sys_echo("catched an error! errno: $code, message: $message, file: $file:$line");
-        throw new ErrorException($message, $code);
+        $context = "catched an error! errno: $code, message: $message, file: $file:$line";
+        sys_echo($context);
+        throw new ErrorException($context, $code);
     }
 
     public static function handleFatalError() {
