@@ -39,8 +39,8 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
+        InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
     ];
 

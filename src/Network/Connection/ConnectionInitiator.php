@@ -15,6 +15,7 @@ use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Network\Connection\Factory\Tcp;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
@@ -105,11 +106,7 @@ class ConnectionInitiator
             $config['connect_timeout'] = intval($config['connect_timeout']);
         }
         if (!isset($config['pool']['maximum-wait-connection'])) {
-            if (isset($config['pool']['maximum-connection-count'])) {
-                $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-connection-count']);
-            } else {
-                $config['pool']['maximum-wait-connection'] = self::MAX_WAIT_CONNECTION;
-            }
+            $config['pool']['maximum-wait-connection'] = Worker::getInstance()->maxConcurrency;
         } else {
             $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-wait-connection']);
         }
