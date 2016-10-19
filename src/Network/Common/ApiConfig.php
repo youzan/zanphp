@@ -142,7 +142,7 @@ return [
         ],
         'trade' => [
             'type' => 'local',
-            'host' => 'http://trade.api.youzan.com/',
+            'host' => 'http://api.koudaitong.com',
             'sub' => [
                 [
                     'mod' => 'trade.buy.bookByParams',

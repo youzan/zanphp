@@ -243,11 +243,7 @@ class Client implements Async
 
         $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
         $type = isset($target['type']) ? $target['type'] : 'local';
-        if ($type == 'local') {
-            $host = 'api.koudaitong.com';
-        } else {
-            $host = isset($hostInfo[0]) ? str_replace('/', '', $hostInfo[0]) : 'api.koudaitong.com';
-        }
+        $host = isset($hostInfo[0]) ? str_replace('/', '', $hostInfo[0]) : 'api.koudaitong.com';
         $defaultTime = $runMode == 'test' ? 15000 : 3000;
         $timeout = isset($target['timeout']) ? $target['timeout'] : $defaultTime;
 
