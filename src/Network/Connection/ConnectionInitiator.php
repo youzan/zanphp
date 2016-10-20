@@ -26,8 +26,8 @@ class ConnectionInitiator
 {
     use Singleton;
 
-    const CONNECT_TIMEOUT = 3000;
-    const MAX_WAIT_CONNECTION = 30;
+    const CONNECT_TIMEOUT = 1000;
+    const MAX_WAIT_CONNECTION = 50;
 
     private $engineMap = [
         'mysqli', 
@@ -106,7 +106,7 @@ class ConnectionInitiator
             $config['connect_timeout'] = intval($config['connect_timeout']);
         }
         if (!isset($config['pool']['maximum-wait-connection'])) {
-            $config['pool']['maximum-wait-connection'] = Worker::getInstance()->maxConcurrency;
+            $config['pool']['maximum-wait-connection'] = static::MAX_WAIT_CONNECTION;
         } else {
             $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-wait-connection']);
         }
