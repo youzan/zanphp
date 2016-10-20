@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
@@ -13,7 +14,8 @@ class HttpClient implements Async
     const GET = 'GET';
     const POST = 'POST';
     // TODO 改成zan-config里的配置
-    const HTTP_PROXY = '10.200.175.195';
+    const HTTP_PROXY_ONLINE = 'proxy-static.s.qima-inc.com';
+    const HTTP_PROXY_DEV = '10.9.29.87';
 
     /** @var  swoole_http_client */
     private $client;
@@ -169,18 +171,26 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->useHttpProxy) {
-            $this->request(self::HTTP_PROXY);
+            if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
+                $proxy = self::HTTP_PROXY_ONLINE;
+            } else {
+                $proxy = self::HTTP_PROXY_DEV;
+            }
+
+            swoole_async_dns_lookup($proxy, function($host, $ip) {
+                $this->request($ip, 80);
+            });
         } else {
             swoole_async_dns_lookup($this->host, function($host, $ip) {
-                $this->request($ip);
+                $this->request($ip, $this->port);
             });
         }
     }
 
 
-    public function request($ip)
+    public function request($ip, $port)
     {
-        $this->client = new \swoole_http_client($ip, $this->port, $this->ssl);
+        $this->client = new \swoole_http_client($ip, $port, $this->ssl);
         $this->buildHeader();
         if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
@@ -210,6 +220,7 @@ class HttpClient implements Async
         } else {
             $this->header['Host'] = $this->host;
         }
+
         if ($this->ssl) {
             $this->header['Scheme'] = 'https';
         }
