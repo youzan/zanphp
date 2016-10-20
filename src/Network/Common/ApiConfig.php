@@ -326,7 +326,7 @@ return [
         ],
         'ump' => [
             'type' => 'local',
-            'host' => 'http://ump.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'goods' => [
             'type' => 'local',
@@ -791,7 +791,7 @@ return [
         ],
         'ump' => [
             'type' => 'local',
-            'host' => 'http://ump.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'goods' => [
             'type' => 'local',
@@ -1261,7 +1261,7 @@ return [
         ],
         'ump' => [
             'type' => 'local',
-            'host' => 'http://ump.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'goods' => [
             'type' => 'local',
