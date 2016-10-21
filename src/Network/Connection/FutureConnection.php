@@ -43,7 +43,7 @@ class FutureConnection implements Async
     private function init()
     {
         $evtName = $this->connKey . '_free';
-        Event::once($evtName,[$this,'getConnection' ]);
+        Event::once($evtName,[$this,'getConnection']);
 
         Timer::after($this->timeout, [$this, 'onConnectTimeout'], $this->getConnectTimeoutJobId());
     }
@@ -79,6 +79,9 @@ class FutureConnection implements Async
         if (!isset($this->taskCallback)) {
             return;
         }
+
+        $evtName = $this->connKey . '_free';
+        Event::unbind($evtName, [$this, 'getConnection']);
 
         if (isset($this->pool->waitNum) && $this->pool->waitNum > 0) {
             $this->pool->waitNum--;
