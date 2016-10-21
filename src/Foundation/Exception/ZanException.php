@@ -22,7 +22,7 @@ class ZanException extends Exception {
      * 用于记录异常出现时的上下文信息
      * @var array
      */
-    protected $metaData = [];
+    private $metaData = [];
 
     public function __construct($message = '', $code = 0, Exception $previous = null, array $metaData = [])
     {
