@@ -41,6 +41,9 @@ class SystemLogger extends BaseLogger
 
     public function format($level, $message, $context)
     {
+        // 业务需求：flume 系统识别的是 warn
+        $level = ($level === 'warning') ? 'warn' : $level;
+
         $header = $this->buildHeader($level);
         $topic = $this->buildTopic();
         $body = $this->buildBody($level, $message, $context);
@@ -81,7 +84,6 @@ class SystemLogger extends BaseLogger
             unset($context['exception']);
         }
 
-        $level = ($level === 'warning') ? 'warn' : $level;
         $detail['extra'] = $context;
         $result = [
             'platform' => 'php',
