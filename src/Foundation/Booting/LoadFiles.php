@@ -22,7 +22,6 @@ class LoadFiles implements Bootable
         $paths = [
             $basePath . '/vendor/zanphp/zan/src',
             $basePath . '/vendor/zanphp/nova/src',
-            $basePath . '/src',
         ];
 
         $excludeFiles = [

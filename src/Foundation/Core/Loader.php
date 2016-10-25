@@ -24,7 +24,7 @@ class Loader
         }
 
         $path = Dir::formatPath($path);
-        $files = Dir::glob($path, '/.*\/[a-zA-Z].*\.php/i', Dir::SCAN_BFS);
+        $files = Dir::glob($path, '/.*\/[a-zA-Z].*\.php$/i', Dir::SCAN_BFS);
 
         foreach ($files as $file) {
             if (in_array($file, $excludeFiles, true)) {
