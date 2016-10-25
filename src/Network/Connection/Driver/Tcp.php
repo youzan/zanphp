@@ -61,7 +61,7 @@ class Tcp extends Base implements Connection
         $this->close();
         sys_echo("tcp client error");
     }
-
+    
     public function setClientCb(callable $cb) {
         $this->clientCb = $cb;
     }

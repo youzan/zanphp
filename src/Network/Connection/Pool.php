@@ -142,7 +142,6 @@ class Pool implements ConnectionPool
         if (count($this->freeConnection) == 1) {
             $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
-            $this->waitNum = $this->waitNum >0 ? $this->waitNum-- : 0 ;
         }
     }
 
@@ -156,5 +155,13 @@ class Pool implements ConnectionPool
             return;
         }
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getPoolConfig()
+    {
+        return $this->poolConfig;
     }
 }

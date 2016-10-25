@@ -31,8 +31,8 @@ class Server extends ServerBase {
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
+        InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
     ];
 
@@ -136,9 +136,9 @@ class Server extends ServerBase {
         sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
-    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
-        sys_echo("worker error happening ....");
+        sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
         sys_echo("worker #$workerId still has $num requests in progress...");

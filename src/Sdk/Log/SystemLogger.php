@@ -54,11 +54,15 @@ class SystemLogger extends BaseLogger
 
     protected function doWrite($log)
     {
-        if (!$this->writer || !$this->conn instanceof Syslog) {
-            yield $this->init();
-        }
+        try {
+            if (!$this->writer || !$this->conn instanceof Syslog) {
+                yield $this->init();
+            }
 
-        yield $this->getWriter()->write($log);
+            yield $this->getWriter()->write($log);   
+        } catch (\Exception $ex) {
+            echo_exception($ex);
+        }
     }
 
     private function buildHeader($level)
