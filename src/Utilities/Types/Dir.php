@@ -11,7 +11,7 @@ class Dir
     const SCAN_BFS = 'bfs';
     const SCAN_DFS = 'dfs';
 
-    public static function glob($path, $pattern=null, $strategy=self::SCAN_DFS)
+    public static function glob($path, $pattern, $strategy=self::SCAN_DFS)
     {
         if(!is_dir($path) || !$pattern) {
             throw new InvalidArgumentException('invalid $path or $pattern for Dir::glob');
@@ -61,16 +61,6 @@ class Dir
 
     public static function matchPattern($pattern, $file)
     {
-        $replaceMap = [
-            '*'     => '.*',
-            '.'     => '\.',
-            '+'     => '.+',
-            '/'     => '\/',
-        ];
-
-        $pattern = str_replace(array_keys($replaceMap), array_values($replaceMap), $pattern);
-        $pattern = '/' . $pattern . '/i';
-
         if(preg_match($pattern, $file)) {
             return true;
         }

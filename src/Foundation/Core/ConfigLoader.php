@@ -17,7 +17,7 @@ class ConfigLoader
         }
 
         $path = Dir::formatPath($path);
-        $configFiles = Dir::glob($path, '*.php', Dir::SCAN_BFS);
+        $configFiles = Dir::glob($path, '/.*\.php/', Dir::SCAN_BFS);
 
         $configMap = [];
         foreach($configFiles as $configFile){
@@ -43,7 +43,7 @@ class ConfigLoader
         }
 
         $path = Dir::formatPath($path);
-        $configFiles = Dir::glob($path, '*.php', Dir::SCAN_BFS);
+        $configFiles = Dir::glob($path, '/.*\.php/', Dir::SCAN_BFS);
 
         $configMap = [];
         foreach($configFiles as $configFile){

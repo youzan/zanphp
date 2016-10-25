@@ -45,7 +45,7 @@ class InitOrderLoader implements Bootable{
 
     private function loadFiles($path)
     {
-        $files = Dir::glob($path, '*.php', Dir::SCAN_CURRENT_DIR);
+        $files = Dir::glob($path, '/.*\.php/i', Dir::SCAN_CURRENT_DIR);
 
         foreach($files as $file){
             require $file;

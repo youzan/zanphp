@@ -17,16 +17,20 @@ class Loader
 {
     use Singleton;
 
-    public function load($path)
+    public function load($path, array $excludeFiles = [])
     {
         if(!is_dir($path)){
             throw new InvalidArgumentException('Invalid path for Loader');
         }
 
         $path = Dir::formatPath($path);
-        $files = Dir::glob($path, '^[a-zA-Z]*.php', Dir::SCAN_BFS);
+        $files = Dir::glob($path, '/.*\/[a-zA-Z].*\.php/i', Dir::SCAN_BFS);
 
         foreach ($files as $file) {
+            if (in_array($file, $excludeFiles, true)) {
+                continue;
+            }
+
             include_once $file;
         }
     }

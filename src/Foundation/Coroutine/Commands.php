@@ -15,7 +15,7 @@ class Commands
     public static function load()
     {
         $dir = __DIR__ . '/Command/';
-        $files = Dir::glob($dir, '*.php');
+        $files = Dir::glob($dir, '/.*\.php/');
 
         if (!$files) return false;
 

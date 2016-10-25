@@ -6,9 +6,10 @@
  * Time: 下午2:37
  */
 
-namespace Zan\Framework\Foundation\Pagelet\Component;
+namespace Zan\Framework\Foundation\View\Pagelet\Component;
 
-use Zan\Framework\Foundation\Pagelet\Contracts\ComponentInterface;
+
+use Zan\Framework\Foundation\View\Pagelet\Contracts\ComponentInterface;
 
 abstract class ComponentAbstract implements ComponentInterface
 {
@@ -19,12 +20,12 @@ abstract class ComponentAbstract implements ComponentInterface
 
     /**
      * @param $extraData
-     * @return Zan\Framework\Foundation\Pagelet\Contracts\ComponentInterface;
+     * @return ComponentInterface;
      */
     abstract public function view(array $extraData);
 
     /**
-     * @return Zan\Framework\Foundation\Pagelet\Contracts\ComponentInterface;
+     * @return ComponentInterface;
      */
     abstract public function edit();
 
