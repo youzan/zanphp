@@ -109,6 +109,11 @@ return [
                     'mod' => 'account.userTagWrite',
                     'host' => 'http://10.9.75.207:8025',
                     'type' => 'java'
+                ],
+                [
+                    'mod' => 'account.userMerchantService',
+                    'host' => 'http://10.9.75.207:8025',
+                    'type' => 'java'
                 ]
             ]
 
@@ -383,6 +388,11 @@ return [
                     'host' => 'http://192.168.66.238:28301',
                     'type' => 'java'
                 ],
+                [
+                    'mod' => 'pay.microaccount',
+                    'host' => 'http://10.9.74.58:8087',
+                    'type' => 'java'
+                ],
             ]
         ],
         'funds' => [
@@ -577,6 +587,11 @@ return [
                     'host' => 'http://10.9.20.165:8025',
                     'type' => 'java'
                 ],
+                [
+                    'mod' => 'account.userMerchantService',
+                    'host' => 'http://10.9.20.165:8025',
+                    'type' => 'java'
+                ]
 
             ]
 
@@ -842,7 +857,12 @@ return [
                     'mod' => 'pay.yzcoin',
                     'host' => 'http://10.9.36.29:28203',
                     'type' => 'java'
-                ]
+                ],
+                [
+                    'mod' => 'pay.microaccount',
+                    'host' => 'http://10.9.168.99:8087',
+                    'type' => 'java'
+                ],
             ]
         ],
         'funds' => [
@@ -972,6 +992,11 @@ return [
                 ],
                 [
                     'mod' => 'account.userTagWrite',
+                    'host' => 'http://usercenter.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'account.userMerchantService',
                     'host' => 'http://usercenter.s.qima-inc.com',
                     'type' => 'java'
                 ],
@@ -1320,6 +1345,11 @@ return [
                 [
                     'mod' => 'pay.yzcoin',
                     'host' => 'http://pay-yzcoin.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'pay.microaccount',
+                    'host' => 'http://pay-microaccount.s.qima-inc.com',
                     'type' => 'java'
                 ],
             ]
