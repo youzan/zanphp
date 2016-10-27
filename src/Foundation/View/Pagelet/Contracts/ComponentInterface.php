@@ -6,7 +6,7 @@
  * Time: 上午11:40
  */
 
-namespace Zan\Framework\Foundation\Pagelet\Contracts;
+namespace Zan\Framework\Foundation\View\Pagelet\Contracts;
 
 interface ComponentInterface
 {
@@ -21,14 +21,14 @@ interface ComponentInterface
      *
      * @param $extraData
      *
-     * @return ComponentOutput
+     * @return ComponentOutputInterface
      */
     public function view(array $extraData);
 
     /**
      * component edit mode
      *
-     * @return ComponentOutput
+     * @return ComponentOutputInterface
      */
     public function edit();
 

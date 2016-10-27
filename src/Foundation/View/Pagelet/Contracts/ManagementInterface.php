@@ -6,7 +6,7 @@
  * Time: 上午11:42
  */
 
-namespace Zan\Framework\Foundation\Pagelet\Contracts;
+namespace Zan\Framework\Foundation\View\Pagelet\Contracts;
 
 Interface ManagementInterface
 {

@@ -35,7 +35,7 @@ class InternalErrorHandler implements ExceptionHandler
         }
 
         $errMsg = '对不起，页面被霸王龙吃掉了... ';
-        $errorPagePath = Path::getRootPath() . '/vendor/zanphp/zan/src/Foundation/View/Pages/Error.php';
+        $errorPagePath = Path::getRootPath() . 'vendor/zanphp/zan/src/Foundation/View/Pages/Error.php';
         $errorPage = require $errorPagePath;
         return new Response($errorPage);
     }
