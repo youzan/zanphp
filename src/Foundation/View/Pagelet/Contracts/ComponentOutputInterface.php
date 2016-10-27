@@ -6,7 +6,7 @@
  * Time: 上午11:41
  */
 
-namespace Zan\Framework\Foundation\View\Pagelet\Contracts;
+namespace Zan\Framework\Foundation\Pagelet\Contracts;
 
 Interface ComponentOutputInterface
 {
@@ -34,7 +34,7 @@ Interface ComponentOutputInterface
     /**
      * return biz data to the ComponentManagement
      *
-     * @return string json
+     * @return json string
      */
     public function getData();
 }

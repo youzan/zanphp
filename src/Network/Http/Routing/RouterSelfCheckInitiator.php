@@ -30,7 +30,7 @@ class RouterSelfCheckInitiator
     private function _getCheckList()
     {
         $checkList = [];
-        $checkListFiles = Dir::glob(Config::get('path.routing'), '/.*\.check.php$/i');
+        $checkListFiles = Dir::glob(Config::get('path.routing'), '*.check.php');
         if (!is_array($checkListFiles) or empty($checkListFiles) ) {
             return [];
         }

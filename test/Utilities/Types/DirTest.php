@@ -51,7 +51,7 @@ class DirTest extends \TestCase {
     public function testGlobWorkFine()
     {
         $path = __DIR__ . '/dir/';
-        $files = Dir::glob($path, '/.*\.php$/i');
+        $files = Dir::glob($path, '*.php');
 
         $this->assertTrue(in_array($path . 'file1.php', $files), 'Dir::glob recusivly without dirs fail');
         $this->assertTrue(in_array($path . 'file3.php', $files), 'Dir::glob recusivly without dirs fail');
@@ -83,7 +83,7 @@ class DirTest extends \TestCase {
     public function testBasenameWorkFine()
     {
         $path = __DIR__ . '/dir/';
-        $files = Dir::glob($path, '/.*\.php$/i', Dir::SCAN_CURRENT_DIR);
+        $files = Dir::glob($path, '*.php', Dir::SCAN_CURRENT_DIR);
 
         $results = Dir::basename($files, '.php');
         $this->assertContains('file1',$results, 'Dir::basename with suffix faild');

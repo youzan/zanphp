@@ -6,8 +6,9 @@
  * Time: 下午2:37
  */
 
-namespace Zan\Framework\Foundation\View\Pagelet\Component;
+namespace Zan\Framework\Foundation\Pagelet\Component;
 
+use Zan\Framework\Foundation\Pagelet\Component\ComponentAbstract;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class ComponentFactory
@@ -39,7 +40,7 @@ class ComponentFactory
      * @param $componentType
      * @param $componentKey
      * @return mixed
-     * @throws InvalidArgumentException
+     * @throws \Exception_Msg
      */
     public function create($componentGroup, $componentType, $componentKey)
     {
