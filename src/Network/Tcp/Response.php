@@ -8,6 +8,8 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Com\Youzan\Test\Service\GenericException;
+use Com\Youzan\Test\Service\GenericResponse;
 use Kdt\Iron\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
@@ -17,6 +19,9 @@ class Response implements BaseResponse {
      * @var SwooleServer
      */
     private $swooleServer;
+    /**
+     * @var Request
+     */
     private $request;
     private $exception;
 
@@ -49,6 +54,14 @@ class Response implements BaseResponse {
         $serviceName = $this->request->getServiceName();
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
+
+        if ($this->request->isGenericInvoke()) {
+            if (!($e instanceof GenericException)) {
+                /* @var $e \Exception */
+                $e = new GenericException($e->getMessage(), $e->getCode(), $e); // TODO metaData
+            }
+        }
+
         $content = Nova::encodeServiceException($novaServiceName, $methodName, $e);
 
         $remote = $this->request->getRemote();
@@ -78,6 +91,13 @@ class Response implements BaseResponse {
         $serviceName = $this->request->getServiceName();
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
+
+        if ($this->request->isGenericInvoke()) {
+            $response = new GenericResponse();
+            $response->response = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $content = $response;
+        }
+
         $content = Nova::encodeServiceOutput($novaServiceName, $methodName, $content);
 
         $remote = $this->request->getRemote();
