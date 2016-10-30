@@ -8,14 +8,8 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Com\Youzan\Test\Service\GenericException;
-use Com\Youzan\Test\Service\GenericRequest;
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
-use Zan\Framework\Foundation\Application;
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Sdk\Trace\Constant;
-use Zan\Framework\Sdk\Trace\Trace;
 
 class Request implements BaseRequest {
     private $data;
@@ -36,8 +30,6 @@ class Request implements BaseRequest {
     private $isGenericInvoke = false;
     private $genericServiceName;
     private $genericMethodName;
-
-    const GENERIC_SERVICE_PREFIX = 'com.youzan.test.service';
 
     public function __construct($fd, $fromId, $data)
     {
@@ -194,19 +186,22 @@ class Request implements BaseRequest {
             $this->remotePort = $remotePort;
             $this->seqNo = $seqNo;
             $this->attachData = $attachData;
-            
+
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;
-//                echo "heartbeating ...\n";
                 $data = null;
                 nova_encode($this->serviceName, 'pong', $this->remoteIp, $this->remotePort, $this->seqNo, '', '', $data);
                 return $data;
             }
 
-            $this->isGenericInvoke = static::GENERIC_SERVICE_PREFIX
-                === substr($serviceName, 0, strlen(static::GENERIC_SERVICE_PREFIX));
+            $this->isGenericInvoke = GenericRequestUtils::isGenericService($serviceName);
             if ($this->isGenericInvoke) {
-                $this->decodeGeneric();
+                $this->novaServiceName = str_replace('.', '\\', ucwords($this->serviceName, '.'));
+                $genericRequest = GenericRequestUtils::decode($this->novaServiceName, $this->methodName, $this->args);
+                $this->genericServiceName = $genericRequest->serviceName;
+                $this->genericMethodName = $genericRequest->methodName;
+                $this->args = $genericRequest->methodParams;
+                $this->route = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
                 return;
             }
 
@@ -215,139 +210,5 @@ class Request implements BaseRequest {
         } else {
             //TODO: throw TApplicationException
         }
-    }
-
-    private function decodeGeneric()
-    {
-        $this->novaServiceName = str_replace('.', '\\', ucwords($this->serviceName, '.'));
-        $args = Nova::decodeServiceArgs($this->novaServiceName, $this->methodName, $this->args);
-
-        if ($args[0] && $args[0] instanceof GenericRequest) {
-            /* @var $genericRequest GenericRequest */
-            $genericRequest = $args[0];
-
-            static::genericRequestCheck($genericRequest);
-
-            $this->genericServiceName = $genericRequest->serviceName;
-            $this->genericMethodName = $genericRequest->methodName;
-            $this->args = $genericRequest->methodParams;
-            $this->route = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
-
-        } else {
-            throw new GenericException("Invalid GenericRequest");
-        }
-    }
-
-    private static function genericRequestCheck(GenericRequest $request)
-    {
-        $className = $request->serviceName;
-        $methodName = $request->methodName;
-        $params = $request->methodParams;
-
-        if (!$className || !$methodName) {
-            throw new GenericException("Invalid class or method");
-        }
-
-        $className = str_replace('.', '\\', ucwords($className, '.'));
-        if (!class_exists($className)) {
-            throw new GenericException("Missing proxy class \"$className\"");
-        }
-        $request->serviceName = $className;
-
-        // 获取app中服务实现类, 以支持默认参数
-        $appNamespace = Application::getInstance()->getNamespace();
-        $appImplClassName = $appNamespace . Nova::removeNovaNamespace($className);
-        if (!class_exists($appImplClassName)) {
-            throw new GenericException("Missing app impl class \"$appImplClassName\"");
-        }
-
-        $class = new \ReflectionClass($appImplClassName);
-        if (!$class->hasMethod($methodName)) {
-            throw new GenericException("Missing method \"$methodName\"");
-        }
-
-        $method = $class->getMethod($methodName);
-        if (!$method->isPublic() || $method->isAbstract()) {
-            throw new GenericException("\"$method\" can not be accessed");
-        }
-
-        $paramsNum = $method->getNumberOfParameters();
-        if ($paramsNum > 0) {
-            if (!$params) {
-                throw new GenericException("Missing parameters");
-            }
-
-            $params = json_decode($params, true, 512, JSON_BIGINT_AS_STRING);
-            if (!is_array($params)) {
-                throw new GenericException("Invalid parameters codec");
-            }
-
-            $requiredParamsNum = $method->getNumberOfRequiredParameters();
-            if (count($params) < $requiredParamsNum) {
-                throw new GenericException("Missing required parameters");
-            }
-
-            $request->methodParams = static::makeParameters($method, array_values($params));
-        } else {
-            $request->methodParams = [];
-        }
-    }
-
-    private static function makeParameters(\ReflectionMethod $method, array $paramList)
-    {
-        $arguments = [];
-        $requiredParamsNum = $method->getNumberOfRequiredParameters();
-        foreach ($method->getParameters() as $pos => $parameter) {
-            if ($pos < $requiredParamsNum) {
-
-                $typeHint = $parameter->getClass();
-                if ($typeHint) {
-                    $propertiesArray = $paramList[$pos];
-                    if (!is_array($propertiesArray)) {
-                        throw new GenericException("Invalid parameter hinted by type: " . $typeHint->getName());
-                    }
-                    $arguments[$pos] = static::makeObjectByTypeHint($typeHint, $propertiesArray);
-                } else {
-                    $arguments[$pos] = $paramList[$pos];
-                }
-
-            } else {
-                $arguments[$pos] = isset($paramList[$pos]) ? $paramList[$pos] : $parameter->getDefaultValue();
-            }
-        }
-
-        return $arguments;
-    }
-
-    private static function makeObjectByTypeHint(\ReflectionClass $typeHint, array $propertiesArray)
-    {
-        $object = $typeHint->newInstanceWithoutConstructor();
-
-        $publicProperties = $typeHint->getProperties(\ReflectionProperty::IS_PUBLIC);
-        $staticProperties = $typeHint->getProperties(\ReflectionProperty::IS_STATIC);
-        $properties = array_diff($publicProperties, $staticProperties);
-
-        foreach ($properties as $property) {
-            /* @var $property \ReflectionProperty */
-            $propertyName = $property->getName();
-            if (isset($propertiesArray[$propertyName])) {
-
-                // TODO 依靠document中的type提示递归处理嵌套类型构造
-                $propertyTypeHint = null;
-                $propertyValue = $propertiesArray[$propertyName];
-                if ($propertyTypeHint) {
-                    if (is_array($propertyValue)) {
-                        $propertyValue = static::makeObjectByTypeHint($propertyTypeHint, $propertyValue);
-                    } else {
-                        throw new GenericException("Invalid inner property");
-                    }
-                }
-
-                // $property->setAccessible(true);
-                $object->$propertyName = $propertyValue;
-            }
-        }
-
-        return $object;
     }
 }
