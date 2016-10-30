@@ -12,6 +12,7 @@ use Com\Youzan\Test\Service\GenericException;
 use Com\Youzan\Test\Service\GenericRequest;
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\Trace;
@@ -239,32 +240,38 @@ class Request implements BaseRequest {
 
     private static function genericRequestCheck(GenericRequest $request)
     {
-        $class = $request->serviceName;
-        $method = $request->methodName;
+        $className = $request->serviceName;
+        $methodName = $request->methodName;
         $params = $request->methodParams;
 
-        if (!$class || !$method) {
+        if (!$className || !$methodName) {
             throw new GenericException("Invalid class or method");
         }
 
-        $class = str_replace('.', '\\', ucwords($class, '.'));
-        if (!class_exists($class)) {
-            throw new GenericException("Missing class \"$class\"");
+        $className = str_replace('.', '\\', ucwords($className, '.'));
+        if (!class_exists($className)) {
+            throw new GenericException("Missing proxy class \"$className\"");
         }
-        $request->serviceName = $class;
+        $request->serviceName = $className;
 
-        $class = new \ReflectionClass($class);
-        if (!$class->hasMethod($method)) {
-            throw new GenericException("Missing method \"$method\"");
+        // 获取app中服务实现类, 以支持默认参数
+        $appNamespace = Application::getInstance()->getNamespace();
+        $appImplClassName = $appNamespace . Nova::removeNovaNamespace($className);
+        if (!class_exists($appImplClassName)) {
+            throw new GenericException("Missing app impl class \"$appImplClassName\"");
         }
 
-        $method = $class->getMethod($method);
+        $class = new \ReflectionClass($appImplClassName);
+        if (!$class->hasMethod($methodName)) {
+            throw new GenericException("Missing method \"$methodName\"");
+        }
+
+        $method = $class->getMethod($methodName);
         if (!$method->isPublic() || $method->isAbstract()) {
-            throw new GenericException("\"$method\" is not public access");
+            throw new GenericException("\"$method\" can not be accessed");
         }
 
         $paramsNum = $method->getNumberOfParameters();
-
         if ($paramsNum > 0) {
             if (!$params) {
                 throw new GenericException("Missing parameters");
