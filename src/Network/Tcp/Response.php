@@ -9,7 +9,6 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Com\Youzan\Test\Service\GenericException;
-use Com\Youzan\Test\Service\GenericResponse;
 use Kdt\Iron\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
@@ -93,9 +92,7 @@ class Response implements BaseResponse {
         $methodName  = $this->request->getMethodName();
 
         if ($this->request->isGenericInvoke()) {
-            $response = new GenericResponse();
-            $response->response = json_encode($content, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            $content = $response;
+            $content = GenericRequestUtils::encode($this->request->getGenericServiceName(), $this->request->getGenericMethodName(), $content);
         }
 
         $content = Nova::encodeServiceOutput($novaServiceName, $methodName, $content);

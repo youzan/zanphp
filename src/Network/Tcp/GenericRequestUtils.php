@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use Com\Youzan\Test\Service\GenericException;
 use Com\Youzan\Test\Service\GenericRequest;
+use Com\Youzan\Test\Service\GenericResponse;
 use Kdt\Iron\Nova\Foundation\Protocol\TStruct;
 use Kdt\Iron\Nova\Foundation\TSpecification;
 use Kdt\Iron\Nova\Nova;
@@ -16,8 +17,30 @@ final class GenericRequestUtils
 
     public static function isGenericService($serviceName)
     {
-        return static::GENERIC_SERVICE_PREFIX
-            === substr($serviceName, 0, strlen(static::GENERIC_SERVICE_PREFIX));
+        return static::GENERIC_SERVICE_PREFIX === substr($serviceName, 0, strlen(static::GENERIC_SERVICE_PREFIX));
+    }
+
+    /**
+     * @param string $serviceName
+     * @param string $methodName
+     * @param mixed $result
+     * @return GenericResponse
+     */
+    public static function encode($serviceName, $methodName, $result)
+    {
+        /* @var $classSpec TSpecification */
+        /* @var $classMap ClassMap */
+        $classMap = ClassMap::getInstance();
+
+        $classSpec = $classMap->getSpec($serviceName);
+        $resultSpec = $classSpec->getOutputStructSpec($methodName);
+
+        static::cleanSpec($resultSpec, $result);
+
+        $response = new GenericResponse();
+        $response->response = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+        return $response;
     }
 
     /**
@@ -175,6 +198,46 @@ final class GenericRequestUtils
             case TType::STOP:
             default:
                 return null;
+        }
+    }
+
+    private static function cleanSpec(array $specItem, &$result)
+    {
+        $expectedTType = $specItem["type"];
+
+        switch ($expectedTType) {
+            case TType::STRUCT:
+                /* @var $result TStruct */
+                $structSpec = $result->getStructSpec();
+                foreach ($structSpec as $pos => $item) {
+                    $propName = $item["var"];
+                    if ($result->$propName !== null) {
+                        static::cleanSpec($item, $result->$propName);
+                    }
+                }
+                unset($result->_TSPEC);
+                break;
+
+            case TType::MAP:
+                foreach ($result as $key => &$value) {
+                    static::cleanSpec($specItem["val"], $value);
+                }
+                unset($value);
+                break;
+
+            case TType::SET:
+                foreach ($result as $i => &$value) {
+                    static::cleanSpec($specItem["elem"], $value);
+                }
+                unset($value);
+                break;
+
+            case TType::LST:
+                foreach ($result as $i => &$value) {
+                    static::cleanSpec($specItem["elem"], $value);
+                }
+                unset($value);
+                break;
         }
     }
 }
