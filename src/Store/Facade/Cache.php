@@ -125,6 +125,11 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hSet($realKey, $field, $value));
+        
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+        if($result && $ttl){
+            yield self::expire($redis, $realKey, $ttl);
+        }
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -234,20 +239,26 @@ class Cache {
             $value = gzencode($value, 1);
         }
         $result = (yield $redis->set($realKey, $value));
+        
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+        if($result && $ttl){
+            yield self::expire($redis, $realKey, $ttl);
+        }
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
-        if ($result) {
-            $conn = (yield $redisObj->getConnection($config['connection']));
-            $redis = new Redis($conn);
-            $ttl = isset($config['exp']) ? $config['exp'] : 0;
-            yield $redis->expire($realKey, $ttl);
-
-            yield self::deleteActiveConnectionFromContext($conn);
-            $conn->release();
-        }
         yield $result;
+    }
+    
+    private static function expire($redis, $key, $ttl=0)
+    {
+        if(!$ttl || !$key){
+            yield false;
+            return;
+        }
+
+        yield $redis->expire($key, $ttl);
     }
 
     /**
