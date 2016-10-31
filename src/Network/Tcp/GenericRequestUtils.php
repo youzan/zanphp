@@ -120,21 +120,33 @@ final class GenericRequestUtils
         switch ($expectedTType) {
 
             case TType::BOOL:
+                if (!is_scalar($rawValue)) {
+                    throw new GenericException("Invalid parameter type in position of $pos, expects bool");
+                }
                 return boolval($rawValue);
 
             case TType::I08:
             case TType::I16:
             case TType::I32:
             case TType::I64:
+                if (!is_scalar($rawValue)) {
+                    throw new GenericException("Invalid parameter type in position of $pos, expects int");
+                }
                 return intval($rawValue);
 
             case TType::DOUBLE:
+                if (!is_scalar($rawValue)) {
+                    throw new GenericException("Invalid parameter type in position of $pos, expects double");
+                }
                 return floatval($rawValue);
                 break;
 
 
             case TType::BYTE:
             case TType::STRING:
+                if (!is_scalar($rawValue)) {
+                    throw new GenericException("Invalid parameter type in position of $pos, expects byte|string");
+                }
                 return strval($rawValue);
                 break;
 
@@ -197,7 +209,7 @@ final class GenericRequestUtils
             case TType::VOID:
             case TType::STOP:
             default:
-                return null;
+                throw new GenericException("Unsupported type \"$expectedTType\"");
         }
     }
 
