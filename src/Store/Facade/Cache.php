@@ -125,7 +125,6 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hSet($realKey, $field, $value));
-        $result = self::decode($result);
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -146,7 +145,6 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hExists($realKey, $field));
-        $result = self::decode($result);
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -167,7 +165,6 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hGetAll($realKey));
-        $result = self::decode($result);
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -188,7 +185,6 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hKeys($realKey));
-        $result = self::decode($result);
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -209,7 +205,6 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hDel($realKey));
-        $result = self::decode($result);
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -367,10 +362,12 @@ class Cache {
      */
     private static function decode($value)
     {
-        if (($ret = json_decode($value, true)) === NULL) {
-            $ret = $value;
+        if(strpos($value,'a:') === 0){
+            $value = unserialize($value);
+        }elseif(preg_match('/^\s*[\[|\{].*[\]|\}\s*$]/',$value)){
+            $value = json_decode($value,true);
         }
 
-        return $ret;
-    }
+        return $value;
+    } 
 }
