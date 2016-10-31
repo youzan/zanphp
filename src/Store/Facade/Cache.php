@@ -90,6 +90,7 @@ class Cache {
         yield $result;
     }
 
+    /* hash ops start ****************************************/
     public static function hGet($configKey, $keys, $field = '')
     {
         $config = self::getConfigCacheKey($configKey);
@@ -110,6 +111,113 @@ class Cache {
 
         yield $result;
     }
+
+    public static function hSet($configKey, $keys, $field='', $value='')
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->hSet($realKey, $field, $value));
+        $result = self::decode($result);
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+    
+    public static function hExists($configKey, $keys, $field = '')
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->hExists($realKey, $field));
+        $result = self::decode($result);
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
+    public static function hGetAll($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->hGetAll($realKey));
+        $result = self::decode($result);
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
+    public static function hKeys($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->hKeys($realKey));
+        $result = self::decode($result);
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+    
+    public static function hDel($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        $result = (yield $redis->hDel($realKey));
+        $result = self::decode($result);
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+    
+    /* hash ops end  ****************************************/
 
     public static function set($configKey, $keys, $value)
     {
