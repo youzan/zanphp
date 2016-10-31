@@ -250,7 +250,28 @@ class Cache {
 
         yield $result;
     }
-    
+
+    public static function incr($configKey, $keys)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+
+        $result = (yield $redis->incr($realKey));
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
     private static function expire($redis, $key, $ttl=0)
     {
         if(!$ttl || !$key){
