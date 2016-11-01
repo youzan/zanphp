@@ -137,6 +137,7 @@ class ServerDiscovery
             ];
             $waitIndex = $waitIndex >= $server['modifiedIndex'] ? $waitIndex : $server['modifiedIndex'];
         }
+        $waitIndex = $waitIndex + 1;
         $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
         return $servers;
     }
@@ -214,7 +215,8 @@ class ServerDiscovery
     private function checkWaitIndexIsOutdatedCleared($raw)
     {
         if (isset($raw['errorCode']) && isset($raw['index']) && $raw['index'] > 0) {
-            $this->serverStore->setServiceWaitIndex($this->appName, $raw['index']);
+            $waitIndex = $raw['index'] + 1;
+            $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
             return true;
         }
         return false;
@@ -244,6 +246,7 @@ class ServerDiscovery
             ];
             if (isset($raw['node']['modifiedIndex'])) {
                 $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
+                $waitIndex = $waitIndex + 1;
                 $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
             }
 
@@ -258,6 +261,7 @@ class ServerDiscovery
             if (isset($raw['prevNode']['modifiedIndex'])) {
                 $waitIndex = $raw['prevNode']['modifiedIndex'] >= $waitIndex ? $raw['prevNode']['modifiedIndex'] : $waitIndex;
             }
+            $waitIndex = $waitIndex + 1;
             $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
 
             $value = json_decode($raw['prevNode']['value'], true);
@@ -290,6 +294,7 @@ class ServerDiscovery
         ];
         if (isset($raw['node']['modifiedIndex'])) {
             $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
+            $waitIndex = $waitIndex + 1;
             $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
         }
         $nowStore[$this->getStoreServicesKey($data['add_on_line']['host'], $data['add_on_line']['port'])] = $data['add_on_line'];
