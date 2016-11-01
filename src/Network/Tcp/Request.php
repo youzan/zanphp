@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
 
@@ -202,13 +203,13 @@ class Request implements BaseRequest {
                 $this->genericMethodName = $genericRequest->methodName;
                 $this->args = $genericRequest->methodParams;
                 $this->route = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
-                return;
+                return null;
             }
 
             $this->formatRoute();
             $this->decodeArgs();
         } else {
-            //TODO: throw TApplicationException
+            throw new TApplicationException("nova_decode fail");
         }
     }
 }

@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Com\Youzan\Test\Service\GenericException;
+use Com\Youzan\Nova\Framework\Generic\Service\GenericResponse;
 use Kdt\Iron\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
@@ -43,10 +43,11 @@ class Response implements BaseResponse {
     public function end($content='')
     {
         $this->send($content);
-
-        //$this->swooleServer->close($this->request->getFd());
     }
 
+    /**
+     * @param $e \Exception
+     */
     public function sendException($e)
     {
         $this->exception = $e->getMessage();
@@ -55,10 +56,8 @@ class Response implements BaseResponse {
         $methodName  = $this->request->getMethodName();
 
         if ($this->request->isGenericInvoke()) {
-            if (!($e instanceof GenericException)) {
-                /* @var $e \Exception */
-                $e = new GenericException($e->getMessage(), $e->getCode(), $e); // TODO metaData
-            }
+            $response = GenericRequestUtils::makeResponseByException($e);
+            return $this->send($response);
         }
 
         $content = Nova::encodeServiceException($novaServiceName, $methodName, $e);
@@ -81,8 +80,6 @@ class Response implements BaseResponse {
                 $outputBuffer
             );
         }
-
-//        $this->swooleServer->close($this->request->getFd());
     }
 
     public function send($content)
@@ -91,7 +88,7 @@ class Response implements BaseResponse {
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
 
-        if ($this->request->isGenericInvoke()) {
+        if ($this->request->isGenericInvoke() && !($content instanceof GenericResponse)) {
             $content = GenericRequestUtils::encode($this->request->getGenericServiceName(), $this->request->getGenericMethodName(), $content);
         }
 
@@ -108,9 +105,8 @@ class Response implements BaseResponse {
             $content,
             $outputBuffer)) {
 
-
             $swooleServer = $this->getSwooleServer();
-            $sendState = $swooleServer->send(
+            $swooleServer->send(
                 $this->request->getFd(),
                 $outputBuffer
             );

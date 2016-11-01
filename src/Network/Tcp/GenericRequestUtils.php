@@ -2,18 +2,19 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Com\Youzan\Test\Service\GenericException;
-use Com\Youzan\Test\Service\GenericRequest;
-use Com\Youzan\Test\Service\GenericResponse;
+use Com\Youzan\Nova\Framework\Generic\Service\GenericRequest;
+use Com\Youzan\Nova\Framework\Generic\Service\GenericResponse;
 use Kdt\Iron\Nova\Foundation\Protocol\TStruct;
 use Kdt\Iron\Nova\Foundation\TSpecification;
 use Kdt\Iron\Nova\Nova;
 use Kdt\Iron\Nova\Service\ClassMap;
 use Thrift\Type\TType;
+use Zan\Framework\Network\Exception\GenericInvokeException;
 
 final class GenericRequestUtils
 {
     const GENERIC_SERVICE_PREFIX = 'com.youzan.test.service';
+    const RESPONSE_SUCCESS = 200;
 
     public static function isGenericService($serviceName)
     {
@@ -24,9 +25,11 @@ final class GenericRequestUtils
      * @param string $serviceName
      * @param string $methodName
      * @param mixed $result
+     * @param int $code
+     * @param string $msg
      * @return GenericResponse
      */
-    public static function encode($serviceName, $methodName, $result)
+    public static function encode($serviceName, $methodName, $result, $code = self::RESPONSE_SUCCESS, $msg = "")
     {
         /* @var $classSpec TSpecification */
         /* @var $classMap ClassMap */
@@ -38,17 +41,19 @@ final class GenericRequestUtils
         static::cleanSpec($resultSpec, $result);
 
         $response = new GenericResponse();
-        $response->response = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        $response->code = $code;
+        $response->message = $msg;
+        $response->data = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         return $response;
     }
 
     /**
      * @param string $novaServiceName
-     * @param string  $methodName
+     * @param string $methodName
      * @param $args
      * @return GenericRequest
-     * @throws GenericException
+     * @throws GenericInvokeException
      */
     public static function decode($novaServiceName, $methodName, $args)
     {
@@ -57,8 +62,17 @@ final class GenericRequestUtils
             static::checkAndParse($args[0]);
             return $args[0];
         } else {
-            throw new GenericException("Invalid GenericRequest");
+            throw new GenericInvokeException("Invalid GenericRequest");
         }
+    }
+
+    public static function makeResponseByException(\Exception $ex) {
+        $response = new GenericResponse();
+        $code = $ex->getCode();
+        $response->code = $code === static::RESPONSE_SUCCESS ? 0 : $code;
+        $response->message = $ex->getMessage();
+        $response->data = "";
+        return $response;
     }
 
     private static function checkAndParse(GenericRequest $request)
@@ -69,9 +83,10 @@ final class GenericRequestUtils
         $serviceName = $request->serviceName;
         $methodName = $request->methodName;
         $params = $request->methodParams;
+        // $paramTypes = $request->parameterTypes;
 
         if (!$serviceName || !$methodName) {
-            throw new GenericException("Invalid class or method");
+            throw new GenericInvokeException("Invalid generic request service or method");
         }
 
         $serviceName = str_replace('.', '\\', ucwords($serviceName, '.'));
@@ -80,35 +95,84 @@ final class GenericRequestUtils
         $classMap = ClassMap::getInstance();
         $classSpec = $classMap->getSpec($serviceName);
         if ($classSpec === null) {
-            throw new GenericException("Missing Service \"$serviceName\"");
+            throw new GenericInvokeException("Missing Service \"$serviceName\"");
         }
 
         $paramSpec = $classSpec->getInputStructSpec($methodName);
         if ($paramSpec === null) {
-            throw new GenericException("Missing Service Method \"$methodName\"");
+            throw new GenericInvokeException("Missing Service Method \"$methodName\"");
         }
 
+        // TODO bojack 反射获取必须参数个数~
         $expectedParamNum = count($paramSpec);
         if ($expectedParamNum > 0) {
-            $params = json_decode($params, true, 512, JSON_BIGINT_AS_STRING);
-            if (!is_array($params)) {
-                throw new GenericException("Invalid parameters codec");
-            }
+
+            $params = static::parseMapParams($params); // map params
+            // $params = static::parseListParams($params, $paramTypes); // list params
+
             $realParamNum = count($params);
             if ($realParamNum < $expectedParamNum) {
-                throw new GenericException("Expects $expectedParamNum parameter, $realParamNum given");
+                throw new GenericInvokeException("Expects $expectedParamNum parameter, $realParamNum given");
             }
-            $request->methodParams = static::parseSpecs($paramSpec, array_values($params));
+
+            $request->methodParams = static::getParamsBySpec($paramSpec, $params);
         } else {
             $request->methodParams = [];
         }
     }
 
-    private static function parseSpecs(array $specs, array $rawArgs)
+    /**
+     * 处理 list<string> 类型参数
+     * @param $rawArgs
+     * @param $paramTypes
+     * @return array
+     * @throws GenericInvokeException
+     */
+    private static function parseListParams($rawArgs, $paramTypes)
+    {
+        if (!is_array($rawArgs) || !is_array($paramTypes) || count($rawArgs) !== count($paramTypes)) {
+            throw new GenericInvokeException("Invalid generic request parameters");
+        }
+
+        $args = [];
+        foreach ($rawArgs as $rawArg) {
+            // TODO 根据卡门传递的paramType判断哪些参数需要json_decode
+            $args[] = json_decode($rawArg, true, 512, JSON_BIGINT_AS_STRING);
+        }
+        return $args;
+    }
+
+    /**
+     * 处理 map<string, json> 类型参数
+     * @param string $rawArgs
+     * @return array
+     * @throws GenericInvokeException
+     */
+    private static function parseMapParams($rawArgs)
+    {
+        if (is_array($rawArgs)) {
+            return $rawArgs;
+        }
+
+        $args = json_decode($rawArgs, true, 512, JSON_BIGINT_AS_STRING);
+        if (!is_array($args)) {
+            throw new GenericInvokeException("Invalid generic request parameters");
+        }
+        return $args;
+    }
+
+    private static function getParamsBySpec(array $specs, array $rawArgs)
     {
         $arguments = [];
         foreach ($specs as $pos => $item) {
-            $arguments[] = static::parseSpec($item, $rawArgs[$pos - 1], $pos);
+            // $arguments[] = static::parseSpec($item, $rawArgs[$pos - 1], $pos); // list params
+
+            // map params
+            $paramName = $item["var"];
+            if (!isset($rawArgs[$paramName])) {
+                throw new GenericInvokeException("Missing method parameter \"$paramName\"");
+            }
+            $arguments[$paramName] = static::parseSpec($item, $rawArgs[$paramName], $pos);
         }
         return $arguments;
     }
@@ -121,7 +185,7 @@ final class GenericRequestUtils
 
             case TType::BOOL:
                 if (!is_scalar($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects bool");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects bool");
                 }
                 return boolval($rawValue);
 
@@ -130,13 +194,13 @@ final class GenericRequestUtils
             case TType::I32:
             case TType::I64:
                 if (!is_scalar($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects int");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects int");
                 }
                 return intval($rawValue);
 
             case TType::DOUBLE:
                 if (!is_scalar($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects double");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects double");
                 }
                 return floatval($rawValue);
                 break;
@@ -145,14 +209,14 @@ final class GenericRequestUtils
             case TType::BYTE:
             case TType::STRING:
                 if (!is_scalar($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects byte|string");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects byte|string");
                 }
                 return strval($rawValue);
                 break;
 
             case TType::STRUCT:
                 if (!is_array($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects struct");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects struct");
                 }
 
                 /* @var $structObject TStruct */
@@ -171,7 +235,7 @@ final class GenericRequestUtils
 
             case TType::MAP:
                 if (!is_array($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects map");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects map");
                 }
 
                 $map = [];
@@ -183,7 +247,7 @@ final class GenericRequestUtils
 
             case TType::SET:
                 if (!is_array($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects set");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects set");
                 }
 
                 $set = [];
@@ -194,7 +258,7 @@ final class GenericRequestUtils
 
             case TType::LST:
                 if (!is_array($rawValue)) {
-                    throw new GenericException("Invalid parameter type in position of $pos, expects list");
+                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects list");
                 }
 
                 $list = [];
@@ -209,7 +273,7 @@ final class GenericRequestUtils
             case TType::VOID:
             case TType::STOP:
             default:
-                throw new GenericException("Unsupported type \"$expectedTType\"");
+                throw new GenericInvokeException("Unsupported type \"$expectedTType\"");
         }
     }
 

@@ -3,7 +3,7 @@
 namespace Zan\Framework\Utilities\Validation;
 
 use Zan\Framework\Contract\Utilities\Validation\UnauthorizedException;
-use Zan\Framework\Contract\Utilities\Validation\ValidationException;
+use Zan\Framework\Contract\Utilities\Validation\ValidationException as ContractValidationException;
 
 /**
  * Provides default implementation of ValidatesWhenResolved contract.
@@ -46,7 +46,7 @@ trait ValidatesWhenResolvedTrait
      */
     protected function failedValidation(Validator $validator)
     {
-        throw new ValidationException($validator);
+        throw new ContractValidationException($validator);
     }
 
     /**
