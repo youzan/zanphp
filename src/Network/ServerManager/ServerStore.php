@@ -31,6 +31,23 @@ class ServerStore
         return null;
     }
 
+    private function getServiceWaitIndexKey($appName)
+    {
+        return 'service_wait_index_' . $appName;
+    }
+
+    public function getServiceWaitIndex($appName)
+    {
+        $key = $this->getServiceWaitIndexKey($appName);
+        return apcu_fetch($key);
+    }
+
+    public function setServiceWaitIndex($appName, $waitIndex)
+    {
+        $key = $this->getServiceWaitIndexKey($appName);
+        return apcu_store($key, $waitIndex);
+    }
+
     public function getLockGetServices($appName)
     {
         return apcu_fetch($this->getLockGetServicesKey($appName));

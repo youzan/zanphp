@@ -32,8 +32,6 @@ class ServerDiscovery
      */
     private $serverStore;
 
-    private $waitIndex = 0;
-
     const DISCOVERY_LOOP_TIME   = 1000;
 
     const WATCH_LOOP_TIME       = 5000;
@@ -124,6 +122,7 @@ class ServerDiscovery
             throw new ServerDiscoveryEtcdException('Service Discovery can not find anything app_name:'.$this->appName);
         }
         $servers = [];
+        $waitIndex = 0;
         foreach ($raw['node']['nodes'] as $server) {
             $value = json_decode($server['value'], true);
             $servers[$this->getStoreServicesKey($value['IP'], $value['Port'])] = [
@@ -136,7 +135,10 @@ class ServerDiscovery
                 'weight' => $value['Weight'],
                 'services' => json_decode($value['ExtData'], true)
             ];
+            $waitIndex = $waitIndex >= $server['modifiedIndex'] ? $waitIndex : $server['modifiedIndex'];
         }
+        $waitIndex = $waitIndex + 1;
+        $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
         return $servers;
     }
 
@@ -174,7 +176,8 @@ class ServerDiscovery
 
     private function watchingByEtcd()
     {
-        $params = $this->waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $this->waitIndex] : ['wait' => true, 'recursive' => true];
+        $waitIndex = $this->serverStore->getServiceWaitIndex($this->appName);
+        $params = $waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $waitIndex] : ['wait' => true, 'recursive' => true];
         $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
         $uri = $this->config['watch']['uri'] . '/' .
             $this->config['watch']['protocol'] . ':' .
@@ -190,6 +193,10 @@ class ServerDiscovery
 
     private function updateServersByEtcd($raw)
     {
+        $isOutdated = $this->checkWaitIndexIsOutdatedCleared($raw);
+        if (true == $isOutdated) {
+            return;
+        }
         $update = $this->parseWatchByEtcdData($raw);
         if (null == $update) {
             return;
@@ -205,6 +212,16 @@ class ServerDiscovery
         }
     }
 
+    private function checkWaitIndexIsOutdatedCleared($raw)
+    {
+        if (isset($raw['errorCode']) && isset($raw['index']) && $raw['index'] > 0) {
+            $waitIndex = $raw['index'] + 1;
+            $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
+            return true;
+        }
+        return false;
+    }
+
     private function parseWatchByEtcdData($raw)
     {
         if (null === $raw || [] === $raw) {
@@ -214,6 +231,7 @@ class ServerDiscovery
             throw new ServerDiscoveryEtcdException('watch Service Discovery can not find anything app_name:'.$this->appName);
         }
         $nowStore = $this->getByStore();
+        $waitIndex = $this->serverStore->getServiceWaitIndex($this->appName);
         if (isset($raw['node']['value']) && isset($raw['prevNode']['value'])) {
             $new = json_decode($raw['node']['value'], true);
             $data['update'] = [
@@ -226,11 +244,26 @@ class ServerDiscovery
                 'weight' => $new['Weight'],
                 'services' => json_decode($new['ExtData'], true)
             ];
+            if (isset($raw['node']['modifiedIndex'])) {
+                $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
+                $waitIndex = $waitIndex + 1;
+                $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
+            }
+
             $nowStore[$this->getStoreServicesKey($data['update']['host'], $data['update']['port'])] = $data['update'];
             $this->serverStore->setServices($this->appName, $nowStore);
             return $data;
         }
         if (!isset($raw['node']['value'])) {
+            if (isset($raw['node']['modifiedIndex'])) {
+                $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
+            }
+            if (isset($raw['prevNode']['modifiedIndex'])) {
+                $waitIndex = $raw['prevNode']['modifiedIndex'] >= $waitIndex ? $raw['prevNode']['modifiedIndex'] : $waitIndex;
+            }
+            $waitIndex = $waitIndex + 1;
+            $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
+
             $value = json_decode($raw['prevNode']['value'], true);
             $data['off_line'] = [
                 'namespace' => $value['Namespace'],
@@ -259,6 +292,11 @@ class ServerDiscovery
             'weight' => $value['Weight'],
             'services' => json_decode($value['ExtData'], true)
         ];
+        if (isset($raw['node']['modifiedIndex'])) {
+            $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
+            $waitIndex = $waitIndex + 1;
+            $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
+        }
         $nowStore[$this->getStoreServicesKey($data['add_on_line']['host'], $data['add_on_line']['port'])] = $data['add_on_line'];
         $this->serverStore->setServices($this->appName, $nowStore);
         return $data;
