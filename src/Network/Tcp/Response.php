@@ -56,7 +56,7 @@ class Response implements BaseResponse {
         $methodName  = $this->request->getMethodName();
 
         if ($this->request->isGenericInvoke()) {
-            $response = GenericRequestUtils::makeResponseByException($e);
+            $response = GenericRequestCodec::encodeException($e);
             return $this->send($response);
         }
 
@@ -89,7 +89,7 @@ class Response implements BaseResponse {
         $methodName  = $this->request->getMethodName();
 
         if ($this->request->isGenericInvoke() && !($content instanceof GenericResponse)) {
-            $content = GenericRequestUtils::encode($this->request->getGenericServiceName(), $this->request->getGenericMethodName(), $content);
+            $content = GenericRequestCodec::encode($this->request->getGenericServiceName(), $this->request->getGenericMethodName(), $content);
         }
 
         $content = Nova::encodeServiceOutput($novaServiceName, $methodName, $content);

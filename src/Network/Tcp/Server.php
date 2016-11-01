@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Com\Youzan\Test\Service\GenericService;
+use Com\Youzan\Nova\Framework\Generic\Service\GenericService;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
@@ -19,7 +19,6 @@ use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
-use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Network\ServerManager\ServiceUnregister;

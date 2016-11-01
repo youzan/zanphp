@@ -195,10 +195,10 @@ class Request implements BaseRequest {
                 return $data;
             }
 
-            $this->isGenericInvoke = GenericRequestUtils::isGenericService($serviceName);
+            $this->isGenericInvoke = GenericRequestCodec::isGenericService($serviceName);
             if ($this->isGenericInvoke) {
                 $this->novaServiceName = str_replace('.', '\\', ucwords($this->serviceName, '.'));
-                $genericRequest = GenericRequestUtils::decode($this->novaServiceName, $this->methodName, $this->args);
+                $genericRequest = GenericRequestCodec::decode($this->novaServiceName, $this->methodName, $this->args);
                 $this->genericServiceName = $genericRequest->serviceName;
                 $this->genericMethodName = $genericRequest->methodName;
                 $this->args = $genericRequest->methodParams;
