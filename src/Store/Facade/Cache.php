@@ -112,6 +112,33 @@ class Cache {
         yield $result;
     }
 
+    public static function hMGet($configKey, $keys, $fields)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+        array_unshift($fields, $realKey);
+
+        $results = (yield call_user_func_array([$redis, 'hMGet'], $fields));
+        if ($results) {
+            foreach ($results as $k => $result) {
+                $results[$k] = self::decode($result);
+            }
+        }
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
     public static function hSet($configKey, $keys, $field='', $value='')
     {
         $config = self::getConfigCacheKey($configKey);
