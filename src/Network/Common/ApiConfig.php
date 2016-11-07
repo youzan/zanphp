@@ -370,17 +370,17 @@ return [
                 ],
                 [
                     'mod' => 'pay.payment.recharge',
-                    'host' => 'http://localhost:8128',
+                    'host' => 'http://pay-payment-recharge-test.s.qima-inc.com:8086',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'pay.ticket',
-                    'host' => 'http://192.168.66.238:8088',
+                    'host' => 'http://pay-ticket-test.s.qima-inc.com:8088',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'pay.settlement',
-                    'host' => 'http://192.168.66.238:8138',
+                    'host' => 'http://settlement-test.s.qima-inc.com:8138',
                     'type' => 'java'
                 ],
                 [
@@ -390,7 +390,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.microaccount',
-                    'host' => 'http://10.9.74.58:8087',
+                    'host' => 'http://pay-microaccount-test.s.qima-inc.com:8087',
                     'type' => 'java'
                 ],
             ]
@@ -844,13 +844,18 @@ return [
                     'type' => 'java'
                 ],
                 [
+                    'mod' => 'pay.payment.recharge',
+                    'host' => 'http://pay-payment-recharge-qa.s.qima-inc.com:8086',
+                    'type' => 'java'
+                ],
+                [
                     'mod' => 'pay.ticket',
-                    'host' => 'http://10.9.59.58:8088',
+                    'host' => 'http://pay-ticket-qa.s.qima-inc.com:8088',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'pay.settlement',
-                    'host' => 'http://10.9.18.207:8088',
+                    'host' => 'http://settlement-qa.s.qima-inc.com:8088',
                     'type' => 'java'
                 ],
                 [
@@ -860,7 +865,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.microaccount',
-                    'host' => 'http://10.9.168.99:8087',
+                    'host' => 'http://pay-microaccount-qa.s.qima-inc.com:8087',
                     'type' => 'java'
                 ],
             ]
