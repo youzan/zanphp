@@ -128,17 +128,17 @@ class Cache {
         array_unshift($fields, $realKey);
 
         $results = (yield call_user_func_array([$redis, 'hMGet'], $fields));
+        $retval = [];
         if ($results) {
             foreach ($results as $k => $result) {
-                unset($results[$k]);
-                $results[$oriFields[$k]] = self::decode($result);
+                $retval[$oriFields[$k]] = self::decode($result);
             }
         }
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
-        yield $results;
+        yield $retval;
     }
 
     public static function hSet($configKey, $keys, $field='', $value='')
