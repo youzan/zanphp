@@ -124,12 +124,14 @@ class Cache {
 
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
+        $oriFields = $fields;
         array_unshift($fields, $realKey);
 
         $results = (yield call_user_func_array([$redis, 'hMGet'], $fields));
         if ($results) {
             foreach ($results as $k => $result) {
-                $results[$k] = self::decode($result);
+                unset($results[$k]);
+                $results[$oriFields[$k]] = self::decode($result);
             }
         }
 
