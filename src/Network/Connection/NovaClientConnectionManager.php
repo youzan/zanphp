@@ -80,7 +80,7 @@ class NovaClientConnectionManager
 
     private function getPool($novaServiceName, $method)
     {
-        if ('test' != RunMode::get() || 'qatest' != RunMode::get()) {
+        if ('test' != RunMode::get()) {
             if (!isset($this->novaServiceNameToMethodsMap[$novaServiceName])) {
                 throw new CanNotFindNovaServiceNameException('nova service name :'.$novaServiceName);
             }
