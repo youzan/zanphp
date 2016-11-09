@@ -124,19 +124,21 @@ class Cache {
 
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
+        $oriFields = $fields;
         array_unshift($fields, $realKey);
 
         $results = (yield call_user_func_array([$redis, 'hMGet'], $fields));
+        $retval = [];
         if ($results) {
             foreach ($results as $k => $result) {
-                $results[$k] = self::decode($result);
+                $retval[$oriFields[$k]] = self::decode($result);
             }
         }
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
-        yield $results;
+        yield $retval;
     }
 
     public static function hSet($configKey, $keys, $field='', $value='')
@@ -153,6 +155,38 @@ class Cache {
         $realKey = self::getRealKey($config, $keys);
         $result = (yield $redis->hSet($realKey, $field, $value));
         
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+        if($result && $ttl){
+            yield self::expire($redis, $realKey, $ttl);
+        }
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
+    public static function hMSet($configKey, $keys, array $kv)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+        $realKey = self::getRealKey($config, $keys);
+
+        $params = [];
+        foreach ($kv as $k => $v) {
+            $params[] = $k;
+            $params[] = $v;
+        }
+        array_unshift($params, $realKey);
+        $result = (yield call_user_func_array([$redis, 'hMSet'], $params));
+
         $ttl = isset($config['exp']) ? $config['exp'] : 0;
         if($result && $ttl){
             yield self::expire($redis, $realKey, $ttl);
