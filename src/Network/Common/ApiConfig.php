@@ -138,7 +138,7 @@ return [
             'sub' => [
                 [
                     'mod' => 'courier.assignable.admins',
-                    'host' => 'http://courier-api.s.qima-inc.com/',
+                    'host' => 'http://courier-api.s.qima-inc.com',
                     'type' => 'java'
                 ],
             ]
@@ -610,7 +610,7 @@ return [
             'sub' => [
                 [
                     'mod' => 'courier.assignable.admins',
-                    'host' => 'http://courier-api.s.qima-inc.com/',
+                    'host' => 'http://courier-api.s.qima-inc.com',
                     'type' => 'java'
                 ],
             ]
@@ -1084,7 +1084,7 @@ return [
             'sub' => [
                 [
                     'mod' => 'courier.assignable.admins',
-                    'host' => 'http://courier-api.s.qima-inc.com/',
+                    'host' => 'http://courier-api.s.qima-inc.com',
                     'type' => 'java'
                 ],
             ]
