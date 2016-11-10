@@ -20,7 +20,7 @@ class Config
         self::$configMap = Arr::merge(self::$configMap, $shareConfigMap, $runModeConfig);
 
         //add private dir
-        if ('test' == $runMode || 'dev' == $runMode) {
+        if ('test' == $runMode || 'dev' == $runMode || 'qatest' == $runMode) {
             $privatePath = Path::getConfigPath() . '.private/';
             if (is_dir($privatePath)) {
                 $privateConfig = ConfigLoader::getInstance()->load($privatePath);
