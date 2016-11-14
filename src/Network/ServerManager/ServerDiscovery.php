@@ -202,12 +202,15 @@ class ServerDiscovery
             return;
         }
         if (isset($update['off_line'])) {
+            sys_echo("watch by etcd nova client off line " . $this->appName . " host:" . $update['off_line']['host'] . " port:" . $update['off_line']['port']);
             NovaClientConnectionManager::getInstance()->offline($this->appName, [$update['off_line']]);
         }
         if (isset($update['add_on_line'])) {
+            sys_echo("watch by etcd nova client add on line " . $this->appName . " host:" . $update['add_on_line']['host'] . " port:" . $update['add_on_line']['port']);
             NovaClientConnectionManager::getInstance()->addOnline($this->appName, [$update['add_on_line']]);
         }
         if (isset($update['update'])) {
+            sys_echo("watch by etcd nova client update service " . $this->appName . " host:" . $update['update']['host'] . " port:" . $update['update']['port']);
             NovaClientConnectionManager::getInstance()->update($this->appName, [$update['update']]);
         }
     }
