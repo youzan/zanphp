@@ -130,6 +130,21 @@ function wait()
     });
 }
 
+/**
+ * @param Traversable $coroutines
+ * @return SysCall
+ * @yield mixed[]
+ *
+ * 注意:
+ *      并发执行的coroutine发生异常, 异常将会作为该coroutine的执行结果返回
+ *      $list = (yield parallel($coroutines));
+ *
+ *      if ($list[$key] instanceof \Exception) {
+ *          // handle exception
+ *      } else {
+ *          // handle result
+ *      }
+ */
 function parallel($coroutines)
 {
     return new SysCall(function (Task $task) use ($coroutines) {
