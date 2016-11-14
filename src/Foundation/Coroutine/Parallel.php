@@ -36,7 +36,7 @@ class Parallel
                 continue; 
             }
 
-            $childTask = new Task($coroutine, $taskContext, 0, $this->task);
+            $childTask = new Task($this->catchException($coroutine), $taskContext, 0, $this->task);
             $this->childTasks[$key] = $childTask;
 
             $newTaskId = $childTask->getTaskId();
@@ -68,5 +68,15 @@ class Parallel
 
         $this->task->send($this->sendValues);
         $this->task->run();
+    }
+
+    private function catchException(\Generator $coroutine)
+    {
+        try {
+            yield $coroutine;
+        } catch (\Exception $ex) {
+            echo_exception($ex);
+            yield $ex;
+        }
     }
 }
