@@ -366,7 +366,7 @@ class Cache {
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
-        yield $result;
+        yield array_combine($realKeys, $result);
     }
 
     public static function mSet($configKey, array $keysArr, array $values)
