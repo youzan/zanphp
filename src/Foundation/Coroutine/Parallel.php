@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Foundation\Coroutine;
 
+use Zan\Framework\Foundation\Exception\ParallelException;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class Parallel
@@ -9,6 +10,7 @@ class Parallel
     private $task;
     private $childTasks = [];
     private $sendValues = [];
+    private $exceptions = [];
 
     public function __construct(Task $task)
     {
@@ -36,7 +38,7 @@ class Parallel
                 continue; 
             }
 
-            $childTask = new Task($coroutine, $taskContext, 0, $this->task);
+            $childTask = new Task($this->catchException($coroutine), $taskContext, 0, $this->task);
             $this->childTasks[$key] = $childTask;
 
             $newTaskId = $childTask->getTaskId();
@@ -66,7 +68,24 @@ class Parallel
 
         $event->unregister($taskDoneEventName);
 
-        $this->task->send($this->sendValues);
-        $this->task->run();
+        if (empty($this->exceptions)) {
+            $this->task->send($this->sendValues);
+            $this->task->run();
+        } else {
+            $ex = ParallelException::makeWithResult($this->sendValues, $this->exceptions);
+            $this->task->sendException($ex);
+            $this->task->run();
+        }
+    }
+
+    private function catchException(\Generator $coroutine)
+    {
+        try {
+            yield $coroutine;
+        } catch (\Exception $ex) {
+            echo_exception($ex);
+            $this->exceptions[] = $ex;
+            yield $ex;
+        }
     }
 }

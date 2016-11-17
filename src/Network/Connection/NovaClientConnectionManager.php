@@ -80,7 +80,7 @@ class NovaClientConnectionManager
 
     private function getPool($novaServiceName, $method)
     {
-        if ('test' != RunMode::get() || 'qatest' != RunMode::get()) {
+        if (!in_array(RunMode::get(), ['test', 'qatest'])) {
             if (!isset($this->novaServiceNameToMethodsMap[$novaServiceName])) {
                 throw new CanNotFindNovaServiceNameException('nova service name :'.$novaServiceName);
             }
@@ -145,6 +145,7 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
+            sys_echo("nova client add on line " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
             $this->addAppNameToServerMap($appName, $server);
 
@@ -157,6 +158,7 @@ class NovaClientConnectionManager
     {
         $pool = $this->getPoolByAppName($appName);
         foreach ($servers as $server) {
+            sys_echo("nova client off line " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
             $this->removeSeverFromAppNameToServerMap($appName, $server);
             $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
             if (null !== $connection && $connection instanceof Connection) {
@@ -172,6 +174,7 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
+            sys_echo("nova client update service " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
             $this->updateAppNameToServerMap($appName, $server);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
         }
