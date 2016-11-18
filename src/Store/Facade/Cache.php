@@ -333,6 +333,81 @@ class Cache {
         yield $result;
     }
 
+    public static function mGet($configKey, array $keysArr)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config)) {
+            yield false;
+            return;
+        }
+
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+
+        $redis = new Redis($conn);
+
+        $realKeys = [];
+        foreach ($keysArr as $keys) {
+            $realKeys[] = self::getRealKey($config, $keys);
+        }
+
+        $result = (yield $redis->mget(...$realKeys));
+
+        $gz = isset($config['encode']) && $config['encode'] == 'gz';
+        if ($result && $gz) {
+            foreach ($result as &$item) {
+                if ($item !== null) {
+                    $item = gzdecode($item);
+                }
+            }
+            unset($item);
+        }
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
+    public static function mSet($configKey, array $keysArr, array $values)
+    {
+        $config = self::getConfigCacheKey($configKey);
+        if (!self::validConfig($config) || count($keysArr) !== count($values) || empty($values)) {
+            yield false;
+            return;
+        }
+        $keysArr = array_values($keysArr);
+        $values = array_values($values);
+
+        $redisObj = self::init($config['connection']);
+        $conn = (yield $redisObj->getConnection($config['connection']));
+        $redis = new Redis($conn);
+
+        $gz = isset($config['encode']) && $config['encode'] == 'gz';
+        $ttl = isset($config['exp']) ? $config['exp'] : 0;
+
+        if ($ttl) {
+            $result = true;
+            foreach ($keysArr as $i => $keys) {
+                $realKey = self::getRealKey($config, $keys);
+                $value = $gz ? gzencode($values[$i], 1) : $values[$i];
+                $result = $result && (yield $redis->setex($realKey, $ttl, $value));
+            }
+        } else {
+            $args = [];
+            foreach ($keysArr as $i => $keys) {
+                $args[] = self::getRealKey($config, $keys);
+                $args[] = $gz ? gzencode($values[$i], 1) : $values[$i];
+            }
+            $result = (yield $redis->mset(...$args));
+        }
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
     private static function expire($redis, $key, $ttl=0)
     {
         if(!$ttl || !$key){
