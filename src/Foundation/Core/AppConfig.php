@@ -3,29 +3,20 @@ namespace Zan\Framework\Foundation\Core;
 
 use Zan\Framework\Utilities\Types\Arr;
 
-class Config
+class AppConfig
 {
     private static $configMap = [];
 
     public static function init()
     {
         $runMode = RunMode::get();
-        $path = Path::getConfigPath();
-        $sharePath = $path . 'share/';
-        $shareConfigMap = ConfigLoader::getInstance()->load($sharePath);
-
-        $runModeConfigPath = Path::getConfigPath() . $runMode;
-        $runModeConfig = ConfigLoader::getInstance()->load($runModeConfigPath);
-
-        self::$configMap = Arr::merge(self::$configMap, $shareConfigMap, $runModeConfig);
-
-        //add private dir
-        if ('test' == $runMode || 'dev' == $runMode || 'qatest' == $runMode) {
-            $privatePath = Path::getConfigPath() . '.private/';
-            if (is_dir($privatePath)) {
-                $privateConfig = ConfigLoader::getInstance()->load($privatePath);
-                self::$configMap = Arr::merge(self::$configMap, $privateConfig);
-            }
+        $path = Path::getAppPath();
+        if(is_dir($path)) {
+            $sharePath = $path . 'share/';
+            $shareConfigMap = ConfigLoader::getInstance()->load($sharePath);
+            $runModeConfigPath = Path::getConfigPath() . $runMode;
+            $runModeConfig = ConfigLoader::getInstance()->load($runModeConfigPath);
+            self::$configMap = Arr::merge(self::$configMap, $shareConfigMap, $runModeConfig);
         }
     }
 

@@ -76,6 +76,7 @@ class Hawk
             $response = (yield $this->httpClient->postJson(self::URI, $this->data));
         } catch (\Exception $e) {
             var_dump('hawk上报失败');
+            return;
         }
         $statusCode = -1;
 

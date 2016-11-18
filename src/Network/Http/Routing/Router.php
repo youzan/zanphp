@@ -78,7 +78,7 @@ class Router {
             return;
         }
         $explodeArr = explode('.', $requestUri);
-        if(in_array(end($explodeArr), $this->config['format_whitelist'])){
+        if(isset($this->config['format_whitelist']) && in_array(end($explodeArr), $this->config['format_whitelist'])){
             $this->format = end($explodeArr);
             array_pop($explodeArr);
             $this->url = implode('.', $explodeArr);

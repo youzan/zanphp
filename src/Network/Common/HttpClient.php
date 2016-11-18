@@ -3,6 +3,8 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
@@ -12,7 +14,8 @@ class HttpClient implements Async
     const GET = 'GET';
     const POST = 'POST';
     // TODO 改成zan-config里的配置
-    const HTTP_PROXY = '10.200.175.195';
+    const HTTP_PROXY_ONLINE = 'proxy-static.s.qima-inc.com';
+    const HTTP_PROXY_DEV = '10.9.29.87';
 
     /** @var  swoole_http_client */
     private $client;
@@ -117,7 +120,7 @@ class HttpClient implements Async
     {
         if (null !== $timeout) {
             if ($timeout < 0 || $timeout > 60000) {
-                throw new HttpClientTimeoutException('Timeout must be between 0-60 seconds');
+                throw new InvalidArgumentException("Timeout must be between 0-60 seconds, $timeout is given");
             }
         }
         $this->timeout = $timeout;
@@ -168,18 +171,30 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->useHttpProxy) {
-            $this->request(self::HTTP_PROXY);
+            if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
+                $proxy = self::HTTP_PROXY_ONLINE;
+            } else {
+                $proxy = self::HTTP_PROXY_DEV;
+            }
+
+            swoole_async_dns_lookup($proxy, function($host, $ip) {
+                $this->request($ip, 80);
+            });
         } else {
             swoole_async_dns_lookup($this->host, function($host, $ip) {
-                $this->request($ip);
+                $this->request($ip, $this->port);
             });
         }
     }
 
 
-    public function request($ip)
+    public function request($ip, $port)
     {
-        $this->client = new \swoole_http_client($ip, $this->port, $this->ssl);
+        if ($this->useHttpProxy) {
+            $this->client = new \swoole_http_client($ip, $port);
+        } else {
+            $this->client = new \swoole_http_client($ip, $port, $this->ssl);
+        }
         $this->buildHeader();
         if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
@@ -209,6 +224,7 @@ class HttpClient implements Async
         } else {
             $this->header['Host'] = $this->host;
         }
+
         if ($this->ssl) {
             $this->header['Scheme'] = 'https';
         }
@@ -236,7 +252,28 @@ class HttpClient implements Async
     public function checkTimeout()
     {
         $this->client->close();
-        $exception = new HttpClientTimeoutException();
+
+        $message = sprintf(
+            '[http request timeout] host:%s port:%s uri:%s method:%s ',
+            $this->host,
+            $this->port,
+            $this->uri,
+            $this->method
+        );
+        $metaData = [
+            'host' => $this->host,
+            'port' => $this->port,
+            'ssl' => $this->ssl,
+            'uri' => $this->uri,
+            'method' => $this->method,
+            'params' => $this->params,
+            'body' => $this->body,
+            'header' => $this->header,
+            'timeout' => $this->timeout,
+            'use_http_proxy' => $this->useHttpProxy,
+        ];
+
+        $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
         if ($this->trace) {
             $this->trace->commit($exception);
         }
