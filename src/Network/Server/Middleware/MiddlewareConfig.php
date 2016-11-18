@@ -56,28 +56,11 @@ class MiddlewareConfig
         if (null === $groupKey) {
             return [];
         }
-
-        if (is_array($groupKey)) {
-            $groupConfigArr = [];
-            foreach ($groupKey as $gKey) {
-                if (!isset($this->config['group'][$gKey])) {
-                    continue;
-                }
-                $groupConfigArr = array_merge($groupConfigArr, $this->config['group'][$gKey]);
-            }
-
-            if (empty($groupConfigArr)) {
-                throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
-            }
-
-            return $groupConfigArr;
-        } else {
-            if (!isset($this->config['group'][$groupKey])) {
-                throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
-            }
-
-            return $this->config['group'][$groupKey];
+        if (!isset($this->config['group'][$groupKey])) {
+            throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
         }
+
+        return $this->config['group'][$groupKey];
     }
 
     public function match($pattern, $route)
