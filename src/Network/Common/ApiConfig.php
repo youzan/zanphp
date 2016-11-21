@@ -139,7 +139,14 @@ return [
         ],
         'courier' => [
             'type' => 'java',
-            'host' => 'http://192.168.66.204:8011'//预发 10.10.72.5
+            'host' => 'http://192.168.66.204:8011', //预发 10.10.72.5
+            'sub' => [
+                [
+                    'mod' => 'courier.assignable.admins',
+                    'host' => 'http://courier-api.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+            ]
         ],
         'courierold' => [
             'type' => 'java',
@@ -613,8 +620,15 @@ return [
         ],
         'courier' => [
             'type' => 'java',
-            'host' => 'http://10.9.35.225:8011'//预发 10.10.72.5
-            #'host' => 'http://10.9.26.248:8011'//预发 10.10.72.5
+            'host' => 'http://10.9.35.225:8011', //预发 10.10.72.5
+            #'host' => 'http://10.9.26.248:8011', //预发 10.10.72.5
+            'sub' => [
+                [
+                    'mod' => 'courier.assignable.admins',
+                    'host' => 'http://courier-api.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+            ]
         ],
         'courierold' => [
             'type' => 'java',
@@ -1585,7 +1599,14 @@ return [
             'type' => 'java',
             // 'host' > 'http://10.10.72.5:8011'//预发 10.10.72.5
             // 'host' => 'http://10.10.127.76:8011'//online bc-msg3/4/5 //todo remove
-            'host' => 'http://10.200.175.192:8011'//online bc-msg3/4/5
+            'host' => 'http://10.200.175.192:8011', //online bc-msg3/4/5
+            'sub' => [
+                [
+                    'mod' => 'courier.assignable.admins',
+                    'host' => 'http://courier-api.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+            ]
         ],
         'courierold' => [
             'type' => 'java',
