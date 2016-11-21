@@ -70,7 +70,7 @@ final class GenericRequestCodec
     public static function decode($novaServiceName, $methodName, $args)
     {
         $args = Nova::decodeServiceArgs($novaServiceName, $methodName, $args);
-        if ($args[0] && ($args[0] instanceof GenericRequest)) {
+        if ($args[0] && is_object($args[0]) && ($args[0] instanceof GenericRequest)) {
             static::checkAndParse($args[0]);
             return $args[0];
         } else {
@@ -98,12 +98,12 @@ final class GenericRequestCodec
         $classMap = ClassMap::getInstance();
         $classSpec = $classMap->getSpec($serviceName);
         if ($classSpec === null) {
-            throw new GenericInvokeException("Missing Service \"$serviceName\"");
+            throw new GenericInvokeException("Service \"$serviceName\" not found");
         }
 
         $paramSpec = $classSpec->getInputStructSpec($methodName);
         if ($paramSpec === null) {
-            throw new GenericInvokeException("Missing Service Method \"$methodName\"");
+            throw new GenericInvokeException("Service Method \"$methodName\" not found");
         }
 
         $expectedParamNum = count($paramSpec);
@@ -238,7 +238,7 @@ final class GenericRequestCodec
             $appImplClassName = static::fromNovaServiceToServiceImpl($serviceName);
             $class = new \ReflectionClass($appImplClassName);
             if (!$class->hasMethod($methodName)) {
-                throw new GenericInvokeException("Missing service implement method \"$appImplClassName::$methodName\"");
+                throw new GenericInvokeException("Service implement method \"$appImplClassName::$methodName\" not found");
             }
 
             $method = $class->getMethod($methodName);
@@ -263,7 +263,7 @@ final class GenericRequestCodec
         $appNamespace = Application::getInstance()->getNamespace();
         $appImplClassName = $appNamespace . Nova::removeNovaNamespace($serviceName);
         if (!class_exists($appImplClassName)) {
-            throw new GenericInvokeException("Missing service implement class \"$appImplClassName\"");
+            throw new GenericInvokeException("Service implement class \"$appImplClassName\" not found");
         }
         return $appImplClassName;
     }
@@ -377,7 +377,7 @@ final class GenericRequestCodec
     }
 
     /**
-     * 清除返回值中无用的 _TSPEC 属性
+     * 递归清除返回值中无用的 _TSPEC 属性
      * @param array $specItem
      * @param $result
      */
