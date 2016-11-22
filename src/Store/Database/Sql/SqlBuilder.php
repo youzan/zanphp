@@ -78,6 +78,7 @@ class SqlBuilder
         if (isset($data['inserts'])) {
             return $this->batchInserts($data);
         }
+        $this->parseVars($data);
         $this->checkInsertRequire($data);
         $insert = isset($data['insert']) ? $data['insert'] : [];
         if (!is_array($insert) || count($insert) == 0) {
