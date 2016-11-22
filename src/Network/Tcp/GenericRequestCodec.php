@@ -53,7 +53,7 @@ final class GenericRequestCodec
      */
     public static function encodeException(\Exception $ex) {
         $response = new GenericResponse();
-        $code = $ex->getCode();
+        $code = $ex->getCode() ?: 0;
         $response->code = $code === static::RESPONSE_SUCCESS ? 0 : $code;
         $response->message = $ex->getMessage();
         $response->data = "";
@@ -387,6 +387,10 @@ final class GenericRequestCodec
 
         switch ($expectedTType) {
             case TType::STRUCT:
+                if (!($result instanceof TStruct)) {
+                    break;
+                }
+
                 /* @var $result TStruct */
                 $structSpec = $result->getStructSpec();
                 foreach ($structSpec as $pos => $item) {
@@ -399,6 +403,10 @@ final class GenericRequestCodec
                 break;
 
             case TType::MAP:
+                if (!is_array($result)) {
+                    break;
+                }
+
                 foreach ($result as $key => &$value) {
                     static::cleanSpec($specItem["val"], $value);
                 }
@@ -406,6 +414,10 @@ final class GenericRequestCodec
                 break;
 
             case TType::SET:
+                if (!is_array($result)) {
+                    break;
+                }
+
                 foreach ($result as $i => &$value) {
                     static::cleanSpec($specItem["elem"], $value);
                 }
@@ -413,6 +425,10 @@ final class GenericRequestCodec
                 break;
 
             case TType::LST:
+                if (!is_array($result)) {
+                    break;
+                }
+
                 foreach ($result as $i => &$value) {
                     static::cleanSpec($specItem["elem"], $value);
                 }

@@ -7,6 +7,8 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
+use Com\Youzan\Nova\Framework\Generic\Servicespecification\GenericService;
+use Kdt\Iron\Nova\Service\Registry;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\ServerManager\ServerRegister;
@@ -38,10 +40,22 @@ class ServerRegisterInitiator
         return $this->register;
     }
 
+    public function initGenericService(&$config)
+    {
+        $registry = new Registry();
+        $registry->register(new GenericService());
+        $genericServices = $registry->getAll();
+        if ($genericServices) {
+            array_push($config['services'], ...$genericServices);
+        }
+    }
+
     public function init()
     {
         //TODO: check config position
         $config['services'] = Nova::getAvailableService();
+        $this->initGenericService($config);
+
         $haunt = Config::get('haunt.register');
 
         if (null !== $this->register) {
@@ -66,5 +80,4 @@ class ServerRegisterInitiator
         $coroutine = $register->register($config);
         Task::execute($coroutine);
     }
-
 }

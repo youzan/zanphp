@@ -31,6 +31,7 @@ class Request implements BaseRequest {
     private $isGenericInvoke = false;
     private $genericServiceName;
     private $genericMethodName;
+    private $genericRoute;
 
     public function __construct($fd, $fromId, $data)
     {
@@ -148,6 +149,11 @@ class Request implements BaseRequest {
         return $this->genericMethodName;
     }
 
+    public function getGenericRoute()
+    {
+        return $this->genericRoute;
+    }
+
     public function isGenericInvoke()
     {
         return $this->isGenericInvoke;
@@ -197,12 +203,7 @@ class Request implements BaseRequest {
 
             $this->isGenericInvoke = GenericRequestCodec::isGenericService($serviceName);
             if ($this->isGenericInvoke) {
-                $this->novaServiceName = str_replace('.', '\\', ucwords($this->serviceName, '.'));
-                $genericRequest = GenericRequestCodec::decode($this->novaServiceName, $this->methodName, $this->args);
-                $this->genericServiceName = $genericRequest->serviceName;
-                $this->genericMethodName = $genericRequest->methodName;
-                $this->args = $genericRequest->methodParams;
-                $this->route = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
+                $this->initGenericInvoke($serviceName);
                 return null;
             }
 
@@ -211,5 +212,16 @@ class Request implements BaseRequest {
         } else {
             throw new TApplicationException("nova_decode fail");
         }
+    }
+
+    private function initGenericInvoke($serviceName)
+    {
+        $this->novaServiceName = str_replace('.', '\\', ucwords($this->serviceName, '.'));
+        $genericRequest = GenericRequestCodec::decode($this->novaServiceName, $this->methodName, $this->args);
+        $this->genericServiceName = $genericRequest->serviceName;
+        $this->genericMethodName = $genericRequest->methodName;
+        $this->args = $genericRequest->methodParams;
+        $this->route = '/'. str_replace('.', '/', $serviceName) . '/' . $this->methodName;
+        $this->genericRoute = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
     }
 }

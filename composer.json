@@ -60,7 +60,7 @@
         "elasticsearch/yz-elasticsearch-client": "1.0.0",
         "php-lib/nsq-async": "1.2.2",
         "psr/log": "1.0.0",
-        "nova-service/generic": "dev-master#1.0.0"
+        "nova-service/generic": "1.0.1"
     },
     "autoload": {
         "psr-4": {
