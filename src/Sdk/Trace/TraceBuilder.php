@@ -71,10 +71,12 @@ class TraceBuilder
             }
         }
 
+        $microtime = str_replace('.', '', microtime(true));
+
         $data = [
             Application::getInstance()->getName(),
             self::$hexIp,
-            floor(time()/3600),
+            $microtime,
             rand(100000, 999999)
         ];
         $data = implode('-', $data);
