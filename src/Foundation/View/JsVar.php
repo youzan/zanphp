@@ -12,6 +12,12 @@ namespace Zan\Framework\Foundation\View;
 class JsVar
 {
     /**
+     * window._global 协议版本，方便前端开发判断是否是Zan PHP
+     * 的 _global 变量来做一些相应的兼容处理。
+     * @var string
+     */
+    private $protocolVersion = '2.0.0';
+    /**
      * 用户账户相关
      * @var array
      */
@@ -85,6 +91,7 @@ class JsVar
     public function get()
     {
         return [
+            'protocol_version' => $this->protocolVersion,
             'session' => $this->_session,
             'config' => $this->_config,
             'query' => $this->_query,
