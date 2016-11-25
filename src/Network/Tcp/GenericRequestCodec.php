@@ -115,7 +115,7 @@ final class GenericRequestCodec
             $requiredParamsNum = static::getRequiredParamsNum($serviceName, $methodName);
             // assert($requiredParamsNum <= $expectedParamNum);
             if ($realParamNum < $requiredParamsNum) {
-                throw new GenericInvokeException("Too few arguments to $serviceName::$methodName, $realParamNum passed  and at least $requiredParamsNum expected");
+                throw new GenericInvokeException("Too few arguments to $serviceName::$methodName, $realParamNum passed and at least $requiredParamsNum expected");
             }
 
             $request->methodParams = static::getParamsBySpec($paramSpec, $params, $request);
@@ -314,9 +314,7 @@ final class GenericRequestCodec
                 break;
 
             case TType::STRUCT:
-                if (!is_array($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects struct");
-                }
+                $rawValue = static::formatComplexArgument($rawValue, $pos, "struct");
 
                 /* @var $structObject TStruct */
                 $structObject = new $specItem["class"];
@@ -333,9 +331,7 @@ final class GenericRequestCodec
                 return $structObject;
 
             case TType::MAP:
-                if (!is_array($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects map");
-                }
+                $rawValue = static::formatComplexArgument($rawValue, $pos, "map");
 
                 $map = [];
                 foreach ($rawValue as $key => $value) {
@@ -345,9 +341,7 @@ final class GenericRequestCodec
                 return $map;
 
             case TType::SET:
-                if (!is_array($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects set");
-                }
+                $rawValue = static::formatComplexArgument($rawValue, $pos, "set");
 
                 $set = [];
                 foreach ($rawValue as $i => $value) {
@@ -356,9 +350,7 @@ final class GenericRequestCodec
                 return /*array_unique(*/$set/*)*/;
 
             case TType::LST:
-                if (!is_array($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects list");
-                }
+                $rawValue = static::formatComplexArgument($rawValue, $pos, "list");
 
                 $list = [];
                 foreach ($rawValue as $i => $value) {
@@ -374,6 +366,27 @@ final class GenericRequestCodec
             default:
                 throw new GenericInvokeException("Unsupported type \"$expectedTType\"");
         }
+    }
+
+    /**
+     * @param $rawValue
+     * @param int $pos
+     * @param string $expect
+     * @return array
+     * @throws GenericInvokeException
+     */
+    private static function formatComplexArgument($rawValue, $pos = -1, $expect = "")
+    {
+        if (is_string($rawValue)) {
+            $rawValue = json_decode($rawValue, true, 512, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+        if ($rawValue === null) {
+            $rawValue = [];
+        }
+        if (!is_array($rawValue)) {
+            throw new GenericInvokeException("Invalid parameter type in position of $pos, expects $expect");
+        }
+        return $rawValue;
     }
 
     /**
