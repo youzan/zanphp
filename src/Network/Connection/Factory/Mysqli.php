@@ -14,6 +14,8 @@ use Zan\Framework\Network\Server\Timer\Timer;
 
 class Mysqli implements ConnectionFactory
 {
+    const DEFAULT_CHARSET = "utf8mb4";
+
     /**
      * @var array
      */
@@ -30,6 +32,8 @@ class Mysqli implements ConnectionFactory
         $this->conn = new \mysqli();
         $this->conn->connect($this->config['host'], $this->config['user'], $this->config['password'],
             $this->config['database'], $this->config['port']);
+        $charset = isset($this->config['charset']) ? $this->config['charset'] : static::DEFAULT_CHARSET;
+        $this->conn->set_charset($charset);
         $this->conn->autocommit(true);
         $connection = new \Zan\Framework\Network\Connection\Driver\Mysqli();
         $connection->setSocket($this->conn);
