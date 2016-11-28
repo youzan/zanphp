@@ -27,7 +27,17 @@ class InternalErrorHandler implements ExceptionHandler
         }
         $config = Config::get($this->configKey, null);
         if (!$config) {
-            return new Response('网络错误');
+            if (Config::get('debug') && Config::get('run_mode') != 'online') {
+                $errorInfo = [
+                    'code' => 99999,
+                    'msg' => $e->getMessage(),
+                    'file' => $e->getFile() . ":" . $e->getLine(),
+                    'trace' => $e->getTrace()
+                ];
+                return new Response($errorInfo);
+            } else {
+                return new Response('网络错误');
+            }
         }
         // 跳转到配置的500页面
         if (isset($config['500'])) {
