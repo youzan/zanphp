@@ -8,6 +8,7 @@
 namespace Zan\Framework\Network\ServerManager;
 
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Utilities\Types\Time;
@@ -79,6 +80,8 @@ class ServiceUnregister
         $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
         $curl = new Curl();
         $unregister = $curl->post($url, $this->parseConfig($this->config));
-        sys_echo($unregister);
+        if (Debug::get()) {
+            sys_echo($unregister);
+        }
     }
 }
