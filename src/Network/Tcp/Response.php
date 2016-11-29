@@ -8,10 +8,10 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Com\Youzan\Nova\Framework\Generic\Service\GenericResponse;
 use Kdt\Iron\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
+use Zan\Framework\Network\Exception\GenericInvokeException;
 
 class Response implements BaseResponse {
     /**
@@ -55,9 +55,9 @@ class Response implements BaseResponse {
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
 
+        // 泛化调用不透传任何异常, 直接打包发送
         if ($this->request->isGenericInvoke()) {
-            $response = GenericRequestCodec::encodeException($e);
-            return $this->send($response);
+            return $this->send($e);
         }
 
         $content = Nova::encodeServiceException($novaServiceName, $methodName, $e);
@@ -88,11 +88,10 @@ class Response implements BaseResponse {
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
 
-        if ($this->request->isGenericInvoke() && !($content instanceof GenericResponse)) {
+        if ($this->request->isGenericInvoke()) {
             $content = GenericRequestCodec::encode(
                 $this->request->getGenericServiceName(),
-                $this->request->getGenericMethodName(),
-                $content);
+                $this->request->getGenericMethodName(), $content);
         }
 
         $content = Nova::encodeServiceOutput($novaServiceName, $methodName, $content);

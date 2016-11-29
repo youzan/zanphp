@@ -3,7 +3,6 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Com\Youzan\Nova\Framework\Generic\Service\GenericRequest;
-use Com\Youzan\Nova\Framework\Generic\Service\GenericResponse;
 use Kdt\Iron\Nova\Foundation\Protocol\TStruct;
 use Kdt\Iron\Nova\Foundation\TSpecification;
 use Kdt\Iron\Nova\Nova;
@@ -15,7 +14,6 @@ use Zan\Framework\Network\Exception\GenericInvokeException;
 final class GenericRequestCodec
 {
     const GENERIC_SERVICE_PREFIX = 'com.youzan.nova.framework.generic.service';
-    const RESPONSE_SUCCESS = 200;
 
     public static function isGenericService($serviceName)
     {
@@ -26,38 +24,34 @@ final class GenericRequestCodec
      * @param string $serviceName
      * @param string $methodName
      * @param mixed $result
-     * @return GenericResponse
+     * @return string
      */
     public static function encode($serviceName, $methodName, $result)
     {
-        /* @var $classSpec TSpecification */
-        /* @var $classMap ClassMap */
-        $classMap = ClassMap::getInstance();
+        if ($result instanceof \Exception) {
 
-        $classSpec = $classMap->getSpec($serviceName);
-        $resultSpec = $classSpec->getOutputStructSpec($methodName);
+            return json_encode([
+                "error_response" => [
+                    "code"      => $result->getCode() ?:0 ,
+                    "message"   => $result->getMessage(),
+                ]
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
-        static::cleanSpec($resultSpec, $result);
+        } else {
 
-        $response = new GenericResponse();
-        $response->code = self::RESPONSE_SUCCESS;
-        $response->message = "";
-        $response->data = json_encode($result, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            /* @var $classSpec TSpecification */
+            /* @var $classMap ClassMap */
 
-        return $response;
-    }
+            $classMap = ClassMap::getInstance();
+            $classSpec = $classMap->getSpec($serviceName);
+            $resultSpec = $classSpec->getOutputStructSpec($methodName);
 
-    /**
-     * @param \Exception $ex
-     * @return GenericResponse
-     */
-    public static function encodeException(\Exception $ex) {
-        $response = new GenericResponse();
-        $code = $ex->getCode() ?: 0;
-        $response->code = $code === static::RESPONSE_SUCCESS ? 0 : $code;
-        $response->message = $ex->getMessage();
-        $response->data = "";
-        return $response;
+            static::cleanSpec($resultSpec, $result);
+
+            return json_encode([
+                "response" => $result
+            ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
     }
 
     /**
@@ -115,7 +109,7 @@ final class GenericRequestCodec
             $requiredParamsNum = static::getRequiredParamsNum($serviceName, $methodName);
             // assert($requiredParamsNum <= $expectedParamNum);
             if ($realParamNum < $requiredParamsNum) {
-                throw new GenericInvokeException("Too few arguments to $serviceName::$methodName, $realParamNum passed and at least $requiredParamsNum expected");
+                throw new GenericInvokeException("Too few arguments to $methodName, $realParamNum passed and at least $requiredParamsNum expected");
             }
 
             $request->methodParams = static::getParamsBySpec($paramSpec, $params, $request);
@@ -141,11 +135,11 @@ final class GenericRequestCodec
         $args = [];
         foreach ($rawArgs as $rawArg) {
             // fix 根据卡门传递的paramType判断哪些参数需要json_decode
-            $args[] = json_decode($rawArg, true, 512, JSON_BIGINT_AS_STRING);
+            $args[] = static::decodeJson($rawArg);
         }
         return $args;
     }
-    */
+    //*/
 
     /**
      * 处理 map<string, json> 类型参数
@@ -155,9 +149,9 @@ final class GenericRequestCodec
      */
     private static function parseMapParams($rawArgs)
     {
-        $args = json_decode($rawArgs, true, 512, JSON_BIGINT_AS_STRING);
+        $args = static::decodeJson($rawArgs, "Invalid generic request arguments");
         if (!is_array($args)) {
-            throw new GenericInvokeException("Invalid generic request parameters");
+            throw new GenericInvokeException("Invalid generic request arguments");
         }
         return $args;
     }
@@ -172,11 +166,11 @@ final class GenericRequestCodec
             // map params
             $paramName = $item["var"];
             if (isset($rawArgs[$paramName])) {
-                $arguments[$paramName] = static::parseSpec($item, $rawArgs[$paramName], $pos);
+                $arguments[$paramName] = static::parseSpec($item, $rawArgs[$paramName], $paramName);
             } else if (isset($defaultValues[$pos])) {
                 $arguments[$paramName] = $defaultValues[$pos];
             } else {
-                throw new GenericInvokeException("Missing method parameter \"$paramName\"");
+                throw new GenericInvokeException("Missing argument <$paramName>");
             }
         }
         return $arguments;
@@ -271,50 +265,52 @@ final class GenericRequestCodec
     /**
      * 根据spec递归解析变量
      * @param array $specItem
-     * @param mixed$rawValue
-     * @param int $pos
+     * @param mixed $rawValue
+     * @param string $paramName
+     * @param int $deep
      * @return mixed
      * @throws GenericInvokeException
      */
-    private static function parseSpec($specItem, $rawValue, $pos = -1)
+    private static function parseSpec($specItem, $rawValue, $paramName, $deep = 1)
     {
         $expectedTType = $specItem["type"];
 
         switch ($expectedTType) {
 
             case TType::BOOL:
-                if (!is_scalar($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects bool");
+                $boolVal = filter_var($rawValue, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                if ($boolVal === null) {
+                    throw new GenericInvokeException("Invalid <$paramName> type, expects bool");
                 }
-                return boolval($rawValue);
+                return $boolVal;
 
+            case TType::BYTE:
             case TType::I08:
             case TType::I16:
             case TType::I32:
             case TType::I64:
-                if (!is_scalar($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects int");
+                $intVal = filter_var($rawValue, FILTER_VALIDATE_INT);
+                if ($intVal === false) {
+                    throw new GenericInvokeException("Invalid <$paramName> type, expects int");
                 }
-                return intval($rawValue);
+                return $intVal;
 
             case TType::DOUBLE:
-                if (!is_scalar($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects double");
+                $floatVal = filter_var($rawValue, FILTER_VALIDATE_FLOAT);
+                if ($floatVal === false) {
+                    throw new GenericInvokeException("Invalid <$paramName> type, expects float");
                 }
-                return floatval($rawValue);
-                break;
+                return $floatVal;
 
-
-            case TType::BYTE:
             case TType::STRING:
-                if (!is_scalar($rawValue)) {
-                    throw new GenericInvokeException("Invalid parameter type in position of $pos, expects byte|string");
+                if (!is_string($rawValue)) {
+                    throw new GenericInvokeException("Invalid <$paramName> type, expects string");
                 }
-                return strval($rawValue);
-                break;
+
+                return $rawValue;
 
             case TType::STRUCT:
-                $rawValue = static::formatComplexArgument($rawValue, $pos, "struct");
+                $rawValue = static::parseComplexArgument($deep, $rawValue, $paramName, "object");
 
                 /* @var $structObject TStruct */
                 $structObject = new $specItem["class"];
@@ -323,7 +319,7 @@ final class GenericRequestCodec
                 foreach ($structSpec as $pos => $item) {
                     $propName = $item["var"];
                     if (isset($rawValue[$propName])) {
-                        $structObject->$propName = static::parseSpec($item, $rawValue[$propName], $pos);
+                        $structObject->$propName = static::parseSpec($item, $rawValue[$propName], "$paramName.$propName", $deep + 1);
                     } else {
                         $structObject->$propName = null;
                     }
@@ -331,30 +327,30 @@ final class GenericRequestCodec
                 return $structObject;
 
             case TType::MAP:
-                $rawValue = static::formatComplexArgument($rawValue, $pos, "map");
+                $rawValue = static::parseComplexArgument($deep, $rawValue, $paramName, "map");
 
                 $map = [];
                 foreach ($rawValue as $key => $value) {
-                    $key = static::parseSpec($specItem["key"], $key);
-                    $map[$key] = static::parseSpec($specItem["val"], $value);
+                    $key = static::parseSpec($specItem["key"], $key, "$paramName.$key", $deep + 1);
+                    $map[$key] = static::parseSpec($specItem["val"], $value, "$paramName.$key", $deep + 1);
                 }
                 return $map;
 
             case TType::SET:
-                $rawValue = static::formatComplexArgument($rawValue, $pos, "set");
+                $rawValue = static::parseComplexArgument($deep, $rawValue, $paramName, "set");
 
                 $set = [];
                 foreach ($rawValue as $i => $value) {
-                    $set[] = static::parseSpec($specItem["elem"], $value, $i + 1);
+                    $set[] = static::parseSpec($specItem["elem"], $value, "{$paramName}[$i]", $deep + 1);
                 }
                 return /*array_unique(*/$set/*)*/;
 
             case TType::LST:
-                $rawValue = static::formatComplexArgument($rawValue, $pos, "list");
+                $rawValue = static::parseComplexArgument($deep, $rawValue, $paramName, "list");
 
                 $list = [];
                 foreach ($rawValue as $i => $value) {
-                    $list[] = static::parseSpec($specItem["elem"], $value, $i + 1);
+                    $list[] = static::parseSpec($specItem["elem"], $value, "{$paramName}[$i]", $deep + 1);
                 }
                 return $list;
 
@@ -364,29 +360,38 @@ final class GenericRequestCodec
             case TType::VOID:
             case TType::STOP:
             default:
-                throw new GenericInvokeException("Unsupported type \"$expectedTType\"");
+                throw new GenericInvokeException("Unsupported argument type \"$expectedTType\"");
         }
     }
 
-    /**
-     * @param $rawValue
-     * @param int $pos
-     * @param string $expect
-     * @return array
-     * @throws GenericInvokeException
-     */
-    private static function formatComplexArgument($rawValue, $pos = -1, $expect = "")
+    private static function parseComplexArgument($deep, $rawValue, $paramName, $expect = "")
     {
-        if (is_string($rawValue)) {
-            $rawValue = json_decode($rawValue, true, 512, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($deep === 1) {
+            if (!is_string($rawValue)) {
+                throw new GenericInvokeException("Invalid <$paramName> type, expects $expect");
+            }
+            $rawValue = static::decodeJson($rawValue, "Invalid <$paramName> type, expects $expect");
         }
-        if ($rawValue === null) {
-            $rawValue = [];
-        }
+
         if (!is_array($rawValue)) {
-            throw new GenericInvokeException("Invalid parameter type in position of $pos, expects $expect");
+            throw new GenericInvokeException("Invalid <$paramName> type, expects object");
         }
+
         return $rawValue;
+    }
+
+    private static function decodeJson($raw, $errMsg = null)
+    {
+        $data = json_decode($raw, true, 512, JSON_BIGINT_AS_STRING);
+        if (JSON_ERROR_NONE !== json_last_error()) {
+            $last = json_last_error();
+            if ($errMsg) {
+                throw new GenericInvokeException($errMsg);
+            } else {
+                throw new GenericInvokeException("Unable to parse JSON data[$last]");
+            }
+        }
+        return $data;
     }
 
     /**
