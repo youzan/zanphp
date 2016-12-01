@@ -32,6 +32,7 @@ class Request implements BaseRequest {
     private $genericServiceName;
     private $genericMethodName;
     private $genericRoute;
+    private $genericAttachment = [];
 
     public function __construct($fd, $fromId, $data)
     {
@@ -154,6 +155,11 @@ class Request implements BaseRequest {
         return $this->genericRoute;
     }
 
+    public function getGenericAttachment()
+    {
+        return $this->genericAttachment;
+    }
+
     public function isGenericInvoke()
     {
         return $this->isGenericInvoke;
@@ -223,5 +229,31 @@ class Request implements BaseRequest {
         $this->args = $genericRequest->methodParams;
         $this->route = '/'. str_replace('.', '/', $serviceName) . '/' . $this->methodName;
         $this->genericRoute = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
+
+        $this->initGenericAttachment();
     }
+
+    private function initGenericAttachment()
+    {
+        $attachment = json_decode($this->attachData, true, 512, JSON_BIGINT_AS_STRING);
+        if (!is_array($attachment)) {
+            return;
+        }
+
+        unset($attachment["async"]);
+
+        foreach (GenericRequestCodec::$carmenInternalArgs as $carmenInternalArg) {
+            if (isset($attachment[$carmenInternalArg])) {
+                $this->genericAttachment[$carmenInternalArg] = $attachment[$carmenInternalArg];
+                unset($attachment[$carmenInternalArg]);
+            }
+        }
+
+        if (empty($attachment)) {
+            $this->attachData =  "{}";
+        } else {
+            $this->attachData = json_encode($attachment, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+    }
+
 }
