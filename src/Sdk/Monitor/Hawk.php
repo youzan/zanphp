@@ -110,13 +110,13 @@ class Hawk
                         // 平均成功耗时
                         $metrics['avg.elapsed'] = $metrics['avg.success.elapsed'] = $kv[self::TOTAL_SUCCESS_COUNT] == 0 ? 0 : floor($kv[self::TOTAL_SUCCESS_TIME] / $kv[self::TOTAL_SUCCESS_COUNT]);
                         // 最大成功耗时
-                        $metrics['max.success.elapsed'] = $kv[self::MAX_SUCCESS_TIME];
+                        $metrics['max.success.elapsed'] = floor($kv[self::MAX_SUCCESS_TIME]);
                         // 失败次数
                         $metrics['failure'] = $kv[self::TOTAL_FAILURE_COUNT];
                         // 失败平均耗时
                         $metrics['avg.failure.elapsed'] = $kv[self::TOTAL_FAILURE_COUNT] == 0 ? 0 : floor($kv[self::TOTAL_FAILURE_TIME] / $kv[self::TOTAL_FAILURE_COUNT]);
                         // 最大失败耗时
-                        $metrics['max.failure.elapsed'] = $kv[self::MAX_FAILURE_TIME];
+                        $metrics['max.failure.elapsed'] = floor($kv[self::MAX_FAILURE_TIME]);
                         // 限流
                         $metrics['reject'] = $kv[self::LIMIT_COUNT];
                         // 平均并发数
