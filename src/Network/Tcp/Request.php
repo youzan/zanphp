@@ -28,6 +28,8 @@ class Request implements BaseRequest {
     private $fromId;
     private $seqNo;
     private $attachData;
+
+    private $startTime;
     private $isHeartBeat = false;
 
     public function __construct($fd, $fromId, $data)
@@ -134,6 +136,26 @@ class Request implements BaseRequest {
     public function getIsHeartBeat()
     {
         return $this->isHeartBeat;
+    }
+
+    public function getStartTime()
+    {
+        return $this->startTime;
+    }
+
+    public function setStartTime()
+    {
+        $this->startTime = microtime(true);
+    }
+
+    public function getRemoteIp()
+    {
+        return $this->remoteIp;
+    }
+
+    public function setRemoteIp($remoteIp)
+    {
+        $this->remoteIp = $remoteIp;
     }
 
     private function formatRoute()

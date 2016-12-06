@@ -12,6 +12,7 @@ use Zan\Framework\Network\Exception\ExcessConcurrencyException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -61,6 +62,8 @@ class RequestHandler {
                 $this->swooleServer->send($this->fd, $result);
                 return;
             }
+            $request->setStartTime();
+
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();
@@ -81,6 +84,19 @@ class RequestHandler {
         } catch(\Exception $e) {
             if (Debug::get()) {
                 echo_exception($e);
+            }
+
+            if ($this->request->getServiceName()) {
+                $hawk = Hawk::getInstance();
+                $hawk->addTotalFailureTime(Hawk::SERVER,
+                    $this->request->getServiceName(),
+                    $this->request->getMethodName(),
+                    $this->request->getRemoteIp(),
+                    microtime(true) - $this->request->getStartTime());
+                $hawk->addTotalFailureCount(Hawk::SERVER,
+                    $this->request->getServiceName(),
+                    $this->request->getMethodName(),
+                    $this->request->getRemoteIp());
             }
             $response->sendException($e);
             $this->event->fire($this->getRequestFinishJobId());
@@ -104,6 +120,17 @@ class RequestHandler {
             http_build_query($this->request->getArgs())
         );
 
+        $hawk = Hawk::getInstance();
+        $hawk->addTotalFailureTime(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp(),
+            microtime(true) - $this->request->getStartTime());
+        $hawk->addTotalFailureCount(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp());
+        
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
         $this->response->sendException($e);
