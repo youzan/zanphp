@@ -5,6 +5,7 @@ namespace Zan\Framework\Sdk\Monitor;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Env;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
@@ -38,23 +39,6 @@ class Hawk
      */
     private $serviceData = [];
 
-    //成功总耗时(微秒)
-//    private $totalSuccessTime = 0;
-    //成功次数
-//    private $totalSuccessCount = 0;
-    //失败平均耗时
-//    private $totalFailureTime = 0;
-    //失败次数
-//    private $totalFailureCount = 0;
-    //失败最大耗时(某次)
-//    private $maxFailureTime = 0;
-    //限流次数
-//    private $limitCount = 0;
-    //并发数
-//    private $totalConcurrency = 0;
-    //并发统计次数
-//    private $concurrencyCount = 0;
-
     private $application;
     private $config;
     private $httpClient;
@@ -69,6 +53,7 @@ class Hawk
 
     const TOTAL_SUCCESS_TIME = 'totalSuccessTime';
     const TOTAL_SUCCESS_COUNT = 'totalSuccessCount';
+    const MAX_SUCCESS_TIME = 'maxSuccessTime';
     const TOTAL_FAILURE_TIME = 'totalFailureTime';
     const TOTAL_FAILURE_COUNT = 'totalFailureCount';
     const MAX_FAILURE_TIME = 'maxFailureTime';
@@ -118,11 +103,14 @@ class Hawk
                         $kv[self::LIMIT_COUNT] = isset($kv[self::LIMIT_COUNT]) ?self::LIMIT_COUNT: 0;
                         $kv[self::TOTAL_CONCURRENCY] = isset($kv[self::TOTAL_CONCURRENCY]) ?$kv[self::TOTAL_CONCURRENCY]: 0;
                         $kv[self::CONCURRENCY_COUNT] = isset($kv[self::CONCURRENCY_COUNT]) ?$kv[self::CONCURRENCY_COUNT]: 0;
+                        $kv[self::MAX_SUCCESS_TIME] = isset($kv[self::MAX_SUCCESS_TIME]) ?$kv[self::MAX_SUCCESS_TIME]: 0;
 
                         // 成功次数
                         $metrics['success'] = $kv[self::TOTAL_SUCCESS_COUNT];
                         // 平均成功耗时
                         $metrics['avg.elapsed'] = $metrics['avg.success.elapsed'] = $kv[self::TOTAL_SUCCESS_COUNT] == 0 ? 0 : floor($kv[self::TOTAL_SUCCESS_TIME] / $kv[self::TOTAL_SUCCESS_COUNT]);
+                        // 最大成功耗时
+                        $metrics['max.success.elapsed'] = $kv[self::MAX_SUCCESS_TIME];
                         // 失败次数
                         $metrics['failure'] = $kv[self::TOTAL_FAILURE_COUNT];
                         // 失败平均耗时
@@ -151,8 +139,9 @@ class Hawk
             }
         }
 
-        // TODO send
-        var_dump($this->data);
+        // send
+        $courotine = $this->send();
+        Task::execute($courotine);
         // clean
         $this->clear();
     }
@@ -232,16 +221,33 @@ class Hawk
     public function addTotalSuccessTime($side, $service, $method, $ip, $diffSec)
     {
         $ip = $this->long2ip($ip);
+        $diffUSec = $diffSec * 1000000;
         if ($side == 'server') {
             $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] =
                 isset($this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME])
                     ? $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME]
                     : 0;
-                $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
+                $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffUSec;
+
+            $this->serviceData['server'][$service][$method][$ip][self::MAX_SUCCESS_TIME] =
+                isset($this->serviceData['server'][$service][$method][$ip][self::MAX_SUCCESS_TIME])
+                    ? $this->serviceData['server'][$service][$method][$ip][self::MAX_SUCCESS_TIME] : 0;
+
+            if ($this->serviceData['server'][$service][$method][$ip][self::MAX_SUCCESS_TIME] < $diffUSec) {
+                $this->serviceData['server'][$service][$method][$ip][self::MAX_SUCCESS_TIME] = $diffUSec;
+            }
         } else {
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] = isset($this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME])
                     ? $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] : 0;
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
+
+            $this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME] =
+                isset($this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME])
+                    ? $this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME] : 0;
+
+            if ($this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME] < $diffUSec) {
+                $this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME] = $diffUSec;
+            }
         }
     }
 
