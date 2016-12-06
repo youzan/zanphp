@@ -191,4 +191,17 @@ class URL
         return $imgSrc;
     }
 
+    public static function parseUrl($url)
+    {
+        $result = parse_url($url);
+        $result['path'] = isset($result['path']) ? ltrim($result['path'], '/v2/') : '';
+        if(isset($result['query'])) {
+            parse_str($result['query'], $result['query']);
+        }else{
+            $result['query'] = [];
+        }
+        $result['fragment'] = isset($result['fragment']) ? $result['fragment'] : [];
+        return $result;
+    }
+
 }

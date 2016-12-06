@@ -19,7 +19,9 @@ class RunMode {
         'online'    => 5,
         'unittest'  => 6,
         'qatest'    => 7,
-        'pubtest'   => 8
+        'pubtest'   => 8,
+        'ci'        => 9,
+        'qa-perf'   => 10,
     ];
     private static $runMode = null;
 

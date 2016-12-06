@@ -42,7 +42,7 @@ class KVStore implements ConnectionFactory
         //call connect
         if (!$this->conn->connect()) {
             //TODO: 链接失败
-            echo "KVStore connect error \n";
+            sys_echo("KVStore connect error ");
         }
         return $connection;
     }

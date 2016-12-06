@@ -42,12 +42,15 @@ class Worker
     private $checkMqReadyClose;
     private $mqReadyClosePre;
 
+    private $isDenyRequest;
+
     /* @var $server Server */
     public function init($server,$config){
         if(!is_array($config)){
             return ;
         }
 
+        $this->isDenyRequest = false;
         $this->classHash = spl_object_hash($this);
         $this->server = $server;
         $this->workerId = $server->swooleServer->worker_id;
@@ -110,6 +113,7 @@ class Worker
 
         /* @var $this->server Server */
         $this->server->swooleServer->deny_request($this->workerId);
+        $this->isDenyRequest = true;
 
         if (is_callable($this->mqReadyClosePre)) {
             call_user_func($this->mqReadyClosePre);
@@ -133,7 +137,7 @@ class Worker
     public function close(){
         $this->output('Close');
 
-        echo "close:workerId->".$this->workerId.",time:".Time::current(true)."\n";
+        sys_echo("close:workerId->".$this->workerId);
 
         $this->server->swooleServer->exit();
     }
@@ -199,6 +203,14 @@ class Worker
             $output .= "###########################\n\n";
             echo $output;
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDenyRequest()
+    {
+        return $this->isDenyRequest;
     }
 
 }

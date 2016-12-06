@@ -2,20 +2,23 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Com\Youzan\Nova\Framework\Generic\Service\GenericService;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
+use Kdt\Iron\Nova\Service\ClassMap;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Server\ServerBase;
+use Zan\Framework\Network\Tcp\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
-use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Network\ServerManager\ServiceUnregister;
@@ -25,11 +28,12 @@ class Server extends ServerBase {
     protected $serverStartItems = [
         InitializeSqlMap::class,
         InitLogConfig::class,
+        InitializeMiddleware::class
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
+        InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
     ];
 
@@ -58,6 +62,8 @@ class Server extends ServerBase {
 
         $this->swooleServer->on('close', [$this, 'onClose']);
 
+        \swoole_async_set(["socket_dontwait" => 1]);
+
         $this->init();
         $this->registerServices();
         
@@ -78,6 +84,7 @@ class Server extends ServerBase {
         }
         $config['path'] = Path::getRootPath() . $config['path'];
         Nova::init($config);
+        ClassMap::getInstance()->setSpec(GenericService::class, new GenericService());
 
         $config = Config::get('haunt');
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
@@ -95,47 +102,53 @@ class Server extends ServerBase {
 
     public function onConnect()
     {
-        echo "connecting ......\n";
+        sys_echo("connecting ......");
     }
 
     public function onClose()
     {
-        echo "closing .....\n";
+        sys_echo("closing .....");
     }
 
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
         Di::make(InitializeServerRegister::class)->bootstrap($this);
-        echo "server starting .....\n";
+        sys_echo("server starting .....");
     }
 
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
         (new ServiceUnregister())->unregister();
-        echo "server shutdown .....\n";
+        sys_echo("server shutdown .....");
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        echo "worker #$workerId starting .....\n";
+        sys_echo("worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        echo "worker #$workerId stopping ....\n";
+        sys_echo("worker #$workerId stopping ....");
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
-    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
-        echo "worker error happening ....\n";
+        sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
     {
-        echo "receive packet data\n\n\n\n";
+        sys_echo("receive packet data..");
     }
 
     public function onReceive(SwooleServer $swooleServer, $fd, $fromId, $data)

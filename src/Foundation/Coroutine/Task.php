@@ -84,9 +84,12 @@ class Task
 
     public function send($value)
     {
-        $this->sendValue = $value;
-
-        return $this->coroutine->send($value);
+        try {
+            $this->sendValue = $value;
+            return $this->coroutine->send($value);
+        } catch (\Exception $e) {
+            $this->sendException($e);
+        }
     }
 
     public function getTaskId()
@@ -136,6 +139,9 @@ class Task
 
     public function fireTaskDoneEvent()
     {
+        if (null === $this->context) {
+            return;
+        }
         $evtName = 'task_event_' . $this->taskId;
         $this->context->getEvent()->fire($evtName, $this->sendValue);
     }

@@ -29,6 +29,14 @@ class ReconnectionPloy {
 
     public function reconnect($conn, $pool)
     {
+        if ($pool instanceof Pool) {
+            $poolConf = $pool->getPoolConfig();
+            $maxWaitNum = $poolConf['pool']['maximum-wait-connection'];
+            if ($pool->waitNum > $maxWaitNum) {
+                return;
+            }
+        }
+
         $connHashCode = spl_object_hash($conn);
         $intervalTime = isset($this->config['interval-reconnect-time']) ? $this->config['interval-reconnect-time'] : 5000;
         $maxTime = isset($this->config['max-reconnect-time']) ? $this->config['max-reconnect-time'] : 30000;

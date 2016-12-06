@@ -15,6 +15,7 @@ use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Network\Connection\Factory\Tcp;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
@@ -24,6 +25,9 @@ use Zan\Framework\Network\Connection\Factory\Mysqli;
 class ConnectionInitiator
 {
     use Singleton;
+
+    const CONNECT_TIMEOUT = 1000;
+    const CONCURRENCY_CONNECTION_LIMIT = 50;
 
     private $engineMap = [
         'mysqli', 
@@ -76,6 +80,9 @@ class ConnectionInitiator
                 $this->poolName = '';
                 continue;
             }
+
+            $this->fixConfig($cf);
+
             //创建连接池
             $dir = $this->poolName;
             $this->poolName = '' === $this->poolName ? $k : $this->poolName . '.' . $k;
@@ -88,6 +95,20 @@ class ConnectionInitiator
                 $endKey = end($fileConfigKeys);
                 $this->poolName = $k == $endKey ? '' : $dir;
             }
+        }
+    }
+
+    private function fixConfig(array &$config)
+    {
+        if (!isset($config['connect_timeout'])) {
+            $config['connect_timeout'] = self::CONNECT_TIMEOUT;
+        } else {
+            $config['connect_timeout'] = intval($config['connect_timeout']);
+        }
+        if (!isset($config['pool']['maximum-wait-connection'])) {
+            $config['pool']['maximum-wait-connection'] = self::CONCURRENCY_CONNECTION_LIMIT;
+        } else {
+            $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-wait-connection']);
         }
     }
 

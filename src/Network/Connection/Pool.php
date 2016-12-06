@@ -142,12 +142,12 @@ class Pool implements ConnectionPool
         if (count($this->freeConnection) == 1) {
             $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
             Event::fire($evtName, [], false);
-            $this->waitNum = $this->waitNum >0 ? $this->waitNum-- : 0 ;
         }
     }
 
     public function remove(Connection $conn)
     {
+        $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
         $connHashCode = spl_object_hash($conn);
         if (null === ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
@@ -156,5 +156,13 @@ class Pool implements ConnectionPool
             return;
         }
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getPoolConfig()
+    {
+        return $this->poolConfig;
     }
 }

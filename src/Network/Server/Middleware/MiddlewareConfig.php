@@ -38,6 +38,11 @@ class MiddlewareConfig
 
     public function getGroupValue(Request $request)
     {
+        $isTcpGenericRequest = $request instanceof \Zan\Framework\Network\Tcp\Request && $request->isGenericInvoke();
+        if ($isTcpGenericRequest) {
+            $genericRoute = $request->getGenericRoute();
+        }
+
         $route = $request->getRoute();
         $groupKey = null;
 
@@ -48,6 +53,11 @@ class MiddlewareConfig
             $match = $this->config['match'][$i];
             $pattern = $this->setDelimit($match[0]);
             if ($this->match($pattern, $route)) {
+                $groupKey = $match[1];
+                break;
+            }
+
+            if (!empty($genericRoute) && $this->match($pattern, $genericRoute)) {
                 $groupKey = $match[1];
                 break;
             }
@@ -96,6 +106,7 @@ class MiddlewareConfig
             KVTerminator::class,
 
             TraceTerminator::class,
+//            ClearContextTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }

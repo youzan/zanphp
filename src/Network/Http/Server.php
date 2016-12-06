@@ -7,6 +7,7 @@ use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
 use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
+use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
@@ -38,8 +39,8 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
-        InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
+        InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
     ];
 
@@ -64,6 +65,8 @@ class Server extends ServerBase implements ServerContract
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
+
+        \swoole_async_set(["socket_dontwait" => 1]);
 
         $this->bootServerStartItem();
         $this->init();
@@ -92,30 +95,38 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        echo "server starting .....\n";
+        sys_echo("server starting .....");
     }
 
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
-        echo "server shutdown .....\n";
+        sys_echo("server shutdown .....");
     }
 
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        echo "worker #$workerId starting .....\n";
+        sys_echo("worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
-        echo "worker #$workerId stopping .....\n";
+        sys_echo("worker #$workerId stopping .....");
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
-    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
         ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
+
+        sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
+
+        $num = Worker::getInstance()->reactionNum ?: 0;
+        sys_echo("worker #$workerId still has $num requests in progress...");
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)

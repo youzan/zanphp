@@ -103,24 +103,28 @@ class RequestHandler
 
     public function handleTimeout()
     {
-        $this->task->setStatus(Signal::TASK_KILLED);
-        $request = $this->context->get('request');
-        if ($request && $request->wantsJson()) {
-            // @TODO 分配code
-            $data = [
-                'code' => 10000,
-                'msg' => '网络超时',
-                'data' => '',
-            ];
-            $response = new JsonResponse($data, BaseResponse::HTTP_GATEWAY_TIMEOUT);
-        } else {
-            $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
-        }
+        try {
+            $this->task->setStatus(Signal::TASK_KILLED);
+            $request = $this->context->get('request');
+            if ($request && $request->wantsJson()) {
+                // @TODO 分配code
+                $data = [
+                    'code' => 10000,
+                    'msg' => '网络超时',
+                    'data' => '',
+                ];
+                $response = new JsonResponse($data, BaseResponse::HTTP_GATEWAY_TIMEOUT);
+            } else {
+                $response = new InternalErrorResponse('服务器超时', BaseResponse::HTTP_GATEWAY_TIMEOUT);
+            }
 
-        $this->context->set('response', $response);
-        $swooleResponse = $this->context->get('swoole_response');
-        $response->sendBy($swooleResponse);
-        $this->event->fire($this->getRequestFinishJobId());
+            $this->context->set('response', $response);
+            $swooleResponse = $this->context->get('swoole_response');
+            $response->sendBy($swooleResponse);
+            $this->event->fire($this->getRequestFinishJobId());
+        } catch (\Exception $ex) {
+            echo_exception($ex);
+        }
     }
 
     private function getRequestFinishJobId()

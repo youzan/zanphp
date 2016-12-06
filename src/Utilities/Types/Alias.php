@@ -68,4 +68,25 @@ class Alias
         }
         return true;
     }
+
+    public static function random($string = '')
+    {
+        if ('' == $string) {
+            $hash = time();
+        } else {
+            $hash = crc32($string);
+        }
+        $num = $hash . rand(100, 999);
+
+        $to = 36;
+        $dict = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $ret = '';
+
+        do {
+            $ret = $dict[bcmod($num, $to)] . $ret;
+            $num = bcdiv($num, $to);
+        } while ($num > 0);
+
+        return $ret;
+    }
 }

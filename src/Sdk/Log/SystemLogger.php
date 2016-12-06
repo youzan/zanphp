@@ -41,6 +41,9 @@ class SystemLogger extends BaseLogger
 
     public function format($level, $message, $context)
     {
+        // 业务需求：flume 系统识别的是 warn
+        $level = ($level === 'warning') ? 'warn' : $level;
+
         $header = $this->buildHeader($level);
         $topic = $this->buildTopic();
         $body = $this->buildBody($level, $message, $context);
@@ -51,11 +54,15 @@ class SystemLogger extends BaseLogger
 
     protected function doWrite($log)
     {
-        if (!$this->writer || !$this->conn instanceof Syslog) {
-            yield $this->init();
-        }
+        try {
+            if (!$this->writer || !$this->conn instanceof Syslog) {
+                yield $this->init();
+            }
 
-        yield $this->getWriter()->write($log);
+            yield $this->getWriter()->write($log);   
+        } catch (\Exception $ex) {
+            echo_exception($ex);
+        }
     }
 
     private function buildHeader($level)

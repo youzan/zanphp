@@ -417,5 +417,48 @@ class Arr {
 
         return $resultArray;
     }
+    
+    /**
+     * Return the values from a columns in the input array
+     *
+     * @param array $input
+     * @param array $columnKeys
+     * @param mixed $indexKey
+     *
+     * @return array Returns an array of values representing a columns from the input array.
+     */
+    public static function columns(array $input, $columnKeys, $indexKey = null)
+    {
+        $resultArray = array();
 
+        foreach ($input as $row) {
+
+            $key = $value = null;
+            $keySet = $valueSet = false;
+
+            if ($indexKey !== null && array_key_exists($indexKey, $row)) {
+                $keySet = true;
+                $key = (string) $row[$indexKey];
+            }
+
+            if (!is_array($columnKeys) || empty($columnKeys)) {
+                $valueSet = true;
+                $value = $row;
+            } elseif (is_array($row)) {
+                $valueSet = true;
+                $value = self::only($row, $columnKeys);
+            }
+
+            if ($valueSet) {
+                if ($keySet) {
+                    $resultArray[$key] = $value;
+                } else {
+                    $resultArray[] = $value;
+                }
+            }
+
+        }
+
+        return $resultArray;
+    }
 }
