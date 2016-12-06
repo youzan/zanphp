@@ -110,29 +110,29 @@ class Hawk
                     foreach ($vvv as $ip => $kv) {
                         $metrics = $tags = [];
 
-                        $kv[self::TOTAL_SUCCESS_COUNT] = $kv[self::TOTAL_SUCCESS_COUNT] ?: 0;
-                        $kv[self::TOTAL_SUCCESS_TIME] = $kv[self::TOTAL_SUCCESS_TIME] ?: 0;
-                        $kv[self::TOTAL_FAILURE_TIME] = $kv[self::TOTAL_FAILURE_TIME] ?: 0;
-                        $kv[self::TOTAL_FAILURE_COUNT] = $kv[self::TOTAL_FAILURE_COUNT] ?: 0;
-                        $kv[self::MAX_FAILURE_TIME] = $kv[self::MAX_FAILURE_TIME] ?: 0;
-                        $kv[self::LIMIT_COUNT] = $kv[self::LIMIT_COUNT] ?: 0;
-                        $kv[self::TOTAL_CONCURRENCY] = $kv[self::TOTAL_CONCURRENCY] ?: 0;
-                        $kv[self::CONCURRENCY_COUNT] = $kv[self::CONCURRENCY_COUNT] ?: 0;
+                        $kv[self::TOTAL_SUCCESS_COUNT] = isset($kv[self::TOTAL_SUCCESS_COUNT]) ?$kv[self::TOTAL_SUCCESS_COUNT]: 0;
+                        $kv[self::TOTAL_SUCCESS_TIME] = isset($kv[self::TOTAL_SUCCESS_TIME]) ?$kv[self::TOTAL_SUCCESS_TIME]: 0;
+                        $kv[self::TOTAL_FAILURE_TIME] = isset($kv[self::TOTAL_FAILURE_TIME]) ?$kv[self::TOTAL_FAILURE_TIME]: 0;
+                        $kv[self::TOTAL_FAILURE_COUNT] = isset($kv[self::TOTAL_FAILURE_COUNT]) ?$kv[self::TOTAL_FAILURE_COUNT]: 0;
+                        $kv[self::MAX_FAILURE_TIME] = isset($kv[self::MAX_FAILURE_TIME]) ?$kv[self::MAX_FAILURE_TIME]: 0;
+                        $kv[self::LIMIT_COUNT] = isset($kv[self::LIMIT_COUNT]) ?self::LIMIT_COUNT: 0;
+                        $kv[self::TOTAL_CONCURRENCY] = isset($kv[self::TOTAL_CONCURRENCY]) ?$kv[self::TOTAL_CONCURRENCY]: 0;
+                        $kv[self::CONCURRENCY_COUNT] = isset($kv[self::CONCURRENCY_COUNT]) ?$kv[self::CONCURRENCY_COUNT]: 0;
 
                         // 成功次数
                         $metrics['success'] = $kv[self::TOTAL_SUCCESS_COUNT];
                         // 平均成功耗时
-                        $metrics['avg.elapsed'] = $metrics['avg.success.elapsed'] = $kv[self::TOTAL_SUCCESS_TIME] / $kv[self::TOTAL_SUCCESS_COUNT];
+                        $metrics['avg.elapsed'] = $metrics['avg.success.elapsed'] = $kv[self::TOTAL_SUCCESS_COUNT] == 0 ? 0 : floor($kv[self::TOTAL_SUCCESS_TIME] / $kv[self::TOTAL_SUCCESS_COUNT]);
                         // 失败次数
                         $metrics['failure'] = $kv[self::TOTAL_FAILURE_COUNT];
                         // 失败平均耗时
-                        $metrics['avg.failure.elapsed'] = $kv[self::TOTAL_FAILURE_TIME] / $kv[self::TOTAL_FAILURE_COUNT];
+                        $metrics['avg.failure.elapsed'] = $kv[self::TOTAL_FAILURE_COUNT] == 0 ? 0 : floor($kv[self::TOTAL_FAILURE_TIME] / $kv[self::TOTAL_FAILURE_COUNT]);
                         // 最大失败耗时
                         $metrics['max.failure.elapsed'] = $kv[self::MAX_FAILURE_TIME];
                         // 限流
                         $metrics['reject'] = $kv[self::LIMIT_COUNT];
                         // 平均并发数
-                        $metrics['concurrent'] = $kv[self::TOTAL_CONCURRENCY] / $kv[self::CONCURRENCY_COUNT];
+                        $metrics['concurrent'] = $kv[self::CONCURRENCY_COUNT] == 0 ? 0 : floor($kv[self::TOTAL_CONCURRENCY] / $kv[self::CONCURRENCY_COUNT]);
 
                         $tags['method'] = $method;
                         $tags['service'] = $service;
@@ -159,11 +159,13 @@ class Hawk
 
     public function addServerServiceData($service, $method, $clientIp, $key, $val)
     {
+        $clientIp = $this->long2ip($clientIp);
         $this->serviceData['server'][$service][$method][$clientIp][$key] = $val;
     }
 
     public function addClientServiceData($service, $method, $serverIp, $key, $val)
     {
+        $serverIp = $this->long2ip($serverIp);
         $this->serviceData['client'][$service][$method][$serverIp][$key] = $val;
     }
 
@@ -229,46 +231,87 @@ class Hawk
 
     public function addTotalSuccessTime($side, $service, $method, $ip, $diffSec)
     {
+        $ip = $this->long2ip($ip);
         if ($side == 'server') {
-            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] =
+                isset($this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME])
+                    ? $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME]
+                    : 0;
+                $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
         } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] = isset($this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME])
+                    ? $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] : 0;
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
         }
     }
 
     public function addTotalFailureTime($side, $service, $method, $ip, $diffSec)
     {
+        $ip = $this->long2ip($ip);
         $diffUSec = $diffSec * 1000000;
         if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] =
+                isset($this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_TIME])
+                ? $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] : 0;
             $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] += $diffUSec;
+
+            $this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME] =
+                isset($this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME])
+                ? $this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME] : 0;
+
             if ($this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME] < $diffUSec) {
                 $this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME] = $diffUSec;
             }
         } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] =
+                isset($this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_TIME])
+                ? $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] : 0;
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] += $diffUSec;
+
+            $this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME] =
+                isset($this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME])
+                ? $this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME] : 0;
+
             if ($this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME] < $diffUSec) {
                 $this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME] = $diffUSec;
             }
         }
     }
 
-    public function addTotalSuccessCount($side, $service, $ip, $method)
+    public function addTotalSuccessCount($side, $service, $method, $ip)
     {
+        $ip = $this->long2ip($ip);
         if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] =
+                isset($this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT]) ?
+                    $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] : 0;
             $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] += 1;
         } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] =
+                isset($this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT])
+                ? $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] : 0;
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] += 1;
         }
     }
 
-    public function addTotalFailureCount($side, $service, $ip, $method)
+    public function addTotalFailureCount($side, $service, $method, $ip)
     {
+        $ip = $this->long2ip($ip);
         if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] =
+                isset($this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT])
+                    ? $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] : 0;
             $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] += 1;
         } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] =
+                isset($this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT])
+                ? $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] : 0;
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] += 1;
         }
     }
 
+    private function long2ip($ip) {
+        return is_numeric($ip) ? long2ip($ip) : $ip;
+    }
 
 }
