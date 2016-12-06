@@ -147,6 +147,7 @@ class Pool implements ConnectionPool
 
     public function remove(Connection $conn)
     {
+        $this->freeConnection->remove($conn);
         $this->activeConnection->remove($conn);
         $connHashCode = spl_object_hash($conn);
         if (null === ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
