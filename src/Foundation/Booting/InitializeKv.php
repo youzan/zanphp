@@ -13,6 +13,7 @@ use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\ConfigLoader;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Store\Facade\KV;
+use Zan\Framework\Store\Facade\KV2;
 
 class InitializeKv implements Bootable
 {
@@ -21,6 +22,7 @@ class InitializeKv implements Bootable
         try {
             $kvMap = ConfigLoader::getInstance()->load(Path::getKvPath());
             KV::initConfigMap($kvMap);
+            KV2::initConfigMap($kvMap);
         } catch (\Exception $e) {
             //do nothing
         }
