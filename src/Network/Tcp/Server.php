@@ -95,6 +95,8 @@ class Server extends ServerBase {
     {
         $appName = Application::getInstance()->getName();
         $config = Config::get('server.hawk_collection');
+        //强制关闭swoole上报
+        $config['enable_hawk'] = 0;
         $config['module'] = $appName;
         $this->swooleServer->nova_config($config);
     }
