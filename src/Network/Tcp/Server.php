@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
@@ -33,6 +34,7 @@ class Server extends ServerBase {
         InitializeWorkerMonitor::class,
         InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
+        InitializeHawkMonitor::class,
     ];
 
     /**

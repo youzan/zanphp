@@ -4,8 +4,12 @@ namespace Zan\Framework\Sdk\Monitor;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Network\Common\HttpClient;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Utilities\Types\Json;
+use Zan\Framework\Utilities\Types\Time;
 
 
 /**
@@ -16,20 +20,151 @@ use Zan\Framework\Utilities\Types\Json;
  */
 class Hawk
 {
-    private $data;
+    use Singleton;
+
+    private $data = [];
+    /**
+     * @var array
+     * {
+     *  'server': {
+     *      'service': {
+     *          'method': {
+     *              'ip' {
+     *              }
+     *          }
+     *      }
+     *  }
+     * }
+     */
+    private $serviceData = [];
+
+    //成功总耗时(微秒)
+//    private $totalSuccessTime = 0;
+    //成功次数
+//    private $totalSuccessCount = 0;
+    //失败平均耗时
+//    private $totalFailureTime = 0;
+    //失败次数
+//    private $totalFailureCount = 0;
+    //失败最大耗时(某次)
+//    private $maxFailureTime = 0;
+    //限流次数
+//    private $limitCount = 0;
+    //并发数
+//    private $totalConcurrency = 0;
+    //并发统计次数
+//    private $concurrencyCount = 0;
+
     private $application;
     private $config;
-
     private $httpClient;
+    private $server;
+    private $ip;
+    private $port;
+    private $host;
+    private $isRunning = false;
 
     const SUCCESS_CODE = 200;
     const URI = '/report';
+
+    const TOTAL_SUCCESS_TIME = 'totalSuccessTime';
+    const TOTAL_SUCCESS_COUNT = 'totalSuccessCount';
+    const TOTAL_FAILURE_TIME = 'totalFailureTime';
+    const TOTAL_FAILURE_COUNT = 'totalFailureCount';
+    const MAX_FAILURE_TIME = 'maxFailureTime';
+    const LIMIT_COUNT = 'limitCount';
+    const TOTAL_CONCURRENCY = 'totalConcurrency';
+    const CONCURRENCY_COUNT = 'concurrencyCount';
+
+    const CLIENT = 'client';
+    const SERVER = 'server';
 
     public function __construct()
     {
         $this->config = Config::get('hawk');
         $this->application = Application::getInstance()->getName();
         $this->httpClient = new HttpClient($this->config['host'], $this->config['port']);
+        $this->host = Env::get('hostname');
+        $this->ip = Env::get('ip');
+        $this->port = Config::get('server.port');
+    }
+
+    public function run($server)
+    {
+        if ($this->config['run'] == false) {
+            return;
+        }
+
+        $this->isRunning = true;
+        $this->server = $server;
+        Timer::tick($this->config['time'], [$this, 'report']);
+    }
+
+    public function report()
+    {
+
+        // 计算soa相关值
+        foreach ($this->serviceData as $side => $v) {
+            foreach ($v as $service => $vv) {
+                foreach ($vv as $method => $vvv) {
+                    foreach ($vvv as $ip => $kv) {
+                        $metrics = $tags = [];
+
+                        $kv[self::TOTAL_SUCCESS_COUNT] = $kv[self::TOTAL_SUCCESS_COUNT] ?: 0;
+                        $kv[self::TOTAL_SUCCESS_TIME] = $kv[self::TOTAL_SUCCESS_TIME] ?: 0;
+                        $kv[self::TOTAL_FAILURE_TIME] = $kv[self::TOTAL_FAILURE_TIME] ?: 0;
+                        $kv[self::TOTAL_FAILURE_COUNT] = $kv[self::TOTAL_FAILURE_COUNT] ?: 0;
+                        $kv[self::MAX_FAILURE_TIME] = $kv[self::MAX_FAILURE_TIME] ?: 0;
+                        $kv[self::LIMIT_COUNT] = $kv[self::LIMIT_COUNT] ?: 0;
+                        $kv[self::TOTAL_CONCURRENCY] = $kv[self::TOTAL_CONCURRENCY] ?: 0;
+                        $kv[self::CONCURRENCY_COUNT] = $kv[self::CONCURRENCY_COUNT] ?: 0;
+
+                        // 成功次数
+                        $metrics['success'] = $kv[self::TOTAL_SUCCESS_COUNT];
+                        // 平均成功耗时
+                        $metrics['avg.elapsed'] = $metrics['avg.success.elapsed'] = $kv[self::TOTAL_SUCCESS_TIME] / $kv[self::TOTAL_SUCCESS_COUNT];
+                        // 失败次数
+                        $metrics['failure'] = $kv[self::TOTAL_FAILURE_COUNT];
+                        // 失败平均耗时
+                        $metrics['avg.failure.elapsed'] = $kv[self::TOTAL_FAILURE_TIME] / $kv[self::TOTAL_FAILURE_COUNT];
+                        // 最大失败耗时
+                        $metrics['max.failure.elapsed'] = $kv[self::MAX_FAILURE_TIME];
+                        // 限流
+                        $metrics['reject'] = $kv[self::LIMIT_COUNT];
+                        // 平均并发数
+                        $metrics['concurrent'] = $kv[self::TOTAL_CONCURRENCY] / $kv[self::CONCURRENCY_COUNT];
+
+                        $tags['method'] = $method;
+                        $tags['service'] = $service;
+                        $tags['side'] = $side;
+                        if ($side == 'server') {
+                            $tags['server'] = $this->ip . ':' . $this->port;
+                            $tags['client'] = $ip;
+                        } else {
+                            $tags['client'] = $this->ip;
+                            $tags['server'] = $ip;
+                        }
+
+                        $this->add('youzan.soa', $metrics, $tags);
+                    }
+                }
+            }
+        }
+
+        // TODO send
+        var_dump($this->data);
+        // clean
+        $this->clear();
+    }
+
+    public function addServerServiceData($service, $method, $clientIp, $key, $val)
+    {
+        $this->serviceData['server'][$service][$method][$clientIp][$key] = $val;
+    }
+
+    public function addClientServiceData($service, $method, $serverIp, $key, $val)
+    {
+        $this->serviceData['client'][$service][$method][$serverIp][$key] = $val;
     }
 
     /**
@@ -49,10 +184,11 @@ class Hawk
      * @param array $metrics
      * @param array $tags
      */
-    public function add($biz, array $metrics, array $tags)
+    public function add($biz, array $metrics, array $tags = [])
     {
         $tags['application'] = $this->application;
-        $tags['host'] = gethostname();
+        $tags['host'] = $this->host;
+        $tags['worker_id'] = (string)$this->server->swooleServer->worker_id;
         $metricsArr = [];
         foreach ($metrics as $k => $v) {
             $metricsArr[$k] = $v;
@@ -60,7 +196,7 @@ class Hawk
 
         $this->data[] = [
             'business' => $biz,
-            'timestamp' => time(),
+            'timestamp' => Time::stamp(),
             'metrics' => $metricsArr,
             'tags' => $tags
         ];
@@ -68,10 +204,6 @@ class Hawk
     
     public function send()
     {
-        if ($this->config['run'] == false) {
-            return;
-        }
-
         try {
             $response = (yield $this->httpClient->postJson(self::URI, $this->data));
         } catch (\Exception $e) {
@@ -84,11 +216,59 @@ class Hawk
             $statusCode = $response->getStatusCode();
         }
 
-        $this->data = [];
-
         if ($statusCode != self::SUCCESS_CODE) {
             //TODO: 上报失败
             var_dump("hawk上报失败");
         }
     }
+
+    private function clear()
+    {
+        $this->data = $this->serviceData = [];
+    }
+
+    public function addTotalSuccessTime($side, $service, $method, $ip, $diffSec)
+    {
+        if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
+        } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
+        }
+    }
+
+    public function addTotalFailureTime($side, $service, $method, $ip, $diffSec)
+    {
+        $diffUSec = $diffSec * 1000000;
+        if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] += $diffUSec;
+            if ($this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME] < $diffUSec) {
+                $this->serviceData['server'][$service][$method][$ip][self::MAX_FAILURE_TIME] = $diffUSec;
+            }
+        } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_TIME] += $diffUSec;
+            if ($this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME] < $diffUSec) {
+                $this->serviceData['client'][$service][$method][$ip][self::MAX_FAILURE_TIME] = $diffUSec;
+            }
+        }
+    }
+
+    public function addTotalSuccessCount($side, $service, $ip, $method)
+    {
+        if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] += 1;
+        } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_COUNT] += 1;
+        }
+    }
+
+    public function addTotalFailureCount($side, $service, $ip, $method)
+    {
+        if ($side == 'server') {
+            $this->serviceData['server'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] += 1;
+        } else {
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_FAILURE_COUNT] += 1;
+        }
+    }
+
+
 }
