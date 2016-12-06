@@ -8,9 +8,11 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Network\Request as BaseRequest;
 use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class Request implements BaseRequest {
     private $data;
@@ -27,12 +29,6 @@ class Request implements BaseRequest {
     private $seqNo;
     private $attachData;
     private $isHeartBeat = false;
-
-    private $isGenericInvoke = false;
-    private $genericServiceName;
-    private $genericMethodName;
-    private $genericRoute;
-    private $genericAttachment = [];
 
     public function __construct($fd, $fromId, $data)
     {
@@ -140,31 +136,6 @@ class Request implements BaseRequest {
         return $this->isHeartBeat;
     }
 
-    public function getGenericServiceName()
-    {
-        return $this->genericServiceName;
-    }
-
-    public function getGenericMethodName()
-    {
-        return $this->genericMethodName;
-    }
-
-    public function getGenericRoute()
-    {
-        return $this->genericRoute;
-    }
-
-    public function getGenericAttachment()
-    {
-        return $this->genericAttachment;
-    }
-
-    public function isGenericInvoke()
-    {
-        return $this->isGenericInvoke;
-    }
-
     private function formatRoute()
     {
         $serviceName = ucwords($this->serviceName, '.');
@@ -199,61 +170,19 @@ class Request implements BaseRequest {
             $this->remotePort = $remotePort;
             $this->seqNo = $seqNo;
             $this->attachData = $attachData;
-
+            
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;
+//                echo "heartbeating ...\n";
                 $data = null;
                 nova_encode($this->serviceName, 'pong', $this->remoteIp, $this->remotePort, $this->seqNo, '', '', $data);
                 return $data;
             }
-
-            $this->isGenericInvoke = GenericRequestCodec::isGenericService($serviceName);
-            if ($this->isGenericInvoke) {
-                $this->initGenericInvoke($serviceName);
-                return null;
-            }
-
+            
             $this->formatRoute();
             $this->decodeArgs();
         } else {
-            throw new TApplicationException("nova_decode fail");
+            //TODO: throw TApplicationException
         }
     }
-
-    private function initGenericInvoke($serviceName)
-    {
-        $this->novaServiceName = str_replace('.', '\\', ucwords($this->serviceName, '.'));
-        $genericRequest = GenericRequestCodec::decode($this->novaServiceName, $this->methodName, $this->args);
-        $this->genericServiceName = $genericRequest->serviceName;
-        $this->genericMethodName = $genericRequest->methodName;
-        $this->args = $genericRequest->methodParams;
-        $this->route = '/'. str_replace('.', '/', $serviceName) . '/' . $this->methodName;
-        $this->genericRoute = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
-
-        $this->initGenericAttachment();
-    }
-
-    private function initGenericAttachment()
-    {
-        $attachment = json_decode($this->attachData, true, 512, JSON_BIGINT_AS_STRING);
-        if (!is_array($attachment)) {
-            return;
-        }
-
-        unset($attachment["async"]);
-
-        foreach (GenericRequestCodec::$carmenInternalArgs as $carmenInternalArg) {
-            if (isset($attachment[$carmenInternalArg])) {
-                $this->genericAttachment[$carmenInternalArg] = $attachment[$carmenInternalArg];
-                unset($attachment[$carmenInternalArg]);
-            }
-        }
-
-        if (empty($attachment)) {
-            $this->attachData =  "{}";
-        } else {
-            $this->attachData = json_encode($attachment, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        }
-    }
-
 }

@@ -8,7 +8,6 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Zan\Framework\Network\Exception\GenericInvokeException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Sdk\Trace\Constant;
@@ -52,11 +51,7 @@ class RequestTask {
     {
         $response = (yield $this->middleWareManager->executeFilters());
         if(null !== $response){
-            if ($this->request->isGenericInvoke()) {
-                throw new GenericInvokeException(strval($response));
-            } else {
-                $this->output($response);
-            }
+            $this->output($response);
             return;
         }
 

@@ -11,16 +11,12 @@ namespace Zan\Framework\Network\Tcp;
 use Kdt\Iron\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
-use Zan\Framework\Network\Exception\GenericInvokeException;
 
 class Response implements BaseResponse {
     /**
      * @var SwooleServer
      */
     private $swooleServer;
-    /**
-     * @var Request
-     */
     private $request;
     private $exception;
 
@@ -43,23 +39,16 @@ class Response implements BaseResponse {
     public function end($content='')
     {
         $this->send($content);
+
+        //$this->swooleServer->close($this->request->getFd());
     }
 
-    /**
-     * @param $e \Exception
-     */
     public function sendException($e)
     {
         $this->exception = $e->getMessage();
         $serviceName = $this->request->getServiceName();
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
-
-        // 泛化调用不透传任何异常, 直接打包发送
-        if ($this->request->isGenericInvoke()) {
-            return $this->send($e);
-        }
-
         $content = Nova::encodeServiceException($novaServiceName, $methodName, $e);
 
         $remote = $this->request->getRemote();
@@ -80,6 +69,8 @@ class Response implements BaseResponse {
                 $outputBuffer
             );
         }
+
+//        $this->swooleServer->close($this->request->getFd());
     }
 
     public function send($content)
@@ -87,13 +78,6 @@ class Response implements BaseResponse {
         $serviceName = $this->request->getServiceName();
         $novaServiceName = $this->request->getNovaServiceName();
         $methodName  = $this->request->getMethodName();
-
-        if ($this->request->isGenericInvoke()) {
-            $content = GenericRequestCodec::encode(
-                $this->request->getGenericServiceName(),
-                $this->request->getGenericMethodName(), $content);
-        }
-
         $content = Nova::encodeServiceOutput($novaServiceName, $methodName, $content);
 
         $remote = $this->request->getRemote();
@@ -107,8 +91,9 @@ class Response implements BaseResponse {
             $content,
             $outputBuffer)) {
 
+
             $swooleServer = $this->getSwooleServer();
-            $swooleServer->send(
+            $sendState = $swooleServer->send(
                 $this->request->getFd(),
                 $outputBuffer
             );

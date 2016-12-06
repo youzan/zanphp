@@ -38,18 +38,6 @@
             "url": "git@gitlab.qima-inc.com:php-3rd-lib/symfony-event-dispatcher.git"
         },
         {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/packaged-thrift.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:nova-service/generic.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-lib/nova-asnyc.git"
-        },
-        {
             "packagist": false
         }
     ],
@@ -58,8 +46,7 @@
         "symfony/console": "3.1",
         "elasticsearch/yz-elasticsearch-client": "1.0.0",
         "php-lib/nsq-async": "1.2.2",
-        "psr/log": "1.0.0",
-        "nova-service/generic": "1.0.2"
+        "psr/log": "1.0.0"
     },
     "autoload": {
         "psr-4": {
