@@ -30,11 +30,11 @@ interface CsrfTokenManagerInterface
     public function refreshToken(CsrfToken $token);
 
     /**
-     * @param CsrfToken $token
      * @param array $modules
+     * @param CsrfToken $token
      * @return bool
      */
-    public function isTokenValid(CsrfToken $token, array $modules);
+    public function isTokenValid(array $modules, CsrfToken $token = null);
 
 
     /**

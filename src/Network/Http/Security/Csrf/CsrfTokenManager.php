@@ -6,6 +6,7 @@ namespace Zan\Framework\Network\Http\Security\Csrf;
 
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Http\Security\Csrf\Factory\SimpleTokenFactory;
 use Zan\Framework\Network\Http\Security\Csrf\Factory\TokenFactoryInterface;
 use Zan\Framework\Utilities\Encrpt\Uuid;
@@ -54,15 +55,20 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
     public function parseToken($tokenRaw)
     {
         $token = $this->factory->buildFromRawText($tokenRaw);
-        printf("%s: %s\n", $token->getId(), date('Y-m-d H:i:s', $token->getTokenTime()));
+        if ($token) {
+            printf("%s: %s\n", $token->getId(), date('Y-m-d H:i:s', $token->getTokenTime()));
+        }
         return $token;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function isTokenValid(CsrfToken $token, array $modules)
+    public function isTokenValid(array $modules, CsrfToken $token = null)
     {
+        if (empty($modules)) {
+            throw new ZanException('Not support request');
+        }
         if ($token and (time() - $token->getTokenTime()) < $this->getTTL($modules)) {
             return true;
         } else {

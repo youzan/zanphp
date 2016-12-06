@@ -54,7 +54,7 @@ class CsrfFilter Implements RequestFilter
                 } else {
                     $token = $this->csrfTokenManager->parseToken($tokenRaw);
                     $modules = $this->getModules($request);
-                    if ($this->csrfTokenManager->isTokenValid($token, $modules)) {
+                    if ($this->csrfTokenManager->isTokenValid($modules, $token)) {
                         $newToken = $this->csrfTokenManager->refreshToken($token);
                     } else {
                         throw new TokenException('Token expired');
