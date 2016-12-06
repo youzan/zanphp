@@ -7,13 +7,14 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
-use Com\Youzan\Nova\Framework\Generic\Servicespecification\GenericService;
-use Kdt\Iron\Nova\Service\Registry;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Debug;
+use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Utilities\Types\Time;
 use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\ServerManager\ServerRegisterInitiator;
 use Zan\Framework\Network\Common\Curl;
 
 class ServiceUnregister
@@ -23,22 +24,11 @@ class ServiceUnregister
     public function __construct()
     {
         $this->init();
-        $this->initGenericService();
     }
 
     private function init()
     {
         $this->config['services'] = Nova::getAvailableService();
-    }
-
-    private function initGenericService()
-    {
-        $registry = new Registry();
-        $registry->register(new GenericService());
-        $genericServices = $registry->getAll();
-        if ($genericServices) {
-            array_push($this->config['services'], ...$genericServices);
-        }
     }
 
     private function parseConfig($config)

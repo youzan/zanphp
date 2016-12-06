@@ -14,9 +14,6 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 use Kdt\Iron\Nova\Nova;
 
 class Dispatcher {
-    /**
-     * @var Request
-     */
     private $request = null;
     private $context = null;
 
@@ -33,13 +30,7 @@ class Dispatcher {
         $serviceName = $this->getServiceName();
 
         $service = new $serviceName();
-
-        if ($this->request->isGenericInvoke()) {
-            $method = $this->request->getGenericMethodName();
-        } else {
-            $method = $this->request->getMethodName();
-        }
-
+        $method  = $this->request->getMethodName();
         $args    = $this->request->getArgs();
         $args    = is_array($args) ? $args : [$args];
 
@@ -50,12 +41,7 @@ class Dispatcher {
     {
         $appNamespace = Application::getInstance()->getNamespace();
 
-        if ($this->request->isGenericInvoke()) {
-            $servieName = $this->request->getGenericServiceName();
-        } else {
-            $servieName = $this->request->getNovaServiceName();
-        }
-
+        $servieName = $this->request->getNovaServiceName();
         $servieName = str_replace('.', '\\', $servieName);
         $servieName = Nova::removeNovaNamespace($servieName);
         $servieName = $appNamespace . $servieName;
