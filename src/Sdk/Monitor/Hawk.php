@@ -239,7 +239,7 @@ class Hawk
         } else {
             $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] = isset($this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME])
                     ? $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] : 0;
-            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffSec * 1000000;
+            $this->serviceData['client'][$service][$method][$ip][self::TOTAL_SUCCESS_TIME] += $diffUSec;
 
             $this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME] =
                 isset($this->serviceData['client'][$service][$method][$ip][self::MAX_SUCCESS_TIME])
