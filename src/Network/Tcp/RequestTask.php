@@ -9,8 +9,10 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Thrift\Exception\TApplicationException;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Sdk\Log\Log;
 use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Utilities\DesignPattern\Context;
@@ -55,6 +57,7 @@ class RequestTask {
                     $this->request->getServiceName(),
                     $this->request->getMethodName(),
                     $this->request->getRemoteIp());
+                $this->logErr($e);
             } else {
                 $hawk->addTotalSuccessTime(Hawk::SERVER,
                     $this->request->getServiceName(),
@@ -104,5 +107,19 @@ class RequestTask {
         return $this->response->end($execResult);
     }
 
-
+    private function logErr($e) {
+        $trace = $this->context->get('trace');
+        $traceId = '';
+        if ($trace) {
+            $traceId = $trace->getRootId();
+        }
+        yield Log::make('zan_framework')->error($e->getMessage(), [
+            'exception' => $e,
+            'app' => Application::getInstance()->getName(),
+            'language'=>'php',
+            'side'=>'server',//server,client两个选项
+            'traceId'=> $traceId,
+            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
+        ]);
+    }
 }
