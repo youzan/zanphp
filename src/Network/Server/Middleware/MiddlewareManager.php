@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Server\Middleware;
 
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
+use Zan\Framework\Contract\Network\RequestPostFilter;
 use Zan\Framework\Contract\Network\RequestTerminator;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -43,6 +44,17 @@ class MiddlewareManager
                 yield $response;
                 return;
             }
+        }
+    }
+
+    public function executePostFilters($response)
+    {
+        $middlewares = $this->middlewares;
+        foreach ($middlewares as $middleware) {
+            if (!$middleware instanceof RequestPostFilter) {
+                continue;
+            }
+            yield $middleware->postFilter($this->request, $response, $this->context);
         }
     }
 

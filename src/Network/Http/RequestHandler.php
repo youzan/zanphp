@@ -8,8 +8,8 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Network\Exception\ExcessConcurrency;
 use Zan\Framework\Network\Exception\ExcessConcurrencyException;
+use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\InternalErrorResponse;
 use Zan\Framework\Network\Http\Response\JsonResponse;
@@ -18,14 +18,16 @@ use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\Types\Time;
-use Zan\Framework\Network\Connection\ConnectionManager;
 
 class RequestHandler
 {
     private $context = null;
+
+    /** @var MiddlewareManager */
     private $middleWareManager = null;
+
+    /** @var Task */
     private $task = null;
     private $event = null;
 
@@ -59,16 +61,14 @@ class RequestHandler
             $coroutine = $requestTask->run();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
-
         } catch (\Exception $e) {
             if (Debug::get()) {
-                echo_exception($e); 
+                echo_exception($e);
             }
             $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
             Task::execute($coroutine, $this->context);
             $this->event->fire($this->getRequestFinishJobId());
         }
-
     }
 
     private function initContext($request, SwooleHttpResponse $swooleResponse)
@@ -100,6 +100,7 @@ class RequestHandler
         $coroutine = $this->middleWareManager->executeTerminators($response);
         Task::execute($coroutine, $this->context);
     }
+
     public function handleTimeout()
     {
         try {

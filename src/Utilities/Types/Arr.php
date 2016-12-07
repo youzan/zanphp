@@ -461,4 +461,12 @@ class Arr {
 
         return $resultArray;
     }
+
+    public static function arraySort($arr, $col, $sort = 'desc', $default = false)
+    {
+        $cols = static::array_cols($arr, $col, $default);
+        $sort = 'desc' === strtolower($sort) ? SORT_DESC : SORT_ASC;
+        array_multisort($cols, $sort, $arr);
+        return $arr;
+    }
 }
