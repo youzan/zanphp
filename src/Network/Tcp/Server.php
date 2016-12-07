@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Com\Youzan\Nova\Framework\Generic\Service\GenericService;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\ServerManager\ServerStore;
@@ -10,6 +11,7 @@ use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
+use Kdt\Iron\Nova\Service\ClassMap;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
@@ -84,6 +86,7 @@ class Server extends ServerBase {
         }
         $config['path'] = Path::getRootPath() . $config['path'];
         Nova::init($config);
+        ClassMap::getInstance()->setSpec(GenericService::class, new GenericService());
 
         $config = Config::get('haunt');
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {

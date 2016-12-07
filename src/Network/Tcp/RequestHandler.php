@@ -66,6 +66,12 @@ class RequestHandler {
             }
             $request->setStartTime();
 
+            if ($request->isGenericInvoke()) {
+                foreach ($request->getGenericAttachment() as $attachKey => $attachVal) {
+                    $this->context->set($attachKey, $attachVal);
+                }
+            }
+
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();
