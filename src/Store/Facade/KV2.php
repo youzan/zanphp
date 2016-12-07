@@ -25,11 +25,11 @@ use Zan\Framework\Utilities\Types\ObjectArray;
  * bin                 | hash field
  * {value}             | hash value
  *
- * set test:set:key def_bin value
- * get test:set:key def_bin
+ * set ns:set:key def_bin value
+ * get ns:set:key def_bin
  *
- * hset test:set:bin field value
- * hget test:set:bin field
+ * hset ns:set:key bin value
+ * hget ns:set:key bin
  */
 class KV2 {
 
@@ -80,7 +80,7 @@ class KV2 {
         yield self::hSet($configKey, $fmtArgs, self::DEFAULT_BIN_NAME, $value);
     }
 
-    public static function hGet($configKey, $fmtArgs, $field)
+    public static function hGet($configKey, $fmtArgs, $bin)
     {
         /* @var Connection $conn */
         $conf = self::getItemConfig($configKey);
@@ -89,8 +89,8 @@ class KV2 {
         $conn = (yield $self->getConnection($conf['connection']));
         $redis = new KVRedis($conn);
 
-        $realKey = $self->getRealKey($conf, $fmtArgs);
-        $result = (yield $redis->hGet($realKey, $field));
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $result = (yield $redis->hGet($realKey, $bin));
         $result = self::unSerialize($result);
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -100,7 +100,7 @@ class KV2 {
         yield $result;
     }
 
-    public static function hSet($configKey, $fmtArgs, $field, $value)
+    public static function hSet($configKey, $fmtArgs, $bin, $value)
     {
         /* @var Connection $conn */
         $conf = self::getItemConfig($configKey);
@@ -109,10 +109,10 @@ class KV2 {
         $conn = (yield $self->getConnection($conf['connection']));
         $redis = new KVRedis($conn);
 
-        $realKey = $self->getRealKey($conf, $fmtArgs);
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
         $value = self::serialize($value);
 
-        $result = (yield $redis->hSet($realKey, $field, $value));
+        $result = (yield $redis->hSet($realKey, $bin, $value));
 
         $ttl = isset($conf['exp']) ? $conf['exp'] : 0;
         if($result && $ttl){
@@ -123,40 +123,43 @@ class KV2 {
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
-        yield $result;
+        yield $result === 1;
     }
 
-    public static function mGet($configKey, array $fmtArgsArray)
-    {
-        /* @var Connection $conn */
-        $conf = self::getItemConfig($configKey);
-        $self = self::getIns($conf);
+//    public static function setex() {}
+//    public static function exists() {}
+//    public static function mGet($configKey, array $fmtArgsArray)
+//    {
+//        /* @var Connection $conn */
+//        $conf = self::getItemConfig($configKey);
+//        $self = self::getIns($conf);
+//
+//        $conn = (yield $self->getConnection($conf['connection']));
+//        $redis = new KVRedis($conn);
+//
+//        $realKeys = [];
+//        foreach ($fmtArgsArray as $fmtArgs) {
+//            $realKeys[] = $self->fmtKVKey($conf, $fmtArgs);
+//        }
+//        $resultList = (yield $redis->mGet(...$realKeys));
+//        if ($resultList) {
+//            foreach ($resultList as &$result) {
+//                if ($result !== null) {
+//                    $result = self::unSerialize($result);
+//                }
+//            }
+//            unset($result);
+//        }
+//
+//        /** @noinspection PhpVoidFunctionResultUsedInspection */
+//        yield self::deleteActiveConnectionFromContext($conn);
+//        $conn->release();
+//
+//        yield $resultList;
+//    }
 
-        $conn = (yield $self->getConnection($conf['connection']));
-        $redis = new KVRedis($conn);
-
-        $realKeys = [];
-        foreach ($fmtArgsArray as $fmtArgs) {
-            $realKeys[] = $self->getRealKey($conf, $fmtArgs);
-        }
-        $resultList = (yield $redis->mGet(...$realKeys));
-        if ($resultList) {
-            foreach ($resultList as &$result) {
-                if ($result !== null) {
-                    $result = self::unSerialize($result);
-                }
-            }
-            unset($result);
-        }
-
-        /** @noinspection PhpVoidFunctionResultUsedInspection */
-        yield self::deleteActiveConnectionFromContext($conn);
-        $conn->release();
-
-        yield $resultList;
-    }
-
-    public static function __callStatic($func, $args)
+    // redis 协议支持有限制
+    private static function __callStatic($func, $args)
     {
         /* @var Connection $conn */
         $configKey = array_shift($args);
@@ -168,7 +171,7 @@ class KV2 {
         $conn = (yield $self->getConnection($conf['connection']));
         $redis = new KVRedis($conn);
 
-        $realKey = $self->getRealKey($conf, $keys);
+        $realKey = $self->fmtKVKey($conf, $keys);
         $result = (yield $redis->$func($realKey, ...$args));
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
@@ -178,12 +181,6 @@ class KV2 {
         yield $result;
     }
 
-    // public static function setex() {}
-    // public static function exists() {}
-
-    // TODO redis协议是否支持
-    // TODO 确认get set hget hset 理解对不对
-    // 过期时间 针对 一行 还是 bin
     private static function expire(KVRedis $redis, $key, $ttl = 0)
     {
         /* @var Connection $conn */
@@ -263,6 +260,10 @@ class KV2 {
 
     public static function unSerialize($payload)
     {
+        if ($payload === null) {
+            return null;
+        }
+
         $lz4 = LZ4::getInstance();
         if ($lz4->isLZ4($payload)) {
             $payload = $lz4->decode($payload);
@@ -270,7 +271,7 @@ class KV2 {
         return $payload;
     }
 
-    private function getRealKey($config, $fmtArgs){
+    private function fmtKVKey($config, $fmtArgs){
         $kvPrefix = "$this->namespace:$this->setName:";
 
         $format = isset($config['key']) ? $config['key'] : null ;
