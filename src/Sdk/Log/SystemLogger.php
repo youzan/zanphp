@@ -9,6 +9,7 @@
 namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Core\Env;
+use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 
@@ -59,7 +60,7 @@ class SystemLogger extends BaseLogger
                 yield $this->init();
             }
 
-            yield $this->getWriter()->write($log);   
+            yield $this->getWriter()->write($log);
         } catch (\Exception $ex) {
             echo_exception($ex);
         }
@@ -84,7 +85,9 @@ class SystemLogger extends BaseLogger
         if (isset($context['exception'])
             && $context['exception'] instanceof \Exception
         ) {
-            $detail['error'] = $this->formatException($context['exception']);
+            $e = $context['exception'];
+            $detail['error'] = $this->formatException($e);
+            $context['exception_metadata'] = $e instanceof ZanException ? $e->getMetadata() : [];
             unset($context['exception']);
         }
 
