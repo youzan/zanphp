@@ -22,12 +22,10 @@ class TraceFilter implements RequestFilter
         $config = Config::get('monitor.trace');
 
         $rootId = $parentId = 'null';
-        $isTcp = method_exists($request, 'getAttachData');
         $name = '';
         $eventId = null;
-        if ($isTcp) {
-            $attachData = $request->getAttachData();
-            $attachArr = json_decode($attachData, true);
+        if ($request instanceof \Zan\Framework\Network\Tcp\Request) {
+            $attachArr = $request->getRpcContext()->get();
             if (isset($attachArr[Trace::TRACE_KEY]['rootId'])) {
                 $rootId = $attachArr[Trace::TRACE_KEY]['rootId'];
             } else if (isset($attachArr[Trace::TRACE_KEY][Trace::ROOT_ID_KEY])) {

@@ -12,6 +12,7 @@ use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\SysCall;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Network\Tcp\RpcContext;
 
 function taskSleep($ms)
 {
@@ -67,6 +68,35 @@ function getTaskId()
     return new SysCall(function (Task $task) {
         $task->send($task->getTaskId());
 
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function getRpcContext($key = null, $default = null)
+{
+    return new SysCall(function (Task $task) use($key, $default) {
+        $context = $task->getContext();
+        $rpcCtx = $context->get(RpcContext::KEY, null, RpcContext::class);
+        if ($rpcCtx) {
+            $task->send($rpcCtx->get($key, $default));
+        } else {
+            $task->send($default);
+        }
+
+        return Signal::TASK_CONTINUE;
+    });
+}
+
+function setRpcContext($key, $value)
+{
+    return new SysCall(function (Task $task) use ($key, $value) {
+        $context = $task->getContext();
+        $rpcCtx = $context->get(RpcContext::KEY, null, RpcContext::class);
+        if ($rpcCtx === null) {
+            $rpcCtx = new RpcContext;
+            $context->set(RpcContext::KEY, $rpcCtx);
+        }
+        $task->send($rpcCtx->set($key, $value));
         return Signal::TASK_CONTINUE;
     });
 }
@@ -212,7 +242,3 @@ function getServerHandler()
         return Signal::TASK_CONTINUE;
     });
 }
-
-
-
-
