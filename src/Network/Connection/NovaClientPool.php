@@ -88,6 +88,11 @@ class NovaClientPool
         $this->loadBalancingStrategy = Di::make($loadBalancingStrategy, [$this]);
     }
 
+    public function updateLoadBalancingStrategy($pool)
+    {
+        $this->loadBalancingStrategy->initServers($pool);
+    }
+
     public function getConnections()
     {
         return $this->connections;

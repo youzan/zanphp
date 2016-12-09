@@ -43,6 +43,7 @@ class NovaClientConnectionManager
             }
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
+            $novaConfig['weight'] = $server['weight'];
             $config[$novaConfig['host'].':'.$novaConfig['port']] = $novaConfig;
         }
 
@@ -145,12 +146,14 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
+            $novaConfig['weight'] = $server['weight'];
             sys_echo("nova client add on line " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
             $this->addAppNameToServerMap($appName, $server);
 
             $pool->createConnection($novaConfig);
             $pool->addConfig($novaConfig);
+            $pool->updateLoadBalancingStrategy($pool);
         }
     }
 
@@ -164,6 +167,7 @@ class NovaClientConnectionManager
             if (null !== $connection && $connection instanceof Connection) {
                 $pool->remove($connection);
                 $pool->removeConfig($server);
+                $pool->updateLoadBalancingStrategy($pool);
             }
         }
     }
@@ -174,9 +178,13 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            sys_echo("nova client update service " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
+            $novaConfig['weight'] = $server['weight'];
+            sys_echo("nova client update service " . $appName . " host:" . $server['host'] . " port:" . $server['port'] . 'weight:' . $server['weight']);
             $this->updateAppNameToServerMap($appName, $server);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
+            $pool = $this->getPoolByAppName($appName);
+            $pool->addConfig($novaConfig);
+            $pool->updateLoadBalancingStrategy($pool);
         }
     }
 }
