@@ -487,6 +487,10 @@ return [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
         ],
+        'app' => [
+            'type' => 'local',
+            'host' => 'http://yop-market-qa.s.qima-inc.com',
+        ],
     ],
 
     'qatest' => [
@@ -966,6 +970,10 @@ return [
         'crm' => [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
+        ],
+        'app' => [
+            'type' => 'local',
+            'host' => 'http://yop-market-qa.s.qima-inc.com',
         ],
     ],
 
@@ -1455,6 +1463,10 @@ return [
         'crm' => [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
+        ],
+        'app' => [
+            'type' => 'local',
+            'host' => 'http://yop-market.s.qima-inc.com',
         ],
     ],
 
@@ -1951,6 +1963,10 @@ return [
         'crm' => [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
+        ],
+        'app' => [
+            'type' => 'local',
+            'host' => 'http://yop-market.s.qima-inc.com',
         ],
     ]
 ];
