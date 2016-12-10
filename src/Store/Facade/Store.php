@@ -60,7 +60,7 @@ class Store
 
         $key = "$ns:$set";
 
-        if (null === self::$_instance[$key]) {
+        if (!isset(self::$_instance[$key])) {
             self::$_instance[$key] = new static($ns, $set);
         }
         return self::$_instance[$key];
