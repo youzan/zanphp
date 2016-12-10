@@ -31,7 +31,8 @@ use Zan\Framework\Utilities\Types\ObjectArray;
  * hset ns:set:key bin value
  * hget ns:set:key bin
  */
-class KV2 {
+class Store
+{
 
     const COMPRESS_LEN = 1024; /* lz4 压缩阈值(min:strlen) */
     const DEFAULT_BIN_NAME = '_z_dft';
@@ -126,42 +127,42 @@ class KV2 {
         yield $result === 1;
     }
 
-//    public static function setex() {}
-//    public static function exists() {}
-//    public static function mGet($configKey, array $fmtArgsArray)
-//    {
-//        /* @var Connection $conn */
-//        $conf = self::getItemConfig($configKey);
-//        $self = self::getIns($conf);
-//
-//        $conn = (yield $self->getConnection($conf['connection']));
-//        $redis = new KVRedis($conn);
-//
-//        $realKeys = [];
-//        foreach ($fmtArgsArray as $fmtArgs) {
-//            $realKeys[] = $self->fmtKVKey($conf, $fmtArgs);
-//        }
-//        $resultList = (yield $redis->mGet(...$realKeys));
-//        if ($resultList) {
-//            foreach ($resultList as &$result) {
-//                if ($result !== null) {
-//                    $result = self::unSerialize($result);
-//                }
-//            }
-//            unset($result);
-//        }
-//
-//        /** @noinspection PhpVoidFunctionResultUsedInspection */
-//        yield self::deleteActiveConnectionFromContext($conn);
-//        $conn->release();
-//
-//        yield $resultList;
-//    }
+    /*
+    public static function setex() {}
+    public static function exists() {}
+    public static function mGet($configKey, array $fmtArgsArray)
+    {
+        // @var Connection $conn
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKeys = [];
+        foreach ($fmtArgsArray as $fmtArgs) {
+            $realKeys[] = $self->fmtKVKey($conf, $fmtArgs);
+        }
+        $resultList = (yield $redis->mGet(...$realKeys));
+        if ($resultList) {
+            foreach ($resultList as &$result) {
+                if ($result !== null) {
+                    $result = self::unSerialize($result);
+                }
+            }
+            unset($result);
+        }
+
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $resultList;
+    }
 
     // redis 协议支持有限制
-    private static function __callStatic($func, $args)
+    public static function __callStatic($func, $args)
     {
-        /* @var Connection $conn */
+        // @var Connection $conn
         $configKey = array_shift($args);
         $keys = array_shift($args);
 
@@ -174,12 +175,12 @@ class KV2 {
         $realKey = $self->fmtKVKey($conf, $keys);
         $result = (yield $redis->$func($realKey, ...$args));
 
-        /** @noinspection PhpVoidFunctionResultUsedInspection */
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
         yield $result;
     }
+    */
 
     private static function expire(KVRedis $redis, $key, $ttl = 0)
     {
