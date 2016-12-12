@@ -25,3 +25,7 @@ service ArgTestService {
 ```
 public function func1($arg1, ObjArg $objArg = null);
 ```
+
+### 2016-12-12 MysqliQueryTimeoutException上下文加入超时sql与超时时间
+
+### 2016-12-12 FIX BUG （LZ4 大于1024bytes 解压失败）
