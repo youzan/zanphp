@@ -43,6 +43,6 @@ class LZ4
 
     private function getHeaderSize($dataSize)
     {
-        return self::LZ4_PREFIX_LEN + strlen(strlen($dataSize)) + self::LZ4_DELIMITER_LEN;
+        return self::LZ4_PREFIX_LEN + strlen($dataSize) + self::LZ4_DELIMITER_LEN;
     }
 }
