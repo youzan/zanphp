@@ -30,6 +30,9 @@ class Factory
             throw new RuntimeException('http server config error: empty ip/port');
         }
 
+        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
+        $config["max_request"] = 0;
+
         $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port], true);
 
         $server = Di::make(HttpServer::class, [$swooleServer, $config]);
@@ -54,6 +57,9 @@ class Factory
             throw new RuntimeException('tcp server config error: empty ip/port');
         }
 
+        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
+        $config["max_request"] = 0;
+
         $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port], true);
 
         $server = Di::make(TcpServer::class, [$swooleServer, $config]);
@@ -77,6 +83,9 @@ class Factory
         if (empty($host) || empty($port)) {
             throw new RuntimeException('subscribe server config error: empty ip/port');
         }
+
+        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
+        $config["max_request"] = 0;
 
         $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port], true);
 

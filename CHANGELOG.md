@@ -26,6 +26,13 @@ service ArgTestService {
 public function func1($arg1, ObjArg $objArg = null);
 ```
 
-### 2016-12-12 MysqliQueryTimeoutException上下文加入超时sql与超时时间
+### 2016-12-12 
 
-### 2016-12-12 FIX BUG （LZ4 大于1024bytes 解压失败）
+1. MysqliQueryTimeoutException上下文加入超时sql与超时时间
+2. 添加异步DnsClient, $ip = (yield DnsClient::lookup("www.youzan.com"));
+
+### 2016-12-12 FIX BUG
+
+1. LZ4 大于1024bytes 解压失败
+2. 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
+3. HttpClient dns查询加入超时机制(1s)
