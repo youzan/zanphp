@@ -172,8 +172,9 @@ class HttpClient implements Async
 
     public function handle()
     {
-        $timerId = spl_object_hash($this) . "_dns_lookup";
-        Timer::after(1000, [$this, "dnsLookupTimeout"], $timerId);
+        if ($this->timeout !== null) {
+            Timer::after(1000, [$this, "dnsLookupTimeout"], $this->getDnsResolveTimerId());
+        }
 
         if ($this->useHttpProxy) {
             if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
@@ -181,8 +182,10 @@ class HttpClient implements Async
             } else {
                 $proxy = self::HTTP_PROXY_DEV;
             }
-            swoole_async_dns_lookup($proxy, function($host, $ip) use($timerId) {
-                Timer::clearAfterJob($timerId);
+            swoole_async_dns_lookup($proxy, function($host, $ip) {
+                if ($this->timeout !== null) {
+                    Timer::clearAfterJob($this->getDnsResolveTimerId());
+                }
                 if ($ip) {
                     $this->request($ip, 80);
                 } else {
@@ -190,8 +193,10 @@ class HttpClient implements Async
                 }
             });
         } else {
-            swoole_async_dns_lookup($this->host, function($host, $ip) use($timerId) {
-                Timer::clearAfterJob($timerId);
+            swoole_async_dns_lookup($this->host, function($host, $ip) {
+                if ($this->timeout !== null) {
+                    Timer::clearAfterJob($this->getDnsResolveTimerId());
+                }
                 if ($ip) {
                     $this->request($ip, $this->port);
                 } else {
@@ -200,7 +205,6 @@ class HttpClient implements Async
             });
         }
     }
-
 
     public function request($ip, $port)
     {
@@ -327,5 +331,10 @@ class HttpClient implements Async
             $this->trace->commit($exception);
         }
         call_user_func($this->callback, null, $exception);
+    }
+
+    private function getDnsResolveTimerId()
+    {
+        return spl_object_hash($this) . "_dns_lookup";
     }
 }
