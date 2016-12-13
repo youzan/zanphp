@@ -30,6 +30,14 @@ use Zan\Framework\Utilities\Types\ObjectArray;
  *
  * hset ns:set:key bin value
  * hget ns:set:key bin
+ *
+ * 注意:
+ *
+ * 1. 使用redis协议存储的值，使用zan框架的as接口无法取出
+ * 2. zan框架存入的string类型的值，使用redis协议可以取出；其他类型的值需要做数据迁移，无法取出;
+ * 3. 使用redis协议时, hset不可以使用保留key值”redisvalue”
+ * 4. 使用redis时，hset之后的值，通过get和mget无法取出；
+ *    但是通过KV Proxy，get和mget可以取出，取出的值为json格式(value类型为Base64编码)
  */
 class Store
 {
