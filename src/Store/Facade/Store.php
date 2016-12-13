@@ -36,6 +36,7 @@ class Store
 
     const COMPRESS_LEN = 1024; /* lz4 压缩阈值(min:strlen) */
     const DEFAULT_BIN_NAME = '_z_dft';
+    const INVALID_BIN_NAME = 'redisvalue';
     const ACTIVE_CONNECTION_CONTEXT_KEY= 'kv_store2_active_connections';
 
     private static $_instance = null;
@@ -73,16 +74,55 @@ class Store
 
     public static function get($configKey, $fmtArgs)
     {
-        yield self::hGet($configKey, $fmtArgs, self::DEFAULT_BIN_NAME);
+        /* @var Connection $conn */
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $result = (yield $redis->get($realKey));
+        $result = self::unSerialize($result);
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
     }
 
     public static function set($configKey, $fmtArgs, $value)
     {
-        yield self::hSet($configKey, $fmtArgs, self::DEFAULT_BIN_NAME, $value);
+        /* @var Connection $conn */
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $value = self::serialize($value);
+
+        $result = (yield $redis->set($realKey, $value));
+
+        $ttl = isset($conf['exp']) ? $conf['exp'] : 0;
+        if($result && $ttl){
+            yield self::expire($redis, $realKey, $ttl);
+        }
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
     }
 
     public static function hGet($configKey, $fmtArgs, $bin)
     {
+        if ($bin === self::INVALID_BIN_NAME) {
+            throw new \InvalidArgumentException("bin name " . self::INVALID_BIN_NAME . " is reversed");
+        }
         /* @var Connection $conn */
         $conf = self::getItemConfig($configKey);
         $self = self::getIns($conf);
@@ -103,6 +143,10 @@ class Store
 
     public static function hSet($configKey, $fmtArgs, $bin, $value)
     {
+        if ($bin === self::INVALID_BIN_NAME) {
+            throw new \InvalidArgumentException("bin name " . self::INVALID_BIN_NAME . " is reversed");
+        }
+
         /* @var Connection $conn */
         $conf = self::getItemConfig($configKey);
         $self = self::getIns($conf);
@@ -127,9 +171,6 @@ class Store
         yield $result === 1;
     }
 
-    /*
-    public static function setex() {}
-    public static function exists() {}
     public static function mGet($configKey, array $fmtArgsArray)
     {
         // @var Connection $conn
@@ -153,12 +194,14 @@ class Store
             unset($result);
         }
 
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
 
         yield $resultList;
     }
 
+    /*
     // redis 协议支持有限制
     public static function __callStatic($func, $args)
     {

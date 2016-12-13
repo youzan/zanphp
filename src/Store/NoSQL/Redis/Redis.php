@@ -17,7 +17,7 @@ use Zan\Framework\Foundation\Contract\Async;
  * @method string get(string $key);
  * @method bool set(string $key, string $value);
  * @method array mGet(...$keys);
- * @method bool hSet(string $key, string $field, string $value);
+ * @method int hSet(string $key, string $field, string $value);
  * @method string hGet(string $key, string $field);
  * @method bool expire(string $key, int $ttlSec);
  */
