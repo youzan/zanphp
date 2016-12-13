@@ -17,7 +17,7 @@ class Path {
     const DEFAULT_SQL_PATH      = 'resource/sql/';
     const DEFAULT_LOG_PATH      = 'resource/log/';
     const DEFAULT_CACHE_PATH    = 'resource/cache/';
-    const DEFAULT_KV_PATH    = 'resource/kvstore/';
+    const DEFAULT_KV_PATH       = 'resource/kvstore/';
     const DEFAULT_MODEL_PATH    = 'resource/model/';
     const DEFAULT_TABLE_PATH    = 'resource/config/share/table/';
     const DEFAULT_ROUTING_PATH  = 'resource/routing/';
@@ -47,7 +47,7 @@ class Path {
     private static $sqlPath     = null;
     private static $logPath     = null;
     private static $cachePath   = null;
-    private static $kvPath   = null;
+    private static $kvPath      = null;
     private static $modelPath   = null;
     private static $tablePath   = null;
     private static $routingPath = null;

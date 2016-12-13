@@ -11,6 +11,16 @@ namespace Zan\Framework\Store\NoSQL\Redis;
 
 use Zan\Framework\Foundation\Contract\Async;
 
+
+/**
+ * Class Redis
+ * @method string get(string $key);
+ * @method bool set(string $key, string $value);
+ * @method array mGet(...$keys);
+ * @method int hSet(string $key, string $field, string $value);
+ * @method string hGet(string $key, string $field);
+ * @method bool expire(string $key, int $ttlSec);
+ */
 class Redis implements Async
 {
     private $callback;
