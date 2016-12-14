@@ -68,12 +68,7 @@ class RequestHandler {
                 return;
             }
 
-            $rpcCtx = $this->request->getRpcContext();
-            foreach ($rpcCtx->get() as $k => $v) {
-                $this->context->set($k, $v);
-            };
-            $this->context->set(RpcContext::KEY, $rpcCtx);
-
+            $this->request->getRpcContext()->bindTaskCtx($this->context);
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();
