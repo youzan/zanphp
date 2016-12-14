@@ -16,14 +16,20 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
 class RequestHandler {
-    private $swooleServer = null;
-    private $context = null;
-    private $request = null;
-    private $response = null;
+    /* @var $swooleServer SwooleServer */
+    private $swooleServer;
+    /* @var $context Context */
+    private $context;
+    /* @var $request Request */
+    private $request;
+    /* @var $response Response */
+    private $response;
     private $fd = null;
     private $fromId = null;
-    private $task = null;
-    private $middleWareManager = null;
+    /* @var $task Task */
+    private $task;
+    /* @var $middleWareManager MiddlewareManager*/
+    private $middleWareManager;
 
     const DEFAULT_TIMEOUT = 30 * 1000;
 
@@ -62,12 +68,7 @@ class RequestHandler {
                 return;
             }
 
-            if ($request->isGenericInvoke()) {
-                foreach ($request->getGenericAttachment() as $attachKey => $attachVal) {
-                    $this->context->set($attachKey, $attachVal);
-                }
-            }
-
+            $this->request->getRpcContext()->bindTaskCtx($this->context);
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();
