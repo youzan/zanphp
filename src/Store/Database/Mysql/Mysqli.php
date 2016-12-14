@@ -11,6 +11,7 @@ use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
@@ -34,6 +35,9 @@ class Mysqli implements DriverInterface
 
     private $result;
 
+    /**
+     * @var Trace
+     */
     private $trace;
 
     private $countAlias;
@@ -89,7 +93,7 @@ class Mysqli implements DriverInterface
         if (false === $res) {
             throw new MysqliConnectionLostException('Mysql close the connection');
         }
-        Timer::after($timeout, [$this, 'onQueryTimeout'], spl_object_hash($this));
+        Timer::after($timeout, $this->onQueryTimeout($this->sql), spl_object_hash($this));
 
         yield $this;
     }
@@ -125,13 +129,20 @@ class Mysqli implements DriverInterface
         call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
     }
 
-    public function onQueryTimeout()
+    public function onQueryTimeout($sql)
     {
-        if ($this->trace) {
-            $this->trace->commit("SQL query timeout");
-        }
-        //TODO: sql记入日志
-        call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException()]);
+        $start = microtime(true);
+        return function() use($sql, $start) {
+            if ($this->trace) {
+                $this->trace->commit("SQL query timeout");
+            }
+
+            $ctx = [
+                "sql" => $sql,
+                "duration" => microtime(true) - $start,
+            ];
+            call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException('Mysql query timeout', 0, null, $ctx)]);
+        };
     }
 
     public function getResult()
