@@ -487,7 +487,7 @@ return [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
         ],
-        'app' => [
+        'api' => [
             'type' => 'local',
             'host' => 'http://yop-market-qa.s.qima-inc.com',
         ],
@@ -971,7 +971,7 @@ return [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
         ],
-        'app' => [
+        'api' => [
             'type' => 'local',
             'host' => 'http://yop-market-qa.s.qima-inc.com',
         ],
@@ -1464,7 +1464,7 @@ return [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
         ],
-        'app' => [
+        'api' => [
             'type' => 'local',
             'host' => 'http://yop-market.s.qima-inc.com',
         ],
@@ -1964,7 +1964,7 @@ return [
             'type' => 'yar',
             'host' => 'http://dzt-api.qima-inc.com/',
         ],
-        'app' => [
+        'api' => [
             'type' => 'local',
             'host' => 'http://yop-market.s.qima-inc.com',
         ],
