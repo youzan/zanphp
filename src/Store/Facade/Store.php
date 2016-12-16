@@ -60,6 +60,7 @@ class Store
     }
 
     /**
+     * @param $config
      * @return static
      */
     private static function getIns($config)
@@ -179,6 +180,29 @@ class Store
         yield $result === 1;
     }
 
+    public static function hDel($configKey, $fmtArgs, $bin)
+    {
+        if ($bin === self::INVALID_BIN_NAME) {
+            throw new \InvalidArgumentException("bin name " . self::INVALID_BIN_NAME . " is reversed");
+        }
+        /* @var Connection $conn */
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $result = (yield $redis->hDel($realKey, $bin));
+        $result = self::unSerialize($result);
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result === 1;
+    }
+
     public static function mGet($configKey, array $fmtArgsArray)
     {
         // @var Connection $conn
@@ -207,6 +231,73 @@ class Store
         $conn->release();
 
         yield $resultList;
+    }
+
+    public static function del($configKey, $fmtArgs)
+    {
+        /* @var Connection $conn */
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $result = (yield $redis->del($realKey));
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result === 1;
+    }
+
+    public static function incr($configKey, $fmtArgs)
+    {
+        yield static::incrBy($configKey, $fmtArgs);
+    }
+
+    public static function incrBy($configKey, $fmtArgs, $value = 1)
+    {
+        /* @var Connection $conn */
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $result = (yield $redis->incrBy($realKey, $value));
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
+    }
+
+    public static function hIncrBy($configKey, $fmtArgs, $bin, $value = 1)
+    {
+        if ($bin === self::INVALID_BIN_NAME) {
+            throw new \InvalidArgumentException("bin name " . self::INVALID_BIN_NAME . " is reversed");
+        }
+
+        /* @var Connection $conn */
+        $conf = self::getItemConfig($configKey);
+        $self = self::getIns($conf);
+
+        $conn = (yield $self->getConnection($conf['connection']));
+        $redis = new KVRedis($conn);
+
+        $realKey = $self->fmtKVKey($conf, $fmtArgs);
+        $result = (yield $redis->hIncrBy($realKey, $bin, $value));
+        $result = self::unSerialize($result);
+
+        /** @noinspection PhpVoidFunctionResultUsedInspection */
+        yield self::deleteActiveConnectionFromContext($conn);
+        $conn->release();
+
+        yield $result;
     }
 
     /*
