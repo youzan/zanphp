@@ -7,7 +7,6 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Exception\ExcessConcurrencyException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
@@ -114,12 +113,7 @@ class RequestHandler {
         );
 
         $this->task->setStatus(Signal::TASK_KILLED);
-        // TODO 分配 code, 暂用 408, 参考 HTTP 超时 Code
-        $metaData = [
-            'service' => $this->request->getRoute(),
-            'param' => $this->request->getArgs()
-        ];
-        $e = new SystemException('server timeout', 408, null, $metaData);
+        $e = new \Exception('server timeout');
         $this->response->sendException($e);
         $this->event->fire($this->getRequestFinishJobId());
     }
