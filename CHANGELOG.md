@@ -108,6 +108,10 @@ hget ns:set:key bin
 
 添加 getRpcContext(k) setRpcContext(k, v) 系统调用, 通过nova协议上下文透传消息;
 
+### 2016-12-14 Fix
+
+修复ParallelException被Throw到父Task的BUG;
+
 
 ### 2016-12-16 Feature
 
