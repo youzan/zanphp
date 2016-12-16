@@ -24,21 +24,35 @@ class XSSFilter Implements RequestFilter
             $requestParameters = $request->request;
             $queryParameters = $request->query;
 
-            $this->parseItem($requestParameters);
-            $this->parseItem($queryParameters);
+            $userAgent = $request->server('HTTP_USER_AGENT');
+            $isIe = false;
+
+            if (stripos($userAgent, 'msie') !== false) {
+                $isIe = true;
+            }
+
+            $postData = $requestParameters->all();
+            $requestParameters->replace($this->parseItem($postData, $isIe));
+
+            $queryData = $queryParameters->all();
+            $queryParameters->replace($this->parseItem($queryData, $isIe));
         }
     }
 
-    protected function parseItem(ParameterBag $parameterBag)
+    protected function parseItem(array $input = null, $isIe = false)
     {
         $output = [];
-        foreach ($parameterBag as $k => $v) {
-            $output[$k] = $this->cleanXSS($v);
+        foreach ($input as $k => $v) {
+            if (is_array($v)) {
+                $output[$k] = $this->parseItem($v, $isIe);
+            } else {
+                $output[$k] = $this->cleanXSS($v, $isIe);
+            }
         }
-        $parameterBag->replace($output);
+        return $output;
     }
 
-    protected function cleanXSS($data)
+    protected function cleanXSS($data, $isIe = false)
     {
         // Fix &entity\n;
         $data = str_replace(array('&amp;', '&lt;', '&gt;'), array('&amp;amp;', '&amp;lt;', '&amp;gt;'), $data);
@@ -56,11 +70,12 @@ class XSSFilter Implements RequestFilter
             '$1=$2novbscript...', $data);
         $data = preg_replace('#([a-z]*)[\x00-\x20]*=([\'"]*)[\x00-\x20]*-moz-binding[\x00-\x20]*:#u', '$1=$2nomozbinding...', $data);
 
-        // Only works in IE: <span style="width: expression(alert('Ping!'));"></span>
-        $data = preg_replace('#(<[^>]+?)style[\x00-\x20]*=[\x00-\x20]*[`\'"]*.*?expression[\x00-\x20]*\([^>]*+>#i', '$1>', $data);
-        $data = preg_replace('#(<[^>]+?)style[\x00-\x20]*=[\x00-\x20]*[`\'"]*.*?behaviour[\x00-\x20]*\([^>]*+>#i', '$1>', $data);
-        $data = preg_replace('#(<[^>]+?)style[\x00-\x20]*=[\x00-\x20]*[`\'"]*.*?s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:*[^>]*+>#iu',
-            '$1>', $data);
+        if ($isIe) {
+            // Only works in IE: <span style="width: expression(alert('Ping!'));"></span>
+            $data = preg_replace('#(<[^>]+?)style[\x00-\x20]*=[\x00-\x20]*[`\'"]*.*?expression[\x00-\x20]*\([^>]*+>#i', '$1>', $data);
+            $data = preg_replace('#(<[^>]+?)style[\x00-\x20]*=[\x00-\x20]*[`\'"]*.*?behaviour[\x00-\x20]*\([^>]*+>#i', '$1>', $data);
+            $data = preg_replace('#(<[^>]+?)style[\x00-\x20]*=[\x00-\x20]*[`\'"]*.*?s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:*[^>]*+>#iu', '$1>', $data);
+        }
 
         // Remove namespaced elements (we do not need them)
         $data = preg_replace('#</*\w+:\w[^>]*+>#i', '', $data);
