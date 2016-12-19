@@ -73,7 +73,7 @@ class Parallel
             $this->task->run();
         } else {
             $ex = ParallelException::makeWithResult($this->sendValues, $this->exceptions);
-            $this->task->sendException($ex);
+            $this->task->getCoroutine()->throw($ex);
             $this->task->run();
         }
     }

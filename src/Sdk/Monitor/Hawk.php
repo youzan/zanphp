@@ -198,7 +198,7 @@ class Hawk
         try {
             $response = (yield $this->httpClient->postJson(self::URI, $this->data));
         } catch (\Exception $e) {
-            var_dump('hawk上报失败');
+            sys_echo('hawk上报失败');
             return;
         }
         $statusCode = -1;
@@ -208,8 +208,7 @@ class Hawk
         }
 
         if ($statusCode != self::SUCCESS_CODE) {
-            //TODO: 上报失败
-            var_dump("hawk上报失败");
+            sys_echo('hawk上报失败');
         }
     }
 

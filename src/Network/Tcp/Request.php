@@ -25,7 +25,6 @@ class Request implements BaseRequest {
     private $remotePort;
     private $fromId;
     private $seqNo;
-    private $attachData;
 
     private $startTime;
     private $isHeartBeat = false;
@@ -34,7 +33,11 @@ class Request implements BaseRequest {
     private $genericServiceName;
     private $genericMethodName;
     private $genericRoute;
-    private $genericAttachment = [];
+
+    /**
+     * @var RpcContext
+     */
+    private $rpcContext;
 
     public function __construct($fd, $fromId, $data)
     {
@@ -79,14 +82,9 @@ class Request implements BaseRequest {
         $this->seqNo = $seqNo;
     }
 
-    public function setAttachData($attachData)
-    {
-        $this->attachData = $attachData;
-    }
-
     public function getAttachData()
     {
-        return $this->attachData;
+        return $this->rpcContext->pack();
     }
 
     public function getRoute()
@@ -177,9 +175,9 @@ class Request implements BaseRequest {
         return $this->genericRoute;
     }
 
-    public function getGenericAttachment()
+    public function getRpcContext()
     {
-        return $this->genericAttachment;
+        return $this->rpcContext;
     }
 
     public function isGenericInvoke()
@@ -220,7 +218,7 @@ class Request implements BaseRequest {
             $this->remoteIp = $remoteIP;
             $this->remotePort = $remotePort;
             $this->seqNo = $seqNo;
-            $this->attachData = $attachData;
+            $this->rpcContext = RpcContext::unpack($attachData);
 
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;
@@ -252,30 +250,9 @@ class Request implements BaseRequest {
         $this->route = '/'. str_replace('.', '/', $serviceName) . '/' . $this->methodName;
         $this->genericRoute = '/'. str_replace('\\', '/', $this->genericServiceName) . '/' . $this->genericMethodName;
 
-        $this->initGenericAttachment();
+        // NOTICE: java-nova框架使用async的参数, 在java应用间表示调用发方式
+        // php无用, 且通过nova透传调用改参数调用java会变成异步调用, 此处删除
+        // 卡门其他透传参数暂时保留
+        $this->rpcContext->set("async", null);
     }
-
-    private function initGenericAttachment()
-    {
-        $attachment = json_decode($this->attachData, true, 512, JSON_BIGINT_AS_STRING);
-        if (!is_array($attachment)) {
-            return;
-        }
-
-        unset($attachment["async"]);
-
-        foreach (GenericRequestCodec::$carmenInternalArgs as $carmenInternalArg) {
-            if (isset($attachment[$carmenInternalArg])) {
-                $this->genericAttachment[$carmenInternalArg] = $attachment[$carmenInternalArg];
-                unset($attachment[$carmenInternalArg]);
-            }
-        }
-
-        if (empty($attachment)) {
-            $this->attachData =  "{}";
-        } else {
-            $this->attachData = json_encode($attachment, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-        }
-    }
-
 }

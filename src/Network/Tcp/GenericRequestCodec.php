@@ -15,7 +15,10 @@ final class GenericRequestCodec
 {
     const GENERIC_SERVICE_PREFIX = 'com.youzan.nova.framework.generic.service';
 
-    public static $carmenInternalArgs = ["request_ip", "kdt_id", "admin_id", "client_id"];
+    /**
+     * @var array 与卡门约定透传的内部参数
+     */
+    public static $carmenInternalArgs = ["async", "request_ip", "kdt_id", "admin_id", "client_id"];
 
     public static function isGenericService($serviceName)
     {

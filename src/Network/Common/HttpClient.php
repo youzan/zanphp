@@ -5,6 +5,8 @@ namespace Zan\Framework\Network\Common;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
+use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
@@ -170,23 +172,39 @@ class HttpClient implements Async
 
     public function handle()
     {
+        if ($this->timeout !== null) {
+            Timer::after(1000, [$this, "dnsLookupTimeout"], $this->getDnsResolveTimerId());
+        }
+
         if ($this->useHttpProxy) {
             if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
                 $proxy = self::HTTP_PROXY_ONLINE;
             } else {
                 $proxy = self::HTTP_PROXY_DEV;
             }
-
             swoole_async_dns_lookup($proxy, function($host, $ip) {
-                $this->request($ip, 80);
+                if ($this->timeout !== null) {
+                    Timer::clearAfterJob($this->getDnsResolveTimerId());
+                }
+                if ($ip) {
+                    $this->request($ip, 80);
+                } else {
+                    $this->whenHostNotFound($host);
+                }
             });
         } else {
             swoole_async_dns_lookup($this->host, function($host, $ip) {
-                $this->request($ip, $this->port);
+                if ($this->timeout !== null) {
+                    Timer::clearAfterJob($this->getDnsResolveTimerId());
+                }
+                if ($ip) {
+                    $this->request($ip, $this->port);
+                } else {
+                    $this->whenHostNotFound($host);
+                }
             });
         }
     }
-
 
     public function request($ip, $port)
     {
@@ -242,6 +260,12 @@ class HttpClient implements Async
         call_user_func($this->callback, $response);
     }
 
+    public function whenHostNotFound($host)
+    {
+        $ex = new HostNotFoundException("", 408, null, [ "host" => $host ]);
+        call_user_func($this->callback, null, $ex);
+    }
+
     private function getCallback(callable $callback)
     {
         return function($response, $exception = null) use ($callback) {
@@ -278,5 +302,39 @@ class HttpClient implements Async
             $this->trace->commit($exception);
         }
         call_user_func($this->callback, null, $exception);
+    }
+
+    public function dnsLookupTimeout()
+    {
+        $message = sprintf(
+            '[http dns lookup timeout] host:%s port:%s uri:%s method:%s ',
+            $this->host,
+            $this->port,
+            $this->uri,
+            $this->method
+        );
+        $metaData = [
+            'host' => $this->host,
+            'port' => $this->port,
+            'ssl' => $this->ssl,
+            'uri' => $this->uri,
+            'method' => $this->method,
+            'params' => $this->params,
+            'body' => $this->body,
+            'header' => $this->header,
+            'timeout' => $this->timeout,
+            'use_http_proxy' => $this->useHttpProxy,
+        ];
+
+        $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
+        if ($this->trace) {
+            $this->trace->commit($exception);
+        }
+        call_user_func($this->callback, null, $exception);
+    }
+
+    private function getDnsResolveTimerId()
+    {
+        return spl_object_hash($this) . "_dns_lookup";
     }
 }
