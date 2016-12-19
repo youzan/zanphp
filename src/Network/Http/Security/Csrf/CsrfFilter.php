@@ -61,7 +61,7 @@ class CsrfFilter Implements RequestFilter
                     }
                 }
             }
-            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw()));
+            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw(), 3600));
         }
     }
 
