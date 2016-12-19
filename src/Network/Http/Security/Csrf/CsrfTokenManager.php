@@ -81,7 +81,7 @@ class CsrfTokenManager implements CsrfTokenManagerInterface
      */
     public function getTTL(array $modules)
     {
-        static $defaultTTL = 1800;
+        static $defaultTTL = 300;
         $cfg = $this->getStrategy($this->csrfConfig, $modules);
         $ttl = isset($cfg['ttl']) ? $cfg['ttl'] : $defaultTTL;
         return $ttl;
