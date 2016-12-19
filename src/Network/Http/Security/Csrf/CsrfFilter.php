@@ -15,6 +15,7 @@ class CsrfFilter Implements RequestFilter
 {
     const TOKEN_NAME = '__zan_token';
     const TOKEN_HEADER_NAME = 'X-ZAN-TOKEN';
+    const DEFAULT_COOKIE_EXPIRE_TIME = 3600;
 
     /**
      * @var CsrfTokenManagerInterface
@@ -61,7 +62,7 @@ class CsrfFilter Implements RequestFilter
                     }
                 }
             }
-            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw(), 3600));
+            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw(), static::DEFAULT_COOKIE_EXPIRE_TIME));
         }
     }
 
