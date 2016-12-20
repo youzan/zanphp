@@ -13,7 +13,7 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 
 class CsrfFilter Implements RequestFilter
 {
-    const TOKEN_NAME = '__zan_token';
+    const TOKEN_NAME = 'csrf_token';
     const TOKEN_HEADER_NAME = 'X-ZAN-TOKEN';
     const DEFAULT_COOKIE_EXPIRE_TIME = 3600;
 
@@ -62,7 +62,8 @@ class CsrfFilter Implements RequestFilter
                     }
                 }
             }
-            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw(), static::DEFAULT_COOKIE_EXPIRE_TIME));
+            //yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw(), static::DEFAULT_COOKIE_EXPIRE_TIME));
+            yield (setContext(self::TOKEN_NAME, $newToken->getRaw()));
         }
     }
 
