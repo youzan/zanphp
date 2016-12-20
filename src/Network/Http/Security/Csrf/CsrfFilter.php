@@ -63,15 +63,13 @@ class CsrfFilter Implements RequestFilter
                 }
             }
             //yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw(), static::DEFAULT_COOKIE_EXPIRE_TIME));
-            $env = (yield getContext('env', []));
-            $env[self::TOKEN_NAME] = $newToken->getRaw();
-            yield (setContext('env', $env));
+            yield (setContext(self::TOKEN_NAME, $newToken->getRaw()));
         }
     }
 
     private function getTokenRaw(\Zan\Framework\Network\Http\Request\Request $request)
     {
-        $token = $request->cookie(self::TOKEN_NAME, null) ?: $request->header(self::TOKEN_HEADER_NAME, null);
+        $token = $request->parameter(self::TOKEN_NAME, null) ?: $request->header(self::TOKEN_HEADER_NAME, null);
         return $token;
     }
 
