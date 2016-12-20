@@ -74,7 +74,7 @@ class Qiniu
     public static function getPrivateUrl($bucket, $key, $fop ='')
     {
         $baseUrl = self::makeBaseUrl(self::getDomain($bucket), $key) . $fop;
-        $baseUrl = str_replace("http", "https", $baseUrl);
+        $baseUrl = str_replace("http://", "https://", $baseUrl);
         $expires = self::$config['bucket'][$bucket]['expires'];
 
         $accessKey = self::$config['access_key'];
