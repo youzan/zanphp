@@ -64,6 +64,8 @@ class HttpController extends Controller
     public function display($tpl)
     {
         $this->setupQiniu();
+        $csrfToken = $this->context->get('csrf_token');
+        $this->jsVar->setCsrfToken($csrfToken);
         $this->viewData['_js_var'] = $this->getJsVars();
         $content = View::display($tpl, $this->viewData);
         return $this->output($content);
@@ -72,6 +74,8 @@ class HttpController extends Controller
     public function render($tpl)
     {
         $this->setupQiniu();
+        $csrfToken = $this->context->get('csrf_token');
+        $this->jsVar->setCsrfToken($csrfToken);
         $this->viewData['_js_var'] = $this->getJsVars();
         return View::display($tpl, $this->viewData);
     }

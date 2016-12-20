@@ -52,6 +52,11 @@ class JsVar
      * @var array
      */
     private $_domain = [];
+    /**
+     * CSRF Token
+     * @var string
+     */
+    private $_csrf_token = '';
 
     public function setSession($key, $value)
     {
@@ -88,6 +93,11 @@ class JsVar
         $this->_domain = $domainList;
     }
 
+    public function setCsrfToken($csrf_token)
+    {
+        $this->_csrf_token = $csrf_token;
+    }
+
     public function get()
     {
         return [
@@ -99,6 +109,7 @@ class JsVar
             'business' => $this->_business,
             'share' => $this->_share,
             'url' => $this->_domain,
+            'csrf_token' => $this->_csrf_token
         ];
     }
-} 
+}
