@@ -19,7 +19,7 @@ class Qrcode {
             $tmp = explode('x', $size);
             $size = $tmp[0];
         }
-        return self::newImpl($data, $size, $base64, $styles);
+        yield self::newImpl($data, $size, $base64, $styles);
     }
 
 

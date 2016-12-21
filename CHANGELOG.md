@@ -107,3 +107,14 @@ hget ns:set:key bin
 ### 2016-12-14 Feature
 
 添加 getRpcContext(k) setRpcContext(k, v) 系统调用, 通过nova协议上下文透传消息;
+
+### 2016-12-14 Fix
+
+修复ParallelException被Throw到父Task的BUG;
+
+
+### 2016-12-16 Feature
+
+Store 添加 `del`, `hDel`, `incr`, `incrBy`, `hIncrBy` 5个接口
+
+KV::incr 需要使用 Store::hIncrBy($configKey, $fmtArgs, Store::DEFAULT_BIN_NAME, $value) 进行兼容替换
