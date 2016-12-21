@@ -15,7 +15,6 @@ class CsrfFilter Implements RequestFilter
 {
     const TOKEN_NAME = 'csrf_token';
     const TOKEN_HEADER_NAME = 'X-ZAN-TOKEN';
-    const DEFAULT_COOKIE_EXPIRE_TIME = 3600;
 
     /**
      * @var CsrfTokenManagerInterface
