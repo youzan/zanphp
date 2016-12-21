@@ -121,8 +121,8 @@ class NovaClientPool
             return;
         }
         $interval = $this->getReloadTime($config['host'], $config['port']);
+        $this->incReloadTime($config['host'], $config['port']);
         if ($interval === 0) {
-            $this->incReloadTime($config['host'], $config['port']);
             $this->createConnection($config);
             return;
         }
