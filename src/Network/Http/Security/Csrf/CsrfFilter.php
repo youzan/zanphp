@@ -62,6 +62,13 @@ class CsrfFilter Implements RequestFilter
                     }
                 }
             }
+
+            /**
+             * @see \Zan\Framework\Foundation\View\JsVar::setCsrfToken
+             * @see \Zan\Framework\Foundation\Domain\HttpController::display
+             * @see \Zan\Framework\Foundation\Domain\HttpController::render
+             * @fixme 当前的CSRF Token实现非常耦合我们的js前端(和IRON兼容), 留给后人改进了...
+             */
             yield (setContext(self::TOKEN_NAME, $newToken->getRaw()));
         }
     }
