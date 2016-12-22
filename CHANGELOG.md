@@ -118,3 +118,37 @@ hget ns:set:key bin
 Store 添加 `del`, `hDel`, `incr`, `incrBy`, `hIncrBy` 5个接口
 
 KV::incr 需要使用 Store::hIncrBy($configKey, $fmtArgs, Store::DEFAULT_BIN_NAME, $value) 进行兼容替换
+
+
+### 2016-12-2 Feature
+
+#### set Cookie时, 如果没有指定Domain, 根据Request Host自动匹配; 规则:
+
+1. 内置Host列表,
+
+```
+[
+    '.koudaitong.com',
+    '.youzan.com',
+    '.qima-inc.com',
+    '.kdt.im',
+]
+```
+
+2. 可以通过cookie.php配置文件添加该列表
+
+```php
+<?php
+return [
+    'domain' => 'foo.youzan.com',
+    // or
+    'domain' => ["127.0.0.1", 'foo.youzan.com'],
+    // ... 其他配置
+];
+````
+
+3. 优先匹配子域
+
+当request host为 bar.foo.youzan.com, domainList 中同时有 ['.youzan.com', 'foo.youzan.com', ...] 
+
+优先匹配 xxx.youzan.com;
