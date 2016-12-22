@@ -19,6 +19,12 @@ class Cookie
     private $config;
     private $request;
     private $response;
+    private $rootDomainWhiteList = [
+        '.koudaitong.com',
+        '.youzan.com',
+        '.qima-inc.com',
+        '.kdt.im',
+    ];
 
     public function __construct(Request $request, SwooleHttpResponse $swooleResponse)
     {
@@ -57,11 +63,22 @@ class Cookie
         $expire = time() + (int)$expire;
 
         $path = (null !== $path) ? $path : $this->config['path'];
-        $domain = (null !== $domain) ? $domain : $this->request->getHost();
+        $domain = (null !== $domain) ? $domain : $this->getDomain();
         $secure = (null !== $secure) ? $secure : $this->config['secure'];
         $httpOnly = (null !== $httpOnly) ? $httpOnly : $this->config['httponly'];
 
         $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httpOnly);
+    }
+
+    private function getDomain()
+    {
+        $host = $this->request->getHost();
+        foreach ($this->rootDomainWhiteList as $domain) {
+            if ($domain != '' && mb_strpos($host, $domain) !== false) {
+                return $domain;
+            }
+        }
+        return $host;
     }
 
 }
