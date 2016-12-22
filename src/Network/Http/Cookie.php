@@ -19,12 +19,8 @@ class Cookie
     private $config;
     private $request;
     private $response;
-    private $rootDomainWhiteList = [
-        '.koudaitong.com',
-        '.youzan.com',
-        '.qima-inc.com',
-        '.kdt.im',
-    ];
+
+    private static $domainWhiteList;
 
     public function __construct(Request $request, SwooleHttpResponse $swooleResponse)
     {
@@ -63,22 +59,47 @@ class Cookie
         $expire = time() + (int)$expire;
 
         $path = (null !== $path) ? $path : $this->config['path'];
-        $domain = (null !== $domain) ? $domain : $this->getDomain();
+        $domain = (null !== $domain) ? $domain : $this->getDomain($this->request->getHost() ?: "");
         $secure = (null !== $secure) ? $secure : $this->config['secure'];
         $httpOnly = (null !== $httpOnly) ? $httpOnly : $this->config['httponly'];
 
         $this->response->cookie($key, $value, $expire, $path, $domain, $secure, $httpOnly);
     }
 
-    private function getDomain()
+    private function getDomain($host)
     {
-        $host = $this->request->getHost();
-        foreach ($this->rootDomainWhiteList as $domain) {
-            if ($domain != '' && mb_strpos($host, $domain) !== false) {
+        if (static::$domainWhiteList === null) {
+            static::initDomainWhiteList();
+        }
+
+        $hostLen = strlen($host);
+        foreach (static::$domainWhiteList as $domain => $len) {
+            if ($hostLen < $len) {
+                continue;
+            }
+
+            if (substr(rtrim($host), -$len) === $domain) {
                 return $domain;
             }
         }
         return $host;
     }
 
+    private function initDomainWhiteList()
+    {
+        $domainList = [
+            '.koudaitong.com',
+            '.youzan.com',
+            '.qima-inc.com',
+            '.kdt.im',
+        ];
+
+        array_push($domainList, ...(array)Config::get("cookie.domain", []));
+
+        foreach ($domainList as $domain) {
+            static::$domainWhiteList[$domain] = strlen($domain);
+        }
+
+        arsort(static::$domainWhiteList);
+    }
 }
