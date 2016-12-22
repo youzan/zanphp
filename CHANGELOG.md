@@ -124,7 +124,7 @@ KV::incr 需要使用 Store::hIncrBy($configKey, $fmtArgs, Store::DEFAULT_BIN_NA
 
 #### set Cookie时, 如果没有指定Domain, 根据Request Host自动匹配; 规则:
 
-1. 内置Host列表,
+#### a. 内置Host列表,
 
 ```
 [
@@ -135,7 +135,7 @@ KV::incr 需要使用 Store::hIncrBy($configKey, $fmtArgs, Store::DEFAULT_BIN_NA
 ]
 ```
 
-2. 可以通过cookie.php配置文件添加该列表
+#### b. 可以通过cookie.php配置文件添加该列表
 
 ```php
 <?php
@@ -147,7 +147,7 @@ return [
 ];
 ````
 
-3. 优先匹配子域
+#### c. 优先匹配子域
 
 当request host为 bar.foo.youzan.com, domainList 中同时有 ['.youzan.com', 'foo.youzan.com', ...] 
 
