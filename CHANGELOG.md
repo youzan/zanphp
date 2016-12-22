@@ -151,4 +151,4 @@ return [
 
 当request host为 bar.foo.youzan.com, domainList 中同时有 ['.youzan.com', 'foo.youzan.com', ...] 
 
-优先匹配 xxx.youzan.com;
+优先匹配 foo.youzan.com;
