@@ -36,7 +36,8 @@ class InternalErrorHandler implements ExceptionHandler
                 ];
                 return new Response($errorInfo);
             } else {
-                return new Response('网络错误');
+                $code = $e->getCode();
+                return new Response("网络错误($code)");
             }
         }
         // 跳转到配置的500页面
