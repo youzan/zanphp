@@ -157,3 +157,22 @@ return [
 ### 2016-12-23
 
 网络错误添加code用以与iron区分, 格式: 网络错误(code)
+
+
+### 2016-12-23 Feature
+
+Tcp连接与Redis增加对Unix Socket支持; 仅需要将原来host配置项修改为sock文件地址即可;
+
+配置:
+
+```
+<?php
+
+return [
+    'kv_redis' => [
+        'engine'=> 'redis',
+	    'host' => "/var/run/yz-tether/redis2aerospike.sock",
+        'pool'  => [ ... ],
+    ],
+];
+```
