@@ -34,8 +34,12 @@ class Redis implements ConnectionFactory
         $connection->setConfig($this->config);
         $connection->init();
 
-        //call connect
-        $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
+        $isUnixSock = is_readable($this->config['host']);
+        if ($isUnixSock) {
+            $socket->connect($this->config['host'], null, [$connection, 'onConnect']);
+        } else {
+            $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
+        }
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
