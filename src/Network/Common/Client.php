@@ -138,7 +138,7 @@ class Client implements Async
             $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING);
             if (false === $jsonData || !is_array($jsonData)) {
                 // TODO 分配 code
-                $e = new UnexpectedResponseException('网络错误', 10000, NULL, ['response' => $response, 'request' => $this->getRequestMetadata()]);
+                $e = new UnexpectedResponseException('网络错误(10000)', 10000, NULL, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                 call_user_func($callback, null, $e);
                 return;
             }
@@ -153,7 +153,7 @@ class Client implements Async
 
             $code = $jsonData['code'];
             if ($code > 0) {
-                $msg = isset($jsonData['msg']) ? $jsonData['msg'] : '网络错误';
+                $msg = isset($jsonData['msg']) ? $jsonData['msg'] : "网络错误($code)";
                 $e = $this->generateException($code, $msg, ['response' => $response, 'request' => $this->getRequestMetadata()]);
                 call_user_func($callback, null, $e);
                 return;

@@ -69,7 +69,8 @@ class RequestTask
         $dispatcher = Di::make(Dispatcher::class);
         $response = (yield $dispatcher->dispatch($this->request, $this->context));
         if (null === $response) {
-            $response = new InternalErrorResponse('网络错误', BaseResponse::HTTP_INTERNAL_SERVER_ERROR);
+            $code = BaseResponse::HTTP_INTERNAL_SERVER_ERROR;
+            $response = new InternalErrorResponse("网络错误($code)", $code);
         }
 
         yield $this->middleWareManager->executePostFilters($response);
