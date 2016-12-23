@@ -118,3 +118,61 @@ hget ns:set:key bin
 Store 添加 `del`, `hDel`, `incr`, `incrBy`, `hIncrBy` 5个接口
 
 KV::incr 需要使用 Store::hIncrBy($configKey, $fmtArgs, Store::DEFAULT_BIN_NAME, $value) 进行兼容替换
+
+
+### 2016-12-22 Feature
+
+#### set Cookie时, 如果没有指定Domain, 根据Request Host自动匹配; 规则:
+
+#### a. 内置Host列表,
+
+```
+[
+    '.koudaitong.com',
+    '.youzan.com',
+    '.qima-inc.com',
+    '.kdt.im',
+]
+```
+
+#### b. 可以通过cookie.php配置文件添加该列表
+
+```php
+<?php
+return [
+    'domain' => 'foo.youzan.com',
+    // or
+    'domain' => ["127.0.0.1", 'foo.youzan.com'],
+    // ... 其他配置
+];
+````
+
+#### c. 优先匹配子域
+
+当request host为 bar.foo.youzan.com, domainList 中同时有 ['.youzan.com', 'foo.youzan.com', ...] 
+
+优先匹配 foo.youzan.com;
+
+
+### 2016-12-23
+
+网络错误添加code用以与iron区分, 格式: 网络错误(code)
+
+
+### 2016-12-23 Feature
+
+Tcp连接与Redis增加对Unix Socket支持; 仅需要将原来host配置项修改为sock文件地址即可;
+
+配置:
+
+```
+<?php
+
+return [
+    'kv_redis' => [
+        'engine'=> 'redis',
+	    'host' => "/var/run/yz-tether/redis2aerospike.sock",
+        'pool'  => [ ... ],
+    ],
+];
+```

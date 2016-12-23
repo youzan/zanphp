@@ -24,7 +24,9 @@ class Tcp implements ConnectionFactory
 
     public function create()
     {
-        $clientFlags = SWOOLE_SOCK_TCP;
+        $isUnixSock = is_readable($this->config['host']);
+
+        $clientFlags = $isUnixSock ? SWOOLE_SOCK_UNIX_STREAM : SWOOLE_SOCK_TCP;
         $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
         $socket->set($this->config['config']);
 
@@ -34,7 +36,11 @@ class Tcp implements ConnectionFactory
         $connection->init();
 
         //call connect
-        $socket->connect($this->config['host'], $this->config['port']);
+        if ($isUnixSock) {
+            $socket->connect($this->config['host']);
+        } else {
+            $socket->connect($this->config['host'], $this->config['port']);
+        }
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
