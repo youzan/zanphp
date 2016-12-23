@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Http\Exception\Handler;
 
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Exception\InvalidRouteException;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
