@@ -176,7 +176,7 @@ return [
 
 ### 2016-12-23 Feature
 
-Tcp连接与Redis增加对Unix Socket支持; 仅需要将原来host配置项修改为sock文件地址即可;
+Tcp连接与Redis增加对Unix Socket支持; 添加 path 配置项;
 
 配置:
 
@@ -186,7 +186,7 @@ Tcp连接与Redis增加对Unix Socket支持; 仅需要将原来host配置项修�
 return [
     'kv_redis' => [
         'engine'=> 'redis',
-	    'host' => "/var/run/yz-tether/redis2aerospike.sock",
+	    'path' => "/var/run/yz-tether/redis2aerospike.sock",
         'pool'  => [ ... ],
     ],
 ];
