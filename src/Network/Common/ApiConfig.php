@@ -342,7 +342,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
@@ -828,7 +828,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
@@ -1317,7 +1317,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
@@ -1817,7 +1817,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
