@@ -34,9 +34,9 @@ class Redis implements ConnectionFactory
         $connection->setConfig($this->config);
         $connection->init();
 
-        $isUnixSock = is_readable($this->config['host']);
+        $isUnixSock = isset($this->config["path"]);
         if ($isUnixSock) {
-            $socket->connect($this->config['host'], null, [$connection, 'onConnect']);
+            $socket->connect($this->config['path'], null, [$connection, 'onConnect']);
         } else {
             $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
         }
