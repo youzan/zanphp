@@ -120,7 +120,6 @@ class Polling implements LoadBalancingStrategyInterface
 
             if ($this->servers[$this->currentIndex]['weight'] >= $this->currentWeight) {
                 $server = $this->servers[$this->currentIndex];
-                sys_echo($server['host'] . ':' . $server['port'] . "\n");
                 return $this->connectionPool->getConnectionByHostPort($server['host'], $server['port']);
             }
         }
