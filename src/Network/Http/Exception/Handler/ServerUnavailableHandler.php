@@ -10,9 +10,7 @@ namespace Zan\Framework\Network\Http\Exception\Handler;
 
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Core\Path;
-use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\JsonResponse;
-use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
 
 class ServerUnavailableHandler implements ExceptionHandler

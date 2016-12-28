@@ -8,12 +8,13 @@ use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Exception\SystemException;
+use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Security\Csrf\Exception\TokenException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class CsrfFilter Implements RequestFilter
 {
-    const TOKEN_NAME = '__zan_token';
+    const TOKEN_NAME = 'csrf_token';
     const TOKEN_HEADER_NAME = 'X-ZAN-TOKEN';
 
     /**
@@ -37,8 +38,9 @@ class CsrfFilter Implements RequestFilter
         /**
          * FIXME
          * We should never care about the instance of interface
+         *
+         * @var \Zan\Framework\Network\Http\Request\Request $request
          */
-        /** @var \Zan\Framework\Network\Http\Request\Request $request */
         if ($request instanceof \Zan\Framework\Network\Http\Request\Request) {
             $tokenRaw = $this->getTokenRaw($request);
             if ($this->isReading($request)) {
@@ -50,24 +52,31 @@ class CsrfFilter Implements RequestFilter
                 }
             } else {
                 if (empty($tokenRaw)) {
-                    throw new TokenException('Invalid token');
+                    throw new TokenException('Invalid token', Response::HTTP_FORBIDDEN);
                 } else {
                     $token = $this->csrfTokenManager->parseToken($tokenRaw);
                     $modules = $this->getModules($request);
                     if ($this->csrfTokenManager->isTokenValid($modules, $token)) {
                         $newToken = $this->csrfTokenManager->refreshToken($token);
                     } else {
-                        throw new TokenException('Token expired');
+                        throw new TokenException('Token expired', Response::HTTP_FORBIDDEN);
                     }
                 }
             }
-            yield (cookieSet(self::TOKEN_NAME, $newToken->getRaw()));
+
+            /**
+             * @see \Zan\Framework\Foundation\View\JsVar::setCsrfToken
+             * @see \Zan\Framework\Foundation\Domain\HttpController::display
+             * @see \Zan\Framework\Foundation\Domain\HttpController::render
+             * @fixme 当前的CSRF Token实现非常耦合我们的js前端(和IRON兼容), 留给后人改进了...
+             */
+            yield (setContext(self::TOKEN_NAME, $newToken->getRaw()));
         }
     }
 
     private function getTokenRaw(\Zan\Framework\Network\Http\Request\Request $request)
     {
-        $token = $request->cookie(self::TOKEN_NAME, null) ?: $request->header(self::TOKEN_HEADER_NAME, null);
+        $token = $request->parameter(self::TOKEN_NAME, null) ?: $request->header(self::TOKEN_HEADER_NAME, null);
         return $token;
     }
 
