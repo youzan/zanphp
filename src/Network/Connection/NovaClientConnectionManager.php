@@ -147,7 +147,7 @@ class NovaClientConnectionManager
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
             $novaConfig['weight'] = $server['weight'];
-            sys_echo("nova client add on line " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
+            sys_echo("nova client add on line " . $appName . " host:" . $server['host'] . " port:" . $server['port'] . 'weight:' . $server['weight']);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
             $this->addAppNameToServerMap($appName, $server);
 
