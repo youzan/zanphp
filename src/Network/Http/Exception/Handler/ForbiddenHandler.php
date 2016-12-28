@@ -42,7 +42,7 @@ class ForbiddenHandler implements ExceptionHandler
                 yield new JsonResponse($context);
             } else {
                 //html
-                yield new Response($errorPage, Response::HTTP_SERVICE_UNAVAILABLE);
+                yield new Response($errorPage, Response::HTTP_FORBIDDEN);
             }
         }
     }
