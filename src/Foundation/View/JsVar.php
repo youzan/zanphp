@@ -56,7 +56,7 @@ class JsVar
      * CSRF Token
      * @var string
      */
-    private $_csrf_token = '';
+    private $_csrfToken = '';
 
     public function setSession($key, $value)
     {
@@ -93,9 +93,9 @@ class JsVar
         $this->_domain = $domainList;
     }
 
-    public function setCsrfToken($csrf_token)
+    public function setCsrfToken($csrfToken)
     {
-        $this->_csrf_token = $csrf_token;
+        $this->_csrfToken = $csrfToken;
     }
 
     public function get()
@@ -109,7 +109,7 @@ class JsVar
             'business' => $this->_business,
             'share' => $this->_share,
             'url' => $this->_domain,
-            'csrf_token' => $this->_csrf_token
+            'csrf_token' => $this->_csrfToken
         ];
     }
 }

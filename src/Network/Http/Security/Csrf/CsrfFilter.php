@@ -8,6 +8,7 @@ use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Exception\SystemException;
+use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Security\Csrf\Exception\TokenException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -37,8 +38,9 @@ class CsrfFilter Implements RequestFilter
         /**
          * FIXME
          * We should never care about the instance of interface
+         *
+         * @var \Zan\Framework\Network\Http\Request\Request $request
          */
-        /** @var \Zan\Framework\Network\Http\Request\Request $request */
         if ($request instanceof \Zan\Framework\Network\Http\Request\Request) {
             $tokenRaw = $this->getTokenRaw($request);
             if ($this->isReading($request)) {
@@ -50,14 +52,14 @@ class CsrfFilter Implements RequestFilter
                 }
             } else {
                 if (empty($tokenRaw)) {
-                    throw new TokenException('Invalid token', 403);
+                    throw new TokenException('Invalid token', Response::HTTP_FORBIDDEN);
                 } else {
                     $token = $this->csrfTokenManager->parseToken($tokenRaw);
                     $modules = $this->getModules($request);
                     if ($this->csrfTokenManager->isTokenValid($modules, $token)) {
                         $newToken = $this->csrfTokenManager->refreshToken($token);
                     } else {
-                        throw new TokenException('Token expired', 403);
+                        throw new TokenException('Token expired', Response::HTTP_FORBIDDEN);
                     }
                 }
             }
