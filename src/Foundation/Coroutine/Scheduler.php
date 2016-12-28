@@ -50,7 +50,7 @@ class Scheduler
         return $this->stack->isEmpty();
     }
 
-    public function throwException($e, $isFirstCall = false)
+    public function throwException($e, $isFirstCall = false, $isAsync = false)
     {
         if ($this->isStackEmpty()) {
             $parent = $this->task->getParentTask();
@@ -72,9 +72,11 @@ class Scheduler
             $this->task->setCoroutine($coroutine);
             $coroutine->throw($e);
 
-            $this->task->run();
+            if ($isAsync) {
+                $this->task->run();
+            }
         }catch (\Exception $e){
-            $this->throwException($e);
+            $this->throwException($e, false, $isAsync);
         }
     }
 
@@ -83,7 +85,7 @@ class Scheduler
     {
         if ($exception !== null
             && $exception instanceof \Exception) {
-            $this->throwException($exception, true);
+            $this->throwException($exception, true, true);
 
             if (Signal::TASK_DONE == $this->task->getStatus()) {
                 return ;
