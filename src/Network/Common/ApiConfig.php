@@ -387,7 +387,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.settlement',
-                    'host' => 'http://settlement-test.s.qima-inc.com:8138',
+                    'host' => 'http://settlement-test.s.qima-inc.com:8082',
                     'type' => 'java'
                 ],
                 [
@@ -873,7 +873,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.settlement',
-                    'host' => 'http://settlement-qa.s.qima-inc.com:8088',
+                    'host' => 'http://settlement-qa.s.qima-inc.com:8082',
                     'type' => 'java'
                 ],
                 [
