@@ -76,14 +76,29 @@ return [
 
 #### 兼容修改
 
-为避免数据迁移, 修改接口兼容数据 KV::set  -> Store::hGet
+为避免数据迁移, 修改接口兼容数据:
+
+1. KV::set  替换为 Store::hSet;
+2. KV::hSet  替换为 Store::hSet;
+3. KV::set  使用 Store::hGet 获取数据;
+4. KV::hSet  使用 Store::hGet 获取数据;
+
 
 ```
 <?php
+
 yield KV::set("scrm_kv.customer", $fmt, $value);
+// 替换为
+yield Store::hSet("scrm_kv2.customer", $fmt, Store::DEFAULT_BIN_NAME, $value);
+// 获取数据
 yield Store::hGet("scrm_kv2.customer", $fmt, Store::DEFAULT_BIN_NAME);
 
+//////////////////////////////////////////////////
+
 yield KV::hSet("scrm_kv.customer", $fmt, $bin, $randStr);
+// 替换为
+yield Store::hSet("scrm_kv2.customer", $fmt, $bin, $value);
+// 获取数据
 yield Store::hGet("scrm_kv2.customer", $fmt, $bin);
 ```
 
@@ -161,7 +176,7 @@ return [
 
 ### 2016-12-23 Feature
 
-Tcp连接与Redis增加对Unix Socket支持; 仅需要将原来host配置项修改为sock文件地址即可;
+Tcp连接与Redis增加对Unix Socket支持; 添加 path 配置项;
 
 配置:
 
@@ -171,8 +186,12 @@ Tcp连接与Redis增加对Unix Socket支持; 仅需要将原来host配置项修�
 return [
     'kv_redis' => [
         'engine'=> 'redis',
-	    'host' => "/var/run/yz-tether/redis2aerospike.sock",
+	    'path' => "/var/run/yz-tether/redis2aerospike.sock",
         'pool'  => [ ... ],
     ],
 ];
 ```
+
+### 2016-12-28 Fix
+
+修复调度器在发生异常情况下调度Async任务的bug;

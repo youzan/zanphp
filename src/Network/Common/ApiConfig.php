@@ -342,7 +342,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
@@ -387,7 +387,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.settlement',
-                    'host' => 'http://settlement-test.s.qima-inc.com:8138',
+                    'host' => 'http://settlement-test.s.qima-inc.com:8082',
                     'type' => 'java'
                 ],
                 [
@@ -828,7 +828,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
@@ -873,7 +873,7 @@ return [
                 ],
                 [
                     'mod' => 'pay.settlement',
-                    'host' => 'http://settlement-qa.s.qima-inc.com:8088',
+                    'host' => 'http://settlement-qa.s.qima-inc.com:8082',
                     'type' => 'java'
                 ],
                 [
@@ -1317,7 +1317,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
@@ -1817,7 +1817,7 @@ return [
         ],
         'goods' => [
             'type' => 'local',
-            'host' => 'http://goods.api.youzan.com/'
+            'host' => 'http://api.koudaitong.com/'
         ],
         'showcase' => [
             'type' => 'local',
