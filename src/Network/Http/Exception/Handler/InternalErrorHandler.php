@@ -26,6 +26,7 @@ class InternalErrorHandler implements ExceptionHandler
             return false;
         }
 
+        // prevent fatal error
         try {
             $config = Config::get($this->configKey, null);
             if (!$config) {
