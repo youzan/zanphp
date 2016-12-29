@@ -7,6 +7,7 @@ use ArrayObject;
 use JsonSerializable;
 use Zan\Framework\Contract\Foundation\Jsonable;
 use Zan\Framework\Contract\Network\Response as ResponseContract;
+use Zan\Framework\Utilities\Types\Json;
 
 class Response extends BaseResponse implements ResponseContract
 {
@@ -67,7 +68,7 @@ class Response extends BaseResponse implements ResponseContract
             return $content->toJson();
         }
 
-        return json_encode($content);
+        return Json::encode($content);
     }
 
     /**
