@@ -106,16 +106,20 @@ class Mysqli implements DriverInterface
         Timer::clearAfterJob(spl_object_hash($this));
         $exception = null;
         if ($result === false) {
-            $errno = $link->_errno;
-            $error = $link->_error;
-            if (in_array($errno, [2013, 2006])) {
-                $exception = new MysqliConnectionLostException();
-            } elseif ($errno == 1064) {
-                $exception = new MysqliSqlSyntaxException($error . ':' . $this->sql);
-            } elseif ($errno == 1062) {
-                $exception = new MysqliQueryDuplicateEntryUniqueKeyException($error);
+            if (property_exists($link, "_errno") && property_exists($link, "_error")) {
+                $errno = $link->_errno;
+                $error = $link->_error;
+                if (in_array($errno, [2013, 2006])) {
+                    $exception = new MysqliConnectionLostException("$error:$this->sql");
+                } elseif ($errno == 1064) {
+                    $exception = new MysqliSqlSyntaxException("$error:$this->sql");
+                } elseif ($errno == 1062) {
+                    $exception = new MysqliQueryDuplicateEntryUniqueKeyException("$error:$this->sql");
+                } else {
+                    $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql");
+                }
             } else {
-                $exception = new MysqliQueryException('errno=' . $errno . '&error=' . $error . ':' . $this->sql);
+                $exception = new MysqliConnectionLostException("mysql connection lost: $this->sql");
             }
 
             if ($this->trace) {
