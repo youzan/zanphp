@@ -195,3 +195,7 @@ return [
 ### 2016-12-28 Fix
 
 修复调度器在发生异常情况下调度Async任务的bug;
+
+### 2017-01-02 Fix
+
+修复async_mysql回调内与swoole代码不匹配造成的Notice错误与异常信息缺失;
