@@ -7,6 +7,7 @@ namespace Zan\Framework\Network\Http\Security\Csrf;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\SystemException;
 use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Security\Csrf\Exception\TokenException;
@@ -51,6 +52,10 @@ class CsrfFilter Implements RequestFilter
                     $newToken = $this->csrfTokenManager->refreshToken($token);
                 }
             } else {
+                if($this->isWhite($request)){
+                   yield null;
+                   return;
+                }
                 if (empty($tokenRaw)) {
                     throw new TokenException('Invalid token', Response::HTTP_FORBIDDEN);
                 } else {
@@ -104,6 +109,31 @@ class CsrfFilter Implements RequestFilter
             $store[$route] = $result;
         }
         return $store[$route];
+    }
+
+    private function isWhite(Request $request){
+        $whiteList = Config::get('secure.csrf.whitelist');
+        $whiteList = $whiteList ? $whiteList : [];
+
+        if(empty($whiteList)){
+            return false;
+        }
+        $route = $request->getRoute();
+        $modules = $this->getModules($request);
+        $module = isset($modules[$route]) ? $modules[$route] : [];
+
+        if(empty($module)){
+            return false;
+        }
+        $tmp = [$module['module'],$module['controller'],$module['action']];
+        $decision = '';
+        foreach($tmp as $r){
+            $decision .= $decision ? '.'.$r : $r;
+            if(isset($whiteList[$r])){
+                return true;
+            }
+        }
+        return false;
     }
 
 }
