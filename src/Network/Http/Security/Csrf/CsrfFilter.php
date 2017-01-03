@@ -118,10 +118,7 @@ class CsrfFilter Implements RequestFilter
         if(empty($whiteList)){
             return false;
         }
-        $route = $request->getRoute();
-        $modules = $this->getModules($request);
-        $module = isset($modules[$route]) ? $modules[$route] : [];
-
+        $module = $this->getModules($request);
         if(empty($module)){
             return false;
         }
