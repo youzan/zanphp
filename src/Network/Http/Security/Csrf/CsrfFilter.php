@@ -126,7 +126,7 @@ class CsrfFilter Implements RequestFilter
         $decision = '';
         foreach($tmp as $r){
             $decision .= $decision ? '.'.$r : $r;
-            if(isset($whiteList[$r])){
+            if(isset($whiteList[$decision])){
                 return true;
             }
         }
