@@ -120,7 +120,7 @@ return [
         ],
         'feeds' => [
             'type' => 'java',
-            'host' => 'http://10.9.47.164:8026',
+            'host' => 'http://10.9.97.128:8026',
         ],
         'verifier' => [
             'type' => 'java',
@@ -609,7 +609,7 @@ return [
         ],
         'feeds' => [
             'type' => 'java',
-            'host' => 'http://10.9.47.164:8026',
+            'host' => 'http://10.9.97.128:8026',
         ],
         'verifier' => [
             'type' => 'java',
