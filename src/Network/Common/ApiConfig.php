@@ -158,112 +158,112 @@ return [
             'sub' => [
                 [
                     'mod' => 'trade.buy.bookByParams',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.cashierBook',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.updateAddressByParams',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.cashierUpdateBuyWay',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.confirmByParams',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.afterPayService.processNormalOrderPaySuccess',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.mergeBook',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.mergeUpdateBuyWay',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.mergeUpdateAddress',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.tm.query',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.orderStockService.decrease',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.orderStateService.modifyWaitToSend',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.selffetch.create',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.selffetch.confirm',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.selffetch.getCode',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.buy.updateSelfFetchAddress',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.gift.queryGiftInvite',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.gift.updateGiftInvite',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.gift.pickUpGift',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.gift.updateFetchRecord',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.gift.listFetchRecords',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'trade.gift.queryFetchRecordById',
-                    'host' => 'http://192.168.66.206:8025',
+                    'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
             ]
@@ -285,37 +285,37 @@ return [
             'sub' => [
                 [
                     'mod' => 'cart.cartService.addGoods',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'cart.cartService.countGoods',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'cart.cartService.listGoods',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'cart.cartService.listGoodsByPk',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'cart.cartService.deleteGoods',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'cart.cartService.updateGoodsNum',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
                 [
                     'mod' => 'cart.cartService.merge',
-                    'host' => 'http://192.168.66.206:8026',
+                    'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
             ]
