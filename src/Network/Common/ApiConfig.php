@@ -157,6 +157,36 @@ return [
             'host' => 'http://api.koudaitong.com',
             'sub' => [
                 [
+                    'mod' => 'trade.bill.show',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.bill.create',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.bill.pay',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.bill.showPay',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.limit.getPass',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.pay.getPayMchId',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
                     'mod' => 'trade.buy.bookByParams',
                     'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
@@ -217,6 +247,11 @@ return [
                     'type' => 'java'
                 ],
                 [
+                    'mod' => 'trade.orderStateService.modifyAfterConfirm',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
                     'mod' => 'trade.selffetch.create',
                     'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
@@ -263,6 +298,26 @@ return [
                 ],
                 [
                     'mod' => 'trade.gift.queryFetchRecordById',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.virtualticket.create',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.virtualticket.batchVerifyByApp',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.virtualticket.verifyByOrder',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.virtualticket.batchVerifyByOpen',
                     'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
