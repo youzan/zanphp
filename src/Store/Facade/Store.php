@@ -291,7 +291,17 @@ class Store
 
         $realKey = $self->fmtKVKey($conf, $fmtArgs);
         $result = (yield $redis->hIncrBy($realKey, $bin, $value));
+        // 临时加入, 排查scrm incr问题
+        if (!$result) {
+            sys_echo(__METHOD__ . " realKey=$realKey,bin=$bin,value=$value,result=");
+            var_dump($result);
+        }
         $result = self::unSerialize($result);
+        // 临时加入, 排查scrm incr问题
+        if (!$result) {
+            sys_echo(__METHOD__ . "unSerialize realKey=$realKey,bin=$bin,value=$value,result=");
+            var_dump($result);
+        }
 
         /** @noinspection PhpVoidFunctionResultUsedInspection */
         yield self::deleteActiveConnectionFromContext($conn);
