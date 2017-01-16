@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use Com\Youzan\Nova\Framework\Generic\Service\GenericService;
 use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
@@ -35,6 +36,7 @@ class Server extends ServerBase {
         InitializeWorkerMonitor::class,
         InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
+        InitializeHawkMonitor::class,
     ];
 
     /**
@@ -96,6 +98,8 @@ class Server extends ServerBase {
     {
         $appName = Application::getInstance()->getName();
         $config = Config::get('server.hawk_collection');
+        //强制关闭swoole上报
+        $config['enable_hawk'] = 0;
         $config['module'] = $appName;
         $this->swooleServer->nova_config($config);
     }

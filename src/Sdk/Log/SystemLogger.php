@@ -75,7 +75,11 @@ class SystemLogger extends BaseLogger
     private function buildTopic()
     {
         $config = $this->config;
-        $result = SystemLogger::TOPIC_PREFIX . '.' . $config['app'] . '.' . $config['module'];
+        if ($config['module'] == 'soa-framework') {
+            $result = SystemLogger::TOPIC_PREFIX . '.soa-framework.default';
+        } else {
+            $result = SystemLogger::TOPIC_PREFIX . '.' . $config['app'] . '.' . $config['module'];
+        }
         return $result;
     }
 
@@ -100,6 +104,11 @@ class SystemLogger extends BaseLogger
             'tag' => $message,
             'detail' => $detail
         ];
+
+        if ($this->config['module'] == 'soa-framework') {
+            $result['app'] = 'soa-framework';
+            $result['module'] = 'default';
+        }
 
         return json_encode($result);
     }

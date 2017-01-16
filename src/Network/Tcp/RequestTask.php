@@ -8,9 +8,12 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Thrift\Exception\TApplicationException;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Network\Exception\GenericInvokeException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
-use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Sdk\Log\Log;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -43,6 +46,29 @@ class RequestTask {
         try {
             yield $this->doRun();
         } catch (\Exception $e) {
+            $hawk = Hawk::getInstance();
+            if ($e instanceof TApplicationException) {
+                $hawk->addTotalFailureTime(Hawk::SERVER,
+                    $this->request->getServiceName(),
+                    $this->request->getMethodName(),
+                    $this->request->getRemoteIp(),
+                    microtime(true) - $this->request->getStartTime());
+                $hawk->addTotalFailureCount(Hawk::SERVER,
+                    $this->request->getServiceName(),
+                    $this->request->getMethodName(),
+                    $this->request->getRemoteIp());
+                $this->logErr($e);
+            } else {
+                $hawk->addTotalSuccessTime(Hawk::SERVER,
+                    $this->request->getServiceName(),
+                    $this->request->getMethodName(),
+                    $this->request->getRemoteIp(),
+                    microtime(true) - $this->request->getStartTime());
+                $hawk->addTotalSuccessCount(Hawk::SERVER,
+                    $this->request->getServiceName(),
+                    $this->request->getMethodName(),
+                    $this->request->getRemoteIp());
+            }
             $this->response->sendException($e);
             $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
@@ -66,6 +92,17 @@ class RequestTask {
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
         $this->output($result);
 
+        $hawk = Hawk::getInstance();
+        $hawk->addTotalSuccessTime(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp(),
+            microtime(true) - $this->request->getStartTime());
+        $hawk->addTotalSuccessCount(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp());
+
         $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
     }
 
@@ -74,5 +111,19 @@ class RequestTask {
         return $this->response->end($execResult);
     }
 
-
+    private function logErr($e) {
+        $trace = $this->context->get('trace');
+        $traceId = '';
+        if ($trace) {
+            $traceId = $trace->getRootId();
+        }
+        yield Log::make('zan_framework')->error($e->getMessage(), [
+            'exception' => $e,
+            'app' => Application::getInstance()->getName(),
+            'language'=>'php',
+            'side'=>'server',//server,client两个选项
+            'traceId'=> $traceId,
+            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
+        ]);
+    }
 }

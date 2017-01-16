@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 use \swoole_server as SwooleServer;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
@@ -12,6 +13,8 @@ use Zan\Framework\Network\Exception\ExcessConcurrencyException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Log\Log;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -67,6 +70,7 @@ class RequestHandler {
                 $this->swooleServer->send($this->fd, $result);
                 return;
             }
+            $request->setStartTime();
 
             $this->request->getRpcContext()->bindTaskCtx($this->context);
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
@@ -89,6 +93,11 @@ class RequestHandler {
         } catch(\Exception $e) {
             if (Debug::get()) {
                 echo_exception($e);
+            }
+
+            if ($this->request->getServiceName()) {
+                $this->reportHawk();
+                $this->logErr($e);
             }
             $response->sendException($e);
             $this->event->fire($this->getRequestFinishJobId());
@@ -114,6 +123,9 @@ class RequestHandler {
 
         $this->task->setStatus(Signal::TASK_KILLED);
         $e = new \Exception('server timeout');
+
+        $this->reportHawk();
+        $this->logErr($e);
         $this->response->sendException($e);
         $this->event->fire($this->getRequestFinishJobId());
     }
@@ -126,5 +138,35 @@ class RequestHandler {
     private function getRequestTimeoutJobId()
     {
         return spl_object_hash($this) . '_handle_timeout';
+    }
+
+    private function reportHawk() {
+        $hawk = Hawk::getInstance();
+        $hawk->addTotalFailureTime(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp(),
+            microtime(true) - $this->request->getStartTime());
+        $hawk->addTotalFailureCount(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp());
+    }
+
+    private function logErr($e) {
+        $trace = $this->context->get('trace');
+        $traceId = '';
+        if ($trace) {
+            $traceId = $trace->getRootId();
+        }
+        $coroutine =  (yield Log::make('zan_framework')->error($e->getMessage(), [
+            'exception' => $e,
+            'app' => Application::getInstance()->getName(),
+            'language'=>'php',
+            'side'=>'server',//server,client两个选项
+            'traceId'=> $traceId,
+            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
+        ]));
+        Task::execute($coroutine);
     }
 }

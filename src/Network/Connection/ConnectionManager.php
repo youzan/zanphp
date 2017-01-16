@@ -81,7 +81,7 @@ class ConnectionManager
     }
 
     public function monitorTick() {
-        $hawk = new Hawk();
+        $hawk = Hawk::getInstance();
 
         foreach (self::$poolMap as $poolKey => $pool) {
             $activeNums = $pool->getActiveConnection()->length();
@@ -93,17 +93,9 @@ class ConnectionManager
                     'active' => $activeNums,
                 ], [
                     'pool_name' => $poolKey,
-                    'worker_id' => (string)self::$server->swooleServer->worker_id
                 ]
             );
         }
-
-        $coroutine = $this->runHawkTask($hawk);
-        Task::execute($coroutine);
-    }
-
-    public function runHawkTask($hawk) {
-        yield $hawk->send();
     }
 
     public function setServer($server) {

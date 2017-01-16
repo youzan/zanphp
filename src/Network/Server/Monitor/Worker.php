@@ -152,17 +152,10 @@ class Worker
     }
 
     public function callHawk() {
-        $hawk = new Hawk();
+        $hawk = Hawk::getInstance();
         $memory =  memory_get_usage();
         $hawk->add(Constant::BIZ_WORKER_MEMORY,
-                    ['used' => $memory],
-                    ['worker_id' => (string)$this->workerId]);
-        $coroutine = $this->runHawkTask($hawk);
-        Task::execute($coroutine);
-    }
-
-    public function runHawkTask($hawk) {
-        yield $hawk->send();
+                    ['used' => $memory]);
     }
 
     public function reactionReceive(){

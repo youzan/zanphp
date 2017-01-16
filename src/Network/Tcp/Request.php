@@ -25,6 +25,8 @@ class Request implements BaseRequest {
     private $remotePort;
     private $fromId;
     private $seqNo;
+
+    private $startTime;
     private $isHeartBeat = false;
 
     private $isGenericInvoke = false;
@@ -136,6 +138,26 @@ class Request implements BaseRequest {
     public function getIsHeartBeat()
     {
         return $this->isHeartBeat;
+    }
+
+    public function getStartTime()
+    {
+        return $this->startTime;
+    }
+
+    public function setStartTime()
+    {
+        $this->startTime = microtime(true);
+    }
+
+    public function getRemoteIp()
+    {
+        return $this->remoteIp;
+    }
+
+    public function setRemoteIp($remoteIp)
+    {
+        $this->remoteIp = $remoteIp;
     }
 
     public function getGenericServiceName()

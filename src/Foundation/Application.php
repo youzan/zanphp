@@ -6,6 +6,7 @@ use RuntimeException;
 use Zan\Framework\Foundation\Booting\InitializeCliInput;
 use Zan\Framework\Foundation\Booting\InitializeCache;
 use Zan\Framework\Foundation\Booting\InitializeKv;
+use Zan\Framework\Foundation\Booting\InitializeSyslog;
 use Zan\Framework\Foundation\Booting\LoadFiles;
 use Zan\Framework\Foundation\Container\Container;
 use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
@@ -97,6 +98,7 @@ class Application
             LoadFiles::class,
             InitializeCache::class,
             InitializeKv::class,
+            InitializeSyslog::class,
         ];
 
         foreach ($bootstrapItems as $bootstrap) {
