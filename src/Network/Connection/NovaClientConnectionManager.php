@@ -43,7 +43,7 @@ class NovaClientConnectionManager
             }
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $novaConfig['weight'] = $server['weight'];
+            $novaConfig['weight'] = isset($server['weight']) ? $server['weight'] : 100;
             $config[$novaConfig['host'].':'.$novaConfig['port']] = $novaConfig;
         }
 
@@ -146,7 +146,7 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $novaConfig['weight'] = $server['weight'];
+            $novaConfig['weight'] = isset($server['weight']) ? $server['weight'] : 100;
             sys_echo("nova client add on line " . $appName . " host:" . $server['host'] . " port:" . $server['port'] . 'weight:' . $server['weight']);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
             $this->addAppNameToServerMap($appName, $server);
@@ -178,7 +178,7 @@ class NovaClientConnectionManager
         foreach ($servers as $server) {
             $novaConfig['host'] = $server['host'];
             $novaConfig['port'] = $server['port'];
-            $novaConfig['weight'] = $server['weight'];
+            $novaConfig['weight'] = isset($server['weight']) ? $server['weight'] : 100;
             sys_echo("nova client update service " . $appName . " host:" . $server['host'] . " port:" . $server['port'] . 'weight:' . $server['weight']);
             $this->updateAppNameToServerMap($appName, $server);
             $this->formatNovaServiceNameToMethodsMap($server['services']);
