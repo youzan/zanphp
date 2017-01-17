@@ -80,7 +80,7 @@ class URL
         $fragment = isset($urlAnalysis['fragment']) ? '#' . $urlAnalysis['fragment'] : '';
 
         if (!empty($host)) {
-            $scheme = isset($urlAnalysis['scheme']) ? $urlAnalysis['scheme'] : '';
+            $scheme = isset($urlAnalysis['scheme']) ? $urlAnalysis['scheme'] : self::SCHEME_HTTPS;
             if (!self::_checkScheme($scheme)) {
                 throw new InvalidArgumentException('Invalid url for URL::site');
             }
