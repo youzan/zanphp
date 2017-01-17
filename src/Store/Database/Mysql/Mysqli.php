@@ -116,7 +116,7 @@ class Mysqli implements DriverInterface
                 } elseif ($errno == 1062) {
                     $exception = new MysqliQueryDuplicateEntryUniqueKeyException("$error:$this->sql");
                 } else {
-                    $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql");
+                    $exception = new MysqliQueryException('errno=' . $errno . '&error=' . $error . ':' . $this->sql, 0, null, ['errno' => $errno, 'error' => $error]);
                 }
             } else {
                 $exception = new MysqliConnectionLostException("mysql connection lost: $this->sql");
