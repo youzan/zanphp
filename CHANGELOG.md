@@ -199,3 +199,13 @@ return [
 ### 2017-01-02 Fix
 
 修复async_mysql回调内与swoole代码不匹配造成的Notice错误与异常信息缺失;
+
+### 2017-01-16 Feature
+
+1. 支持动态权重变更、软负载
+2. 框架错误记录到log
+3. hawk SDK重构，更全的监控信息上报
+
+### 2017-01-17 Fix
+
+Url::site添加https作为默认scheme 
