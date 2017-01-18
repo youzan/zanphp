@@ -95,7 +95,7 @@ class RequestHandler {
                 echo_exception($e);
             }
 
-            if ($this->request->getServiceName()) {
+            if ($this->request && $this->request->getServiceName()) {
                 $this->reportHawk();
                 $this->logErr($e);
             }
