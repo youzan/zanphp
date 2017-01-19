@@ -1434,6 +1434,52 @@ return [
                     'host' => 'http://pay-microaccount-pre.s.qima-inc.com',
                     'type' => 'java'
                 ],
+                //salesman change pay host to api.s.qima-inc.com
+                [
+                    'mod' => 'pay.funds.salesMan.getAccount',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.trade.salesMan.getSettledMoney',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.SalesMan.getCashAccount',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getInoutLogDetail',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getInoutLogList',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getCashDetail',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getCashList',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.SalesMan.setWXWallet',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.SalesMan.cashApply',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
             ]
         ],
         'funds' => [
@@ -1933,6 +1979,52 @@ return [
                     'mod' => 'pay.microaccount',
                     'host' => 'http://pay-microaccount.s.qima-inc.com',
                     'type' => 'java'
+                ],
+                //salesman change pay host to api.s.qima-inc.com
+                [
+                    'mod' => 'pay.funds.salesMan.getAccount',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.trade.salesMan.getSettledMoney',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.SalesMan.getCashAccount',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getInoutLogDetail',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getInoutLogList',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getCashDetail',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.salesMan.getCashList',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.SalesMan.setWXWallet',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
+                ],
+                [
+                    'mod' => 'pay.funds.SalesMan.cashApply',
+                    'host' => 'http://api.s.qima-inc.com',
+                    'type' => 'local'
                 ],
             ]
         ],
