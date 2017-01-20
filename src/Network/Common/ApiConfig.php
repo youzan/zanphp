@@ -1002,6 +1002,10 @@ return [
             'type' => 'java',
             'host' => 'http://qabb-qab-ic0.h.qima-inc.com',
         ],
+        'sc' => [
+            'type' => 'java',
+            'host' => 'http://qabb-qa-sc0.h.qima-inc.com',
+        ],
         'delivery' => [
             'type' => 'java',
             'host' => 'http://10.9.27.149:7001'
