@@ -22,20 +22,23 @@ interface DriverInterface extends Async
     public function query($sql);
 
     /**
-     * @param bool $autoHandleException
+     * @param int $flags
      * @return DbResultInterface
+     * @internal param bool $autoHandleException
      */
-    public function beginTransaction();
+    public function beginTransaction($flags = 0);
 
     /**
+     * @param int $flags
      * @return DbResultInterface
      */
-    public function commit();
+    public function commit($flags = 0);
 
     /**
+     * @param int $flags
      * @return DbResultInterface
      */
-    public function rollback();
+    public function rollback($flags = 0);
 
     /**
      * @return DbResultInterface

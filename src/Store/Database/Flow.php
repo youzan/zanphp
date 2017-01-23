@@ -7,7 +7,9 @@
  */
 namespace Zan\Framework\Store\Database;
 
+use Zan\Framework\Store\Database\Exception\DbBeginTransactionFailException;
 use Zan\Framework\Store\Database\Mysql\Mysqli;
+use Zan\Framework\Store\Database\Mysql\MysqliResult;
 use Zan\Framework\Store\Database\Sql\SqlMap;
 use Zan\Framework\Store\Database\Sql\Table;
 use Zan\Framework\Network\Connection\ConnectionManager;
@@ -71,39 +73,41 @@ class Flow
         yield $result;
     }
 
-    public function beginTransaction()
+    public function beginTransaction($flags = 0)
     {
         $taskId = (yield getTaskId());
-        yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), true);
+        yield setContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), $flags);
     }
 
-    public function commit()
+    public function commit($flags = 0)
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
         try {
-            $commit = (yield $driver->commit());
+            /* @var MysqliResult $commit */
+            $commit = (yield $driver->commit($flags));
         } catch (\Exception $e) {
             throw new DbCommitFailException();
         }
-        if (true === $commit) {
+        if ((yield $commit->fetchRows()) === true) {
             yield $this->finishTransaction();
             return;
         }
         throw new DbCommitFailException();
     }
 
-    public function rollback()
+    public function rollback($flags = 0)
     {
         $connection = (yield $this->getConnectionByStack());
         $driver = $this->getDriver($connection);
         try {
-            $rollback = (yield $driver->rollback());
+            /* @var MysqliResult $rollback */
+            $rollback = (yield $driver->rollback($flags));
         } catch (\Exception $e) {
             yield $this->dealRollbackError();
             throw new DbRollbackFailException();
         }
-        if (true === $rollback) {
+        if ((yield $rollback->fetchRows()) === true) {
             yield $this->finishTransaction();
             return;
         }
@@ -129,10 +133,11 @@ class Flow
     {
         $taskId = (yield getTaskId());
         $beginTransaction = (yield getContext(sprintf(self::BEGIN_TRANSACTION_FLAG, $taskId), false));
-        if (!$beginTransaction) {
+        if ($beginTransaction === false || $beginTransaction === null) {
             yield $this->getConnectionByConnectionManager($database);
             return;
         }
+        $flags = $beginTransaction;
         $connection = (yield getContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $database), null));
         if (null !== $connection && $connection instanceof Connection) {
             yield $connection;
@@ -140,7 +145,7 @@ class Flow
         }
 
         $connection = (yield $this->getConnectionByConnectionManager($database));
-        yield $this->setTransaction($database, $connection);
+        yield $this->setTransaction($database, $connection, $flags);
         yield $connection;
         return;
     }
@@ -246,11 +251,15 @@ class Flow
         }
     }
 
-    private function setTransaction($database, $connection)
+    private function setTransaction($database, $connection, $flags = 0)
     {
         $driver = $this->getDriver($connection);
         $taskId = (yield getTaskId());
-        yield $driver->beginTransaction();
+        /* @var MysqliResult $txBegin */
+        $txBegin = (yield $driver->beginTransaction($flags));
+        if ((yield $txBegin->fetchRows()) !== true) {
+            throw new DbBeginTransactionFailException();
+        }
         yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $database), $connection);
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
         if (null !== $connectionStack && $connectionStack instanceof SplStack) {
@@ -353,6 +362,4 @@ class Flow
                 break;
         }
     }
-
-
 }
