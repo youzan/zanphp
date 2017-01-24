@@ -154,7 +154,7 @@ class Mysqli implements DriverInterface
         return $this->result;
     }
 
-    public function beginTransaction($flags = MYSQLI_TRANS_START_NO_OPT)
+    public function beginTransaction($flags = 0)
     {
         $conn = $this->connection->getSocket();
         yield $this->begin_transaction($conn, $flags);
@@ -168,35 +168,19 @@ class Mysqli implements DriverInterface
         */
     }
 
-    public function commit($flags = MYSQLI_TRANS_COR_NO_OPT)
+    public function commit($flags = 0)
     {
         $conn = $this->connection->getSocket();
         yield $this->commit_or_rollback($conn, true, $flags);
-
-        /*
-        $commit = (yield $this->connection->getSocket()->commit());
-        if (!$commit) {
-            throw new MysqliTransactionException('mysqli commit error');
-        }
-        yield $commit;
-        */
     }
 
-    public function rollback($flags = MYSQLI_TRANS_COR_NO_OPT)
+    public function rollback($flags = 0)
     {
         $conn = $this->connection->getSocket();
         yield $this->commit_or_rollback($conn, false, $flags);
-
-        /*
-        $rollback = (yield $this->connection->getSocket()->rollback());
-        if (!$rollback) {
-            throw new MysqliTransactionException('mysqli rollback error');
-        }
-        yield $rollback;
-        */
     }
 
-    private function begin_transaction(\mysqli $conn, $flags)
+    private function begin_transaction(\mysqli $conn, $flags = 0)
     {
         $characteristic = [];
         if ($flags & MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
@@ -216,7 +200,7 @@ class Mysqli implements DriverInterface
         yield $this->query($query);
     }
 
-    private function commit_or_rollback(\mysqli $conn, $commit, $flags = MYSQLI_TRANS_COR_NO_OPT)
+    private function commit_or_rollback(\mysqli $conn, $commit, $flags = 0)
     {
         $ops = [];
         if ($flags & MYSQLI_TRANS_COR_AND_CHAIN && !($flags & MYSQLI_TRANS_COR_AND_NO_CHAIN)) {

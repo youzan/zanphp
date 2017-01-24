@@ -7,7 +7,7 @@
  */
 namespace Zan\Framework\Store\Database;
 
-use Zan\Framework\Store\Database\Exception\DbBeginTransactionFailException;
+use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 use Zan\Framework\Store\Database\Mysql\Mysqli;
 use Zan\Framework\Store\Database\Mysql\MysqliResult;
 use Zan\Framework\Store\Database\Sql\SqlMap;
@@ -258,7 +258,7 @@ class Flow
         /* @var MysqliResult $txBegin */
         $txBegin = (yield $driver->beginTransaction($flags));
         if ((yield $txBegin->fetchRows()) !== true) {
-            throw new DbBeginTransactionFailException();
+            throw new MysqliTransactionException('mysqli begin transaction error');
         }
         yield setContext(sprintf(self::CONNECTION_CONTEXT, $taskId, $database), $connection);
         $connectionStack = (yield getContext(sprintf(self::CONNECTION_STACK, $taskId), null));
