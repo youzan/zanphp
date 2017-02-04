@@ -208,4 +208,8 @@ return [
 
 ### 2017-01-17 Fix
 
-Url::site添加https作为默认scheme 
+Url::site添加https作为默认scheme
+ 
+### 2017-02-04 Feature
+
+mysql 添加异步事务支持
