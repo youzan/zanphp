@@ -22,22 +22,22 @@ class Db {
         return;
     }
  
-    public static function beginTransaction()
+    public static function beginTransaction($flags = 0)
     {
         $flow = new Flow();
-        yield $flow->beginTransaction();
+        yield $flow->beginTransaction($flags);
     }
     
-    public static function commit()
+    public static function commit($flags = 0)
     {
         $flow = new Flow();
-        yield $flow->commit();
+        yield $flow->commit($flags);
     }
     
-    public static function rollback()
+    public static function rollback($flags = 0)
     {
         $flow = new Flow();
-        yield $flow->rollback();
+        yield $flow->rollback($flags);
     }
 
     public static function terminate()
