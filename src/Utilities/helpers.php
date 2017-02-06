@@ -2,7 +2,7 @@
 
 use Zan\Framework\Utilities\Types\Arr;
 
-//TODO move to Arr
+
 if (! function_exists('data_set')) {
     /**
      * Set an item on an array or object using dot notation.
@@ -116,3 +116,8 @@ if (! function_exists('d')) {
     }
 }
 
+if (! function_exists('swoole2x')) {
+    function swoole2x() {
+        return version_compare(phpversion('swoole'), '2.0.0') >= 0;
+    }
+}

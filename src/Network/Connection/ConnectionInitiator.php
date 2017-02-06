@@ -15,11 +15,10 @@ use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Network\Connection\Factory\Tcp;
-use Zan\Framework\Network\Server\Monitor\Worker;
-use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
+use Zan\Framework\Network\Connection\Factory\Mysql;
 
 
 class ConnectionInitiator
@@ -129,7 +128,11 @@ class ConnectionInitiator
                 $factory = new Http($config);
                 break;
             case 'Mysqli':
-                $factory = new Mysqli($config);
+                if (swoole2x()) {
+                    $factory = new Mysql($config);
+                } else {
+                    $factory = new Mysqli($config);
+                }
                 break;
             case 'NovaClient':
                 $factory = new NovaClient($config);
@@ -141,7 +144,7 @@ class ConnectionInitiator
                 $factory = new Tcp($config);
                 break;
             default:
-                break;
+                throw new \RuntimeException("not support connection type: $factoryType");
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
