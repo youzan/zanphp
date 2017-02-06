@@ -344,6 +344,11 @@ return [
                     'type' => 'java'
                 ],
                 [
+                    'mod' => 'cart.cartService.batchAddGoods',
+                    'host' => 'http://10.9.65.122:7001',
+                    'type' => 'java'
+                ],
+                [
                     'mod' => 'cart.cartService.countGoods',
                     'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
@@ -826,6 +831,11 @@ return [
             'sub' => [
                 [
                     'mod' => 'cart.cartService.addGoods',
+                    'host' => 'http://10.9.65.122:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'cart.cartService.batchAddGoods',
                     'host' => 'http://10.9.65.122:7001',
                     'type' => 'java'
                 ],
@@ -1321,6 +1331,11 @@ return [
                     'type' => 'java'
                 ],
                 [
+                    'mod' => 'cart.cartService.batchAddGoods',
+                    'host' => 'http://trade-cart-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
                     'mod' => 'cart.cartService.countGoods',
                     'host' => 'http://trade-cart-soa.s.qima-inc.com',
                     'type' => 'java'
@@ -1493,6 +1508,17 @@ return [
                 [
                     'mod' => 'funds.wait_settled',
                     'host' => 'http://10.200.175.232:5061/online',
+                    'type' => 'java'
+                ]
+            ]
+        ],
+        'dc_api' => [
+            'type' => 'local',
+            'host' => 'http://dc_api.api.youzan.com/',
+            'sub' => [
+                [
+                    'mod' => 'dc_api.online.takeaway.realtime',
+                    'host' => 'http://statistics.s.qima-inc.com',
                     'type' => 'java'
                 ]
             ]
@@ -1867,6 +1893,11 @@ return [
                     'type' => 'java'
                 ],
                 [
+                    'mod' => 'cart.cartService.batchAddGoods',
+                    'host' => 'http://trade-cart-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
                     'mod' => 'cart.cartService.countGoods',
                     'host' => 'http://trade-cart-soa.s.qima-inc.com',
                     'type' => 'java'
@@ -2039,6 +2070,17 @@ return [
                 [
                     'mod' => 'funds.wait_settled',
                     'host' => 'http://10.200.175.232:5061/online',
+                    'type' => 'java'
+                ]
+            ]
+        ],
+        'dc_api' => [
+            'type' => 'local',
+            'host' => 'http://dc_api.api.youzan.com/',
+            'sub' => [
+                [
+                    'mod' => 'dc_api.online.takeaway.realtime',
+                    'host' => 'http://statistics.s.qima-inc.com',
                     'type' => 'java'
                 ]
             ]
