@@ -154,31 +154,68 @@ class Mysqli implements DriverInterface
         return $this->result;
     }
 
-    public function beginTransaction()
+    public function beginTransaction($flags = 0)
     {
+        $conn = $this->connection->getSocket();
+        yield $this->begin_transaction($conn, $flags);
+
+        /*
         $beginTransaction = (yield $this->connection->getSocket()->begin_transaction(MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT));
         if (!$beginTransaction) {
             throw new MysqliTransactionException('mysqli begin transaction error');
         }
         yield $beginTransaction;
+        */
     }
 
-    public function commit()
+    public function commit($flags = 0)
     {
-        $commit = (yield $this->connection->getSocket()->commit());
-        if (!$commit) {
-            throw new MysqliTransactionException('mysqli commit error');
-        }
-        yield $commit;
+        $conn = $this->connection->getSocket();
+        yield $this->commit_or_rollback($conn, true, $flags);
     }
 
-    public function rollback()
+    public function rollback($flags = 0)
     {
-        $rollback = (yield $this->connection->getSocket()->rollback());
-        if (!$rollback) {
-            throw new MysqliTransactionException('mysqli rollback error');
-        }
-        yield $rollback;
+        $conn = $this->connection->getSocket();
+        yield $this->commit_or_rollback($conn, false, $flags);
     }
 
+    private function begin_transaction(\mysqli $conn, $flags = 0)
+    {
+        $characteristic = [];
+        if ($flags & MYSQLI_TRANS_START_WITH_CONSISTENT_SNAPSHOT) {
+            $characteristic[] = "WITH CONSISTENT SNAPSHOT";
+        }
+        if ($flags & (MYSQLI_TRANS_START_READ_ONLY | MYSQLI_TRANS_START_READ_WRITE)) {
+            if ($conn->server_version < 50605) {
+                trigger_error(E_USER_WARNING, "This server version doesn't support 'READ WRITE' and 'READ ONLY'. Minimum 5.6.5 is required");
+            } else if ($flags & MYSQLI_TRANS_START_READ_WRITE) {
+                $characteristic[] = "READ WRITE";
+            } else if ($flags & MYSQLI_TRANS_START_READ_ONLY) {
+                $characteristic[] = "READ ONLY";
+            }
+        }
+
+        $query = "START TRANSACTION " . implode(", ", $characteristic);
+        yield $this->query($query);
+    }
+
+    private function commit_or_rollback(\mysqli $conn, $commit, $flags = 0)
+    {
+        $ops = [];
+        if ($flags & MYSQLI_TRANS_COR_AND_CHAIN && !($flags & MYSQLI_TRANS_COR_AND_NO_CHAIN)) {
+            $ops[] = "AND CHAIN";
+        } else if ($flags & MYSQLI_TRANS_COR_AND_NO_CHAIN && !($flags & MYSQLI_TRANS_COR_AND_CHAIN)) {
+            $ops[] = "AND NO CHAIN";
+        }
+
+        if ($flags & MYSQLI_TRANS_COR_RELEASE && !($flags & MYSQLI_TRANS_COR_NO_RELEASE)) {
+            $ops[] = "RELEASE";
+        } else if ($flags & MYSQLI_TRANS_COR_NO_RELEASE && !($flags & MYSQLI_TRANS_COR_RELEASE)) {
+            $ops[] = "NO RELEASE";
+        }
+
+        $query = ($commit ? "COMMIT " : "ROLLBACK ") . implode(" ", $ops);
+        yield $this->query($query);
+    }
 }

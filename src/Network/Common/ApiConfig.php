@@ -522,6 +522,10 @@ return [
             'type' => 'java',
             'host' => 'http://qabb-test-ic0.h.qima-inc.com',
         ],
+        'sc' => [
+            'type' => 'java',
+            'host' => 'http://qabb-dev-sc0.h.qima-inc.com',
+        ],
         'mock' => [
             'type' => 'yar',
             'host' => 'http://mock.api.koudaitong.com/'
