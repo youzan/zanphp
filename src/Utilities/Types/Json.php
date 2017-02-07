@@ -54,7 +54,9 @@ class Json
 
         $errno = json_last_error();
         if ($errno !== JSON_ERROR_NONE) {
-            if($debug)var_dump($json);
+            if($debug){
+                var_dump($json);
+            }
             throw new InvalidArgumentException("JSON decode failed: " . json_last_error_msg(), $errno, null, func_get_args());
         }
 
