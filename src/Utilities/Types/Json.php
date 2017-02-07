@@ -40,7 +40,6 @@ class Json
      * @param bool $assoc
      * @param int $depth
      * @param int $options
-     * @param bool $debug
      * @return mixed
      * @throws InvalidArgumentException
      */
