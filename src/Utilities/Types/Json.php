@@ -44,7 +44,7 @@ class Json
      * @return mixed
      * @throws InvalidArgumentException
      */
-    public static function decode($json, $assoc = true, $depth = 512, $options = JSON_BIGINT_AS_STRING, $debug = false)
+    public static function decode($json, $assoc = true, $depth = 512, $options = JSON_BIGINT_AS_STRING)
     {
         if (!is_string($json)) {
             return $json;
@@ -54,9 +54,7 @@ class Json
 
         $errno = json_last_error();
         if ($errno !== JSON_ERROR_NONE) {
-            if($debug){
-                var_dump($json);
-            }
+            echo "json decode failed: $json\n";
             throw new InvalidArgumentException("JSON decode failed: " . json_last_error_msg(), $errno, null, func_get_args());
         }
 
