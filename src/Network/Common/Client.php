@@ -135,7 +135,7 @@ class Client implements Async
 
             $body = $response->getBody();
 
-            $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING);
+            $jsonData = Json::decode($body, true, 512, JSON_BIGINT_AS_STRING, true);
             if (false === $jsonData || !is_array($jsonData)) {
                 // TODO 分配 code
                 $e = new UnexpectedResponseException('网络错误(10000)', 10000, NULL, ['response' => $response, 'request' => $this->getRequestMetadata()]);
