@@ -37,7 +37,7 @@ class Mysql implements DriverInterface
 
     private $countAlias;
 
-    /** @var \SwooleMysql $swooleMysql */
+    /** @var \swoole_mysql $swooleMysql */
     private $swooleMysql;
 
     const DEFAULT_QUERY_TIMEOUT = 3000;
@@ -133,7 +133,7 @@ class Mysql implements DriverInterface
     }
 
     /**
-     * @param \SwooleMysql $link
+     * @param \swoole_mysql $link
      * @param array|false $result
      * @return void
      */

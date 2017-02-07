@@ -19,7 +19,6 @@ function randfile($file, $count, $bs = 1024 * 1024 /*m*/)
     return $count * $bs;
 }
 
-
 $onceWriteTest = function() {
     $f = "tmp1";
     $f_copy = "{$f}_copy";
@@ -53,6 +52,8 @@ $onceReadTest = function() {
     assert($size === strlen($txt));
 };
 Task::execute($onceReadTest());
+
+
 
 
 $readWriteTest = function() {

@@ -12,6 +12,7 @@ use Zan\Framework\Utilities\Types\Time;
 
 class Mysql extends Base implements Connection
 {
+    protected $isAsync = true;
     private $classHash = null;
 
     public function closeSocket()
@@ -24,7 +25,7 @@ class Mysql extends Base implements Connection
     }
 
     public function init() {
-        /** @var \SwooleMysql $swooleMysql */
+        /** @var \swoole_mysql $swooleMysql */
         $swooleMysql = $this->getSocket();
         $swooleMysql->on('connect', [$this, 'onConnect']);
         $swooleMysql->on('close', [$this, 'onClose']);
@@ -39,13 +40,13 @@ class Mysql extends Base implements Connection
         sys_echo("mysql client connect to server");
     }
 
-    public function onClose(\SwooleMysql $cli){
+    public function onClose(\swoole_mysql $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
         sys_echo("mysql client close");
     }
 
-    public function onError(\SwooleMysql $cli){
+    public function onError(\swoole_mysql $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
         sys_echo("mysql client error");

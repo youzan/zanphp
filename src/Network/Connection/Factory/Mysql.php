@@ -16,7 +16,7 @@ class Mysql implements ConnectionFactory
     private $config;
 
     /**
-     * @var \SwooleMysql
+     * @var \swoole_mysql
      */
     private $conn;
 
@@ -27,7 +27,7 @@ class Mysql implements ConnectionFactory
     
     public function create()
     {
-        $this->conn = new \SwooleMysql();
+        $this->conn = new \swoole_mysql();
         $connection = new MysqlConnection();
         $connection->setSocket($this->conn);
         $connection->setConfig($this->config);
@@ -42,15 +42,17 @@ class Mysql implements ConnectionFactory
             "charset" => isset($this->config['charset']) ? $this->config['charset'] : self::DEFAULT_CHARSET,
         ]);
 
-        Timer::after($this->config['connect_timeout'], [$this, "connectTimeout"], $connection->getConnectTimeoutJobId());
+        Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 
         return $connection;
     }
 
-    public function connectTimeout(MysqlConnection $connection)
+    public function getConnectTimeoutCallback(MysqlConnection $connection)
     {
-        $connection->close();
-        $connection->onConnectTimeout();
+        return function() use ($connection) {
+            $connection->close();
+            $connection->onConnectTimeout();
+        };
     }
 
     public function close()
