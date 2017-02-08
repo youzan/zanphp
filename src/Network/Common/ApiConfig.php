@@ -840,7 +840,7 @@ return [
                 ],
                 [
                     'mod' => 'cart.cartService.batchAddGoods',
-                    'host' => 'http://10.9.65.122:7001',
+                    'host' => 'http://10.9.4.201:7001',
                     'type' => 'java'
                 ],
                 [
