@@ -137,13 +137,13 @@ class Mysql implements DriverInterface
      * @param array|false $result
      * @return void
      */
-    public function onSqlReady($link, $result)
+    public function onSqlReady($link, $result = true)
     {
         $this->cancelTimeoutTimer();
 
         $exception = null;
 
-        if ($result === false) {
+        if ($link->errno !== 0 || $result === false) {
 
             $errno = $link->errno;
             $error = $link->error;
