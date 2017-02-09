@@ -98,7 +98,7 @@ class Mysql implements DriverInterface
 
     public function beginTransaction($flags = 0)
     {
-        $r = $this->swooleMysql->begin_transaction([$this, "onSqlReady"]);
+        $r = $this->swooleMysql->begin([$this, "onSqlReady"]);
         if ($r === false) {
             throw new MysqliQueryException(__FUNCTION__ . " fail");
         }
