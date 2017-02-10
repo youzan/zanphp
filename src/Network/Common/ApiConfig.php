@@ -840,7 +840,7 @@ return [
                 ],
                 [
                     'mod' => 'cart.cartService.batchAddGoods',
-                    'host' => 'http://10.9.65.122:7001',
+                    'host' => 'http://10.9.4.201:7001',
                     'type' => 'java'
                 ],
                 [
@@ -2140,6 +2140,10 @@ return [
         'ic' => [
             'type' => 'java',
             'host' => 'http://ic.s.qima-inc.com',
+        ],
+        'sc' => [
+            'type' => 'java',
+            'host' => 'http://sc.s.qima-inc.com',
         ],
         'delivery' => [
             'type' => 'java',
