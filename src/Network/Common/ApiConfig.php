@@ -2141,6 +2141,10 @@ return [
             'type' => 'java',
             'host' => 'http://ic.s.qima-inc.com',
         ],
+        'sc' => [
+            'type' => 'java',
+            'host' => 'http://sc.s.qima-inc.com',
+        ],
         'delivery' => [
             'type' => 'java',
             'host' => 'http://delivery.s.qima-inc.com'
