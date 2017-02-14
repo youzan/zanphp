@@ -53,7 +53,6 @@ class Json
 
         $errno = json_last_error();
         if ($errno !== JSON_ERROR_NONE) {
-            echo "json decode failed: $json\n";
             throw new InvalidArgumentException("JSON decode failed: " . json_last_error_msg(), $errno, null, func_get_args());
         }
 
