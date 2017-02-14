@@ -1573,7 +1573,7 @@ return [
         ],
         'ic' => [
             'type' => 'java',
-            'host' => 'http://ic.s.qima-inc.com',
+            'host' => 'http://ic-pre.s.qima-inc.com',
         ],
         'sc' => [
             'type' => 'java',
