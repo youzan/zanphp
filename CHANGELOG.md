@@ -213,3 +213,9 @@ Url::site添加https作为默认scheme
 ### 2017-02-04 Feature
 
 mysql 添加异步事务支持
+
+### 2017-02-20 Feature 支持多App配置
+
+添加 root/resource/config_{{appName}} 配置路径, 注意: appName "-"替换为"_"
+
+root/resource/config_{{appName}}/ 配置优先于 root/resource/config
