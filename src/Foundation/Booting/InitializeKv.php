@@ -21,7 +21,6 @@ class InitializeKv implements Bootable
     {
         try {
             $kvMap = ConfigLoader::getInstance()->load(Path::getKvPath());
-            KV::initConfigMap($kvMap);
             Store::initConfigMap($kvMap);
         } catch (\Exception $e) {
             //do nothing
