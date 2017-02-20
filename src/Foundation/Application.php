@@ -72,11 +72,11 @@ class Application
     {
         $this->appName = $appName;
 
+        static::setInstance($this);
+
         $this->setBasePath($basePath);
 
         $this->bootstrap();
-
-        static::setInstance($this);
     }
 
     protected function bootstrap()

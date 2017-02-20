@@ -8,9 +8,8 @@
 
 namespace Zan\Framework\Foundation\Core;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\Types\Dir;
-use Zan\Framework\Foundation\Core\Config;
 
 class Path {
     const DEFAULT_CONFIG_PATH   = 'resource/config/';
@@ -26,6 +25,7 @@ class Path {
     const DEFAULT_APP_PATH = 'vendor/zan-config/app/';
     const DEFAULT_CRON_PATH         = 'resource/config/share/cron/';
     const DEFAULT_MQWORKER_PATH     = 'resource/config/share/mqworker/';
+    const DEFAULT_MODULE_CONFIG_PATH_PREFIX = 'resource/config_';
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
     const CONFIG_PATH_CONFIG_KEY  = 'path.config';
@@ -41,6 +41,7 @@ class Path {
     const APP_PATH_CONFIG_KEY = 'path.app';
     const CRON_PATH_CONFIG_KEY          = 'path.cron';
     const MQ_WORKER_PATH_CONFIG_KEY     = 'path.mqworker';
+    const MODULE_CONFIG_PATH_CONFIG_KEY = 'path.module_config';
 
     private static $rootPath    = null;
     private static $configPath  = null;
@@ -56,6 +57,7 @@ class Path {
     private static $appConfigPath = null;
     private static $cronConfigPath = null;
     private static $mqWorkerConfigPath = null;
+    private static $moduleConfigPath = null;
 
     public static function init($rootPath)
     {
@@ -140,6 +142,11 @@ class Path {
         return self::$mqWorkerConfigPath;
     }
 
+    public static function getModuleConfigPath()
+    {
+        return self::$moduleConfigPath;
+    }
+
     private static function setRootPath($rootPath)
     {
         self::$rootPath = Dir::formatPath($rootPath);
@@ -160,6 +167,9 @@ class Path {
         self::$appConfigPath = self::$rootPath .self::DEFAULT_APP_PATH;
         self::$cronConfigPath = self::$rootPath . self::DEFAULT_CRON_PATH;
         self::$mqWorkerConfigPath = self::$rootPath . self::DEFAULT_MQWORKER_PATH;
+
+        $appNamePostfix = str_replace('-', '_', Application::getInstance()->getName());
+        self::$moduleConfigPath = self::$rootPath . self::DEFAULT_MODULE_CONFIG_PATH_PREFIX . "$appNamePostfix/";
     }
 
     private static function setInConfig()
@@ -178,5 +188,6 @@ class Path {
         Config::set(self::APP_PATH_CONFIG_KEY, self::$appConfigPath);
         Config::set(self::CRON_PATH_CONFIG_KEY, self::$cronConfigPath);
         Config::set(self::MQ_WORKER_PATH_CONFIG_KEY, self::$mqWorkerConfigPath);
+        Config::set(self::MODULE_CONFIG_PATH_CONFIG_KEY, self::$moduleConfigPath);
     }
 }
