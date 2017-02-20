@@ -17,6 +17,9 @@ use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\KV\KVStore;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
+// TODO:
+// 已经移除KVStore相关类, KV 与 KVTerminator 暂时保留,
+// 防止 业务代码没有移除干净, 导致 Fatal error: class not found
 class KV
 {
     const POOL_PREFIX = 'connection.kvstore.';
