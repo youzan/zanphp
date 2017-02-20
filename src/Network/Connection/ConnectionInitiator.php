@@ -10,7 +10,6 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Connection\Factory\KVStore;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
@@ -34,7 +33,6 @@ class ConnectionInitiator
         'redis', 
         'syslog', 
         'novaClient',
-        'kVStore',
         'es',
         'tcp',
     ];
@@ -136,9 +134,6 @@ class ConnectionInitiator
                 break;
             case 'NovaClient':
                 $factory = new NovaClient($config);
-                break;
-            case 'KVStore':
-                $factory = new KVStore($config);
                 break;
             case 'Tcp':
                 $factory = new Tcp($config);
