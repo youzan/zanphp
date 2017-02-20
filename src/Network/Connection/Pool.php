@@ -68,12 +68,20 @@ class Pool implements ConnectionPool
         if  ('' !== $previousConnectionHash) {
             $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
             if ($this->type == 'Mysqli') {
-                if (!$connection->getSocket()->connect_errno){
-                    $connection->heartbeat();
+
+                if (swoole2x()) {
+                    $errno = $connection->getSocket()->errno;
                 } else {
+                    $errno = $connection->getSocket()->connect_errno;
+                }
+
+                if ($errno) {
                     ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection),$previousKey);
                     $this->remove($connection);
+                } else {
+                    $connection->heartbeat();
                 }
+
                 $connection->setPool($this);
             } else {
                 ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection), $previousKey);

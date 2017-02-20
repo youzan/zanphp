@@ -67,8 +67,7 @@ class Server extends ServerBase {
         \swoole_async_set(["socket_dontwait" => 1]);
 
         $this->init();
-        $this->registerServices();
-        
+
         $this->bootServerStartItem();
         
         $this->swooleServer->start();
@@ -92,16 +91,6 @@ class Server extends ServerBase {
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
             ServerStore::getInstance()->resetLockDiscovery();
         }
-    }
-
-    private function registerServices()
-    {
-        $appName = Application::getInstance()->getName();
-        $config = Config::get('server.hawk_collection');
-        //强制关闭swoole上报
-        $config['enable_hawk'] = 0;
-        $config['module'] = $appName;
-        $this->swooleServer->nova_config($config);
     }
 
     public function onConnect()

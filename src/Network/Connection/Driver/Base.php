@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Foundation\Core\Event;
 use Zan\Framework\Network\Connection\NovaClientPool;
@@ -19,7 +20,9 @@ use Zan\Framework\Network\Connection\Pool;
 abstract class Base implements Connection
 {
     protected $config = null;
+    /** @var ConnectionPool  */
     protected $pool = null;
+    /** @var ConnectionFactory */
     protected $socket = null;
     protected $engine = null;
     protected $isAsync = false;
@@ -52,6 +55,9 @@ abstract class Base implements Connection
         return $this->config;
     }
 
+    /**
+     * @return ConnectionFactory
+     */
     public function getSocket()
     {
         return $this->socket;
