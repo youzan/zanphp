@@ -49,7 +49,11 @@ class Mysql extends Base implements Connection
     public function onError(\swoole_mysql $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        sys_echo("mysql client error");
+        if (\swoole2x()) {
+            sys_echo("mysql client error [errno={$cli->errno}, error={$cli->error}]");
+        } else {
+            sys_echo("mysql client error");
+        }
     }
 
     public function close()
