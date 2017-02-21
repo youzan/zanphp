@@ -7,7 +7,7 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Store\Database\Mysql\Mysqli as Engine;
+use Zan\Framework\Store\Database\Mysql\Mysql as Engine;
 use Zan\Framework\Utilities\Types\Time;
 
 class Mysql extends Base implements Connection
