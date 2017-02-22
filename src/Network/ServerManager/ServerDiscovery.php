@@ -133,7 +133,7 @@ class ServerDiscovery
                 'protocol' => $value['Protocol'],
                 'status' => $value['Status'],
                 'weight' => $value['Weight'],
-                'services' => json_decode($value['ExtData'], true)
+                'services' => json_decode($value['ExtData'], true) ?: []
             ];
             $waitIndex = $waitIndex >= $server['modifiedIndex'] ? $waitIndex : $server['modifiedIndex'];
         }

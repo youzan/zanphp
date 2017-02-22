@@ -28,7 +28,7 @@ class NovaClientPool
     private $appName;
 
     private $loadBalancingStrategyMap = [
-        'polling' => Polling::class,
+        Polling::NAME => Polling::class,
     ];
 
     const CONNECTION_RELOAD_STEP_TIME = 5000;

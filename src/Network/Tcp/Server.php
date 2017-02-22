@@ -75,6 +75,9 @@ class Server extends ServerBase {
 
     private function init()
     {
+        // TODO 重新解析 nova.novaApi 支持注册多app
+        // TODO 向下兼容
+        // TODO haunt.php .app_names 修改成支持 domain 支持拉取 app特定domain内容
         $config = Config::get('nova.novaApi', null);
         if(null === $config){
             return true;
@@ -84,6 +87,8 @@ class Server extends ServerBase {
             throw new ZanException('nova server path not defined');
         }
         $config['path'] = Path::getRootPath() . $config['path'];
+
+        // TODO 修改Nova...
         Nova::init($config);
         ClassMap::getInstance()->setSpec(GenericService::class, new GenericService());
 
