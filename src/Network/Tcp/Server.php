@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Com\Youzan\Nova\Framework\Generic\Service\GenericService;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\ServerManager\ServerStore;
@@ -75,22 +76,14 @@ class Server extends ServerBase {
 
     private function init()
     {
-        // TODO 重新解析 nova.novaApi 支持注册多app
-        // TODO 向下兼容
-        // TODO haunt.php .app_names 修改成支持 domain 支持拉取 app特定domain内容
         $config = Config::get('nova.novaApi', null);
         if(null === $config){
             return true;
         }
 
-        if(!isset($config['path'])){
-            throw new ZanException('nova server path not defined');
-        }
-        $config['path'] = Path::getRootPath() . $config['path'];
-
-        // TODO 修改Nova...
-        Nova::init($config);
-        ClassMap::getInstance()->setSpec(GenericService::class, new GenericService());
+        Nova::init($this->parserNovaConfig($config));
+        // TODO 移除
+        // ClassMap::getInstance()->setSpec(GenericService::class, new GenericService());
 
         $config = Config::get('haunt');
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
@@ -118,7 +111,7 @@ class Server extends ServerBase {
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
-        (new ServiceUnregister())->unregister();
+        (new ServiceUnregister())->unRegister();
         sys_echo("server shutdown .....");
     }
 
@@ -153,5 +146,70 @@ class Server extends ServerBase {
     {
         (new RequestHandler())->handle($swooleServer, $fd, $fromId, $data);
     }
-    
+
+    /**
+     * 配置向下兼容
+     *
+     * novaApi => [
+     *      'path'  => 'vendor/nova-service/xxx/gen-php',
+     *      'namespace' => 'Com\\Youzan\\Biz\\',
+     *      'appName' => 'demo', // optional
+     *      'domain' => 'com.youzan.service', // optional
+     * ]
+     * novaApi => [
+     *      [
+     *          'appName' => 'app-foo',
+     *          'path'  => 'vendor/nova-service/xxx/gen-php',
+     *          'namespace' => 'Com\\Youzan\\Biz\\',
+     *          'domain' => 'com.youzan.service', // optional
+     *      ],
+     *      [
+     *          'appName' => 'app-bar',
+     *          'path'  => 'vendor/nova-service/xxx/gen-php',
+     *          'namespace' => 'Com\\Youzan\\Biz\\',
+     *          'domain' => 'com.youzan.service', // optional
+     *      ],
+     * ]
+     * @param $config
+     * @return array
+     * @throws ZanException
+     */
+    private function parserNovaConfig($config)
+    {
+        if (!is_array($config)) {
+            throw new ZanException("invalid nova config");
+        }
+        if (isset($config["path"])) {
+            $appName = Application::getInstance()->getName();
+            if (!isset($config["appName"])) {
+                $config["appName"] = $appName;
+            }
+            $config = [ $config ];
+        }
+
+        foreach ($config as &$item) {
+            if (!isset($item["appName"])) {
+                throw new ZanException("nova app name not defined");
+            }
+            if(!isset($item["path"])){
+                throw new ZanException("nova server path not defined");
+            }
+
+            $item["path"] = Path::getRootPath() . $item["path"];
+
+            if(!isset($item["namespace"])){
+                throw new ZanException("nova namespace path not defined");
+            }
+
+            if(!isset($item["domain"])) {
+                $item["domain"] = "com.youzan.service";
+            }
+
+            if(!isset($item["protocol"])) {
+                $item["protocol"] = "nova";
+            }
+        }
+        unset($item);
+        return $config;
+    }
 }

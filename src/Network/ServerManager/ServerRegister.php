@@ -29,14 +29,15 @@ class ServerRegister
                 'methods' => $service['methods'],
             ];
         }
+        fprintf(STDERR, json_encode($extData, JSON_PRETTY_PRINT) . "\n");
         return [
             'SrvList' => [
                 [
-                    'Namespace' => 'com.youzan.service',
-                    'SrvName' => Application::getInstance()->getName(),
+                    'Namespace' => $config["domain"],
+                    'SrvName' => $config["appName"],
                     'IP' => $ip,
                     'Port' => (int)Config::get('server.port'),
-                    'Protocol' => 'nova',
+                    'Protocol' => $config["protocol"],
                     'Status' => 1,
                     'Weight' => 100,
                     'ExtData' => json_encode($extData),
@@ -49,7 +50,10 @@ class ServerRegister
     {
         $haunt = Config::get('haunt');
         $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        $response = (yield $httpClient->postJson($haunt['register']['uri'], $this->parseConfig($config), null));
+        $body = $this->parseConfig($config);
+        fprintf(STDERR, "\nregister: \n");
+        fprintf(STDERR, json_encode($body, JSON_PRETTY_PRINT) . "\n\n");
+        $response = (yield $httpClient->postJson($haunt['register']['uri'], $body, null));
         $register = $response->getBody();
 
         sys_echo($register);

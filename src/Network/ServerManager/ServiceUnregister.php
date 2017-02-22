@@ -22,24 +22,25 @@ class ServiceUnregister
 
     public function __construct()
     {
-        $this->init();
-        $this->initGenericService();
+        // $this->init();
+        // TODO 移除
+        // $this->initGenericService();
     }
 
-    private function init()
-    {
-        $this->config['services'] = Nova::getAvailableService();
-    }
+//    private function init()
+//    {
+//        $this->config['services'] = Nova::getAvailableService();
+//    }
 
-    private function initGenericService()
-    {
-        $registry = new Registry();
-        $registry->register(new GenericService());
-        $genericServices = $registry->getAll();
-        if ($genericServices) {
-            array_push($this->config['services'], ...$genericServices);
-        }
-    }
+//    private function initGenericService()
+//    {
+//        $registry = new Registry();
+//        $registry->register(new GenericService());
+//        $genericServices = $registry->getAll();
+//        if ($genericServices) {
+//            array_push($this->config['services'], ...$genericServices);
+//        }
+//    }
 
     private function parseConfig($config)
     {
@@ -57,11 +58,11 @@ class ServiceUnregister
         return [
             'SrvList' => [
                 [
-                    'Namespace' => 'com.youzan.service',
-                    'SrvName' => Application::getInstance()->getName(),
+                    'Namespace' => $config["domain"],
+                    'SrvName' => $config["appName"],
                     'IP' => $ip,
                     'Port' => (int)Config::get('server.port'),
-                    'Protocol' => 'nova',
+                    'Protocol' => $config["protocol"],
                     'Status' => 1,
                     'Weight' => 100,
                     'ExtData' => json_encode($extData),
@@ -70,7 +71,7 @@ class ServiceUnregister
         ];
     }
 
-    public function unregister()
+    public function unRegister()
     {
         $haunt = Config::get('haunt.unregister');
         if (empty($haunt)) {
@@ -81,15 +82,33 @@ class ServiceUnregister
         if ($isRegistered == ServerRegisterInitiator::DISABLE_REGISTER) {
             return;
         }
-        $this->toUnregister();
+
+        $keys = Nova::getEtcdKeyList();
+        foreach ($keys as list($protocol, $domain, $appName)) {
+            $this->doUnRegisterOneGroup($protocol, $domain, $appName);
+        }
+
     }
 
-    private function toUnregister()
+    private function doUnRegisterOneGroup($protocol, $domain, $appName)
+    {
+        $config = [];
+        $config["services"] = Nova::getAvailableService($protocol, $domain, $appName);
+        $config["domain"] = $domain;
+        $config["appName"] = $appName;
+        $config["protocol"] = $protocol;
+        $this->toUnRegister($config);
+    }
+
+    private function toUnRegister($config)
     {
         $haunt = Config::get('haunt');
         $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
         $curl = new Curl();
-        $unregister = $curl->post($url, $this->parseConfig($this->config));
+        $body = $this->parseConfig($config);
+        fprintf(STDERR, "\nunRegister: \n");
+        fprintf(STDERR, json_encode($body, JSON_PRETTY_PRINT) . "\n\n");
+        $unregister = $curl->post($url, $body);
         if (Debug::get()) {
             sys_echo($unregister);
         }
