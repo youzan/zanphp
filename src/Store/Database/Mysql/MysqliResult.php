@@ -34,7 +34,11 @@ class MysqliResult implements DbResultInterface
      */
     public function getLastInsertId()
     {
-        $insertId = $this->driver->getConnection()->getSocket()->_insert_id;
+        if (\swoole2x()) {
+            $insertId = $this->driver->getConnection()->getSocket()->insert_id;
+        } else {
+            $insertId = $this->driver->getConnection()->getSocket()->_insert_id;            
+        }
         yield $insertId;
     }
 
@@ -43,7 +47,11 @@ class MysqliResult implements DbResultInterface
      */
     public function getAffectedRows()
     {
-        $affectedRows = $this->driver->getConnection()->getSocket()->_affected_rows;
+        if (\swoole2x()) {
+            $affectedRows = $this->driver->getConnection()->getSocket()->affected_rows;
+        } else {
+            $affectedRows = $this->driver->getConnection()->getSocket()->_affected_rows;
+        }
         yield $affectedRows;
     }
 
