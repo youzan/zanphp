@@ -94,6 +94,12 @@ class Polling implements LoadBalancingStrategyInterface
 
     public function get()
     {
+        // no server alive return null
+        if (!is_numeric($this->serverCount) && $this->serverCount < 1) {
+            yield null;
+            return;
+        }
+        
         yield $this->algorithm();
     }
 
