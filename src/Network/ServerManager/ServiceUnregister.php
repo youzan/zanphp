@@ -106,8 +106,7 @@ class ServiceUnregister
         $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
         $curl = new Curl();
         $body = $this->parseConfig($config);
-        fprintf(STDERR, "\nunRegister: \n");
-        fprintf(STDERR, json_encode($body, JSON_PRETTY_PRINT) . "\n\n");
+        // sys_error("unRegister:\n" . json_encode($body, JSON_PRETTY_PRINT) . "\n\n");
         $unregister = $curl->post($url, $body);
         if (Debug::get()) {
             sys_echo($unregister);

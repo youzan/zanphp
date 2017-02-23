@@ -67,6 +67,9 @@ class RequestHandler {
             $result = $request->decode();
             $this->request = $request;
             if ($request->getIsHeartBeat()) {
+                $info = $this->swooleServer->connection_info($this->fd, $this->fromId, true);
+                // $info = $this->swooleServer->getClientInfo($this->fd);
+                // sprintf(STDERR, print_r($info, true));
                 $this->swooleServer->send($this->fd, $result);
                 return;
             }

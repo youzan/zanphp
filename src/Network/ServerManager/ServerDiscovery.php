@@ -23,9 +23,21 @@ use Zan\Framework\Utilities\Types\Time;
 
 class ServerDiscovery
 {
+    // from haunt_sdk const_define.go
+    const SRV_UNINIT = 0;
+    const SRV_STATUS_OK = 1;
+    const SRV_STATUS_NOT_OK = 2;
+
+    const DEFAULT_PROTOCOL = "nova";
+    const DEFAULT_NAMESPACE = "com.youzan.service";
+
     private $config;
 
     private $appName;
+
+    private $protocol;
+
+    private $namespace;
 
     /**
      * @var ServerStore
@@ -38,10 +50,12 @@ class ServerDiscovery
 
     const WATCH_STORE_LOOP_TIME = 1000;
 
-    public function __construct($config, $appName)
+    public function __construct($config, $appName, $protocol, $namespace)
     {
         $this->initConfig($config);
         $this->appName = $appName;
+        $this->protocol = $protocol;
+        $this->namespace = $namespace;
         $this->initServerStore();
     }
 
@@ -99,15 +113,13 @@ class ServerDiscovery
     private function getByEtcd()
     {
         $httpClient = new HttpClient($this->config['discovery']['host'], $this->config['discovery']['port']);
-        $uri = $this->config['discovery']['uri'] . '/' .
-            $this->config['discovery']['protocol'] . ':' .
-            $this->config['discovery']['namespace'] . '/'.
-            $this->appName;
+        $uri = $this->buildEtcdUri($this->config['discovery']['uri']);
         $response = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
         $raw = $response->getBody();
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
+        // sys_error("etcd recv: $raw");
         $servers = $this->parseEtcdData($result);
         $this->saveServices($servers);
         yield $servers;
@@ -119,12 +131,29 @@ class ServerDiscovery
             throw new ServerDiscoveryEtcdException('Service Discovery can not find key of the app:'.$this->appName);
         }
         if (!isset($raw['node']['nodes']) || count($raw['node']['nodes']) < 1) {
+            // TODO
             throw new ServerDiscoveryEtcdException('Service Discovery can not find anything app_name:'.$this->appName);
         }
         $servers = [];
         $waitIndex = 0;
         foreach ($raw['node']['nodes'] as $server) {
+            // 无ttl为无效节点
+            if (!isset($server["ttl"])) {
+                continue;
+            }
+
             $value = json_decode($server['value'], true);
+
+            // Status !== 1 无效节点
+            if ($value["Status"] !== self::SRV_STATUS_OK) {
+                continue;
+            }
+
+            // 只关注 订阅 domain
+            if ($value['Namespace'] !== $this->namespace) {
+                continue;
+            }
+
             $servers[$this->getStoreServicesKey($value['IP'], $value['Port'])] = [
                 'namespace' => $value['Namespace'],
                 'app_name' => $value['SrvName'],
@@ -179,12 +208,10 @@ class ServerDiscovery
         $waitIndex = $this->serverStore->getServiceWaitIndex($this->appName);
         $params = $waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $waitIndex] : ['wait' => true, 'recursive' => true];
         $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
-        $uri = $this->config['watch']['uri'] . '/' .
-            $this->config['watch']['protocol'] . ':' .
-            $this->config['watch']['namespace'] . '/'.
-            $this->appName;
+        $uri = $this->buildEtcdUri($this->config['watch']['uri']);
         $response = (yield $httpClient->get($uri, $params, $this->config['watch']['timeout']));
         $raw = $response->getBody();
+        // sys_error("watch etcd recv: $raw\n");
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
@@ -202,15 +229,15 @@ class ServerDiscovery
             return;
         }
         if (isset($update['off_line'])) {
-            sys_echo("watch by etcd nova client off line " . $this->appName . " host:" . $update['off_line']['host'] . " port:" . $update['off_line']['port']);
+            sys_error("watch by etcd nova client off line " . $this->appName . " host:" . $update['off_line']['host'] . " port:" . $update['off_line']['port']);
             NovaClientConnectionManager::getInstance()->offline($this->appName, [$update['off_line']]);
         }
         if (isset($update['add_on_line'])) {
-            sys_echo("watch by etcd nova client add on line " . $this->appName . " host:" . $update['add_on_line']['host'] . " port:" . $update['add_on_line']['port']);
+            sys_error("watch by etcd nova client add on line " . $this->appName . " host:" . $update['add_on_line']['host'] . " port:" . $update['add_on_line']['port']);
             NovaClientConnectionManager::getInstance()->addOnline($this->appName, [$update['add_on_line']]);
         }
         if (isset($update['update'])) {
-            sys_echo("watch by etcd nova client update service " . $this->appName . " host:" . $update['update']['host'] . " port:" . $update['update']['port']);
+            sys_error("watch by etcd nova client update service " . $this->appName . " host:" . $update['update']['host'] . " port:" . $update['update']['port']);
             NovaClientConnectionManager::getInstance()->update($this->appName, [$update['update']]);
         }
     }
@@ -225,18 +252,26 @@ class ServerDiscovery
         return false;
     }
 
+    // TODO 处理 Status 与 Namespace
     private function parseWatchByEtcdData($raw)
     {
         if (null === $raw || [] === $raw) {
             throw new ServerDiscoveryEtcdException('watch Service Discovery data error app_name :'.$this->appName);
         }
         if (!isset($raw['node']) && !isset($raw['prevNode'])) {
+            // TODO
             throw new ServerDiscoveryEtcdException('watch Service Discovery can not find anything app_name:'.$this->appName);
         }
         $nowStore = $this->getByStore();
         $waitIndex = $this->serverStore->getServiceWaitIndex($this->appName);
         if (isset($raw['node']['value']) && isset($raw['prevNode']['value'])) {
             $new = json_decode($raw['node']['value'], true);
+
+            // 只关注 订阅 domain
+            if ($new['Namespace'] !== $this->namespace) {
+                return null;
+            }
+
             $data['update'] = [
                 'namespace' => $new['Namespace'],
                 'app_name' => $new['SrvName'],
@@ -268,6 +303,12 @@ class ServerDiscovery
             $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
 
             $value = json_decode($raw['prevNode']['value'], true);
+
+            // 只关注 订阅 domain
+            if ($value['Namespace'] !== $this->namespace) {
+                return null;
+            }
+
             $data['off_line'] = [
                 'namespace' => $value['Namespace'],
                 'app_name' => $value['SrvName'],
@@ -284,7 +325,14 @@ class ServerDiscovery
             $this->serverStore->setServices($this->appName, $nowStore);
             return $data;
         }
+
         $value = json_decode($raw['node']['value'], true);
+
+        // 只关注 订阅 domain
+        if ($value['Namespace'] !== $this->namespace) {
+            return null;
+        }
+
         $data['add_on_line'] = [
             'namespace' => $value['Namespace'],
             'app_name' => $value['SrvName'],
@@ -388,6 +436,11 @@ class ServerDiscovery
     private function getWatchServicesJobId()
     {
         return spl_object_hash($this) . '_watch_' . $this->appName;
+    }
+
+    private function buildEtcdUri($uri)
+    {
+        return "$uri/$this->protocol:$this->namespace/$this->appName";
     }
 }
 

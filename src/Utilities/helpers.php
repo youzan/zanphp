@@ -64,6 +64,13 @@ if (! function_exists('sys_echo')) {
     }
 }
 
+if (! function_exists('sys_error')) {
+    function sys_error($context) {
+        $dataStr = date("Y-m-d H:i:s", time());
+        fprintf(STDERR, "[$dataStr] $context\n");
+    }
+}
+
 if (! function_exists('echo_exception')) {
     function echo_exception(\Exception $e)
     {

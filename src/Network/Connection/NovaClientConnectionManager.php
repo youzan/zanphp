@@ -8,183 +8,191 @@
 namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientPoolException;
-use Zan\Framework\Network\Connection\Exception\CanNotFindNovaServiceNameException;
 use Zan\Framework\Network\Connection\Exception\CanNotFindNovaServiceNameMethodException;
-use Zan\Framework\Network\Connection\Exception\CanNotParseServiceNameException;
-use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientPoolNameByAppNameException;
-use Zan\Framework\Foundation\Core\RunMode;
 
 class NovaClientConnectionManager
 {
     use Singleton;
 
-    private $novaClientPools = [];
+    /**
+     * serviceKey => server info
+     * @var array
+     */
+    private $serviceMap;
 
-    private $novaServiceNameToMethodsMap = [];
-    
-    private $appNameToNovaClientPoolNameMap = [];
+    /**
+     * appName => NovaClientPool
+     * @var NovaClientPool[]
+     */
+    private $poolMap;
 
-    private $appNameToServerMap = [];
+    private $novaConfig;
 
-    public function work($appName, $servers, $novaClientPoolName = '')
+    public function __construct()
     {
-        $novaConfig = Config::get('connection.nova');
-        $config = [];
-
-        foreach ($servers as $server) {
-            $services = $server['services'];
-            if (is_array($services) && [] !== $services) {
-                $novaClientPoolName = $this->formatNovaServiceNameToMethodsMap($services);
-                $this->addAppNameToServerMap($appName, $server);
-            }
-            $novaConfig['host'] = $server['host'];
-            $novaConfig['port'] = $server['port'];
-            $novaConfig['weight'] = isset($server['weight']) ? $server['weight'] : 100;
-            $config[$novaConfig['host'].':'.$novaConfig['port']] = $novaConfig;
-        }
-
-        $this->appNameToNovaClientPoolNameMap[$appName] = $novaClientPoolName;
-        $this->novaClientPools[$novaClientPoolName] = new NovaClientPool($appName, $config, $novaConfig['load_balancing_strategy']);
+        $this->serviceMap = [];
+        $this->poolMap = [];
+        $this->novaConfig = Config::get("connection.nova", []);
+        isset($this->novaConfig["load_balancing_strategy"]) ?
+            $this->novaConfig["load_balancing_strategy"] : Polling::NAME;
     }
 
-    private function formatNovaServiceNameToMethodsMap($services)
+    public function get($protocol, $namespace, $service, $method)
     {
-        $novaClientPoolName = '';
-        foreach ($services as $service) {
-            $novaClientPoolName = '' == $novaClientPoolName ? $this->parseNovaClientPoolName($service['service']) : $novaClientPoolName;
-            if (isset($this->novaServiceNameToMethodsMap[$service['service']])) {
-                continue;
-            }
-            $this->novaServiceNameToMethodsMap[$service['service']] = ['nova_client_pool_name' => $novaClientPoolName, 'methods' => $service['methods']];
+        $serviceKey = $this->serviceKey($protocol, $namespace, $service);
+        if (!isset($this->serviceMap[$serviceKey])) {
+            throw new CanNotFindNovaClientPoolException("service=$service");
         }
-        return $novaClientPoolName;
-    }
 
-    private function parseNovaClientPoolName($novaServiceName)
-    {
-        $exp = explode('.', $novaServiceName);
-        if (isset($exp[0]) && isset($exp[1]) && isset($exp[2])) {
-            return $exp[0] . '.' . $exp[1] . '.' . $exp[2];
+        $service = $this->serviceMap[$serviceKey];
+        if (!in_array($method, $service["methods"], true)) {
+            throw new CanNotFindNovaServiceNameMethodException("service=$service, $method=$method");
         }
-        throw new CanNotParseServiceNameException('nova service name :'.$novaServiceName);
-    }
 
-    public function get($novaServiceName, $method)
-    {
-        $pool = $this->getPool($novaServiceName, $method);
+        $pool = $this->getPool($service["app_name"]);
         yield $pool->get();
     }
 
-    private function getPool($novaServiceName, $method)
+    private function getPool($appName)
     {
-        if (!in_array(RunMode::get(), ['test', 'qatest'])) {
-            if (!isset($this->novaServiceNameToMethodsMap[$novaServiceName])) {
-                throw new CanNotFindNovaServiceNameException('nova service name :'.$novaServiceName);
-            }
-            if (!in_array($method, $this->novaServiceNameToMethodsMap[$novaServiceName]['methods'])) {
-                throw new CanNotFindNovaServiceNameMethodException('nova service name :'.$novaServiceName.'&method :'.$method);
-            }
+        if (!isset($this->poolMap[$appName])) {
+            throw new CanNotFindNovaClientPoolException("app_name=$appName");
         }
 
-        $novaClientPoolName = $this->parseNovaClientPoolName($novaServiceName);
-
-        if (!isset($this->novaClientPools[$novaClientPoolName])) {
-            throw new CanNotFindNovaClientPoolException('nova client pool name :'.$novaClientPoolName);
-        }
-
-        return $this->novaClientPools[$novaClientPoolName];
+        return $this->poolMap[$appName];
     }
 
-    private function getPoolByAppName($appName)
+    public function work($appName, array $servers)
     {
-        if (!isset($this->appNameToNovaClientPoolNameMap[$appName])) {
-            throw new CanNotFindNovaClientPoolNameByAppNameException('app name :'.$appName);
-        }
-        $novaClientPoolName = $this->appNameToNovaClientPoolNameMap[$appName];
-
-        if (!isset($this->novaClientPools[$novaClientPoolName])) {
-            throw new CanNotFindNovaClientPoolException('nova client pool name :'.$novaClientPoolName);
-        }
-
-        return $this->novaClientPools[$novaClientPoolName];
-    }
-
-    private function addAppNameToServerMap($appName, $server)
-    {
-        $this->appNameToServerMap[$appName][$server['host'].':'.$server['port']] = $server;
-    }
-
-    private function removeSeverFromAppNameToServerMap($appName, $server)
-    {
-        if (isset($this->appNameToServerMap[$appName][$server['host'].':'.$server['port']])) {
-            unset($this->appNameToServerMap[$appName][$server['host'].':'.$server['port']]);
-        }
-        return true;
-    }
-
-    private function updateAppNameToServerMap($appName, $server)
-    {
-        if (!isset($this->appNameToServerMap[$appName][$server['host'].':'.$server['port']])) {
-            return;
-        }
-        $this->appNameToServerMap[$appName][$server['host'].':'.$server['port']] = $server;
-    }
-
-    public function getServersFromAppNameToServerMap($appName)
-    {
-        return isset($this->appNameToServerMap[$appName]) ? $this->appNameToServerMap[$appName] : [];
-    }
-
-    public function addOnline($appName, $servers)
-    {
-        $novaConfig = Config::get('connection.nova');
-        $pool = $this->getPoolByAppName($appName);
+        $config = [];
         foreach ($servers as $server) {
-            $novaConfig['host'] = $server['host'];
-            $novaConfig['port'] = $server['port'];
-            $novaConfig['weight'] = isset($server['weight']) ? $server['weight'] : 100;
-            sys_echo("nova client add on line " . $appName . " host:" . $server['host'] . " port:" . $server['port'] . 'weight:' . $server['weight']);
-            $this->formatNovaServiceNameToMethodsMap($server['services']);
-            $this->addAppNameToServerMap($appName, $server);
+            $protocol = $server["protocol"];
+            $namespace = $server["namespace"];
 
+            foreach ($server["services"] as $service) {
+                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $this->serviceMap[$serviceKey] = $service + $server;
+            }
+
+            list($key, $novaConfig) = $this->makeNovaConfig($server);
+            $config[$key] = $novaConfig;
+        }
+
+        $pool = new NovaClientPool($appName, $config, $this->novaConfig["load_balancing_strategy"]);;
+        $this->poolMap[$appName] = $pool;
+    }
+
+    public function addOnline($appName, array $servers)
+    {
+        $pool = $this->getPool($appName);
+
+        foreach ($servers as $server) {
+            $protocol = $server["protocol"];
+            $namespace = $server["namespace"];
+
+            sys_error("nova client online " . $this->serverInfo($server));
+
+            foreach ($server["services"] as $service) {
+                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $this->serviceMap[$serviceKey] = $service + $server;
+            }
+
+            list(, $novaConfig) = $this->makeNovaConfig($server);
             $pool->createConnection($novaConfig);
             $pool->addConfig($novaConfig);
             $pool->updateLoadBalancingStrategy($pool);
         }
     }
 
-    public function offline($appName, $servers)
+    public function update($appName, array $servers)
     {
-        $pool = $this->getPoolByAppName($appName);
+        $pool = $this->getPool($appName);
+
         foreach ($servers as $server) {
-            sys_echo("nova client off line " . $appName . " host:" . $server['host'] . " port:" . $server['port']);
-            $this->removeSeverFromAppNameToServerMap($appName, $server);
-            $connection = $pool->getConnectionByHostPort($server['host'], $server['port']);
-            if (null !== $connection && $connection instanceof Connection) {
-                $pool->remove($connection);
-                $pool->removeConfig($server);
-                $pool->updateLoadBalancingStrategy($pool);
+            $protocol = $server["protocol"];
+            $namespace = $server["namespace"];
+
+            sys_error("nova client update " . $this->serverInfo($server));
+
+            foreach ($server["services"] as $service) {
+                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $this->serviceMap[$serviceKey] = $service + $server;
+            }
+
+            list(, $novaConfig) = $this->makeNovaConfig($server);
+            $pool->addConfig($novaConfig);
+            $pool->updateLoadBalancingStrategy($pool);
+        }
+    }
+
+    public function offline($appName, array $servers)
+    {
+        $pool = $this->getPool($appName);
+
+        foreach ($servers as $server) {
+            $protocol = $server["protocol"];
+            $namespace = $server["namespace"];
+
+            sys_error("nova client offline " . $this->serverInfo($server));
+
+            foreach ($server["services"] as $service) {
+                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+
+                if (isset($this->serviceMap[$serviceKey])) {
+                    $connection = $pool->getConnectionByHostPort($server["host"], $server["port"]);
+                    if (null !== $connection && $connection instanceof Connection) {
+                        $pool->remove($connection);
+                        $pool->removeConfig($server);
+                        $pool->updateLoadBalancingStrategy($pool);
+                    }
+                    unset($this->serviceMap[$serviceKey]);
+                }
             }
         }
     }
 
-    public function update($appName, $servers)
+    public function getServersFromAppNameToServerMap($appName)
     {
-        $novaConfig = Config::get('connection.nova');
-        foreach ($servers as $server) {
-            $novaConfig['host'] = $server['host'];
-            $novaConfig['port'] = $server['port'];
-            $novaConfig['weight'] = isset($server['weight']) ? $server['weight'] : 100;
-            sys_echo("nova client update service " . $appName . " host:" . $server['host'] . " port:" . $server['port'] . 'weight:' . $server['weight']);
-            $this->updateAppNameToServerMap($appName, $server);
-            $this->formatNovaServiceNameToMethodsMap($server['services']);
-            $pool = $this->getPoolByAppName($appName);
-            $pool->addConfig($novaConfig);
-            $pool->updateLoadBalancingStrategy($pool);
+        $map = [];
+        foreach ($this->serviceMap as $key => $server) {
+            if ($appName === $server["app_name"]) {
+                $host = $server["host"];
+                $port = $server["port"];
+                $map["$host:$port"] = $server;
+            }
         }
+        return $map;
+    }
+
+    private function serviceKey($protocol, $namespace, $service)
+    {
+        return "$protocol:$namespace:$service";
+    }
+
+    private function makeNovaConfig($server)
+    {
+        $key = "{$server["host"]}:{$server["port"]}";
+        $value = [
+                "host" => $server["host"],
+                "port" => $server["port"],
+                "weight" => isset($server["weight"]) ? $server["weight"] : 100,
+                "server" => $server, // extra info for debug
+            ] + $this->novaConfig;
+
+        return [$key, $value];
+    }
+
+    private function serverInfo($server)
+    {
+        unset($server["services"]);
+        $info = [];
+        foreach ($server as $k => $v) {
+            $info[] = "$k=$v";
+        }
+        return '[' . implode(", ", $info) . ']';
     }
 }

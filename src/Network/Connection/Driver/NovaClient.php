@@ -25,6 +25,13 @@ class NovaClient extends Base implements Connection
     private $clientCb;
     protected $isAsync = true;
 
+    private $serverInfo;
+
+    public function __construct(array $serverInfo = [])
+    {
+        $this->serverInfo = $serverInfo;
+    }
+
     protected function closeSocket()
     {
         try {
@@ -42,7 +49,7 @@ class NovaClient extends Base implements Connection
         $this->getSocket()->on('error', [$this, 'onError']);
     }
 
-    public function onConnect($cli) {
+    public function onConnect(SwooleClient $cli) {
         //put conn to active_pool
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
@@ -67,7 +74,28 @@ class NovaClient extends Base implements Connection
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
-        sys_echo("nova client error");
+
+        $this->printErrInfo($cli);
+    }
+
+    private function printErrInfo(SwooleClient $cli)
+    {
+        $errInfo = [
+            "errno" => $cli->errCode,
+            "error" => socket_strerror($cli->errCode),
+        ];
+
+        if ($this->serverInfo) {
+            unset($this->serverInfo["services"]);
+            $errInfo += $this->serverInfo;
+        }
+
+        $buffer = [];
+        foreach ($errInfo as $k => $v) {
+            $buffer[] = "$k=$v";
+        }
+
+        sys_echo("nova client error " . implode(", ", $buffer));
     }
 
     public function setClientCb(callable $cb) {

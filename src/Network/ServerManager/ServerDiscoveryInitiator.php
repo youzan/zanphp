@@ -34,15 +34,29 @@ class ServerDiscoveryInitiator
         if (!isset($config['app_names']) || [] === $config['app_names']) {
             return;
         }
+
+        // 为特定app指定protocol 与 domain
+        $appConfigs = Config::get('haunt.app_configs', []);
+        foreach ($config['app_names'] as $appName) {
+            if (!isset($appConfigs[$appName])) {
+                $appConfigs[$appName] = [
+                    "protocol" => ServerDiscovery::DEFAULT_PROTOCOL,
+                    "namespace" => ServerDiscovery::DEFAULT_NAMESPACE
+                ];
+            }
+        }
+
         if (ServerStore::getInstance()->lockDiscovery()) {
             $this->lockDiscovery = 1;
             foreach ($config['app_names'] as $appName) {
-                $serverDiscovery = new ServerDiscovery($config, $appName);
+                $appConf = $appConfigs[$appName];
+                $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
                 $serverDiscovery->workByEtcd();
             }
         } else {
             foreach ($config['app_names'] as $appName) {
-                $serverDiscovery = new ServerDiscovery($config, $appName);
+                $appConf = $appConfigs[$appName];
+                $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
                 $serverDiscovery->workByStore();
             }
         }
