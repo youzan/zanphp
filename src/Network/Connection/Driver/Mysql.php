@@ -30,15 +30,13 @@ class Mysql extends Base implements Connection
         $swooleMysql->on('connect', [$this, 'onConnect']);
         $swooleMysql->on('close', [$this, 'onClose']);
         $swooleMysql->on('error', [$this, 'onError']);
-
-        $this->classHash = spl_object_hash($this);
     }
 
     public function onConnect($cli) {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->release();
+
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
-        $this->heartbeat();
         sys_echo("mysql client connect to server");
     }
 
@@ -66,6 +64,7 @@ class Mysql extends Base implements Connection
 
     public function heartbeat()
     {
+        $this->classHash = spl_object_hash($this);
         $this->heartbeatLater();
     }
 
@@ -109,6 +108,6 @@ class Mysql extends Base implements Connection
 
     private function getHeartBeatingJobId()
     {
-        return $this->classHash . '_heart_beating_job_id';
+        return spl_object_hash($this) . '_heart_beating_job_id';
     }
 }
