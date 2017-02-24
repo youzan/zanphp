@@ -65,12 +65,12 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
+        $isSwoole2x = \swoole2x();
         if  ('' !== $previousConnectionHash) {
             $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
             if ($this->type == 'Mysqli') {
-                $isSwoole2x = \swoole2x();
-                $errno = 0;
 
+                $errno = 0;
                 if ($isSwoole2x && null !== $prevConn) {
                     $errno = $prevConn->getSocket()->errno;
                 } else if (!$isSwoole2x) {
@@ -104,7 +104,7 @@ class Pool implements ConnectionPool
         }
         if ('' == $previousConnectionHash) {
             $connection->setPool($this);
-            if ($this->type !== 'Mysqli') {
+            if ($this->type !== 'Mysqli' || ($this->type === 'Mysqli' && !$isSwoole2x)) {
                 $connection->heartbeat();
             }
         }
