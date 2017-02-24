@@ -42,8 +42,8 @@ class ReconnectionPloy {
         $maxTime = isset($this->config['max-reconnect-time']) ? $this->config['max-reconnect-time'] : 30000;
         $this->reconnectTime[$connHashCode] = ($this->reconnectTime[$connHashCode]+$intervalTime) >= $maxTime ?
             $maxTime :($this->reconnectTime[$connHashCode]+$intervalTime);
-        Timer::after($this->reconnectTime[$connHashCode], function() use ($pool, $connHashCode) {
-            $pool->createConnect($connHashCode);
+        Timer::after($this->reconnectTime[$connHashCode], function() use ($pool, $connHashCode, $conn) {
+            $pool->createConnect($connHashCode, $conn);
         });
     }
 
