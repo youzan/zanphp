@@ -44,8 +44,6 @@ class ServerDiscoveryInitiator
             }
         }
 
-        // 如果加锁的worker挂了, 锁在生命周期就永远不会被释放
-        // 这里记录加锁的workerId, 在worker error回调检查异常退出的worker是否是持有锁的worker
         if (ServerStore::getInstance()->lockDiscovery($workerId)) {
             sys_error("worker #$workerId service discovery from etcd");
             foreach ($config['app_names'] as $appName) {
