@@ -41,9 +41,9 @@ class NovaClientConnectionManager
             $this->novaConfig["load_balancing_strategy"] : Polling::NAME;
     }
 
-    public function get($protocol, $namespace, $service, $method)
+    public function get($protocol, $domain, $service, $method)
     {
-        $serviceKey = $this->serviceKey($protocol, $namespace, $service);
+        $serviceKey = $this->serviceKey($protocol, $domain, $service);
         if (!isset($this->serviceMap[$serviceKey])) {
             throw new CanNotFindNovaClientPoolException("service=$service");
         }
@@ -75,10 +75,10 @@ class NovaClientConnectionManager
         $config = [];
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
-            $namespace = $server["namespace"];
+            $domain = $server["namespace"];
 
             foreach ($server["services"] as $service) {
-                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
                 $this->serviceMap[$serviceKey] = $service + $server;
             }
 
@@ -96,12 +96,12 @@ class NovaClientConnectionManager
 
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
-            $namespace = $server["namespace"];
+            $domain = $server["namespace"];
 
             sys_error("nova client online " . $this->serverInfo($server));
 
             foreach ($server["services"] as $service) {
-                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
                 $this->serviceMap[$serviceKey] = $service + $server;
             }
 
@@ -118,12 +118,12 @@ class NovaClientConnectionManager
 
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
-            $namespace = $server["namespace"];
+            $domain = $server["namespace"];
 
             sys_error("nova client update " . $this->serverInfo($server));
 
             foreach ($server["services"] as $service) {
-                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
                 $this->serviceMap[$serviceKey] = $service + $server;
             }
 
@@ -139,12 +139,12 @@ class NovaClientConnectionManager
 
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
-            $namespace = $server["namespace"];
+            $domain = $server["namespace"];
 
             sys_error("nova client offline " . $this->serverInfo($server));
 
             foreach ($server["services"] as $service) {
-                $serviceKey = $this->serviceKey($protocol, $namespace, $service["service"]);
+                $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
 
                 if (isset($this->serviceMap[$serviceKey])) {
                     $connection = $pool->getConnectionByHostPort($server["host"], $server["port"]);
@@ -172,9 +172,11 @@ class NovaClientConnectionManager
         return $map;
     }
 
-    private function serviceKey($protocol, $namespace, $service)
+    private function serviceKey($protocol, $domain, $service)
     {
-        return "$protocol:$namespace:$service";
+        // return "$protocol:$domain:$service";
+        // 无法获取客户端调用domain信息, 忽略
+        return "$protocol::$service";
     }
 
     private function makeNovaConfig($server)

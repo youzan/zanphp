@@ -97,8 +97,15 @@ class ServerDiscoveryInitiator
                 'host' => $noNeedDiscovery['connection'][$appName]['host'],
                 'port' => $noNeedDiscovery['connection'][$appName]['port'],
                 'services' => [],
+                'namespace' => $novaConfig['namespace'],
+                'protocol' => "nova",
+                'status' => 1,
+                'weight' => 100,
             ];
-            NovaClientConnectionManager::getInstance()->work($appName, $servers, substr(str_replace('\\', '.', strtolower($novaConfig['namespace'])), 0, -1));
+
+            /* @var $connMgr NovaClientConnectionManager */
+            $connMgr = NovaClientConnectionManager::getInstance();
+            $connMgr->work($appName, $servers);
         }
 
         return $config;
