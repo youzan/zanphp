@@ -12,10 +12,11 @@ class DnsClient implements Async
 {
     private $callback;
     private $host;
-
+    const   MAX_RETRIES = 3;
+    private $times = 0;
     private function __construct() { }
 
-    public static function lookup($host, $timeout = 1000)
+    public static function lookup($host, $timeout = 100)
     {
         $self = new static;
         $self->host = $host;
@@ -38,14 +39,19 @@ class DnsClient implements Async
                 }
                 unset($this->callback);
             }
+            $this->times = 0;
         });
     }
 
     private function onTimeout($duration)
     {
         Timer::after($duration, function() {
+            $maxRetries = static::MAX_RETRIES;
+            if ($this->times++ < $maxRetries)
+                return;
+            $this->times = 0;
             if ($this->callback) {
-                $ex = new DnsLookupTimeoutException("dns lookup timeout", 408, null, ["host" => $this->host]);
+                $ex = new DnsLookupTimeoutException("dns lookup timeout after $maxRetries times", 408, null, ["host" => $this->host]);
                 call_user_func($this->callback, $this->host, $ex);
                 unset($this->callback);
             }
