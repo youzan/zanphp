@@ -48,7 +48,9 @@ class Dispatcher {
 
     private function getServiceName()
     {
-        $appNamespace = Application::getInstance()->getNamespace();
+        $app = Application::getInstance();
+        $appNamespace = $app->getNamespace();
+        $appName = $app->getName();
 
         if ($this->request->isGenericInvoke()) {
             $servieName = $this->request->getGenericServiceName();
@@ -57,7 +59,7 @@ class Dispatcher {
         }
 
         $servieName = str_replace('.', '\\', $servieName);
-        $servieName = Nova::removeNovaNamespace($servieName);
+        $servieName = Nova::removeNovaNamespace($servieName, $appName);
         $servieName = $appNamespace . $servieName;
 
         return $servieName;

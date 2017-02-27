@@ -59,15 +59,17 @@ if (! function_exists('data_set')) {
 
 if (! function_exists('sys_echo')) {
     function sys_echo($context) {
+        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
         $dataStr = date("Y-m-d H:i:s", time());
-        echo "[$dataStr] $context\n";
+        echo "[$dataStr #$workerId] $context\n";
     }
 }
 
 if (! function_exists('sys_error')) {
     function sys_error($context) {
+        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
         $dataStr = date("Y-m-d H:i:s", time());
-        fprintf(STDERR, "[$dataStr] $context\n");
+        fprintf(STDERR, "[$dataStr #$workerId] $context\n");
     }
 }
 
@@ -78,12 +80,13 @@ if (! function_exists('echo_exception')) {
         $code = $e->getCode();
         $msg = $e->getMessage();
         $trace = $e->getTraceAsString();
-
+        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
         echo <<<EOF
         
         
 ###################################################################################
           \033[1;31mGot a exception\033[0m
+          worker: #$workerId
           time: $time
           code: $code
           message: $msg

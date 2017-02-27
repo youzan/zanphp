@@ -259,8 +259,10 @@ final class GenericRequestCodec
      */
     private static function fromNovaServiceToServiceImpl($serviceName)
     {
-        $appNamespace = Application::getInstance()->getNamespace();
-        $appImplClassName = $appNamespace . Nova::removeNovaNamespace($serviceName);
+        $app = Application::getInstance();
+        $appNamespace = $app->getNamespace();
+        $appName = $app->getName();
+        $appImplClassName = $appNamespace . Nova::removeNovaNamespace($serviceName, $appName);
         if (!class_exists($appImplClassName)) {
             throw new GenericInvokeException("Service implement class \"$appImplClassName\" not found");
         }

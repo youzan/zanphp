@@ -57,10 +57,14 @@ class NovaClientConnectionManager
         yield $pool->get();
     }
 
-    private function getPool($appName)
+    private function getPool($appName, array $servers = [])
     {
         if (!isset($this->poolMap[$appName])) {
-            throw new CanNotFindNovaClientPoolException("app_name=$appName");
+            if ($servers) {
+                $this->work($appName, $servers);
+            } else {
+                throw new CanNotFindNovaClientPoolException("app_name=$appName");
+            }
         }
 
         return $this->poolMap[$appName];
@@ -88,7 +92,7 @@ class NovaClientConnectionManager
 
     public function addOnline($appName, array $servers)
     {
-        $pool = $this->getPool($appName);
+        $pool = $this->getPool($appName, $servers);
 
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
@@ -110,7 +114,7 @@ class NovaClientConnectionManager
 
     public function update($appName, array $servers)
     {
-        $pool = $this->getPool($appName);
+        $pool = $this->getPool($appName, $servers);
 
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
@@ -131,7 +135,7 @@ class NovaClientConnectionManager
 
     public function offline($appName, array $servers)
     {
-        $pool = $this->getPool($appName);
+        $pool = $this->getPool($appName, $servers);
 
         foreach ($servers as $server) {
             $protocol = $server["protocol"];
@@ -188,9 +192,11 @@ class NovaClientConnectionManager
 
     private function serverInfo($server)
     {
-        unset($server["services"]);
         $info = [];
         foreach ($server as $k => $v) {
+            if (is_array($v)) {
+                continue;
+            }
             $info[] = "$k=$v";
         }
         return '[' . implode(", ", $info) . ']';

@@ -2,17 +2,15 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Com\Youzan\Nova\Framework\Generic\Service\GenericService;
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
+use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
 use Kdt\Iron\Nova\Nova;
-use Kdt\Iron\Nova\Service\ClassMap;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
@@ -117,12 +115,15 @@ class Server extends ServerBase {
 
     public function onWorkerStart($swooleServer, $workerId)
     {
+        $_SERVER["WORKER_ID"] = $workerId;
         $this->bootWorkerStartItem($workerId);
         sys_echo("worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
+        // worker stop 在 worker 进程执行
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker #$workerId stopping ....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
@@ -131,6 +132,7 @@ class Server extends ServerBase {
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;

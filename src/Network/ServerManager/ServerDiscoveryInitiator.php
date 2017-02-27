@@ -22,9 +22,7 @@ class ServerDiscoveryInitiator
 {
     use Singleton;
 
-    private $lockDiscovery = 0;
-
-    public function init()
+    public function init($workerId)
     {
         $config = Config::get('haunt');
         if (empty($config)) {
@@ -46,14 +44,17 @@ class ServerDiscoveryInitiator
             }
         }
 
-        if (ServerStore::getInstance()->lockDiscovery()) {
-            $this->lockDiscovery = 1;
+        // 如果加锁的worker挂了, 锁在生命周期就永远不会被释放
+        // 这里记录加锁的workerId, 在worker error回调检查异常退出的worker是否是持有锁的worker
+        if (ServerStore::getInstance()->lockDiscovery($workerId)) {
+            sys_error("worker #$workerId service discovery from etcd");
             foreach ($config['app_names'] as $appName) {
                 $appConf = $appConfigs[$appName];
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
                 $serverDiscovery->workByEtcd();
             }
         } else {
+            sys_error("worker #$workerId service discovery from apcu");
             foreach ($config['app_names'] as $appName) {
                 $appConf = $appConfigs[$appName];
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
@@ -62,12 +63,9 @@ class ServerDiscoveryInitiator
         }
     }
 
-    public function resetLockDiscovery()
+    public function unlockDiscovery($workerId)
     {
-        if (1 == $this->lockDiscovery) {
-            return ServerStore::getInstance()->resetLockDiscovery();
-        }
-        return true;
+        return ServerStore::getInstance()->unlockDiscovery($workerId);
     }
 
     public function noNeedDiscovery($config)
