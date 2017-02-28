@@ -86,12 +86,14 @@ class NovaClient extends Base implements Connection
         ];
 
         if ($this->serverInfo) {
-            unset($this->serverInfo["services"]);
             $errInfo += $this->serverInfo;
         }
 
         $buffer = [];
         foreach ($errInfo as $k => $v) {
+            if (is_array($v)) {
+                continue;
+            }
             $buffer[] = "$k=$v";
         }
 
