@@ -191,7 +191,7 @@ class Server extends ServerBase {
 
         foreach ($config as &$item) {
             if (!isset($item["appName"])) {
-                throw new ZanException("nova app name not defined");
+                $item["appName"] = Application::getInstance()->getName();
             }
             if(!isset($item["path"])){
                 throw new ZanException("nova server path not defined");

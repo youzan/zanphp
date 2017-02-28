@@ -57,6 +57,4 @@ class ServerRegister
 
         sys_echo($register);
     }
-
-
 }
