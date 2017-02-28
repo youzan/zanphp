@@ -29,7 +29,6 @@ class ServerRegister
                 'methods' => $service['methods'],
             ];
         }
-        // sys_error(json_encode($extData, JSON_PRETTY_PRINT) . "\n");
         return [
             'SrvList' => [
                 [
@@ -51,10 +50,23 @@ class ServerRegister
         $haunt = Config::get('haunt');
         $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
         $body = $this->parseConfig($config);
-        // sys_error("register:\n" . json_encode($body, JSON_PRETTY_PRINT) . "\n\n");
-        $response = (yield $httpClient->postJson($haunt['register']['uri'], $body, null));
-        $register = $response->getBody();
+        $detail = $this->inspect($body['SrvList'][0]);
+        sys_echo("registering [$detail]");
 
-        sys_echo($register);
+        $response = (yield $httpClient->postJson($haunt['register']['uri'], $body, null));
+        $msg = rtrim($response->getBody(), "\n");
+        sys_echo("$msg [$detail]");
+    }
+
+    private function inspect($config)
+    {
+        $map = [];
+        foreach ($config as $k => $v) {
+            if ($k === "ExtData") {
+                continue;
+            }
+            $map[] = "$k=$v";
+        }
+        return implode(", ", $map);
     }
 }

@@ -99,7 +99,7 @@ class NovaClientConnectionManager
             $protocol = $server["protocol"];
             $domain = $server["namespace"];
 
-            sys_error("nova client online " . $this->serverInfo($server));
+            sys_echo("nova client online " . $this->serverInfo($server));
 
             foreach ($server["services"] as $service) {
                 $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
@@ -121,7 +121,7 @@ class NovaClientConnectionManager
             $protocol = $server["protocol"];
             $domain = $server["namespace"];
 
-            sys_error("nova client update " . $this->serverInfo($server));
+            sys_echo("nova client update " . $this->serverInfo($server));
 
             foreach ($server["services"] as $service) {
                 $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
@@ -142,19 +142,24 @@ class NovaClientConnectionManager
             $protocol = $server["protocol"];
             $domain = $server["namespace"];
 
-            sys_error("nova client offline " . $this->serverInfo($server));
+            sys_echo("nova client offline " . $this->serverInfo($server));
 
             foreach ($server["services"] as $service) {
                 $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
 
                 if (isset($this->serviceMap[$serviceKey])) {
+
                     $connection = $pool->getConnectionByHostPort($server["host"], $server["port"]);
                     if (null !== $connection && $connection instanceof Connection) {
                         $pool->remove($connection);
-                        $pool->removeConfig($server);
-                        $pool->updateLoadBalancingStrategy($pool);
                     }
-                    unset($this->serviceMap[$serviceKey]);
+
+                    $pool->removeConfig($server);
+                    $pool->updateLoadBalancingStrategy($pool);
+
+                    if (empty($pool->getConfig())) {
+                        unset($this->serviceMap[$serviceKey]);
+                    }
                 }
             }
         }
@@ -165,9 +170,12 @@ class NovaClientConnectionManager
         $map = [];
         foreach ($this->serviceMap as $key => $server) {
             if ($appName === $server["app_name"]) {
-                $host = $server["host"];
-                $port = $server["port"];
-                $map["$host:$port"] = $server;
+                $pool = $this->getPool($appName);
+                $config = $pool->getConfig();
+                // 同一个service 可能有多个节点
+                foreach ($config as $hostPort => $item) {
+                    $map[$hostPort] = $item["server"];
+                }
             }
         }
         return $map;

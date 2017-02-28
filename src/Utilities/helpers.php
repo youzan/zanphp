@@ -59,7 +59,7 @@ if (! function_exists('data_set')) {
 
 if (! function_exists('sys_echo')) {
     function sys_echo($context) {
-        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
+        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : "";
         $dataStr = date("Y-m-d H:i:s", time());
         echo "[$dataStr #$workerId] $context\n";
     }
@@ -67,7 +67,7 @@ if (! function_exists('sys_echo')) {
 
 if (! function_exists('sys_error')) {
     function sys_error($context) {
-        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
+        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : "";
         $dataStr = date("Y-m-d H:i:s", time());
         fprintf(STDERR, "[$dataStr #$workerId] $context\n");
     }

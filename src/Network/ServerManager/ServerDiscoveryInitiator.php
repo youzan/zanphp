@@ -44,15 +44,16 @@ class ServerDiscoveryInitiator
             }
         }
 
-        if (ServerStore::getInstance()->lockDiscovery($workerId)) {
-            sys_error("worker #$workerId service discovery from etcd");
+        if ($workerId === 0) {
+        // if (ServerStore::getInstance()->lockDiscovery($workerId)) {
+            sys_echo("worker #$workerId service discovery from etcd");
             foreach ($config['app_names'] as $appName) {
                 $appConf = $appConfigs[$appName];
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
                 $serverDiscovery->workByEtcd();
             }
         } else {
-            sys_error("worker #$workerId service discovery from apcu");
+            sys_echo("worker #$workerId service discovery from apcu");
             foreach ($config['app_names'] as $appName) {
                 $appConf = $appConfigs[$appName];
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
@@ -63,7 +64,7 @@ class ServerDiscoveryInitiator
 
     public function unlockDiscovery($workerId)
     {
-        return ServerStore::getInstance()->unlockDiscovery($workerId);
+        // return ServerStore::getInstance()->unlockDiscovery($workerId);
     }
 
     public function noNeedDiscovery($config)

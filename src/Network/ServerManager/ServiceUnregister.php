@@ -18,14 +18,13 @@ use Zan\Framework\Network\Common\Curl;
 
 class ServiceUnregister
 {
-    private $config = [];
+//    private $config = [];
 
-    public function __construct()
-    {
-        // $this->init();
-        // TODO 移除
-        // $this->initGenericService();
-    }
+//    public function __construct()
+//    {
+//         $this->init();
+//         $this->initGenericService();
+//    }
 
 //    private function init()
 //    {
@@ -106,10 +105,22 @@ class ServiceUnregister
         $url = 'http://'.$haunt['unregister']['host'].':'.$haunt['unregister']['port'].$haunt['unregister']['uri'];
         $curl = new Curl();
         $body = $this->parseConfig($config);
-        // sys_error("unRegister:\n" . json_encode($body, JSON_PRETTY_PRINT) . "\n\n");
+        sys_echo("unregister " . $this->inspect($body['SrvList'][0]));
         $unregister = $curl->post($url, $body);
         if (Debug::get()) {
             sys_echo($unregister);
         }
+    }
+
+    private function inspect($config)
+    {
+        $map = [];
+        foreach ($config as $k => $v) {
+            if ($k === "ExtData") {
+                continue;
+            }
+            $map[] = "$k=$v";
+        }
+        return implode(", ", $map);
     }
 }

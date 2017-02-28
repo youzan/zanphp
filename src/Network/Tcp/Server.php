@@ -103,7 +103,7 @@ class Server extends ServerBase {
     {
         $this->writePid($swooleServer->master_pid);
         Di::make(InitializeServerRegister::class)->bootstrap($this);
-        sys_echo("server starting .....");
+        sys_echo("server starting ..... [$swooleServer->host:$swooleServer->port]");
     }
 
     public function onShutdown($swooleServer)

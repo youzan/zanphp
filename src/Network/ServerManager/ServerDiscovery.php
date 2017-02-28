@@ -123,7 +123,6 @@ class ServerDiscovery
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
-        // sys_error("etcd recv: $raw");
         $servers = $this->parseEtcdData($result);
         $this->saveServices($servers);
         yield $servers;
@@ -132,7 +131,7 @@ class ServerDiscovery
     private function parseEtcdData($raw)
     {
         if (null === $raw || [] === $raw) {
-            throw new ServerDiscoveryEtcdException('Service Discovery can not find key of the app:'.$this->appName);
+            throw new ServerDiscoveryEtcdException("Service Discovery can not find key of the app {$this->appName}");
         }
 
         if (!isset($raw['node']['nodes']) || count($raw['node']['nodes']) < 1) {
@@ -143,7 +142,7 @@ class ServerDiscovery
             if (isset($raw["errorCode"])) {
                 $detail = "[errno={$raw["errorCode"]}, msg={$raw["message"]}, cause={$raw["cause"]}]";
             }
-            throw new ServerDiscoveryEtcdException("Service Discovery can not find anything app_name:{$this->appName} $detail");
+            throw new ServerDiscoveryEtcdException("Service Discovery can not find node of the app {$this->appName} $detail");
         }
         $servers = [];
         $waitIndex = 0;
@@ -179,6 +178,11 @@ class ServerDiscovery
         }
         $waitIndex = $waitIndex + 1;
         $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
+
+        if (empty($servers)) {
+            throw new ServerDiscoveryEtcdException("Service Discovery can not find any valid node of the app $this->appName");
+        }
+
         return $servers;
     }
 
@@ -225,7 +229,6 @@ class ServerDiscovery
         $uri = $this->buildEtcdUri($this->config['watch']['uri']);
         $response = (yield $httpClient->get($uri, $params, $this->config['watch']['timeout']));
         $raw = $response->getBody();
-        // sys_error("watch etcd recv: $raw\n");
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
 
@@ -238,23 +241,22 @@ class ServerDiscovery
         if (true == $isOutdated) {
             return;
         }
-        $updates = $this->parseWatchByEtcdData($raw);
-        if (null == $updates) {
+        $update = $this->parseWatchByEtcdData($raw);
+        if (null == $update) {
             return;
         }
-        foreach ($updates as $update) {
-            if (isset($update['off_line'])) {
-                sys_echo("watch by etcd nova client off line " . $this->appName . " host:" . $update['off_line']['host'] . " port:" . $update['off_line']['port']);
-                NovaClientConnectionManager::getInstance()->offline($this->appName, [$update['off_line']]);
-            }
-            if (isset($update['add_on_line'])) {
-                sys_echo("watch by etcd nova client add on line " . $this->appName . " host:" . $update['add_on_line']['host'] . " port:" . $update['add_on_line']['port']);
-                NovaClientConnectionManager::getInstance()->addOnline($this->appName, [$update['add_on_line']]);
-            }
-            if (isset($update['update'])) {
-                sys_echo("watch by etcd nova client update service " . $this->appName . " host:" . $update['update']['host'] . " port:" . $update['update']['port']);
-                NovaClientConnectionManager::getInstance()->update($this->appName, [$update['update']]);
-            }
+
+        if (isset($update['off_line'])) {
+            sys_echo("watch by etcd nova client off line " . $this->appName . " host:" . $update['off_line']['host'] . " port:" . $update['off_line']['port']);
+            NovaClientConnectionManager::getInstance()->offline($this->appName, [$update['off_line']]);
+        }
+        if (isset($update['add_on_line'])) {
+            sys_echo("watch by etcd nova client add on line " . $this->appName . " host:" . $update['add_on_line']['host'] . " port:" . $update['add_on_line']['port']);
+            NovaClientConnectionManager::getInstance()->addOnline($this->appName, [$update['add_on_line']]);
+        }
+        if (isset($update['update'])) {
+            sys_echo("watch by etcd nova client update service " . $this->appName . " host:" . $update['update']['host'] . " port:" . $update['update']['port']);
+            NovaClientConnectionManager::getInstance()->update($this->appName, [$update['update']]);
         }
     }
 
@@ -287,7 +289,11 @@ class ServerDiscovery
         $nowStore = $this->getByStore();
         $waitIndex = $this->serverStore->getServiceWaitIndex($this->appName);
 
-        // 更新: 存在 node  && 存在 prevNode
+        // 是否可以根据 action 判断 ???
+        // $action = $raw['action'];
+
+        // 注意: 非dev环境haunt, 因为下线节点不从etcd摘除, 理论上永远只会进去update分支
+        // 1. 更新: 存在 node  && 存在 prevNode
         if (isset($raw['node']['value']) && isset($raw['prevNode']['value'])) {
             if (isset($raw['node']['modifiedIndex'])) {
                 $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
@@ -295,7 +301,6 @@ class ServerDiscovery
                 $this->serverStore->setServiceWaitIndex($this->appName, $waitIndex);
             }
 
-            $data = [];
             $new = json_decode($raw['node']['value'], true);
 
             // 只关注 订阅 domain
@@ -303,23 +308,47 @@ class ServerDiscovery
                 return null;
             }
 
+            $nowAlive = isset($raw['node']['ttl']) && $raw['node']['ttl'] > 0;
+            if (!$nowAlive) {
+                return $this->serverOffline($nowStore, $new);
+            }
+
+            $preAlive = isset($raw['prevNode']['ttl']) && $raw['prevNode']['ttl'] > 0;
+            if (!$preAlive && $nowAlive) {
+                return $this->serverOnline($nowStore, $new);
+            }
+
+            $nowStatus = $new['Status'];
+            if ($nowStatus !== self::SRV_STATUS_OK) {
+                return $this->serverOffline($nowStore, $new);
+            }
+
+            $pre = json_decode($raw['prevNode']['value'], true);
+            $prevStatus = $pre["Status"];
+            if ($prevStatus !== self::SRV_STATUS_OK && $nowStatus === self::SRV_STATUS_OK) {
+                return $this->serverOnline($nowStore, $new);
+            }
+
+            return $this->serverUpdate($nowStore, $new);
+
+            /*
             $storeKey = $this->getStoreServicesKey($new['IP'], $new['Port']);
             if (isset($nowStore[$storeKey])) {
                 $nowServer = $nowStore[$storeKey];
                 $oldStatus = $nowServer["status"];
                 $newStatus = $new['Status'];
-                if ($oldStatus === 1 && $newStatus === 0) {
-                    $data[] = $this->serverOffline($nowStore, $new);
-                } else if ($oldStatus === 0 && $newStatus === 1) {
-                    $data[] = $this->serverOnline($nowStore, $new);
+                if ($oldStatus === self::SRV_STATUS_OK && $newStatus !== self::SRV_STATUS_OK) {
+                    return $this->serverOffline($nowStore, $new);
+                } else if ($oldStatus !== self::SRV_STATUS_OK && $newStatus === self::SRV_STATUS_OK) {
+                    return $this->serverOnline($nowStore, $new);
                 }
             }
-
-            $data[] = $this->serverUpdate($nowStore, $new);
-            return $data;
+            */
         }
 
-        // 离线: 只存在 prevNode node 不存在 node
+        // 注意: 理论上node与prenode应该都存在, 这里兼容不同环境haunt的差异
+
+        // 2. 离线: 只存在 prevNode node 不存在 node
         if (!isset($raw['node']['value'])) {
             if (isset($raw['node']['modifiedIndex'])) {
                 $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
@@ -335,10 +364,10 @@ class ServerDiscovery
             if ($value['Namespace'] !== $this->namespace) {
                 return null;
             }
-            return [$this->serverOffline($nowStore, $value)];
+            return $this->serverOffline($nowStore, $value);
         }
 
-        // 上线: 不存在 prevNode && 只存在 node
+        // 3. 上线: 不存在 prevNode && 只存在 node
         if (isset($raw['node']['modifiedIndex'])) {
             $waitIndex = $raw['node']['modifiedIndex'] >= $waitIndex ? $raw['node']['modifiedIndex'] : $waitIndex;
             $waitIndex = $waitIndex + 1;
@@ -350,7 +379,7 @@ class ServerDiscovery
         if ($value['Namespace'] !== $this->namespace) {
             return null;
         }
-        return [$this->serverOnline($nowStore, $value)];
+        return $this->serverOnline($nowStore, $value);
     }
 
     public function checkWatchingByEtcd()
@@ -500,5 +529,3 @@ class ServerDiscovery
         return $data;
     }
 }
-
-
