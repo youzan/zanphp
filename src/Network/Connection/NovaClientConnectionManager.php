@@ -37,8 +37,9 @@ class NovaClientConnectionManager
         $this->serviceMap = [];
         $this->poolMap = [];
         $this->novaConfig = Config::get("connection.nova", []);
-        isset($this->novaConfig["load_balancing_strategy"]) ?
-            $this->novaConfig["load_balancing_strategy"] : Polling::NAME;
+        if (!isset($this->novaConfig["load_balancing_strategy"])) {
+            $this->novaConfig["load_balancing_strategy"] = Polling::NAME;
+        }
     }
 
     public function get($protocol, $domain, $service, $method)
