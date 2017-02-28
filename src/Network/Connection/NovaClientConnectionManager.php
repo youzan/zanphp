@@ -45,12 +45,12 @@ class NovaClientConnectionManager
     {
         $serviceKey = $this->serviceKey($protocol, $domain, $service);
         if (!isset($this->serviceMap[$serviceKey])) {
-            throw new CanNotFindNovaClientPoolException("service=$service");
+            throw new CanNotFindNovaClientPoolException("proto=$protocol, domain=$domain, service=$service, method=$method");
         }
 
         $service = $this->serviceMap[$serviceKey];
         if (!in_array($method, $service["methods"], true)) {
-            throw new CanNotFindNovaServiceNameMethodException("service=$service, $method=$method");
+            throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");
         }
 
         $pool = $this->getPool($service["app_name"]);
