@@ -1022,7 +1022,7 @@ return [
         ],
         'delivery' => [
             'type' => 'java',
-            'host' => 'http://10.9.27.149:7001'
+            'host' => 'http://10.9.122.218:7001'
         ],
         'ticket' => [
             'type' => 'yar',
