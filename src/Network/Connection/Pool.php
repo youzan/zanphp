@@ -56,7 +56,7 @@ class Pool implements ConnectionPool
         }
     }
 
-    public function createConnect($previousConnectionHash = '')
+    public function createConnect($previousConnectionHash = '', $prevConn = null)
     {
         $max = isset($this->poolConfig['pool']['maximum-connection-count']) ?
             $this->poolConfig['pool']['maximum-connection-count'] : 30;
@@ -65,21 +65,29 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
+        $isSwoole2x = \swoole2x();
         if  ('' !== $previousConnectionHash) {
             $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
             if ($this->type == 'Mysqli') {
 
-                if (swoole2x()) {
-                    $errno = $connection->getSocket()->errno;
-                } else {
+                $errno = 0;
+                if ($isSwoole2x && null !== $prevConn) {
+                    $errno = $prevConn->getSocket()->errno;
+                } else if (!$isSwoole2x) {
                     $errno = $connection->getSocket()->connect_errno;
                 }
 
-                if ($errno) {
+                if ($isSwoole2x && $errno) {
                     ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection),$previousKey);
-                    $this->remove($connection);
-                } else {
-                    $connection->heartbeat();
+                    $this->freeConnection->remove($prevConn);
+                    $this->activeConnection->remove($prevConn);
+                } else if (!$isSwoole2x) {
+                    if ($errno) {
+                        ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection), $previousKey);
+                        $this->remove($connection);
+                    } else {
+                        $connection->heartbeat();
+                    }
                 }
 
                 $connection->setPool($this);
@@ -94,10 +102,12 @@ class Pool implements ConnectionPool
         } else {
             $this->freeConnection->push($connection);
         }
-        if ('' == $previousConnectionHash || $this->type !== 'Mysqli') {
-            $connection->setPool($this);
-            $connection->heartbeat();
+        if ('' == $previousConnectionHash) {
+            if ($this->type !== 'Mysqli' || ($this->type === 'Mysqli' && !$isSwoole2x)) {
+                $connection->heartbeat();
+            }
         }
+        $connection->setPool($this);
         $connection->setEngine($this->type);
     }
 
@@ -160,9 +170,10 @@ class Pool implements ConnectionPool
         $connHashCode = spl_object_hash($conn);
         if (null === ReconnectionPloy::getInstance()->getReconnectTime($connHashCode)) {
             ReconnectionPloy::getInstance()->setReconnectTime($connHashCode, 0);
-            $this->createConnect($connHashCode);
+            $this->createConnect($connHashCode, $conn);
             return;
         }
+
         ReconnectionPloy::getInstance()->reconnect($conn, $this);
     }
 
