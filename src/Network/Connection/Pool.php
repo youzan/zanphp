@@ -103,11 +103,11 @@ class Pool implements ConnectionPool
             $this->freeConnection->push($connection);
         }
         if ('' == $previousConnectionHash) {
-            $connection->setPool($this);
             if ($this->type !== 'Mysqli' || ($this->type === 'Mysqli' && !$isSwoole2x)) {
                 $connection->heartbeat();
             }
         }
+        $connection->setPool($this);
         $connection->setEngine($this->type);
     }
 
