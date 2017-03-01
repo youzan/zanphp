@@ -134,8 +134,8 @@ class Mysql implements DriverInterface
 
     /**
      * @param \swoole_mysql $link
-     * @param array|false $result
-     * @return void
+     * @param array|bool $result
+     * @return void|\Zan\Framework\Contract\Store\Database\DbResultInterface
      */
     public function onSqlReady($link, $result = true)
     {

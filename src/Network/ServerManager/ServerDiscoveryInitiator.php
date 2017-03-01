@@ -36,12 +36,13 @@ class ServerDiscoveryInitiator
         // 为特定app指定protocol 与 domain
         $appConfigs = Config::get('haunt.app_configs', []);
         foreach ($config['app_names'] as $appName) {
-            if (!isset($appConfigs[$appName])) {
-                $appConfigs[$appName] = [
-                    "protocol" => ServerDiscovery::DEFAULT_PROTOCOL,
-                    "namespace" => ServerDiscovery::DEFAULT_NAMESPACE
-                ];
+            if (!isset($appConfigs[$appName]) || !is_array($appConfigs[$appName])) {
+                $appConfigs[$appName] = [];
             }
+            $appConfigs[$appName] += [
+                "protocol" => ServerDiscovery::DEFAULT_PROTOCOL,
+                "namespace" => ServerDiscovery::DEFAULT_NAMESPACE
+            ];
         }
 
         if ($workerId === 0) {
