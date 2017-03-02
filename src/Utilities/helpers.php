@@ -77,6 +77,7 @@ if (! function_exists('echo_exception')) {
     function echo_exception(\Exception $e)
     {
         $time = date('Y-m-d H:i:s', time());
+        $class = get_class($e);
         $code = $e->getCode();
         $msg = $e->getMessage();
         $trace = $e->getTraceAsString();
@@ -88,6 +89,7 @@ if (! function_exists('echo_exception')) {
           \033[1;31mGot a exception\033[0m
           worker: #$workerId
           time: $time
+          class: $class
           code: $code
           message: $msg
           
