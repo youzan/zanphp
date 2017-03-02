@@ -110,13 +110,13 @@ class Server extends ServerBase implements ServerContract
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker #$workerId stopping .....");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
     {
-        ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)

@@ -40,21 +40,35 @@ class ServerRegisterInitiator
         return $this->register;
     }
 
-    public function initGenericService(&$config)
-    {
-        $registry = new Registry();
-        $registry->register(new GenericService());
-        $genericServices = $registry->getAll();
-        if ($genericServices) {
-            array_push($config['services'], ...$genericServices);
-        }
-    }
+//    public function initGenericService(&$config)
+//    {
+//        $registry = new Registry();
+//        $registry->register(new GenericService());
+//        $genericServices = $registry->getAll();
+//        if ($genericServices) {
+//            array_push($config['services'], ...$genericServices);
+//        }
+//    }
 
     public function init()
     {
-        //TODO: check config position
-        $config['services'] = Nova::getAvailableService();
-        $this->initGenericService($config);
+        $keys = Nova::getEtcdKeyList();
+        foreach ($keys as list($protocol, $domain, $appName)) {
+            $this->doRegisterOneGroup($protocol, $domain, $appName);
+        }
+    }
+
+    private function doRegisterOneGroup($protocol, $domain, $appName)
+    {
+        $config = [];
+        $config["services"] = Nova::getAvailableService($protocol, $domain, $appName);
+        $config["domain"] = $domain;
+        $config["appName"] = $appName;
+        $config["protocol"] = $protocol;
+
+
+        // TODO 移除
+        // $this->initGenericService($config);
 
         $haunt = Config::get('haunt.register');
 

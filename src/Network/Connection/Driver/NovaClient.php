@@ -21,6 +21,13 @@ class NovaClient extends Base implements Connection
     private $clientCb;
     protected $isAsync = true;
 
+    private $serverInfo;
+
+    public function __construct(array $serverInfo = [])
+    {
+        $this->serverInfo = $serverInfo;
+    }
+
     protected function closeSocket()
     {
         try {
@@ -38,21 +45,23 @@ class NovaClient extends Base implements Connection
         $this->getSocket()->on('error', [$this, 'onError']);
     }
 
-    public function onConnect($cli) {
+    public function onConnect(SwooleClient $cli) {
         //put conn to active_pool
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->release();
-        $this->getPool()->connecting($this);
+        /** @var $pool NovaClientPool */
+        $pool = $this->getPool();
+        $pool->connecting($this);
         $this->heartbeat();
-        sys_echo("nova client connect to server");
+        $this->inspect("connect to server", $cli);
     }
 
     public function onClose(SwooleClient $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
-        sys_echo("nova client close");
+        $this->inspect("close", $cli);
     }
 
     public function onReceive(SwooleClient $cli, $data) {
@@ -63,7 +72,8 @@ class NovaClient extends Base implements Connection
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
-        sys_echo("nova client error");
+
+        $this->inspect("error", $cli, true);
     }
 
     public function setClientCb(callable $cb) {
@@ -99,8 +109,10 @@ class NovaClient extends Base implements Connection
     public function close()
     {
         $this->closeSocket();
-        $this->getPool()->remove($this);
-        $this->getPool()->reload($this->config);
+        /** @var $pool NovaClientPool */
+        $pool = $this->getPool();
+        $pool->remove($this);
+        $pool->reload($this->config);
     }
 
     public function release()
@@ -116,5 +128,26 @@ class NovaClient extends Base implements Connection
     private function getHeartbeatingJobId()
     {
         return spl_object_hash($this) . 'heartbeat';
+    }
+
+    private function inspect($desc, SwooleClient $cli, $error = false)
+    {
+        $info = $this->serverInfo;
+        if ($error) {
+            $info += [
+                "errno" => $cli->errCode,
+                "error" => socket_strerror($cli->errCode),
+            ];
+        }
+
+        $buffer = [];
+        foreach ($info as $k => $v) {
+            if (is_array($v)) {
+                continue;
+            }
+            $buffer[] = "$k=$v";
+        }
+
+        sys_echo("nova client $desc [" . implode(", ", $buffer) . "]");
     }
 }

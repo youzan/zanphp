@@ -1,58 +1,11 @@
 {
     "name": "zanphp/zan",
-    "repositories": [
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/qiniu-php-sdk.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/symfony-console.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/yz-elasticsearch.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/psr-log.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/monolog-monolog.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-lib/nsq-async.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/pimple-pimple.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/guzzle-guzzle.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/symfony-event-dispatcher.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-3rd-lib/packaged-thrift.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:nova-service/generic.git"
-        },
-        {
-            "type": "git",
-            "url": "git@gitlab.qima-inc.com:php-lib/nova-asnyc.git"
-        },
-        {
-            "packagist": false
+    "repositories": {
+        "packagist": {
+            "type": "composer",
+            "url": "http://packagist.qima-inc.com"
         }
-    ],
+    },
     "require": {
         "qiniu/php-sdk": "7.0.0",
         "symfony/console": "3.1",

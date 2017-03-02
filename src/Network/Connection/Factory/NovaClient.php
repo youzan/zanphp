@@ -30,7 +30,8 @@ class NovaClient implements ConnectionFactory
         $socket = new SwooleClient($clientFlags, SWOOLE_SOCK_ASYNC);
         $socket->set($this->config['config']);
 
-        $connection = new NovaClientConnection();
+        $serverInfo = isset($this->config["server"]) ? $this->config["server"] : [];
+        $connection = new NovaClientConnection($serverInfo);
         $connection->setSocket($socket);
         $connection->setConfig($this->config);
         $connection->init();

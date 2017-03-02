@@ -32,11 +32,11 @@ class ServerRegister
         return [
             'SrvList' => [
                 [
-                    'Namespace' => 'com.youzan.service',
-                    'SrvName' => Application::getInstance()->getName(),
+                    'Namespace' => $config["domain"],
+                    'SrvName' => $config["appName"],
                     'IP' => $ip,
                     'Port' => (int)Config::get('server.port'),
-                    'Protocol' => 'nova',
+                    'Protocol' => $config["protocol"],
                     'Status' => 1,
                     'Weight' => 100,
                     'ExtData' => json_encode($extData),
@@ -49,11 +49,24 @@ class ServerRegister
     {
         $haunt = Config::get('haunt');
         $httpClient = new HttpClient($haunt['register']['host'], $haunt['register']['port']);
-        $response = (yield $httpClient->postJson($haunt['register']['uri'], $this->parseConfig($config), null));
-        $register = $response->getBody();
+        $body = $this->parseConfig($config);
+        $detail = $this->inspect($body['SrvList'][0]);
+        sys_echo("registering [$detail]");
 
-        sys_echo($register);
+        $response = (yield $httpClient->postJson($haunt['register']['uri'], $body, null));
+        $msg = rtrim($response->getBody(), "\n");
+        sys_echo("$msg [$detail]");
     }
 
-
+    private function inspect($config)
+    {
+        $map = [];
+        foreach ($config as $k => $v) {
+            if ($k === "ExtData") {
+                continue;
+            }
+            $map[] = "$k=$v";
+        }
+        return implode(", ", $map);
+    }
 }
