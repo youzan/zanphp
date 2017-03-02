@@ -7,16 +7,16 @@
  */
 namespace Zan\Framework\Network\ServerManager;
 
-use Zan\Framework\Network\ServerManager\ServerDiscovery;
+use Kdt\Iron\Nova\Foundation\TService;
+use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\ServerManager\ServerStore;
 
 use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
-use Kdt\Iron\Nova\Nova;
-use Zan\Framework\Foundation\Core\Path;
+use Zan\Framework\Utilities\Types\Dir;
+use Zan\Framework\Utilities\Types\Time;
 
 class ServerDiscoveryInitiator
 {
@@ -92,14 +92,32 @@ class ServerDiscoveryInitiator
                 continue;
             }
             $novaConfig = $noNeedDiscovery['novaApi'][$appName];
+            $novaConfig += [ "domain" => ServerDiscovery::DEFAULT_NAMESPACE ];
+
+
+            $services = [];
+            $path = Path::getRootPath() . $novaConfig["path"] . "/";
+            $baseNamespace = $novaConfig["namespace"];
+            $specMap = Nova::getSpec($path, $baseNamespace);
+            $ts = \nova_get_time();
+            foreach ($specMap as $className => $spec) {
+                $services[] = [
+                    "language"=> "php",
+                    "version"=> "1.0.0",
+                    "timestamp"=> $ts,
+                    "service" => TService::getNovaServiceName($spec->getServiceName()),
+                    "methods"=> $spec->getServiceMethods(),
+                ];
+            }
+
             //reset $servers
             $servers = [];
             $servers[$noNeedDiscovery['connection'][$appName]['host'].':'.$noNeedDiscovery['connection'][$appName]['port']] = [
                 'app_name' => $appName,
                 'host' => $noNeedDiscovery['connection'][$appName]['host'],
                 'port' => $noNeedDiscovery['connection'][$appName]['port'],
-                'services' => [],
-                'namespace' => $novaConfig['namespace'],
+                'services' => $services,
+                'namespace' => $novaConfig['domain'],
                 'protocol' => "nova",
                 'status' => 1,
                 'weight' => 100,
