@@ -65,6 +65,8 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
+        if (null === $connection)
+            return;
         $isSwoole2x = \swoole2x();
         if  ('' !== $previousConnectionHash) {
             $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
