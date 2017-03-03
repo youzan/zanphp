@@ -17,6 +17,8 @@ class MysqliResult implements DbResultInterface
      */
     private $driver;
 
+    private $countAlias;
+
     /**
      * FutureResult constructor.
      * @param DriverInterface $driver
