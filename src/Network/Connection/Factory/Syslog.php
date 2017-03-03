@@ -37,7 +37,7 @@ class Syslog implements ConnectionFactory
         //call connect
         if (false === $socket->connect($this->config['host'], $this->config['port']))
         {
-            sys_err("Syslog connect ".$this->config['host'].":".$this->config['port']." failed\n");
+            sys_error("Syslog connect ".$this->config['host'].":".$this->config['port']." failed");
             return null;
         }
 

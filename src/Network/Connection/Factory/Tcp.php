@@ -45,7 +45,7 @@ class Tcp implements ConnectionFactory
         }
 
         if (false === $connected) {
-            sys_err("Tcp connect $dst failed\n");
+            sys_error("Tcp connect $dst failed");
             return null;
         }
 

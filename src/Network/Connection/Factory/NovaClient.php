@@ -38,7 +38,7 @@ class NovaClient implements ConnectionFactory
 
         //call connect
         if (false === $socket->connect($this->config['host'], $this->config['port'])) {
-            sys_err("NovaClient connect ".$this->config['host'].":".$this->config['port']. " failed\n");
+            sys_error("NovaClient connect ".$this->config['host'].":".$this->config['port']. " failed");
             return null;
         }
 

@@ -43,7 +43,7 @@ class Redis implements ConnectionFactory
             $dst = $this->config['host'].":".$this->config['port'];
         }
         if (false === $result) {
-            sys_err("Redis connect $dst failed\n");
+            sys_error("Redis connect $dst failed");
             return null;
         }
 
