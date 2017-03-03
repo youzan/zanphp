@@ -16,6 +16,10 @@ use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUnique
 
 class Mysql implements DriverInterface
 {
+    const QUERY_FAIL = 0;
+    const QUERY_ASYNC = 1;
+    const QUERY_SYNC = 2;
+
     /**
      * @var \Zan\Framework\Network\Connection\Driver\Mysql
      */
@@ -29,6 +33,8 @@ class Mysql implements DriverInterface
     private $callback;
 
     private $result;
+
+    private $exception;
 
     /**
      * @var Trace
@@ -73,6 +79,35 @@ class Mysql implements DriverInterface
         $this->callback = $callback;
     }
 
+    private function checkResult($queryReturn, $desc)
+    {
+        // 兼容 swoole2.x 旧版本bool返回值
+        // rpm 包 > 2.0.7 之后可以去掉
+        if (is_bool($queryReturn)) {
+            if ($queryReturn === false) {
+                $queryReturn = self::QUERY_FAIL;
+            } else if ($this->result === null && $this->exception === null) {
+                $queryReturn = self::QUERY_ASYNC;
+            } else {
+                $queryReturn = self::QUERY_SYNC;
+            }
+        }
+
+        if ($queryReturn === self::QUERY_FAIL) {
+            throw new MysqliQueryException("$desc fail");
+        } else if ($queryReturn === self::QUERY_ASYNC) {
+            $this->beginTimeoutTimer($desc);
+            yield $this;
+        } else if ($queryReturn === self::QUERY_SYNC) {
+            sys_error("QUERY_SYNC");
+            if ($this->exception) {
+                throw $this->exception;
+            } else {
+                yield new MysqliResult($this);
+            }
+        }
+    }
+
     /**
      * @param $sql
      * @return \Generator
@@ -86,56 +121,39 @@ class Mysql implements DriverInterface
         }
 
         $this->sql = $sql;
-        // TODO bind
-        $res = $this->swooleMysql->query($this->sql, [], [$this, "onSqlReady"]);
-        if (false === $res) {
-            throw new MysqliQueryException("query fail");
-        }
-
-        $this->beginTimeoutTimer(__FUNCTION__);
-        yield $this;
+        $r = $this->swooleMysql->query($this->sql, [], [$this, "onSqlReady"]);
+        yield $this->checkResult($r, __FUNCTION__);
     }
 
     public function beginTransaction($flags = 0)
     {
-        $r = $this->swooleMysql->begin([$this, "onSqlReady"]);
-        if ($r === false) {
-            throw new MysqliQueryException(__FUNCTION__ . " fail");
-        }
-
         $this->sql = "START TRANSACTION";
-        $this->beginTimeoutTimer(__FUNCTION__);
-        yield $this;
+        $r = $this->swooleMysql->begin([$this, "onSqlReady"]);
+        yield $this->checkResult($r, __FUNCTION__);
     }
 
     public function commit($flags = 0)
     {
-        $r = $this->swooleMysql->commit([$this, "onSqlReady"]);
-        if ($r === false) {
-            throw new MysqliQueryException(__FUNCTION__ . " fail");
-        }
-
         $this->sql = "COMMIT";
-        $this->beginTimeoutTimer(__FUNCTION__);
-        yield $this;
+        $r = $this->swooleMysql->commit([$this, "onSqlReady"]);
+        yield $this->checkResult($r, __FUNCTION__);
     }
 
     public function rollback($flags = 0)
     {
-        $r = $this->swooleMysql->rollback([$this, "onSqlReady"]);
-        if ($r === false) {
-            throw new MysqliQueryException(__FUNCTION__ . " fail");
-        }
-
         $this->sql = "ROLLBACK";
-        $this->beginTimeoutTimer(__FUNCTION__);
-        yield $this;
+        $r = $this->swooleMysql->rollback([$this, "onSqlReady"]);
+        yield $this->checkResult($r, __FUNCTION__);
     }
 
     /**
      * @param \swoole_mysql $link
      * @param array|bool $result
      * @return void|\Zan\Framework\Contract\Store\Database\DbResultInterface
+     * @throws MysqliConnectionLostException
+     * @throws MysqliQueryDuplicateEntryUniqueKeyException
+     * @throws MysqliQueryException
+     * @throws MysqliSqlSyntaxException
      */
     public function onSqlReady($link, $result = true)
     {
@@ -154,7 +172,12 @@ class Mysql implements DriverInterface
             } elseif ($errno == 1062) {
                 $exception = new MysqliQueryDuplicateEntryUniqueKeyException("$error:$this->sql");
             } else {
-                $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql", 0, null, ['errno' => $errno, 'error' => $error]);
+                $ctx = [
+                    'sql' => $this->sql,
+                    'errno' => $errno,
+                    'error' => $error,
+                ];
+                $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql", 0, null, $ctx);
             }
 
             if ($this->trace) {
@@ -165,7 +188,12 @@ class Mysql implements DriverInterface
         }
 
         $this->result = $result;
-        call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+        $this->exception = $exception;
+
+        if ($this->callback) {
+            call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+            $this->callback = null;
+        }
     }
 
     private function beginTimeoutTimer($type)
@@ -188,11 +216,14 @@ class Mysql implements DriverInterface
                 $this->trace->commit("$type timeout");
             }
 
-            $ctx = [
-                "sql" => $sql,
-                "duration" => microtime(true) - $start,
-            ];
-            call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException("Mysql $type timeout", 0, null, $ctx)]);
+            if ($this->callback) {
+                $duration = microtime(true) - $start;
+                $ctx = [
+                    "sql" => $sql,
+                    "duration" => $duration,
+                ];
+                call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx)]);
+            }
         };
     }
 }
