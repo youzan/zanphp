@@ -35,7 +35,11 @@ class Syslog implements ConnectionFactory
         $connection->init();
 
         //call connect
-        $socket->connect($this->config['host'], $this->config['port']);
+        if (false === $socket->connect($this->config['host'], $this->config['port']))
+        {
+            sys_error("Syslog connect ".$this->config['host'].":".$this->config['port']." failed");
+            return null;
+        }
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 

@@ -37,7 +37,10 @@ class NovaClient implements ConnectionFactory
         $connection->init();
 
         //call connect
-        $socket->connect($this->config['host'], $this->config['port']);
+        if (false === $socket->connect($this->config['host'], $this->config['port'])) {
+            sys_error("NovaClient connect ".$this->config['host'].":".$this->config['port']. " failed");
+            return null;
+        }
 
         $connectTimeout = isset($this->config['connect_timeout']) ? $this->config['connect_timeout'] : self::CONNECT_TIMEOUT;
         Timer::after($connectTimeout, $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
