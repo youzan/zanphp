@@ -15,8 +15,6 @@ use Zan\Framework\Foundation\Core\Config;
 
 use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
-use Zan\Framework\Utilities\Types\Dir;
-use Zan\Framework\Utilities\Types\Time;
 
 class ServerDiscoveryInitiator
 {
@@ -123,6 +121,7 @@ class ServerDiscoveryInitiator
                 'weight' => 100,
             ];
 
+            ServerStore::getInstance()->setServices($appName, $servers);
             /* @var $connMgr NovaClientConnectionManager */
             $connMgr = NovaClientConnectionManager::getInstance();
             $connMgr->work($appName, $servers);
