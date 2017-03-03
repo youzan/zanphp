@@ -5,10 +5,13 @@ namespace Zan\Framework\Sdk\Search;
 use Zan\Framework\Foundation\Contract\Async;
 use Elasticsearch\Client;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
 class EsClient implements Async
 {
     const DEFAULT_NODE = 'default';
+
+    private $nodeInfo;
 
     private $client;
 
@@ -24,13 +27,18 @@ class EsClient implements Async
             $node = '.' . $node;
         }
         $nodeInfo = Config::get('connection.elasticsearch' . $node);
+        if (!isset($nodeInfo["hosts"][0])) {
+            throw new InvalidArgumentException("es node must set one host");
+        }
 
-        return new EsClient($nodeInfo);
+        $self = new EsClient();
+        $self->nodeInfo = $nodeInfo;
+        return $self;
     }
 
-    private function __construct($nodeInfo)
+    private function __construct()
     {
-        $this->client = new Client($nodeInfo);
+
     }
 
     public function setParams($params)
@@ -39,9 +47,30 @@ class EsClient implements Async
         return $this;
     }
 
+    private function parseUrl($url)
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED)) {
+            $url = 'http://' . $url;
+        }
+        $parts = parse_url($url);
+        if ($parts === false) {
+            throw new InvalidArgumentException("Could not parse URI");
+        }
+        if (!isset($parts['port'])) {
+            $parts['port'] = 80;
+        }
+        return [$parts['host'],  $parts['port'],];
+    }
+
     public function execute(Callable $callback, $task)
     {
-        call_user_func($this->handle, $callback);
+        $url = $this->nodeInfo["hosts"][0];
+        list($host, $port) = $this->parseUrl($url);
+        swoole_async_dns_lookup($host, function($host, $ip) use($callback, $port) {
+            $this->nodeInfo["hosts"][0] = "$ip:$port";
+            $this->client = new Client($this->nodeInfo);
+            call_user_func($this->handle, $callback);
+        });
     }
 
     public function search()
