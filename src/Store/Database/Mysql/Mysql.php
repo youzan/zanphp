@@ -99,7 +99,6 @@ class Mysql implements DriverInterface
             $this->beginTimeoutTimer($desc);
             yield $this;
         } else if ($queryReturn === self::QUERY_SYNC) {
-            sys_error("QUERY_SYNC");
             if ($this->exception) {
                 throw $this->exception;
             } else {
