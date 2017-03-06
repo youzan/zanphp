@@ -173,7 +173,9 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->timeout !== null) {
-            Timer::after(1000, [$this, "dnsLookupTimeout"], $this->getDnsResolveTimerId());
+            $timeoutFn = [$this, "dnsLookupTimeout"];
+        } else {
+            $timeoutFn = null;
         }
 
         if ($this->useHttpProxy) {
@@ -182,28 +184,20 @@ class HttpClient implements Async
             } else {
                 $proxy = self::HTTP_PROXY_DEV;
             }
-            swoole_async_dns_lookup($proxy, function($host, $ip) {
-                if ($this->timeout !== null) {
-                    Timer::clearAfterJob($this->getDnsResolveTimerId());
-                }
-                if ($ip) {
-                    $this->request($ip, 80);
-                } else {
-                    $this->whenHostNotFound($host);
-                }
-            });
+            $host = $proxy;
+            $port = 80;
         } else {
-            swoole_async_dns_lookup($this->host, function($host, $ip) {
-                if ($this->timeout !== null) {
-                    Timer::clearAfterJob($this->getDnsResolveTimerId());
-                }
-                if ($ip) {
-                    $this->request($ip, $this->port);
-                } else {
-                    $this->whenHostNotFound($host);
-                }
-            });
+            $host = $this->host;
+            $port = $this->port;
         }
+        DnsClient::lookup($host, function ($host, $ip) use ($port) {
+            if ($ip) {
+                $this->request($ip, $port);
+            } else {
+                $this->whenHostNotFound($host);
+            }
+        }, $timeoutFn, $this->timeout);
+
     }
 
     public function request($ip, $port)

@@ -8,53 +8,51 @@ use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 
-class DnsClient implements Async
+class DnsClient
 {
     private $callback;
     private $host;
+    private $maxRetryCount;
+    private $count;
+    private $timeoutFn;
 
     private function __construct() { }
 
-    public static function lookup($host, $timeout = 1000)
+    public static function lookup($host, $callback = null, $timeoutFn = null, $timeout = 1000)
     {
         $self = new static;
         $self->host = $host;
+        $self->callback = $callback;
+        $self->timeoutFn = $timeoutFn;
+        $self->count = 0;
+        $self->maxRetryCount = 3;
         $self->onTimeout($timeout);
-        $self->resolve();
         return $self;
     }
 
-    private function resolve()
+    public function resolve()
     {
         // 无需做缓存, 内部有缓存
-        swoole_async_dns_lookup($this->host, function($domain, $ip) {
+        swoole_async_dns_lookup($this->host, function($host, $ip) {
+            Timer::clearAfterJob($this->timerId());
             if ($this->callback) {
-                Timer::clearAfterJob($this->timerId());
-                if ($ip) {
-                    call_user_func($this->callback, $ip);
-                } else {
-                    $ex = new HostNotFoundException("", 408, null, [ "host" => $domain ]);
-                    call_user_func($this->callback, null, $ex);
-                }
-                unset($this->callback);
+                call_user_func($this->callback, $host, $ip);
             }
         });
     }
 
-    private function onTimeout($duration)
+    public function onTimeout($duration)
     {
-        Timer::after($duration, function() {
-            if ($this->callback) {
-                $ex = new DnsLookupTimeoutException("dns lookup timeout", 408, null, ["host" => $this->host]);
-                call_user_func($this->callback, $this->host, $ex);
-                unset($this->callback);
-            }
-        }, $this->timerId());
-    }
-
-    public function execute(callable $callback, $task)
-    {
-        $this->callback = $callback;
+        if ($this->count < $this->maxRetryCount) {
+            Timer::after($duration, [$this, "resolve"], $this->timerId());
+            $this->count++;
+        } else {
+            Timer::after($duration, function() {
+                if ($this->timeoutFn) {
+                    call_user_func($this->timeoutFn);
+                }
+            }, $this->timerId());
+        }
     }
 
     private function timerId()
