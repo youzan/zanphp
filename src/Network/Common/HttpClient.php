@@ -18,7 +18,7 @@ class HttpClient implements Async
     // TODO 改成zan-config里的配置
     const HTTP_PROXY_ONLINE = 'proxy-static.s.qima-inc.com';
     const HTTP_PROXY_DEV = '10.9.29.87';
-    const MAX_RETRIES = 3;
+
     /** @var  swoole_http_client */
     private $client;
 
@@ -30,7 +30,6 @@ class HttpClient implements Async
      * @var int [millisecond]
      */
     private $timeout;
-    private $times;
 
     private $uri;
     private $method;
@@ -49,8 +48,6 @@ class HttpClient implements Async
         $this->host = $host;
         $this->port = $port;
         $this->ssl = $ssl;
-        $this->timeout = 100;
-        $this->times = 0;
     }
 
     public static function newInstance($host, $port = 80, $ssl = false)
@@ -176,7 +173,9 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->timeout !== null) {
-            Timer::after($this->timeout, [$this, "dnsLookupTimeout"], $this->getDnsResolveTimerId());
+            $timeoutFn = [$this, "dnsLookupTimeout"];
+        } else {
+            $timeoutFn = null;
         }
 
         if ($this->useHttpProxy) {
@@ -185,23 +184,20 @@ class HttpClient implements Async
             } else {
                 $proxy = self::HTTP_PROXY_DEV;
             }
-            $url = $proxy;
+            $host = $proxy;
             $port = 80;
         } else {
-            $url = $this->host;
+            $host = $this->host;
             $port = $this->port;
         }
-        swoole_async_dns_lookup($url, function($host, $ip) use ($port) {
-            if ($this->timeout !== null) {
-                Timer::clearAfterJob($this->getDnsResolveTimerId());
-            }
+        DnsClient::lookup($host, function ($host, $ip) use ($port) {
             if ($ip) {
                 $this->request($ip, $port);
             } else {
                 $this->whenHostNotFound($host);
             }
-            $this->times = 0;
-        });
+        }, $timeoutFn, $this->timeout);
+
     }
 
     public function request($ip, $port)
@@ -250,15 +246,12 @@ class HttpClient implements Async
 
     public function onReceive($cli)
     {
-        if (null !== $this->timeout) {
-            Timer::clearAfterJob(spl_object_hash($this));
-        }
+        Timer::clearAfterJob(spl_object_hash($this));
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
-        $this->client->close();
     }
 
     public function whenHostNotFound($host)
@@ -307,14 +300,8 @@ class HttpClient implements Async
 
     public function dnsLookupTimeout()
     {
-        $maxRetries = static::MAX_RETRIES;
-        if ($this->times++ < $maxRetries) {
-            Timer::after($this->timeout, [$this, "dnsLookupTimeout"], $this->getDnsResolveTimerId());
-            return;
-        }
-        $this->times = 0;
         $message = sprintf(
-            "[http dns lookup timeout after $maxRetries retries] host:%s port:%s uri:%s method:%s ",
+            '[http dns lookup timeout] host:%s port:%s uri:%s method:%s ',
             $this->host,
             $this->port,
             $this->uri,
