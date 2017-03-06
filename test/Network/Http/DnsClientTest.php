@@ -21,8 +21,8 @@ class DnsClientTest extends TaskTest {
         DnsClient::lookup("unreachable", function ($host, $ip) {
             var_dump(func_get_args());
         },
-            function () {
-                var_dump(func_get_args());
-            });
+        function () {
+            var_dump(func_get_args());
+        });
     }
 }

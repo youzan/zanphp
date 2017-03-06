@@ -10,9 +10,10 @@ use Zan\Framework\Network\Server\Timer\Timer;
 
 class DnsClient
 {
+    const maxRetryCount = 3;
+
     private $callback;
     private $host;
-    private $maxRetryCount;
     private $count;
     private $timeoutFn;
     private $timeout;
@@ -26,10 +27,16 @@ class DnsClient
         $self->callback = $callback;
         $self->timeoutFn = $timeoutFn;
         $self->count = 0;
-        $self->maxRetryCount = 3;
+        if ($timeout <= 0)
+            $timeout = 100;
         $self->timeout = $timeout;
         $self->resolve();
         return $self;
+    }
+
+    public static function lookupWithoutTimeout($host, $callback)
+    {
+        swoole_async_dns_lookup($host, $callback);
     }
 
     public function resolve()
@@ -47,7 +54,7 @@ class DnsClient
 
     public function onTimeout($duration)
     {
-        if ($this->count < $this->maxRetryCount) {
+        if ($this->count < self::maxRetryCount) {
             Timer::after($duration, [$this, "resolve"], $this->timerId());
             $this->count++;
         } else {
