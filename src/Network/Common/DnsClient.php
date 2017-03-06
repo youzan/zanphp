@@ -15,6 +15,7 @@ class DnsClient
     private $maxRetryCount;
     private $count;
     private $timeoutFn;
+    private $timeout;
 
     private function __construct() { }
 
@@ -26,12 +27,14 @@ class DnsClient
         $self->timeoutFn = $timeoutFn;
         $self->count = 0;
         $self->maxRetryCount = 3;
-        $self->onTimeout($timeout);
+        $self->timeout = $timeout;
+        $self->resolve();
         return $self;
     }
 
     public function resolve()
     {
+        $this->onTimeout($this->timeout);
         // 无需做缓存, 内部有缓存
         swoole_async_dns_lookup($this->host, function($host, $ip) {
             Timer::clearAfterJob($this->timerId());
@@ -40,6 +43,7 @@ class DnsClient
             }
         });
     }
+
 
     public function onTimeout($duration)
     {
