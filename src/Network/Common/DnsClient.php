@@ -19,7 +19,7 @@ class DnsClient
 
     private function __construct() { }
 
-    public static function lookup($host, $callback = null, $timeoutFn = null, $timeout = 1000)
+    public static function lookup($host, $callback = null, $timeoutFn = null, $timeout = 100)
     {
         $self = new static;
         $self->host = $host;
