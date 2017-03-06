@@ -9,16 +9,13 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
-use Zan\Framework\Store\Database\Mysql\Mysqli;
 
 class MysqliResult implements DbResultInterface
 {
     /**
-     * @var Mysqli
+     * @var Mysql
      */
     private $driver;
-
-    private $countAlias;
 
     /**
      * FutureResult constructor.
@@ -37,7 +34,7 @@ class MysqliResult implements DbResultInterface
         if (\swoole2x()) {
             $insertId = $this->driver->getConnection()->getSocket()->insert_id;
         } else {
-            $insertId = $this->driver->getConnection()->getSocket()->_insert_id;            
+            $insertId = $this->driver->getConnection()->getSocket()->_insert_id;
         }
         yield $insertId;
     }

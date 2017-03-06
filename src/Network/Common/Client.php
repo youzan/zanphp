@@ -218,7 +218,7 @@ class Client implements Async
         return $e;
     }
     
-    private static function getApiConfig($api)
+    public static function getApiConfig($api)
     {
         $runMode = RunMode::get();
         if (is_null(self::$apiConfig)) {

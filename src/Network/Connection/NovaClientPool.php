@@ -28,7 +28,7 @@ class NovaClientPool
     private $appName;
 
     private $loadBalancingStrategyMap = [
-        'polling' => Polling::class,
+        Polling::NAME => Polling::class,
     ];
 
     const CONNECTION_RELOAD_STEP_TIME = 5000;
@@ -138,21 +138,22 @@ class NovaClientPool
 
     private function checkCanReload($config)
     {
+        // test 环境保持重连 WHY ???
         if ('test' == RunMode::get()) {
             return true;
         }
-        $canReload = false;
+
         $services = ServerStore::getInstance()->getServices($this->appName);
         if (null == $services || [] == $services) {
             return false;
         }
         foreach ($services as $service) {
+            // 其他环境 服务未下线 持续重连 服务已下线 停止重连
             if ($service['host'] == $config['host'] && $service['port'] == $config['port']) {
-                $canReload = true;
-                break;
+                return true;
             }
         }
-        return $canReload;
+        return false;
     }
 
     public function remove(Connection $conn)

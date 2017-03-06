@@ -108,13 +108,14 @@ class Server extends ServerBase implements ServerContract
 
     public function onWorkerStart($swooleServer, $workerId)
     {
+        $_SERVER["WORKER_ID"] = $workerId;
         $this->bootWorkerStartItem($workerId);
         sys_echo("worker #$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker #$workerId stopping .....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
@@ -123,7 +124,7 @@ class Server extends ServerBase implements ServerContract
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
-        ServerDiscoveryInitiator::getInstance()->resetLockDiscovery();
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
 
         sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
