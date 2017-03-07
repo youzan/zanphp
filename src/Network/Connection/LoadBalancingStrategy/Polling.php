@@ -14,6 +14,8 @@ use Zan\Framework\Network\Connection\NovaClientPool;
 class Polling implements LoadBalancingStrategyInterface
 {
 
+    const NAME = "polling";
+
     private $connectionPool;
 
     /**上次选择的服务器*/

@@ -219,3 +219,86 @@ mysql 添加异步事务支持
 添加 root/resource/config_{{appName}} 配置路径, 注意: appName "-"替换为"_"
 
 root/resource/config_{{appName}}/ 配置优先于 root/resource/config
+
+### 2017-02-27 Feature 
+
+#### haunt.php 添加可选配置项 "app_configs"
+
+```php
+return [
+     // 拉取需要的服务列表，此处填写注册到注册中心的的app name，如果无需拉去任何服务，app_names为空array即可
+    'app_names' => [
+        'scrm-api',
+        'pf-api',
+    ],
+
+    // 拉取app配置 
+    'app_configs' => [
+        // 从 com.youzan.service 域拉取scrm-api 服务
+        'scrm-api' => [
+            'protocol' => 'nova',
+            'namespace' => 'com.youzan.service',
+        ],
+        // 从 com.youzan.test 域拉取pf-api 服务
+        'pf-api' => [
+            'protocol' => 'nova',
+            'namespace' => 'com.youzan.test',
+        ],
+    ],
+];
+```
+
+#### nova.php "novaApi" 配置项支持发布多个thrift package
+
+
+```php
+// 兼容旧的配置方式
+return [
+    'novaApi' => [
+        'path'  => 'vendor/nova-service/pf/gen-php',
+        'namespace' => 'Com\\Youzan\\Pf\\',
+    ],
+];
+```
+
+```php
+// 多组 package 配置方式
+// 注意: 多package 需要 'namespace' 相同
+// 注意: haunt agent 对 同ip+port发布多个虚拟应用做了限制, 不可用
+return [
+    'novaApi' => [
+        [
+            'path'  => 'vendor/nova-service/scrm-base/gen-php',
+            'namespace' => 'Com\\Youzan\\Scrm\\',
+            'domain' => 'com.youzan.service', // 可选, 默认 com.youzan.service, 配置服务发布到 具体的域
+            'appName'   => 'scrm', // 可选, 默认Application::getName(), 配置服务发布的 应用名
+            'protocol'   => 'nova', // 可选, 目前恒等于 nova
+        ],
+        [
+            'path'  => 'vendor/nova-service/scrm-core/gen-php',
+            'namespace' => 'Com\\Youzan\\Scrm\\',
+            'domain' => 'com.youzan.service', // 可选, 默认 com.youzan.service, 配置服务发布到 具体的域
+            'appName'   => 'scrm', // 可选, 默认Application::getName(), 配置服务发布的 应用名
+            'protocol'   => 'nova', // 可选, 目前恒等于 nova
+        ],
+    ],
+];
+```
+
+#### 服务注册一些说明:
+
+1. 服务注册时会将 Protocol + Namespace + SrvName + IP + Port 做为 etcdKey;
+2. srvList 中etcdKey同名, 后面的一组服务会覆盖前面注册的服务;
+3. srvList 是用来注册多组 不同namespace, 或者不同SrvName的 的服务
+4. zan中protocol === nova
+5. zan中namespace 可在 novaApi 中配置, 默认 com.youzan.service
+6. zan中SrvName 可在 novaApi 中配置, 默认 Application::getName()
+7. 多个thrift package 按etcdKey分组注册, 每组追加泛化调用方法
+
+#### 服务拉取的说明:
+
+1. 从etcd服务拉取是以app为维度的, 返回app实例的n个节点
+
+#### thrift 与 app
+
+1. thrift 文件中 namespace nova com.youzan.a.b.c 中 a 与 appName 没有必然联系, 可以不相同

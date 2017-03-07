@@ -13,6 +13,8 @@ class ServerStore
 {
     use Singleton;
 
+    const LOCK_INIT = -1;
+
     public function set($key, $value)
     {
         if (apcu_exists($key)) {
@@ -113,18 +115,24 @@ class ServerStore
         return 'server_lock_watch_' . $appName;
     }
 
-    public function lockDiscovery()
+    public function lockDiscovery($workerId)
     {
-        return apcu_cas($this->getLockDiscoveryKey(), 0, 1);
+        return apcu_cas($this->getLockDiscoveryKey(), self::LOCK_INIT, $workerId);
+    }
+
+    public function unlockDiscovery($workerId)
+    {
+        // 保证只有加锁的worker才能加锁
+        return apcu_cas($this->getLockDiscoveryKey(), $workerId, self::LOCK_INIT);
+    }
+
+    public function resetLockDiscovery()
+    {
+        return apcu_store($this->getLockDiscoveryKey(), self::LOCK_INIT);
     }
 
     private function getLockDiscoveryKey()
     {
         return 'sever_lock_discovery';
-    }
-
-    public function resetLockDiscovery()
-    {
-        return apcu_store($this->getLockDiscoveryKey(), 0);
     }
 }

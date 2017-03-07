@@ -37,9 +37,16 @@ class Tcp implements ConnectionFactory
 
         //call connect
         if ($isUnixSock) {
-            $socket->connect($this->config['path']);
+            $connected = $socket->connect($this->config['path']);
+            $dst = $this->config['path'];
         } else {
-            $socket->connect($this->config['host'], $this->config['port']);
+            $connected = $socket->connect($this->config['host'], $this->config['port']);
+            $dst = $this->config['host'].":".$this->config['port'];
+        }
+
+        if (false === $connected) {
+            sys_error("Tcp connect $dst failed");
+            return null;
         }
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
