@@ -326,6 +326,11 @@ return [
                     'host' => 'http://10.9.23.188:8025',
                     'type' => 'java'
                 ],
+                [
+                    'mod' => 'trade.seller.refuseOrder',
+                    'host' => 'http://10.9.23.188:8025',
+                    'type' => 'java'
+                ],
             ]
         ],
         'tradetask' => [
@@ -823,6 +828,11 @@ return [
                 ],
                 [
                     'mod' => 'trade.seller.confirmOrder',
+                    'host' => 'http://10.9.38.65:8025',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.seller.refuseOrder',
                     'host' => 'http://10.9.38.65:8025',
                     'type' => 'java'
                 ],
@@ -1324,6 +1334,11 @@ return [
                 ],
                 [
                     'mod' => 'trade.seller.confirmOrder',
+                    'host' => 'http://trade-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.seller.refuseOrder',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
@@ -1895,6 +1910,11 @@ return [
                 ],
                 [
                     'mod' => 'trade.seller.confirmOrder',
+                    'host' => 'http://trade-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod' => 'trade.seller.refuseOrder',
                     'host' => 'http://trade-soa.s.qima-inc.com',
                     'type' => 'java'
                 ],
