@@ -40,7 +40,7 @@ class Mysql implements ConnectionFactory
             "password" => $this->config['password'],
             "database" => $this->config['database'],
             "charset" => isset($this->config['charset']) ? $this->config['charset'] : self::DEFAULT_CHARSET,
-        ]);
+        ], [$connection, "onConnect"]);
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 

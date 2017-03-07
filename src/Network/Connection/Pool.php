@@ -73,9 +73,7 @@ class Pool implements ConnectionPool
             if ($this->type == 'Mysqli') {
 
                 $errno = 0;
-                if ($isSwoole2x && null !== $prevConn) {
-                    $errno = $prevConn->getSocket()->errno;
-                } else if (!$isSwoole2x) {
+                if ($isSwoole2x && null !== $prevConn || !$isSwoole2x) {
                     $errno = $connection->getSocket()->connect_errno;
                 }
 

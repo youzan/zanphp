@@ -27,25 +27,32 @@ class Mysql extends Base implements Connection
     public function init() {
         /** @var \swoole_mysql $swooleMysql */
         $swooleMysql = $this->getSocket();
-        $swooleMysql->on('connect', [$this, 'onConnect']);
+        // $swooleMysql->on('connect', [$this, 'onConnect']);
         $swooleMysql->on('close', [$this, 'onClose']);
-        $swooleMysql->on('error', [$this, 'onError']);
+        // $swooleMysql->on('error', [$this, 'onError']);
 
         $this->classHash = spl_object_hash($this);
     }
 
-    public function onConnect($cli) {
+    public function onConnect(\swoole_mysql $cli, $result) {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
-        $this->release();
-        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
-        $this->heartbeat();
-        sys_echo("mysql client connect to server");
+        if ($result) {
+            $this->release();
+            ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
+            $this->heartbeat();
+            sys_echo("mysql client connect to server");
+        } else {
+            if ($cli->connect_errno) {
+                sys_error("mysql connect fail [errno={$cli->connect_errno}, error={$cli->connect_error}]");
+                $this->close();
+            }
+        }
     }
 
     public function onClose(\swoole_mysql $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        sys_echo("mysql client close");
+        sys_echo("mysql client close [errno={$cli->errno}, error={$cli->error}]");
     }
 
     public function onError(\swoole_mysql $cli){

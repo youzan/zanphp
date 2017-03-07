@@ -16,10 +16,6 @@ use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUnique
 
 class Mysql implements DriverInterface
 {
-    const QUERY_FAIL = 0;
-    const QUERY_ASYNC = 1;
-    const QUERY_SYNC = 2;
-
     /**
      * @var \Zan\Framework\Network\Connection\Driver\Mysql
      */
@@ -33,8 +29,6 @@ class Mysql implements DriverInterface
     private $callback;
 
     private $result;
-
-    private $exception;
 
     /**
      * @var Trace
@@ -79,34 +73,6 @@ class Mysql implements DriverInterface
         $this->callback = $callback;
     }
 
-    private function checkResult($queryReturn, $desc)
-    {
-        // 兼容 swoole2.x 旧版本bool返回值
-        // rpm 包 > 2.0.7 之后可以去掉
-        if (is_bool($queryReturn)) {
-            if ($queryReturn === false) {
-                $queryReturn = self::QUERY_FAIL;
-            } else if ($this->result === null && $this->exception === null) {
-                $queryReturn = self::QUERY_ASYNC;
-            } else {
-                $queryReturn = self::QUERY_SYNC;
-            }
-        }
-
-        if ($queryReturn === self::QUERY_FAIL) {
-            throw new MysqliQueryException("$desc fail");
-        } else if ($queryReturn === self::QUERY_ASYNC) {
-            $this->beginTimeoutTimer($desc);
-            yield $this;
-        } else if ($queryReturn === self::QUERY_SYNC) {
-            if ($this->exception) {
-                throw $this->exception;
-            } else {
-                yield new MysqliResult($this);
-            }
-        }
-    }
-
     /**
      * @param $sql
      * @return \Generator
@@ -120,29 +86,28 @@ class Mysql implements DriverInterface
         }
 
         $this->sql = $sql;
-        $r = $this->swooleMysql->query($this->sql, [], [$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        $r = $this->swooleMysql->query($this->sql, [$this, "onSqlReady"]);
+        if ($r === false) {
+            throw new MysqliQueryException("mysql query fail [sql=$this->sql]");
+        } else {
+            $this->beginTimeoutTimer("mysql query");
+            yield $this;
+        }
     }
 
     public function beginTransaction($flags = 0)
     {
-        $this->sql = "START TRANSACTION";
-        $r = $this->swooleMysql->begin([$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        yield $this->query("START TRANSACTION");
     }
 
     public function commit($flags = 0)
     {
-        $this->sql = "COMMIT";
-        $r = $this->swooleMysql->commit([$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        yield $this->query("COMMIT");
     }
 
     public function rollback($flags = 0)
     {
-        $this->sql = "ROLLBACK";
-        $r = $this->swooleMysql->rollback([$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        yield $this->query("ROLLBACK");
     }
 
     /**
@@ -160,7 +125,7 @@ class Mysql implements DriverInterface
 
         $exception = null;
 
-        if ($link->errno !== 0 || $result === false) {
+        if ($result === false) {
 
             $errno = $link->errno;
             $error = $link->error;
@@ -187,7 +152,6 @@ class Mysql implements DriverInterface
         }
 
         $this->result = $result;
-        $this->exception = $exception;
 
         if ($this->callback) {
             call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
