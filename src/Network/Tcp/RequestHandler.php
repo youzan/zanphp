@@ -10,6 +10,7 @@ use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Exception\ExcessConcurrencyException;
+use Zan\Framework\Network\Server\Middleware\MiddlewareConfig;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
@@ -99,7 +100,20 @@ class RequestHandler {
                 $this->reportHawk();
                 $this->logErr($e);
             }
-            $response->sendException($e);
+            
+            if (is_null($this->middleWareManager)) {
+                $exceptionConfig = MiddlewareConfig::getInstance()->getExceptionHandlerConfig();
+                if (isset($exceptionConfig['frameworkException'])) {
+                    $handler = new $exceptionConfig['frameworkException'];
+                    $e = $handler->handle($e);
+                }
+            } else {
+                $e = $this->middleWareManager->handleException($e);
+            }
+
+            if (!is_null($e))
+                $response->sendException($e);
+
             $this->event->fire($this->getRequestFinishJobId());
             return;
         }
@@ -126,7 +140,9 @@ class RequestHandler {
 
         $this->reportHawk();
         $this->logErr($e);
-        $this->response->sendException($e);
+        $e = $this->middleWareManager->handleException($e);
+        if (!is_null($e))
+            $this->response->sendException($e);
         $this->event->fire($this->getRequestFinishJobId());
     }
 

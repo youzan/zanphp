@@ -18,12 +18,23 @@ class MiddlewareConfig
     use Singleton;
 
     private $config = null;
+    private $exceptionHandlerConfig = [];
     private $zanFilters = [];
     private $zanTerminators = [];
 
     public function setConfig($config)
     {
         $this->config = $config;
+    }
+
+    public function setExceptionHandlerConfig(array $exceptionHandlerConfig)
+    {
+        $this->exceptionHandlerConfig = $exceptionHandlerConfig;
+    }
+
+    public function getExceptionHandlerConfig()
+    {
+        return $this->exceptionHandlerConfig;
     }
 
     public function setZanFilters(array $zanFilters)
@@ -36,7 +47,7 @@ class MiddlewareConfig
         $this->zanTerminators = $zanTerminators;
     }
 
-    public function getGroupValue(Request $request)
+    public function getGroupValue(Request $request, $config)
     {
         $isTcpGenericRequest = $request instanceof \Zan\Framework\Network\Tcp\Request && $request->isGenericInvoke();
         if ($isTcpGenericRequest) {
@@ -47,10 +58,10 @@ class MiddlewareConfig
         $groupKey = null;
 
         for ($i = 0; ; $i++) {
-            if (!isset($this->config['match'][$i])) {
+            if (!isset($config['match'][$i])) {
                 break;
             }
-            $match = $this->config['match'][$i];
+            $match = $config['match'][$i];
             $pattern = $this->setDelimit($match[0]);
             if ($this->match($pattern, $route)) {
                 $groupKey = $match[1];
@@ -66,11 +77,22 @@ class MiddlewareConfig
         if (null === $groupKey) {
             return [];
         }
-        if (!isset($this->config['group'][$groupKey])) {
+        if (!isset($config['group'][$groupKey])) {
             throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
         }
 
-        return $this->config['group'][$groupKey];
+        return $config['group'][$groupKey];
+    }
+
+    public function getRequestFilters($request)
+    {
+        return $this->getGroupValue($request, $this->config);
+    }
+
+    public function addExceptionHandlers($request, $filter)
+    {
+        $exceptionHandlers = $this->getGroupValue($request, $this->exceptionHandlerConfig);
+        return array_merge($filter, $exceptionHandlers);
     }
 
     public function match($pattern, $route)

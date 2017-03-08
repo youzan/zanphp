@@ -81,10 +81,8 @@ class ServerBase
 
     protected function writePid($pid)
     {
-        if (RunMode::get() == 'test') {
-            $pidFilePath = $this->getPidFilePath();
-
-            file_put_contents($pidFilePath, $pid);
-        }
+        $pidFilePath = $this->getPidFilePath();
+        if (false === file_put_contents($pidFilePath, $pid))
+            sys_error("write pid into $pidFilePath failed");
     }
 }
