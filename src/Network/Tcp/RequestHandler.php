@@ -137,8 +137,11 @@ class RequestHandler {
 
         $this->reportHawk();
         $this->logErr($e);
-        $e = $this->middleWareManager->handleException($e);
-        if (!is_null($e))
+        $result = $this->middleWareManager->handleException($e);
+
+        if ($result instanceof \Exception)
+            $this->response->sendException($result);
+        else
             $this->response->sendException($e);
         $this->event->fire($this->getRequestFinishJobId());
     }
