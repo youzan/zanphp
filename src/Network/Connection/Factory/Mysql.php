@@ -27,20 +27,31 @@ class Mysql implements ConnectionFactory
     
     public function create()
     {
-        $this->conn = new \swoole_mysql();
-        $connection = new MysqlConnection();
-        $connection->setSocket($this->conn);
-        $connection->setConfig($this->config);
-        $connection->init();
-
-        $this->conn->connect([
+        $servInfo = [
             "host" => $this->config['host'],
             "port" => $this->config['port'],
             "user" => $this->config['user'],
             "password" => $this->config['password'],
             "database" => $this->config['database'],
             "charset" => isset($this->config['charset']) ? $this->config['charset'] : self::DEFAULT_CHARSET,
-        ]);
+        ];
+
+
+        $this->conn = new \swoole_mysql();
+        $connection = new MysqlConnection();
+        $connection->setSocket($this->conn);
+        $connection->setConfig($this->config);
+        $connection->init();
+
+        $this->conn->on('close', [$connection, 'onClose']);
+
+        if (_mysql2()) {
+            $this->conn->connect($servInfo, [$connection, "onConnect"]);
+        } else {
+            $this->conn->on('connect', [$connection, 'onConnect']);
+            $this->conn->on('error', [$connection, 'onError']);
+            $this->conn->connect($servInfo);
+        }
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 

@@ -8,6 +8,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Store\Database\Mysql\Mysql as Engine;
+use Zan\Framework\Store\Database\Mysql\Mysql2 as Engine2;
 use Zan\Framework\Utilities\Types\Time;
 
 class Mysql extends Base implements Connection
@@ -25,27 +26,29 @@ class Mysql extends Base implements Connection
     }
 
     public function init() {
-        /** @var \swoole_mysql $swooleMysql */
-        $swooleMysql = $this->getSocket();
-        $swooleMysql->on('connect', [$this, 'onConnect']);
-        $swooleMysql->on('close', [$this, 'onClose']);
-        $swooleMysql->on('error', [$this, 'onError']);
-
         $this->classHash = spl_object_hash($this);
     }
 
-    public function onConnect($cli) {
+    // mariodb connect 回调无result 参数
+    public function onConnect(\swoole_mysql $cli, $result = true) {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
-        $this->release();
-        ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
-        $this->heartbeat();
-        sys_echo("mysql client connect to server");
+        if ($result) {
+            $this->release();
+            ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
+            $this->heartbeat();
+            sys_echo("mysql client connect to server");
+        } else {
+            if ($cli->connect_errno) {
+                sys_error("mysql connect fail [errno={$cli->connect_errno}, error={$cli->connect_error}]");
+                $this->close();
+            }
+        }
     }
 
     public function onClose(\swoole_mysql $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        sys_echo("mysql client close");
+        sys_echo("mysql client close [errno={$cli->errno}, error={$cli->error}]");
     }
 
     public function onError(\swoole_mysql $cli){
@@ -95,7 +98,12 @@ class Mysql extends Base implements Connection
             return;
         }
         $this->setUnReleased();
-        $engine = new Engine($this);
+
+        if (_mysql2()) {
+            $engine = new Engine2($this);
+        } else {
+            $engine = new Engine($this);
+        }
 
         try{
             yield $engine->query('select 1');

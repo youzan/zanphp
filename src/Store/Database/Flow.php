@@ -10,6 +10,7 @@ namespace Zan\Framework\Store\Database;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 use Zan\Framework\Store\Database\Mysql\Mysqli;
 use Zan\Framework\Store\Database\Mysql\Mysql;
+use Zan\Framework\Store\Database\Mysql\Mysql2;
 use Zan\Framework\Store\Database\Mysql\MysqliResult;
 use Zan\Framework\Store\Database\Sql\SqlMap;
 use Zan\Framework\Store\Database\Sql\Table;
@@ -56,7 +57,11 @@ class Flow
     public function __construct()
     {
         if (swoole2x()) {
-            $this->engineMap['Mysqli'] = Mysql::class;
+            if (_mysql2()) {
+                $this->engineMap['Mysqli'] = Mysql2::class;
+            } else {
+                $this->engineMap['Mysqli'] = Mysql::class;
+            }
         }
     }
 
