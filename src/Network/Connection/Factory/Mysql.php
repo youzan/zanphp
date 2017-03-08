@@ -48,8 +48,8 @@ class Mysql implements ConnectionFactory
         if (_mysql2()) {
             $this->conn->connect($servInfo, [$connection, "onConnect"]);
         } else {
-            $this->conn->on('connect', [$this, 'onConnect']);
-            $this->conn->on('error', [$this, 'onError']);
+            $this->conn->on('connect', [$connection, 'onConnect']);
+            $this->conn->on('error', [$connection, 'onError']);
             $this->conn->connect($servInfo);
         }
 
