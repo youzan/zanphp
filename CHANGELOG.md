@@ -302,3 +302,48 @@ return [
 #### thrift 与 app
 
 1. thrift 文件中 namespace nova com.youzan.a.b.c 中 a 与 appName 没有必然联系, 可以不相同
+
+#### 自定义异常处理注册函数
+resource\middleware目录下增加exceptionHandler.php配置,示例如下:
+```php
+<?php
+use Zan\Framework\Network\Tcp\Exception\Handler\GenericExceptionHandler;
+
+return [
+    'match' => [
+        // 可以单独针对 所有泛化调用 设置异常处理函数
+        [
+            "/com/youzan/nova/framework/generic/service/GenericService/invoke", "genericExceptionHandlerGroup",
+        ],
+        // 也可以直接 针对特定服务配置, 在过滤器内检测是否是泛化调用
+        [
+            "/Com/Youzan/Nova/Framework/Generic/Php/Service/GenericTestService/ThrowException", "genericExceptionHandlerGroup",
+        ],
+        [
+            ".*", "all"
+        ]
+    ],
+    'group' => [
+        "genericExceptionHandlerGroup" => [
+            GenericExceptionHandler::class
+        ],
+        "all" => [
+            GenericExceptionHandler::class
+        ],
+    ],
+];
+```
+
+match下添加serviceName和对应的handler group,框架自动根据serviceName匹配,成功后执行对应group下的handler,
+handler class示例为:
+```php
+class GenericExceptionHandler implements ExceptionHandler
+{
+    public function handle(\Exception $e)
+    {
+        sys_error("GenericExceptionHandler handle: ".$e->getMessage());
+        throw new \Exception("网络错误", 0);
+    }
+}
+```
+转换成自定义异常抛出即可。

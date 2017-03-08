@@ -100,18 +100,15 @@ class RequestHandler {
                 $this->reportHawk();
                 $this->logErr($e);
             }
-            
-            if (is_null($this->middleWareManager)) {
-                $exceptionConfig = MiddlewareConfig::getInstance()->getExceptionHandlerConfig();
-                if (isset($exceptionConfig['frameworkException'])) {
-                    $handler = new $exceptionConfig['frameworkException'];
-                    $e = $handler->handle($e);
-                }
-            } else {
-                $e = $this->middleWareManager->handleException($e);
+
+            $result = null;
+            if ($this->middleWareManager) {
+                $result = $this->middleWareManager->handleException($e);
             }
 
-            if (!is_null($e))
+            if ($result instanceof \Exception)
+                $response->sendException($result);
+            else
                 $response->sendException($e);
 
             $this->event->fire($this->getRequestFinishJobId());
