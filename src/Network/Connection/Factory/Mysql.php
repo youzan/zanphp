@@ -43,7 +43,7 @@ class Mysql implements ConnectionFactory
         $connection->setConfig($this->config);
         $connection->init();
 
-        $this->conn->on('close', [$this, 'onClose']);
+        $this->conn->on('close', [$connection, 'onClose']);
 
         if (_mysql2()) {
             $this->conn->connect($servInfo, [$connection, "onConnect"]);
