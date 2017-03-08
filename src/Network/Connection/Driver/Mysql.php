@@ -8,6 +8,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Store\Database\Mysql\Mysql as Engine;
+use Zan\Framework\Store\Database\Mysql\Mysql2 as Engine2;
 use Zan\Framework\Utilities\Types\Time;
 
 class Mysql extends Base implements Connection
@@ -25,16 +26,11 @@ class Mysql extends Base implements Connection
     }
 
     public function init() {
-        /** @var \swoole_mysql $swooleMysql */
-        $swooleMysql = $this->getSocket();
-        // $swooleMysql->on('connect', [$this, 'onConnect']);
-        $swooleMysql->on('close', [$this, 'onClose']);
-        // $swooleMysql->on('error', [$this, 'onError']);
-
         $this->classHash = spl_object_hash($this);
     }
 
-    public function onConnect(\swoole_mysql $cli, $result) {
+    // mariodb connect 回调无result 参数
+    public function onConnect(\swoole_mysql $cli, $result = true) {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         if ($result) {
             $this->release();
@@ -102,7 +98,12 @@ class Mysql extends Base implements Connection
             return;
         }
         $this->setUnReleased();
-        $engine = new Engine($this);
+
+        if (_mysql2()) {
+            $engine = new Engine2($this);
+        } else {
+            $engine = new Engine($this);
+        }
 
         try{
             yield $engine->query('select 1');

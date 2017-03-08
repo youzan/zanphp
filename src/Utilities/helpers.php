@@ -133,3 +133,13 @@ if (! function_exists('swoole2x')) {
         return version_compare(phpversion('swoole'), '2.0.0') >= 0;
     }
 }
+
+if (! function_exists('_mysql2')) {
+    function _mysql2() {
+        static $cache = null;
+        if ($cache === null) {
+            $cache = property_exists(\swoole_mysql::class, "connect_errno");
+        }
+        return $cache;
+    }
+}
