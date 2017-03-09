@@ -22,7 +22,7 @@ require __DIR__ . '/Zan.php';
 class Test {
     public static function init()
     {
-
+        echo "Hello World!";
     }
 }
 
