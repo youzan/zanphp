@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Network\Server\Middleware;
 
+use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Contract\Network\RequestPostFilter;
@@ -47,6 +48,24 @@ class MiddlewareManager
         }
     }
 
+    public function handleException(\Exception $e)
+    {
+        $middlewares = $this->middlewares;
+
+        foreach ($middlewares as $middleware) {
+            if (!$middleware instanceof ExceptionHandler) {
+                continue;
+            }
+
+            try {
+                $e = $middleware->handle($e);
+            } catch (\Exception $handlerException) {
+                return $handlerException;
+            }
+        }
+        return $e;
+    }
+
     public function executePostFilters($response)
     {
         $middlewares = $this->middlewares;
@@ -72,7 +91,8 @@ class MiddlewareManager
     private function initMiddlewares()
     {
         $middlewares = [];
-        $groupValues = $this->middlewareConfig->getGroupValue($this->request);
+        $groupValues = $this->middlewareConfig->getRequestFilters($this->request);
+        $groupValues = $this->middlewareConfig->addExceptionHandlers($this->request, $groupValues);
         $groupValues = $this->middlewareConfig->addBaseFilters($groupValues);
         $groupValues = $this->middlewareConfig->addBaseTerminators($groupValues);
         foreach ($groupValues as $groupValue) {

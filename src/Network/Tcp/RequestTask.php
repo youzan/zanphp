@@ -69,7 +69,13 @@ class RequestTask {
                     $this->request->getMethodName(),
                     $this->request->getRemoteIp());
             }
-            $this->response->sendException($e);
+            $result = $this->middleWareManager->handleException($e);
+
+            if ($result instanceof \Exception)
+                $this->response->sendException($result);
+            else
+                $this->response->sendException($e);
+
             $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
     }

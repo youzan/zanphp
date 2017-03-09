@@ -53,15 +53,15 @@ class Dispatcher {
         $appName = $app->getName();
 
         if ($this->request->isGenericInvoke()) {
-            $servieName = $this->request->getGenericServiceName();
+            $serviceName = $this->request->getGenericServiceName();
         } else {
-            $servieName = $this->request->getNovaServiceName();
+            $serviceName = $this->request->getNovaServiceName();
         }
 
-        $servieName = str_replace('.', '\\', $servieName);
-        $servieName = Nova::removeNovaNamespace($servieName, $appName);
-        $servieName = $appNamespace . $servieName;
+        $serviceName = str_replace('.', '\\', $serviceName);
+        $serviceName = Nova::removeNovaNamespace($serviceName, $appName);
+        $serviceName = $appNamespace . $serviceName;
 
-        return $servieName;
+        return $serviceName;
     }
 }
