@@ -988,6 +988,17 @@ return [
                 ]
             ]
         ],
+        'dc_api' => [
+            'type' => 'local',
+            'host' => 'http://dc_api.api.youzan.com/',
+            'sub' => [
+                [
+                    'mod' => 'dc_api.online.takeaway.realtime',
+                    'host' => 'http://statistics-qa.s.qima-inc.com:5061',
+                    'type' => 'java'
+                ]
+            ]
+        ],
         'notice' => [
             'type' => 'local',
             'host' => 'http://notice.api.koudaitong.com/'
