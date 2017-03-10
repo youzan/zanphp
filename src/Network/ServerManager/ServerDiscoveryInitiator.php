@@ -24,7 +24,7 @@ class ServerDiscoveryInitiator
     {
         $config = Config::get('haunt');
         if (empty($config)) {
-            throw new ServerConfigException();
+            throw new ServerConfigException("haunt config is not found");
         }
         $config = $this->noNeedDiscovery($config);
         if (!isset($config['app_names']) || [] === $config['app_names']) {

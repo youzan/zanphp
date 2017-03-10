@@ -12,7 +12,9 @@ use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\Curl;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\Types\Time;
+use Zan\Framework\Foundation\Coroutine\Task;
 
 class ServerRegister
 {
@@ -53,9 +55,16 @@ class ServerRegister
         $detail = $this->inspect($body['SrvList'][0]);
         sys_echo("registering [$detail]");
 
-        $response = (yield $httpClient->postJson($haunt['register']['uri'], $body, null));
-        $msg = rtrim($response->getBody(), "\n");
-        sys_echo("$msg [$detail]");
+        try {
+            $response = (yield $httpClient->postJson($haunt['register']['uri'], $body, null));
+            $msg = rtrim($response->getBody(), "\n");
+            sys_echo("$msg [$detail]");
+        } catch (\Exception $e) {
+            sys_error("register failed: ".$haunt['register']['host'].":".$haunt['register']['port']);
+            Timer::after(3000, function () use ($config) {
+                Task::execute($this->register($config));
+            });
+        }
     }
 
     private function inspect($config)
