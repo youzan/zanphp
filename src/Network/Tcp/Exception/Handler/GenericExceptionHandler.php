@@ -13,7 +13,8 @@ class GenericExceptionHandler implements ExceptionHandler
 {
     public function handle(\Exception $e)
     {
+        //Just throw Exception
         sys_error("GenericExceptionHandler handle: ".$e->getMessage());
-        throw new \Exception("网络错误", 0);
+        throw $e;
     }
 }
