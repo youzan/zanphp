@@ -50,7 +50,7 @@ class Trace
         $this->config = $config;
         $this->appName = Application::getInstance()->getName();
         $this->hostName = gethostname();
-        $this->ip = gethostbyname($this->hostName);
+        $this->ip = nova_get_ip();
         $this->pid = getmypid();
 
         if ($rootId) {

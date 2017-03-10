@@ -93,20 +93,16 @@ class ServerRegisterInitiator
     {
         $runmode = RunMode::get();
         if ($runmode === "test" || $runmode === "qatest") {
-            if ($ip = swoole_get_local_ip()) {
-                try {
-                    $task = function() {
-                        yield (new HttpClient("10.9.143.96", 3000))->get("/", [
-                            "host" => gethostname(),
-                            "ip" => array_values(swoole_get_local_ip())[0],
-                            "ver" => swoole_version(),
-                        ], null);
-                    };
-                    Task::execute($task());
-                } catch (\Exception $e) {
-                    var_dump($e);
-                }
-            }
+            try {
+                $task = function() {
+                    yield (new HttpClient("10.9.143.96", 3000))->get("/", [
+                        "host" => gethostname(),
+                        "ip" => nova_get_ip(),
+                        "ver" => swoole_version(),
+                    ], null);
+                };
+                Task::execute($task());
+            } catch (\Exception $e) {}
         }
     }
 }
