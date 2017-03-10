@@ -9,6 +9,8 @@ namespace Zan\Framework\Network\ServerManager;
 
 use Com\Youzan\Nova\Framework\Generic\Servicespecification\GenericService;
 use Kdt\Iron\Nova\Service\Registry;
+use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\ServerManager\ServerRegister;
@@ -40,22 +42,14 @@ class ServerRegisterInitiator
         return $this->register;
     }
 
-//    public function initGenericService(&$config)
-//    {
-//        $registry = new Registry();
-//        $registry->register(new GenericService());
-//        $genericServices = $registry->getAll();
-//        if ($genericServices) {
-//            array_push($config['services'], ...$genericServices);
-//        }
-//    }
-
     public function init()
     {
         $keys = Nova::getEtcdKeyList();
         foreach ($keys as list($protocol, $domain, $appName)) {
             $this->doRegisterOneGroup($protocol, $domain, $appName);
         }
+
+        $this->doReportSwooleVer();
     }
 
     private function doRegisterOneGroup($protocol, $domain, $appName)
@@ -93,5 +87,26 @@ class ServerRegisterInitiator
         $register = new ServerRegister();
         $coroutine = $register->register($config);
         Task::execute($coroutine);
+    }
+
+    private function doReportSwooleVer()
+    {
+        $runmode = RunMode::get();
+        if ($runmode === "test" || $runmode === "qatest") {
+            if ($ip = swoole_get_local_ip()) {
+                try {
+                    $task = function() {
+                        yield (new HttpClient("10.9.143.96", 3000))->get("/", [
+                            "host" => gethostname(),
+                            "ip" => array_values(swoole_get_local_ip())[0],
+                            "ver" => swoole_version(),
+                        ], null);
+                    };
+                    Task::execute($task());
+                } catch (\Exception $e) {
+                    var_dump($e);
+                }
+            }
+        }
     }
 }
