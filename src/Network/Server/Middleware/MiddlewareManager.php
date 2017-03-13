@@ -13,6 +13,7 @@ use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
 use Zan\Framework\Contract\Network\RequestPostFilter;
 use Zan\Framework\Contract\Network\RequestTerminator;
+use Zan\Framework\Network\Http\RequestExceptionHandlerChain;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 
@@ -46,6 +47,14 @@ class MiddlewareManager
                 return;
             }
         }
+    }
+
+    public function handleHttpException(\Exception $e)
+    {
+        $handlerChain = array_filter($this->middlewares, function($v) {
+            return $v instanceof ExceptionHandler;
+        });
+        yield RequestExceptionHandlerChain::getInstance()->handle($e, $handlerChain);
     }
 
     public function handleException(\Exception $e)

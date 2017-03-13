@@ -12,6 +12,7 @@ use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Exception\Handler\ExceptionLogger;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use swoole_http_response as SwooleHttpResponse;
+use Zan\Framework\Network\Http\Response\ResponseTrait;
 
 class ExceptionHandlerChain
 {
@@ -31,18 +32,22 @@ class ExceptionHandlerChain
         $this->handlerMap = [];
     }
 
-    public function handle(\Exception $e)
+    public function handle(\Exception $e, array $extraHandlerChain = [])
     {
-        if (empty($this->handlerChain)) {
+        /** @var ExceptionHandler[] $handlerChain */
+        $handlerChain = array_merge(array_values($extraHandlerChain), $this->handlerChain);
+        if (empty($handlerChain)) {
             //@TODO 输出到console
             return;
             // throw $e;
         }
 
+        $response = null;
+
         //at less one handler handle the exception
         //else throw the exception out
         $exceptionHandled = false;
-        foreach ($this->handlerChain as $handler) {
+        foreach ($handlerChain as $handler) {
             $response = (yield $handler->handle($e));
             if ($response) {
                 $resp = (yield getContext('response'));
@@ -57,6 +62,7 @@ class ExceptionHandlerChain
         if (is_a($response, BaseResponse::class)) {
             $swooleResponse = (yield getContext('swoole_response'));
             $response->exception = $e->getMessage();
+            /** @var $response ResponseTrait */
             yield $response->sendBy($swooleResponse);
             return;
         }

@@ -51,7 +51,7 @@ class RequestTask
             if (Debug::get()) {
                 echo_exception($e);
             }
-            $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
+            $coroutine = $this->middleWareManager->handleHttpException($e);
             Task::execute($coroutine, $this->context);
             $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
