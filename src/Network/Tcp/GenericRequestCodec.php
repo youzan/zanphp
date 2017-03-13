@@ -47,11 +47,11 @@ final class GenericRequestCodec
             /* @var $classSpec TSpecification */
             /* @var $classMap ClassMap */
 
-            $classMap = ClassMap::getInstance();
+            /*$classMap = ClassMap::getInstance();
             $classSpec = $classMap->getSpec($serviceName);
             $resultSpec = $classSpec->getOutputStructSpec($methodName);
 
-            static::cleanSpec($resultSpec, $result);
+            static::cleanSpec($resultSpec, $result);*/
 
             return json_encode([
                 "response" => $result
