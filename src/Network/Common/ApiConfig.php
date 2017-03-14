@@ -414,10 +414,6 @@ return [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
         ],
-        'showcase' => [
-            'type' => 'local',
-            'host' => 'http://showcase.api.youzan.com/'
-        ],
         'fenxiao' => [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
@@ -919,10 +915,6 @@ return [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
         ],
-        'showcase' => [
-            'type' => 'local',
-            'host' => 'http://showcase.api.youzan.com/'
-        ],
         'fenxiao' => [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
@@ -1220,8 +1212,6 @@ return [
         ],
         'courier' => [
             'type' => 'java',
-            // 'host' > 'http://10.10.72.5:8011'//预发 10.10.72.5
-            // 'host' => 'http://10.10.127.76:8011'//online bc-msg3/4/5 //todo remove
             'host' => 'http://10.200.175.192:8011'//online bc-msg3/4/5
         ],
         'courierold' => [
@@ -1437,10 +1427,6 @@ return [
         'goods' => [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
-        ],
-        'showcase' => [
-            'type' => 'local',
-            'host' => 'http://showcase.api.youzan.com/'
         ],
         'fenxiao' => [
             'type' => 'local',
@@ -1789,8 +1775,6 @@ return [
         ],
         'courier' => [
             'type' => 'java',
-            // 'host' > 'http://10.10.72.5:8011'//预发 10.10.72.5
-            // 'host' => 'http://10.10.127.76:8011'//online bc-msg3/4/5 //todo remove
             'host' => 'http://10.200.175.192:8011', //online bc-msg3/4/5
             'sub' => [
                 [
@@ -2014,10 +1998,6 @@ return [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
         ],
-        'showcase' => [
-            'type' => 'local',
-            'host' => 'http://showcase.api.youzan.com/'
-        ],
         'fenxiao' => [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
@@ -2148,10 +2128,10 @@ return [
             'type' => 'local',
             'host' => 'http://notice.api.koudaitong.com/'
         ],
-        'fans' => [
-            'type' => 'local',
-            'host' => 'http://api.koudaitong.com/'
-        ],
+            'fans' => [
+                'type' => 'local',
+                'host' => 'http://api.koudaitong.com/'
+            ],
         'cp' => [
             'type' => 'local',
             'host' => 'http://api.koudaitong.com/'
