@@ -29,9 +29,12 @@ class InitializeMiddleware
     {
         $middlewareInitiator = MiddlewareInitiator::getInstance();
         $middlewareConfig = ConfigLoader::getInstance()->load(Config::get('path.middleware'));
+        $exceptionHandlerConfig = isset($middlewareConfig['exceptionHandler']) ? $middlewareConfig['exceptionHandler'] : [];
+        $exceptionHandlerConfig = is_array($exceptionHandlerConfig) ? $exceptionHandlerConfig : [];
         $middlewareConfig = isset($middlewareConfig['middleware']) ? $middlewareConfig['middleware'] : [];
         $middlewareConfig = is_array($middlewareConfig) ? $middlewareConfig : [];
         $middlewareInitiator->initConfig($middlewareConfig);
+        $middlewareInitiator->initExceptionHandlerConfig($exceptionHandlerConfig);
         $middlewareInitiator->initZanFilters($this->zanFilters);
         $middlewareInitiator->initZanTerminators($this->zanTerminators);
     }
