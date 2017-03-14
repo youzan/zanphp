@@ -1,6 +1,10 @@
 ## Change Log
 
-### HTTP Server 自定义异常处理注册
+### 20170315 添加可选配置文件 config/env/api.php, 配置优先于ApiConfig 
+
+------------------------------------------------------------------------------------------
+
+### 20170314 HTTP Server 自定义异常处理注册
 
 resource\middleware目录下增加exceptionHandler.php配置,示例如下:
 

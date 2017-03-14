@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Common;
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Foundation\Contract\Async;
@@ -222,22 +223,8 @@ class Client implements Async
     {
         $runMode = RunMode::get();
         if (is_null(self::$apiConfig)) {
-            $configFile = __DIR__ . '/ApiConfig.php';
-            if (!file_exists($configFile)) {
-                throw new UnexpectedResponseException('service_host 配置文件不存在');
-            }
-            $allApiConfig = require $configFile;
-
-            $runMode = RunMode::get();
-            if (isset($allApiConfig[$runMode])) {
-                self::$apiConfig = $allApiConfig[$runMode];
-            } elseif ($runMode == 'pre' && isset($allApiConfig['online'])) {
-                self::$apiConfig = $allApiConfig['online'];
-            } elseif($runMode == 'pubtest' && isset($allApiConfig['test'])){
-                self::$apiConfig = $allApiConfig['test'];
-            }else{
-                throw new UnexpectedResponseException('service_host 配置文件不完整');
-            }
+            self::loadConfig();
+            self::loadBizDefinedConfig();
         }
 
         $pos = stripos ($api, ".");
@@ -305,5 +292,48 @@ class Client implements Async
             'params' => $this->params,
             'uri' => $this->uri
         ];
+    }
+
+    private static function loadConfig()
+    {
+        $configFile = __DIR__ . '/ApiConfig.php';
+        if (!file_exists($configFile)) {
+            throw new UnexpectedResponseException('service_host 配置文件不存在');
+        }
+        $allApiConfig = require $configFile;
+
+        $runMode = RunMode::get();
+        if (isset($allApiConfig[$runMode])) {
+            self::$apiConfig = $allApiConfig[$runMode];
+        } elseif ($runMode == 'pre' && isset($allApiConfig['online'])) {
+            self::$apiConfig = $allApiConfig['online'];
+        } elseif($runMode == 'pubtest' && isset($allApiConfig['test'])){
+            self::$apiConfig = $allApiConfig['test'];
+        }else{
+            throw new UnexpectedResponseException('service_host 配置文件不完整');
+        }
+    }
+
+    /**
+     * 覆盖规则
+     * 全局没有, 直接添加自定义
+     * 两者都有, 除sub字段, 其他用户自定义覆盖全局
+     * mod字段, 自定义搜索优先级高
+     */
+    private static function loadBizDefinedConfig()
+    {
+        $bizApi =  Config::get("api", []);
+        foreach ($bizApi as $mod => $item) {
+            if (isset(self::$apiConfig[$mod])) {
+                $item0 = self::$apiConfig[$mod];
+                if (isset($item["sub"]) && isset($item0["sub"])) {
+                    $item0["sub"] = array_merge($item["sub"], $item0["sub"]);
+                    unset($item["sub"]);
+                }
+                self::$apiConfig[$mod] = array_merge($item0, $item);
+            } else {
+                self::$apiConfig[$mod] = $item;
+            }
+        }
     }
 }
