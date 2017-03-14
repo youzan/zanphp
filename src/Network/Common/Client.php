@@ -327,7 +327,7 @@ class Client implements Async
             if (isset(self::$apiConfig[$mod])) {
                 $item0 = self::$apiConfig[$mod];
                 if (isset($item["sub"]) && isset($item0["sub"])) {
-                    self::$apiConfig[$mod]["sub"] = array_merge($item["sub"], $item0["sub"]);
+                    $item0["sub"] = array_merge($item["sub"], $item0["sub"]);
                     unset($item["sub"]);
                 }
                 self::$apiConfig[$mod] = array_merge($item0, $item);
