@@ -322,7 +322,7 @@ class Client implements Async
      */
     private static function loadBizDefinedConfig()
     {
-        $bizApi =  Config::get("api", []);
+        $bizApi =  Config::get("apiconf", []);
         foreach ($bizApi as $mod => $item) {
             if (isset(self::$apiConfig[$mod])) {
                 $item0 = self::$apiConfig[$mod];
