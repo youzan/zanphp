@@ -318,7 +318,7 @@ class Client implements Async
      * 覆盖规则
      * 全局没有, 直接添加自定义
      * 两者都有, 除sub字段, 其他用户自定义覆盖全局
-     * mod字段, 自定义搜索优先级高
+     * sub字段, 自定义搜索优先级高
      */
     private static function loadBizDefinedConfig()
     {
