@@ -544,6 +544,77 @@ return [
             'type' => 'java',
             'host' => 'http://10.9.71.125:7001'
         ],
+        'trade-refund' => [
+            'type' => 'local',
+            'host' => 'http://trade.api.youzan.com/',
+            'sub'  => [
+                [
+                    'mod'  => 'trade-refund.facade.orderRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderItemRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.markRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderItemTransfer',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.safeguardRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.changePricePayRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderClosedRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.overPayRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayExpireRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.cashBack',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayOverPayRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayItemRefund',
+                    'host' => 'http://127.0.0.1:7001',
+                    'type' => 'java'
+                ],
+            ]
+        ],
 
         'scrm' => [
             'type' => 'java',
@@ -1054,6 +1125,77 @@ return [
         'refund_soa' => [
             'type' => 'java',
             'host' => 'http://10.9.71.125:7001',
+        ],
+        'trade-refund' => [
+            'type' => 'local',
+            'host' => 'http://trade.api.youzan.com/',
+            'sub'  => [
+                [
+                    'mod'  => 'trade-refund.facade.orderRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderItemRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.markRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderItemTransfer',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.safeguardRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.changePricePayRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderClosedRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.overPayRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayExpireRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.cashBack',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayOverPayRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayItemRefund',
+                    'host' => 'http://10.9.71.125:7001',
+                    'type' => 'java'
+                ],
+            ]
         ],
         'scrm' => [
             'type' => 'java',
