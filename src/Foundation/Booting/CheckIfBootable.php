@@ -15,7 +15,7 @@ class CheckIfBootable implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        $requiredExtensions = ["apcu", "swoole"];
+        $requiredExtensions = ["apcu", "lz4", "swoole"];
         foreach ($requiredExtensions as $extension) {
             if (!extension_loaded($extension)) {
                 sys_error("$extension is not loaded, use php -m to check php modules");
