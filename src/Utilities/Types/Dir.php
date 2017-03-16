@@ -13,9 +13,10 @@ class Dir
 
     public static function glob($path, $pattern=null, $strategy=self::SCAN_DFS)
     {
-        if(!is_dir($path) || !$pattern) {
-            throw new InvalidArgumentException('invalid $path or $pattern for Dir::glob');
-        }
+        if(!is_dir($path))
+            throw new InvalidArgumentException("Directory: $path does not exist");
+        if (!$pattern)
+            throw new InvalidArgumentException("Dir glob pattern is invalid");
 
         $files = Dir::scan($path, $strategy);
         $result = [];
