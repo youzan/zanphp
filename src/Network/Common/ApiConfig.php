@@ -1618,6 +1618,10 @@ return [
             'type' => 'java',
             'host' => 'http://trade-refund-soa.s.qima-inc.com',
         ],
+        'trade-refund' => [
+            'type' => 'java',
+            'host' => 'trade-refund-soa-pre.s.qima-inc.com',
+        ],
         'scrm' => [
             'type' => 'http',
             'host' => 'http://novaproxy.s.qima-inc.com'
@@ -2187,6 +2191,77 @@ return [
         'refund_soa' => [
             'type' => 'java',
             'host' => 'http://trade-refund-soa.s.qima-inc.com',
+        ],
+        'trade-refund' => [
+            'type' => 'local',
+            'host' => 'http://trade.api.youzan.com/',
+            'sub'  => [
+                [
+                    'mod'  => 'trade-refund.facade.orderRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderItemRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.markRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderItemTransfer',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.safeguardRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.changePricePayRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.orderClosedRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.overPayRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayExpireRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.cashBack',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayOverPayRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+                [
+                    'mod'  => 'trade-refund.facade.peerpayItemRefund',
+                    'host' => 'http://trade-refund-soa.s.qima-inc.com',
+                    'type' => 'java'
+                ],
+            ]
         ],
         'scrm' => [
             'type' => 'http',
