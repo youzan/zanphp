@@ -65,7 +65,9 @@ class Cache {
             foreach ($routes as $key => $route) {
                 $result = ($key == 0) ? [$route => $config] : [$route => $result];
             }
-            self::$_configMap = array_merge_recursive(self::$_configMap, $result);
+            if (is_array(self::$_configMap) && is_array($result)) {
+                self::$_configMap = array_merge_recursive(self::$_configMap, $result);
+            }
         }
     }
 
