@@ -42,10 +42,15 @@ class NovaClientConnectionManager
         }
     }
 
-    public function get($protocol, $domain, $service, $method)
+    public function get($protocol, $domain, $service, $method, $retry = 5)
     {
         $serviceKey = $this->serviceKey($protocol, $domain, $service);
         if (!isset($this->serviceMap[$serviceKey])) {
+            while ($retry > 0) {
+                yield taskSleep(200);
+                yield $this->get($protocol, $domain, $service, $method, --$retry);
+                return;
+            }
             throw new CanNotFindNovaClientPoolException("proto=$protocol, domain=$domain, service=$service, method=$method");
         }
 
