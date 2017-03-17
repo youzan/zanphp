@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\BusinessException;
 use Zan\Framework\Foundation\Contract\Async;
@@ -296,7 +297,7 @@ class Client implements Async
 
     private static function loadConfig()
     {
-        $configFile = __DIR__ . '/ApiConfig.php';
+        $configFile = Path::getRootPath() . 'vendor/zan-config/zan/src/ApiConfig.php';
         if (!file_exists($configFile)) {
             throw new UnexpectedResponseException('service_host 配置文件不存在');
         }
