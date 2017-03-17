@@ -9,6 +9,22 @@ class RedisUuid extends UuidAbstract
     {
         if (! self::$instance) {
             self::$instance = new self();
+
+            $appendConfig = [
+                'connection' => 'redis.uuid',
+                'exp' => '1'
+            ];
+            $appendConfig['key'] = 'step';
+            Cache::appendConfigMapByConfigKey('uuid.step', $appendConfig);
+
+            $appendConfig['key'] = 'serialid';
+            Cache::appendConfigMapByConfigKey('uuid.serialid', $appendConfig);
+
+            $appendConfig['key'] = 'snowflake';
+            Cache::appendConfigMapByConfigKey('uuid.snowflake', $appendConfig);
+
+            $appendConfig['key'] = 'objectid';
+            Cache::appendConfigMapByConfigKey('uuid.objectid', $appendConfig);
         }
 
         return self::$instance;

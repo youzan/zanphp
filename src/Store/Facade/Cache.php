@@ -40,6 +40,37 @@ class Cache {
         self::$_configMap = $configMap;
     }
 
+    /**
+     * 给初始化后的Cache配置追加配置项
+     *
+     * @param string $configKey
+     * @param array $config
+     * @return null
+     */
+    public static function appendConfigMapByConfigKey($configKey, array $config)
+    {
+        if (self::validConfig($config)) {
+            $routes = explode('.', $configKey);
+            if (empty($routes)) {
+                return null;
+            }
+            //如果key已有值就放弃设值（避免重复覆盖）
+            $nowConfig = self::getConfigCacheKey($configKey);
+            if (!empty($nowConfig)) {
+                return null;
+            }
+
+            $result = [];
+            $routes = array_reverse($routes);
+            foreach ($routes as $key => $route) {
+                $result = ($key == 0) ? [$route => $config] : [$route => $result];
+            }
+            if (is_array(self::$_configMap) && is_array($result)) {
+                self::$_configMap = array_merge_recursive(self::$_configMap, $result);
+            }
+        }
+    }
+
 
     public static function __callStatic($func, $args) {
         $configKey = array_shift($args);
