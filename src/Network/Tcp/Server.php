@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Network\Server\Monitor\Worker;
+use Zan\Framework\Network\Server\WorkerStart\InitializeExceptionHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Network\ServerManager\ServerStore;
@@ -32,6 +33,7 @@ class Server extends ServerBase {
     ];
 
     protected $workerStartItems = [
+        InitializeExceptionHandler::class,
         InitializeWorkerMonitor::class,
         InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
@@ -80,8 +82,6 @@ class Server extends ServerBase {
         }
 
         Nova::init($this->parserNovaConfig($config));
-        // TODO 移除
-        // ClassMap::getInstance()->setSpec(GenericService::class, new GenericService());
 
         $config = Config::get('haunt');
         if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
@@ -117,17 +117,17 @@ class Server extends ServerBase {
     {
         $_SERVER["WORKER_ID"] = $workerId;
         $this->bootWorkerStartItem($workerId);
-        sys_echo("worker #$workerId starting .....");
+        sys_echo("worker *$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
         // worker stop 在 worker 进程执行
         ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
-        sys_echo("worker #$workerId stopping ....");
+        sys_echo("worker *$workerId stopping ....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        sys_echo("worker #$workerId still has $num requests in progress...");
+        sys_echo("worker *$workerId still has $num requests in progress...");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
@@ -136,7 +136,7 @@ class Server extends ServerBase {
         sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        sys_echo("worker #$workerId still has $num requests in progress...");
+        sys_echo("worker *$workerId still has $num requests in progress...");
     }
 
     public function onPacket(SwooleServer $swooleServer, $data, array $clientInfo)
