@@ -7,7 +7,7 @@
         }
     },
     "require": {
-        "zan-config/zan": "1.0.0",
+        "zan-config/zan": "dev-master@dev",
         "qiniu/php-sdk": "7.0.0",
         "symfony/console": "3.1",
         "elasticsearch/yz-elasticsearch-client": "1.0.1",
