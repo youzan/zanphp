@@ -16,7 +16,7 @@ class Env {
     public static  function init()
     {
         self::$data['hostname'] = gethostname();
-        self::$data['ip'] = gethostbyname(self::$data['hostname']);
+        self::$data['ip'] = nova_get_ip();
         self::$data['pid'] = getmypid();
         self::$data['uid'] = getmyuid();
     }
