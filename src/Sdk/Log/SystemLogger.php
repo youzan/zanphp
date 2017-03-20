@@ -30,7 +30,7 @@ class SystemLogger extends BaseLogger
         $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->config['path']);
         $this->priority = LOG_LOCAL3 + LOG_INFO;
         $this->hostname = Env::get('hostname');
-        $this->server = $this->hostname . '/' . gethostbyname($this->hostname);
+        $this->server = $this->hostname . '/' . Env::get('ip');
         $this->pid = Env::get('pid');
     }
 
