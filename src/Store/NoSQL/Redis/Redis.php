@@ -10,6 +10,8 @@ namespace Zan\Framework\Store\NoSQL\Redis;
 
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
 
 
 /**
@@ -32,6 +34,8 @@ class Redis implements Async
     private $conn;
     private $sock;
 
+    const DEFAULT_CALL_TIMEOUT = 2000;
+
     public function __construct($conn)
     {
         $this->conn = $conn;
@@ -42,16 +46,48 @@ class Redis implements Async
     {
         $arguments[] = [$this, 'recv'];
         call_user_func_array([$this->sock, $name], $arguments);
+        $this->beginTimeoutTimer($name, $arguments);
         yield $this;
     }
 
     public function recv($client, $ret)
     {
+        $this->cancelTimeoutTimer();
         call_user_func($this->callback, $ret);
     }
 
     public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
+    }
+
+    private function beginTimeoutTimer($name, $args)
+    {
+        $config = $this->conn->getConfig();
+        $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_CALL_TIMEOUT;
+        Timer::after($timeout, $this->onTimeout($name, $args), spl_object_hash($this));
+    }
+
+    private function cancelTimeoutTimer()
+    {
+        Timer::clearAfterJob(spl_object_hash($this));
+    }
+
+    private function onTimeout($name, $args)
+    {
+        $start = microtime(true);
+        return function() use($name, $args, $start) {
+            // TODO TRACE
+
+            if ($this->callback) {
+                $duration = microtime(true) - $start;
+                $ctx = [
+                    "name" => $name,
+                    "args" => $args,
+                    "duration" => $duration,
+                ];
+                call_user_func_array($this->callback, [null, new RedisCallTimeoutException("Redis call $name timeout", 0, null, $ctx)]);
+            }
+        };
     }
 }
