@@ -15,6 +15,16 @@ class InitializeCliInput implements Bootable
     public function bootstrap(Application $app)
     {
         $input = new ArgvInput();
+        if ($input->hasParameterOption('--help')) {
+            $help = <<<EOF
+Options:
+--debug [true/false]              enable/disable debug mode
+--env   [ENV]                     set run mode environment, eg: online, test, qatest
+--service-register [true/false]   enable/disable service register
+
+EOF;
+            exit($help);
+        }
         $debug = $input->getParameterOption('--debug');
         if ($debug === 'true') {
             Debug::enableDebug();
