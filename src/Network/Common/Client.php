@@ -196,7 +196,7 @@ class Client implements Async
 
                 $response = $jsonData['data']['data'];
             } else {
-                if (isset($jsonData['data'])) {
+                if (array_key_exists('data', $jsonData)) {
                     $response = $jsonData['data'];
                 } else {
                     $msg = isset($jsonData['msg']) ? $jsonData['msg'] : "网络错误($code)";
