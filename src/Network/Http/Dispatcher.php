@@ -37,6 +37,7 @@ class Dispatcher
         $parts = array_filter(explode('/', $controllerName));
         $controllerName = join('\\', array_map('ucfirst', $parts));
         $app = Application::getInstance();
-        return $app->getNamespace() . 'Controller\\' .  $controllerName . 'Controller';
+        $controllerRootNamespace = Config::get('controller_mapping.root_namespace', $app->getNamespace());
+        return $controllerRootNamespace . 'Controller\\' .  $controllerName . 'Controller';
     }
 }
