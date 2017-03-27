@@ -89,7 +89,11 @@ class ConnectionInitiator
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
                 $cf['pool']['pool_name'] = $this->poolName;
-                $this->initPool($factoryType, $cf);
+                if (class_exists("swoole_conn_pool")) {
+                    $this->initSwoolePool($factoryType, $cf);
+                } else {
+                    $this->initPool($factoryType, $cf);
+                }
                 $fileConfigKeys = array_keys($config);
                 $endKey = end($fileConfigKeys);
                 $this->poolName = $k == $endKey ? '' : $dir;
@@ -147,6 +151,12 @@ class ConnectionInitiator
                 throw new \RuntimeException("not support connection type: $factoryType");
         }
         $connectionPool = new Pool($factory, $config, $factoryType);
+        ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
+    }
+
+    private function initSwoolePool($factoryType, $config)
+    {
+
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
 }
