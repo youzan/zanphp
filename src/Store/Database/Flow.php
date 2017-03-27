@@ -97,6 +97,7 @@ class Flow
             yield $this->queryException($e, $connection);
             throw $e;
         }
+        yield $this->releaseConnection($connection);
         yield $dbResult;
     }
 
