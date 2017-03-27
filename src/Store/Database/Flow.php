@@ -86,6 +86,20 @@ class Flow
         yield $result;
     }
 
+    public function queryRaw($table, $sql)
+    {
+        $database = Table::getInstance()->getDatabase($table);
+        $connection = (yield $this->getConnection($database));
+        $driver = $this->getDriver($connection);
+        try {
+            $dbResult = (yield $driver->query($sql));
+        } catch (\Exception $e) {
+            yield $this->queryException($e, $connection);
+            throw $e;
+        }
+        yield $dbResult;
+    }
+
     public function beginTransaction($flags = 0)
     {
         $taskId = (yield getTaskId());
