@@ -26,7 +26,8 @@ class LoadFiles implements Bootable
 
         $loader = Loader::getInstance();
         foreach ($paths as $path) {
-            $loader->load($path);
+            if (is_dir($path))
+                $loader->load($path);
         }
     }
 }
