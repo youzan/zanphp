@@ -9,6 +9,7 @@
 namespace Zan\Framework\Store\NoSQL\Redis;
 
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
@@ -36,7 +37,7 @@ class Redis implements Async
 
     const DEFAULT_CALL_TIMEOUT = 2000;
 
-    public function __construct($conn)
+    public function __construct(Connection $conn)
     {
         $this->conn = $conn;
         $this->sock = $conn->getSocket();

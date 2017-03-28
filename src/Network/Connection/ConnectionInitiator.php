@@ -156,7 +156,7 @@ class ConnectionInitiator
 
     private function initSwoolePool($factoryType, $config)
     {
-
-        ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
+        $swooleConnectionPool = new SwooleConnectionPool($factoryType);
+        ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $swooleConnectionPool);
     }
 }

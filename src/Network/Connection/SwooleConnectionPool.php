@@ -10,27 +10,28 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Foundation\Exception\ZanException;
-use Zan\Framework\Network\Connection\Driver\Base;
-use Zan\Framework\Network\Connection\Driver\Tcp;
 use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 
 class SwooleConnectionPool implements Async/*, ConnectionPool*/
 {
+    public $poolType;
     /**
      * @var \swoole_conn_pool
      */
-    private $pool;
+    public $pool;
 
-    private $config;
+    public $config;
 
-    private $heartbeatHandler;
+    public $heartbeatHandler;
 
-    private $callback;
+    public $callback;
 
-    public function __construct($type, array $config, $heartbeatHandler)
+    public function __construct($factoryType, array $config, $heartbeatHandler)
     {
+        $this->poolType = $factoryType;
+
+        // $factoryType -> type
         $this->pool = new \swoole_conn_pool($type);
         $this->config = $config;
         $this->heartbeatHandler = $heartbeatHandler;
@@ -52,7 +53,7 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
             // $timeout = // get from config
         }
 
-        $r = $this->pool->get($timeout, $this->getConnectionDone($timeout));
+        $r = $this->pool->get($timeout, $this->getConnectionDone());
         if ($r === false) {
             throw new ZanException("fail to call swoole_conn_pool::get ");
         }
@@ -66,57 +67,30 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
         return $this->pool->release($conn, $status);
     }
 
-    private function getConnectionDone($timeout, $type)
+    public function getConnectionDone($result, $conn)
     {
-        return function($result, $conn) use($timeout, $type) {
-            if ($cc = $this->callback) {
-                if ($result) {
-
-                    /* @var $connection Base */
-                    $connection = null;
-
-                    // 子类 重写 close ...   release...
-                    switch (true) {
-                        case $conn instanceof \swoole_client:
-                            $connection = new Tcp();
-                            $connection->setSocket($conn);
-                            $connection->setConfig(); // TODO
-                            $connection->setPool(); // TODO
-
-                            // $connection->init();
-                            break;
-
-                        case $conn instanceof \swoole_mysql:
-                            return true;
-
-
-                        case $conn instanceof \swoole_redis:
-                            return true;
-
-
-                        case $conn instanceof \swoole_http_client:
-                            return true;
-
-
-                        default:
-                            assert(false);
-                    }
-
-
-                    $cc($connection);
-
-                } else {
-                    $cc(null, new GetConnectionTimeoutFromPool("get connection timeout, [pool_type=$type, timeout=$timeout]"));
-                }
+        if ($cc = $this->callback) {
+            if ($result) {
+                $poolConnection = new SwoolePoolConnection();
+                $cc($poolConnection);
             } else {
-                // swoole 内部发生同步call异步回调, 不应该发生
-                assert(false);
+                $cc(null, new GetConnectionTimeoutFromPool("get connection timeout, $this"));
             }
-        };
+        } else {
+            // swoole 内部发生同步call异步回调, 不应该发生
+            assert(false);
+        }
     }
 
     public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
+    }
+
+    public function __toString()
+    {
+        // TODO 打包配置信息
+
+        // TODO: Implement __toString() method.
     }
 }

@@ -13,10 +13,8 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\Types\ObjectArray;
 use Zan\Framework\Utilities\Types\Time;
-use Zan\Framework\Foundation\Coroutine\Task;
 
 class Pool implements ConnectionPool
 {

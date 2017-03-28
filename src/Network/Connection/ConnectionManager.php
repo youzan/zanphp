@@ -77,7 +77,7 @@ class ConnectionManager
 
     /**
      * @param $poolKey
-     * @param Pool|\swoole_conn_pool $pool
+     * @param Pool|SwooleConnectionPool $pool
      * @throws InvalidArgumentException
      */
     public function addPool($poolKey, $pool)
