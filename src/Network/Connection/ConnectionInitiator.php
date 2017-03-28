@@ -71,8 +71,10 @@ class ConnectionInitiator
         }
         foreach ($config as $k=>$cf) {
             if (!isset($cf['engine'])) {
+                $poolName = $this->poolName;
                 $this->poolName = '' === $this->poolName ? $k : $this->poolName . '.' . $k;
                 $this->initConfig($cf);
+                $this->poolName = $poolName;
                 continue;
             }
             if (!isset($cf['pool']) || empty($cf['pool'])) {
