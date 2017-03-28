@@ -196,7 +196,14 @@ class Client implements Async
 
                 $response = $jsonData['data']['data'];
             } else {
-                $response = $jsonData['data'];
+                if (array_key_exists('data', $jsonData)) {
+                    $response = $jsonData['data'];
+                } else {
+                    $msg = isset($jsonData['msg']) ? $jsonData['msg'] : "网络错误($code)";
+                    $e = $this->generateException($code, $msg, ['response' => $response, 'request' => $this->getRequestMetadata()]);
+                    call_user_func($callback, null, $e);
+                    return;
+                }
             }
 
             call_user_func($callback, $response);
