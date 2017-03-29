@@ -3,6 +3,8 @@
 namespace Zan\Framework\Sdk\SmsCaptcha;
 
 
+use Zan\Framework\Foundation\Core\Path;
+use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Http\Middleware\Session;
 use Zan\Framework\Sdk\Sms\Channel;
 use Zan\Framework\Sdk\Sms\MessageContext;
@@ -17,6 +19,7 @@ use Zan\Framework\Utilities\Types\Time;
  * @package Zan\Framework\Sdk\SmsCaptcha
  *
  * 从IRON移植过来的短信验证码SDK, 接口不变, 方便迁移代码
+ * 需要从IRON移植配置到resource/cache/common/smscaptcha.php
  */
 class SmsCaptcha
 {
@@ -26,7 +29,7 @@ class SmsCaptcha
     const BIZ_ID_UPDATE_CASH_ACCOUNT   = 9; //修改提现到 银行卡账号
     const BIZ_ID_ADD_CASH_ACCOUNT      = 15; //增加提现到 银行卡账号
 
-    public $bizMap = [
+    private $bizMap = [
         'kdt_account_captcha' => 3,//注册时
         'reset_team_mobile_captcha' => 4,//修改店铺联系方式时
         'set_trade_captcha' => 5,//设置提现账户时
@@ -46,15 +49,27 @@ class SmsCaptcha
         'activation_code_order' =>19, //激活码批量采购
     ];
 
-    public $mobile;
-    public $biz;
-    public $ip;
-    public $sendTimes;
-    public $platform;
-    public $subFrom;
+    private $mobile;
+    private $biz;
+    private $ip;
+    private $sendTimes;
+    private $platform;
+    private $subFrom;
+
+    private static $_enable;
 
     public function __construct(array $config)
     {
+        $path = Path::getCachePath() . "/common/smscaptcha.php";
+        if (self::$_enable === null) {
+            self::$_enable = file_exists($path);
+        }
+
+        if (self::$_enable === false) {
+            sys_error("请添加 $path 配置");
+            throw new ZanException("网络错误");
+        }
+
         if(!in_array($config['biz'], array_keys($this->bizMap))) {
             throw new SmsCaptchaException('亲，业务类型错啦！');
         }
@@ -85,7 +100,7 @@ class SmsCaptcha
                 'sub_from' => $this->subFrom,
             ];
 
-            SmsService::getInstance()->send(
+            yield SmsService::getInstance()->send(
                 self::getMessageContextForSmsCaptcha($messageParams),
                 [new Recipient(Channel::SMS, $this->mobile)]
             );
@@ -133,7 +148,7 @@ class SmsCaptcha
         yield $this->validSuccess(true);
     }
 
-    public function validFailed()
+    private function validFailed()
     {
         $usedCount = 0;
         $count = (yield SmsCaptchaStore::getCount($this->mobile, $this->biz));
@@ -145,7 +160,7 @@ class SmsCaptcha
         yield SmsCaptchaStore::setCount($this->mobile, $this->biz, $usedCount);
     }
 
-    public function validSuccess($invalid)
+    private function validSuccess($invalid)
     {
         if($invalid) {
             //给app预留一个开关，控制验证码是否失效
@@ -159,7 +174,7 @@ class SmsCaptcha
      * @param $messageParams
      * @return MessageContext
      */
-    public function getMessageContextForSmsCaptcha($messageParams)
+    private function getMessageContextForSmsCaptcha($messageParams)
     {
         $biz = Arr::get($messageParams, 'biz', 0);
 

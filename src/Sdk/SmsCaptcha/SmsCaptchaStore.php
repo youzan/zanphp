@@ -23,83 +23,82 @@ class SmsCaptchaStore
 
     public static function getCode($mobile, $biz)
     {
-        yield Cache::get(self::SMS_CAPTCHA_CACHE_KEY, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::get(self::SMS_CAPTCHA_CACHE_KEY, [$mobile, $biz]);
     }
 
     public static function setCode($mobile, $biz, $code)
     {
-        yield Cache::set(self::SMS_CAPTCHA_CACHE_KEY, $code, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::set(self::SMS_CAPTCHA_CACHE_KEY, [$mobile, $biz], $code);
     }
 
     public static function delCode($mobile, $biz)
     {
-        yield Cache::delete(self::SMS_CAPTCHA_CACHE_KEY, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::del(self::SMS_CAPTCHA_CACHE_KEY, [$mobile, $biz]);
     }
 
     public static function getCount($mobile, $biz)
     {
-        $count = (yield Cache::get(self::SMS_CAPTCHA_COUNT_CACHE_KEY, ['mobile' => $mobile, 'biz' => $biz]));
+        $count = (yield Cache::get(self::SMS_CAPTCHA_COUNT_CACHE_KEY, [$mobile, $biz]));
         yield intval($count);
     }
 
     public static function setCount($mobile, $biz, $count)
     {
-        yield Cache::set(self::SMS_CAPTCHA_COUNT_CACHE_KEY, $count, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::set(self::SMS_CAPTCHA_COUNT_CACHE_KEY, [$mobile, $biz], $count);
     }
 
     public static function delCount($mobile, $biz)
     {
-        yield Cache::delete(self::SMS_CAPTCHA_COUNT_CACHE_KEY, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::del(self::SMS_CAPTCHA_COUNT_CACHE_KEY, [$mobile, $biz]);
     }
 
     public static function getBizCount($mobile, $biz)
     {
-        $count = (yield Cache::get(self::SMS_CAPTCHA_BIZ_COUNT_CACHE_KEY, ['mobile' => $mobile, 'biz' => $biz]));
+        $count = (yield Cache::get(self::SMS_CAPTCHA_BIZ_COUNT_CACHE_KEY, [$mobile, $biz]));
         yield intval($count);
     }
 
     public static function setBizCount($mobile, $biz, $count)
     {
-        yield Cache::set(self::SMS_CAPTCHA_BIZ_COUNT_CACHE_KEY, $count, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::set(self::SMS_CAPTCHA_BIZ_COUNT_CACHE_KEY, [$mobile, $biz], $count);
     }
 
     public static function delBizCount($mobile, $biz)
     {
-        yield Cache::delete(self::SMS_CAPTCHA_BIZ_COUNT_CACHE_KEY, ['mobile' => $mobile, 'biz' => $biz]);
+        yield Cache::del(self::SMS_CAPTCHA_BIZ_COUNT_CACHE_KEY, [$mobile, $biz]);
     }
 
     public static function getTotal($mobile, $biz)
     {
-        $total = (yield yield Cache::get(self::SMS_CAPTCHA_TOTAL_CACHE_KEY, $mobile));
+        $total = (yield Cache::get(self::SMS_CAPTCHA_TOTAL_CACHE_KEY, $mobile));
         yield intval($total);
     }
 
     public static function setTotal($mobile, $biz, $total)
     {
-        yield yield Cache::set(self::SMS_CAPTCHA_TOTAL_CACHE_KEY, $total, $mobile);
+        yield Cache::set(self::SMS_CAPTCHA_TOTAL_CACHE_KEY, $mobile, $total);
     }
 
     public static function delTotal($mobile, $biz)
     {
-        yield yield Cache::delete(self::SMS_CAPTCHA_TOTAL_CACHE_KEY, $mobile);
+        yield Cache::del(self::SMS_CAPTCHA_TOTAL_CACHE_KEY, $mobile);
     }
 
     public static function getTime($mobile, $biz)
     {
-        $time = (yield Cache::get(self::SMS_CAPTCHA_TIME_CACHE_KEY, ['mobile' => $mobile]));
+        $time = (yield Cache::get(self::SMS_CAPTCHA_TIME_CACHE_KEY, $mobile));
         yield intval($time);
     }
 
     public static function setTime($mobile, $biz)
     {
-        yield Cache::set(self::SMS_CAPTCHA_TIME_CACHE_KEY, Time::current(true), ['mobile' => $mobile]);
+        yield Cache::set(self::SMS_CAPTCHA_TIME_CACHE_KEY, $mobile, Time::current(true));
     }
 
     public static function delTime($mobile, $biz)
     {
-        yield Cache::delete(self::SMS_CAPTCHA_TIME_CACHE_KEY, ['mobile' => $mobile]);
+        yield Cache::del(self::SMS_CAPTCHA_TIME_CACHE_KEY, $mobile);
     }
-
 
     public static function initCaptcha($response, $mobile, $biz)
     {

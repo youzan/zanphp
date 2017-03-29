@@ -62,17 +62,18 @@ class SmsCaptchaValidation
     public static function checkCode($response, $mobile, $biz)
     {
         if( !in_array(Config::get('run_mode'), ['online', 'pre'], true)) {
-            return true;
+            yield true;
+            return;
         }
 
         $userCode = SmsCaptchaStore::generateCacheValue($response, $mobile, $biz);
-        $cacheCode = (yield SmsCaptchaStore::getCount($mobile, $biz));
+        $cacheCode = (yield SmsCaptchaStore::getCode($mobile, $biz));
 
         if(!$cacheCode && $biz == 9) {
             $userCode = SmsCaptchaStore::generateCacheValue($response, $mobile, 15);
-            $cacheCode = (yield SmsCaptchaStore::getCount($mobile, $biz));
+            $cacheCode = (yield SmsCaptchaStore::getCode($mobile, $biz));
         }
 
-        return $userCode === $cacheCode;
+        yield $userCode === $cacheCode;
     }
 }

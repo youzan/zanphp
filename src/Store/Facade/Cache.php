@@ -18,7 +18,7 @@ use Zan\Framework\Utilities\Types\ObjectArray;
  * Class Cache
  * @package Zan\Framework\Store\Facade
  *
- * @method static bool delete($configKey, $keys)
+ * @method static bool del($configKey, $keys)
  */
 class Cache {
 
