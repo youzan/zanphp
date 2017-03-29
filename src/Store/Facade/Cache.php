@@ -7,17 +7,19 @@
  */
 namespace Zan\Framework\Store\Facade;
 
-use RuntimeException;
 use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Core\ConfigLoader;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\Redis\Redis;
-use Zan\Framework\Store\NoSQL\Redis\RedisManager;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
+/**
+ * Class Cache
+ * @package Zan\Framework\Store\Facade
+ *
+ * @method static bool del($configKey, $keys)
+ */
 class Cache {
 
     const POOL_PREFIX = 'connection.';
