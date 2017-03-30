@@ -21,7 +21,7 @@ class CheckIfBootable implements Bootable
                 sys_error("\033[1;31m$extension is not loaded, use php -m to check php modules\033[0m");
             }
         }
-        $targetVersion = "2.1.3";
+        $targetVersion = "2.1.0";
         $currentVersion = swoole_version();
         if ($currentVersion < $targetVersion) {
             sys_error("\033[1;31mYour swoole version($currentVersion) is lower than $targetVersion, ".
