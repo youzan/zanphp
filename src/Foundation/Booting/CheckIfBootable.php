@@ -18,16 +18,14 @@ class CheckIfBootable implements Bootable
         $requiredExtensions = ["apcu", "lz4", "swoole"];
         foreach ($requiredExtensions as $extension) {
             if (!extension_loaded($extension)) {
-                sys_error("$extension is not loaded, use php -m to check php modules");
-                exit(1);
+                sys_error("\033[1;31m$extension is not loaded, use php -m to check php modules\033[0m");
             }
         }
-        $targetVersion = "2.1.0";
+        $targetVersion = "2.1.3";
         $currentVersion = swoole_version();
         if ($currentVersion < $targetVersion) {
-            sys_error("Your swoole version($currentVersion) is lower than $targetVersion, ".
-                "please upgrade your swoole extension");
-            exit(1);
+            sys_error("\033[1;31mYour swoole version($currentVersion) is lower than $targetVersion, ".
+                "please upgrade your swoole extension\033[0m");
         }
     }
 }
