@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Http;
 
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Network\Http\Exception\PageNotFoundException; 
@@ -37,6 +38,7 @@ class Dispatcher
         $parts = array_filter(explode('/', $controllerName));
         $controllerName = join('\\', array_map('ucfirst', $parts));
         $app = Application::getInstance();
-        return $app->getNamespace() . 'Controller\\' .  $controllerName . 'Controller';
+        $controllerRootNamespace = Config::get('controller_mapping.root_namespace', $app->getNamespace());
+        return $controllerRootNamespace . 'Controller\\' .  $controllerName . 'Controller';
     }
 }

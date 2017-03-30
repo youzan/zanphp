@@ -13,7 +13,6 @@ use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Http\RequestExceptionHandlerChain;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
-use Zan\Framework\Network\Tcp\Exception\Handler\GenericExceptionHandler;
 
 class MiddlewareConfig
 {
@@ -93,16 +92,8 @@ class MiddlewareConfig
 
     public function addExceptionHandlers($request, $filter)
     {
-        $baseExceptionHandlers = [];
-        if ($request instanceof \Zan\Framework\Network\Tcp\Request) {
-            $baseExceptionHandlers = [
-                GenericExceptionHandler::class
-            ];
-        }
-
         $exceptionHandlers = $this->getGroupValue($request, $this->exceptionHandlerConfig);
-        //baseExceptionHandlers must be the last element!!!
-        return array_merge($filter, $exceptionHandlers, $baseExceptionHandlers);
+        return array_merge($filter, $exceptionHandlers);
     }
 
     public function match($pattern, $route)

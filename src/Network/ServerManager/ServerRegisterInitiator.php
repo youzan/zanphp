@@ -48,8 +48,6 @@ class ServerRegisterInitiator
         foreach ($keys as list($protocol, $domain, $appName)) {
             $this->doRegisterOneGroup($protocol, $domain, $appName);
         }
-
-        $this->doReportSwooleVer();
     }
 
     private function doRegisterOneGroup($protocol, $domain, $appName)
@@ -59,10 +57,6 @@ class ServerRegisterInitiator
         $config["domain"] = $domain;
         $config["appName"] = $appName;
         $config["protocol"] = $protocol;
-
-
-        // TODO 移除
-        // $this->initGenericService($config);
 
         $haunt = Config::get('haunt.register');
 
@@ -87,22 +81,5 @@ class ServerRegisterInitiator
         $register = new ServerRegister();
         $coroutine = $register->register($config);
         Task::execute($coroutine);
-    }
-
-    private function doReportSwooleVer()
-    {
-        $runmode = RunMode::get();
-        if ($runmode === "test" || $runmode === "qatest") {
-            try {
-                $task = function() {
-                    yield (new HttpClient("10.9.143.96", 3000))->get("/", [
-                        "host" => gethostname(),
-                        "ip" => nova_get_ip(),
-                        "ver" => swoole_version(),
-                    ], null);
-                };
-                Task::execute($task());
-            } catch (\Exception $e) {}
-        }
     }
 }

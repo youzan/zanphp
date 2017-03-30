@@ -2,10 +2,6 @@
 
 namespace Zan\Framework\Network\Common;
 
-
-use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
-use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 
 class DnsClient
