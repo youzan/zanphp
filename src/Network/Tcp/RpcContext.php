@@ -75,6 +75,9 @@ class RpcContext
 
     public function pack()
     {
-        return json_encode($this->ctx, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $ctx = $this->ctx;
+        if ($ctx === [])
+            $ctx = new \stdClass();
+        return json_encode($ctx, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }
