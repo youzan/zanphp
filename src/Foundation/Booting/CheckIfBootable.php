@@ -22,7 +22,7 @@ class CheckIfBootable implements Bootable
                 curl -s http://gitlab.qima-inc.com/xiaohengjin/php7Env/raw/master/install_extensions.sh|sh\033[0m");
             }
         }
-        $targetVersion = "2.1.5";
+        $targetVersion = "2.1.0";
         $currentVersion = swoole_version();
         if ($currentVersion < $targetVersion) {
             sys_error("\033[1;31mYour swoole version($currentVersion) is lower than $targetVersion, ".
