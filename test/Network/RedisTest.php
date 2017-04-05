@@ -10,8 +10,12 @@ namespace Zan\Framework\Test\Network;
 
 use Zan\Framework\Foundation\Test\UnitTest;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Connection\Factory\Redis as RedisFactory;
+
+use Zan\Framework\Store\NoSQL\Redis\Redis;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 use Zan\Framework\Test\Network\Task\RedisJob;
+use Zan\Framework\Testing\TaskTest;
 
 
 class RedisTest extends \TestCase {

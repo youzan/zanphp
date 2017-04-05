@@ -7,7 +7,6 @@ use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Pool;
 
-require __DIR__ . '/../../bootstrap.php';
 class RedisUuidTest extends \TestCase
 {
     /**

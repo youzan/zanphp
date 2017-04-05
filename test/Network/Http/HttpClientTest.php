@@ -9,15 +9,11 @@ use Zan\Framework\Test\Foundation\Coroutine\Context;
 
 class HttpClientTest extends TaskTest
 {
-
-
-
     public function testTaskCall()
     {
         $context = new Context();
         $task = new Task($this->makeCoroutine($context), null, 8);
         $task->run();
-
     }
 
     private function makeCoroutine($context)
@@ -33,7 +29,8 @@ class HttpClientTest extends TaskTest
             'fg_color' => '000000',
             'bg_color' => 'ffffff',
         ];
-        $response = (yield HttpClient::newInstance('192.168.66.202', 8888)->get('', $params));
+        $httpClient = new HttpClient('192.168.66.202', 8888);
+        $response = (yield $httpClient->get('', $params));
         $result = $response->getBody();
 
         var_dump($result);

@@ -1,8 +1,5 @@
 <?php
-
-require __DIR__ . '/../../bootstrap.php';
-
-//namespace Zan\Framework\Test\Sdk\Searcher;
+namespace Zan\Framework\Test\Sdk\Searcher;
 
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\DesignPattern\Context;

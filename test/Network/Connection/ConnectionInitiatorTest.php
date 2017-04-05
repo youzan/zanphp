@@ -10,71 +10,39 @@
 namespace Zan\Framework\Test\Network\Connection;
 
 use Zan\Framework\Network\Connection\ConnectionInitiator;
+use Zan\Framework\Network\Connection\ConnectionManager;
+use Zan\Framework\Store\NoSQL\Redis\Redis;
+use Zan\Framework\Testing\TaskTest;
 
-class ConnectionInitiatorTest  extends \TestCase{
+class ConnectionInitiatorTest extends TaskTest {
 
-    public function testInitByConfigWork()
+    protected function initTask()
     {
-        $ci = new ConnectionInitiator();
-        $ci->init([]);
-    }
-
-    private function initPool($config)
-    {
-        foreach ($config as $cf) {
-            if (!isset($cf['engine'])) {
-                $this->initPool($cf);
-            } else {
-                if (empty($cf['pool'])) {
-                    continue;
-                }
-                var_dump($cf['pool']['pool_name']);
-            }
-//            if (isset($cf['engine']) && !empty($cf['pool'])) {
-//
-//            } else {
-//                continue;
-//            }
-
-        }
-    }
-
-
-    private function configFile()
-    {
-        $config = [
-            'mysql' => [
-                'default_write' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [
-                        'pool_name' => 'pifa',
-                        'maximum-connection-count' => '50',
-                        'minimum-connection-count' => '10',
-                        'keeping-sleep-time' => '10',
-                        'init-connection'=> '10',
-                        'host' => '192.168.66.202',
-                        'user' => 'test_koudaitong',
-                        'password' => 'nPMj9WWpZr4zNmjz',
-                        'database' => 'pf',
-                        'port' => '3306'
-                    ],
-                ],
-                'default_read' => [
-                    'engine'=> 'mysqli',
-                    'pool'  => [
-                        'pool_name' => 'pf-2'
-                    ],
+        $config  = [
+            'redis' => [
+                'engine'=> 'redis',
+                'host' => '127.0.0.1',
+                'port' => 6379,
+                'pool'  => [
+                    'maximum-connection-count' => 50,
+                    'minimum-connection-count' => 10,
+                    'keeping-sleep-time' => 10,
+                    'init-connection'=> 10,
                 ],
             ],
-            'http' => [
-                'default' => [
-                    'engine' => 'http',
-                    'pool' => [
-                        'pool_name' => 'http',
-                    ]
-                ]
-            ]
         ];
-        return $config;
+        $connectionInitiator = ConnectionInitiator::getInstance();
+        $this->invoke($connectionInitiator, "initConfig", [$config]);
+        parent::initTask();
     }
+
+    public function taskPoolGet()
+    {
+        $conn = (yield ConnectionManager::getInstance()->get("redis"));
+        $redis = new Redis($conn);
+        yield $redis->set("foo", "value");
+        $result = (yield $redis->get("foo"));
+        $this->assertEquals($result, "value", "redis get failed");
+    }
+
 }
