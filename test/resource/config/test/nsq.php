@@ -7,5 +7,5 @@
  */
 return [
     'lookupd' =>
-        'http://nsq-dev.s.qima-inc.com:4161'
+        'http:nsq-dev.s.qima-inc.com:4161'
 ];
