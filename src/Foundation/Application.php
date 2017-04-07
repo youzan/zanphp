@@ -64,6 +64,11 @@ class Application
     protected $container;
 
     /**
+     * @var \Zan\Framework\Network\Server\ServerBase;
+     */
+    protected $server;
+
+    /**
      * Create a new Zan application instance.
      *
      * @param string $appName
@@ -245,9 +250,13 @@ class Application
      */
     public function createHttpServer()
     {
-        return $this->getContainer()
+        $server = $this->getContainer()
             ->make(ServerFactory::class)
             ->createHttpServer();
+
+        $this->server = $server;
+
+        return $server;
     }
 
     /**
@@ -257,9 +266,13 @@ class Application
      */
     public function createTcpServer()
     {
-        return $this->getContainer()
+        $server = $this->getContainer()
             ->make(ServerFactory::class)
             ->createTcpServer();
+
+        $this->server = $server;
+
+        return $server;
     }
 
     /**
@@ -269,8 +282,20 @@ class Application
      */
     public function createMqServer()
     {
-        return $this->getContainer()
+        $server = $this->getContainer()
             ->make(ServerFactory::class)
             ->createMqServer();
+
+        $this->server = $server;
+
+        return $server;
+    }
+
+    /**
+     * @return \Zan\Framework\Network\Server\ServerBase
+     */
+    public function getServer()
+    {
+        return $this->server;
     }
 }
