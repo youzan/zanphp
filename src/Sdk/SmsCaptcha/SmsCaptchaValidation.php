@@ -10,6 +10,7 @@ namespace Zan\Framework\Sdk\SmsCaptcha;
 
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Utilities\Types\Time;
 
 class SmsCaptchaValidation
@@ -61,7 +62,7 @@ class SmsCaptchaValidation
 
     public static function checkCode($response, $mobile, $biz)
     {
-        if( !in_array(Config::get('run_mode'), ['online', 'pre'], true)) {
+        if( !in_array(RunMode::get(), ['online', 'pre'], true)) {
             yield true;
             return;
         }
