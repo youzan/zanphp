@@ -107,11 +107,21 @@ class Response implements BaseResponse {
             $content,
             $outputBuffer)) {
 
+            $msg_size = unpack("Nmsg_size", substr($outputBuffer, 0, 4))["msg_size"];
+            $real_size = strlen($outputBuffer);
+            if ($msg_size !== $real_size) {
+                sys_echo("msg_size=$msg_size, real_size=$real_size");
+            }
+
             $swooleServer = $this->getSwooleServer();
-            $swooleServer->send(
+            $send_len = $swooleServer->send(
                 $this->request->getFd(),
                 $outputBuffer
             );
+
+            if ($send_len !== $real_size) {
+
+            }
         }
     }
     
