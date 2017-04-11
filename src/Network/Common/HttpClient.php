@@ -251,6 +251,7 @@ class HttpClient implements Async
         }
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
+        $this->client->close();
     }
 
     public function whenHostNotFound($host)
