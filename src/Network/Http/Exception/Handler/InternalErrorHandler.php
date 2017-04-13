@@ -30,7 +30,7 @@ class InternalErrorHandler implements ExceptionHandler
         try {
             $config = Config::get($this->configKey, null);
             if (!$config) {
-                if (Config::get('debug') && RunMode::get() != 'online') {
+                if (Config::get('debug') && !RunMode::isOnline()) {
                     $errorInfo = [
                         'code' => 99999,
                         'msg' => $e->getMessage(),

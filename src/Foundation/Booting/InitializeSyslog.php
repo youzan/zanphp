@@ -16,14 +16,16 @@ use Zan\Framework\Foundation\Core\RunMode;
 
 class InitializeSyslog implements Bootable
 {
+    // flume
+    const SYSLOG_ONLINE = ["127.0.0.1", 5140];
+    const SYSLOG_DEV = ["10.9.65.239", 5140];
+
     public function bootstrap(Application $app)
     {
         Config::set('log.zan_framework', 'syslog://info/zan_framework?module=soa-framework');
-        $runMode = RunMode::get();
 
         $logConf = [
             'engine'=> 'syslog',
-            'port' => '5140',
             'timeout' => 5000,
             'persistent' => true,
             'pool' => [
@@ -34,11 +36,19 @@ class InitializeSyslog implements Bootable
             ],
         ];
 
-        if ($runMode == 'pre' || $runMode == 'online') {
-            $logConf['host'] = '127.0.0.1';
-        } else {
-            $logConf['host'] = '10.9.65.239';
+        $host = Config::get("zan.syslog.host", null);
+        $port = Config::get("zan.syslog.port", 5140);
+
+        if ($host === null) {
+            if (RunMode::isOnline()) {
+                list($host, $port) = static::SYSLOG_ONLINE;
+            } else {
+                list($host, $port) = static::SYSLOG_DEV;
+            }
         }
+
+        $logConf['host'] = $host;
+        $logConf['port'] = $port;
 
         Config::set('connection.syslog.zan_framework', $logConf);
     }

@@ -38,7 +38,7 @@ class Config
             $moduleShareConfigMap, $moduleRunModeConfig);
 
         //add private dir
-        if ('test' == $runMode || 'dev' == $runMode || 'qatest' == $runMode) {
+        if (!RunMode::isOnline()) {
             $privatePath = $path . '.private/';
             if (is_dir($privatePath)) {
                 $privateConfig = ConfigLoader::getInstance()->load($privatePath);

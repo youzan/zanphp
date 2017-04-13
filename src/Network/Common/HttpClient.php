@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
@@ -15,11 +16,11 @@ class HttpClient implements Async
 {
     const GET = 'GET';
     const POST = 'POST';
-    // TODO 改成zan-config里的配置
-    const HTTP_PROXY_ONLINE = 'proxy-static.s.qima-inc.com';
-    const HTTP_PROXY_DEV = '10.9.29.87';
 
-    /** @var  swoole_http_client */
+    const HTTP_PROXY_ONLINE = ['proxy-static.s.qima-inc.com', 80];
+    const HTTP_PROXY_DEV = ['10.9.29.87', 80];
+
+    /** @var  \swoole_http_client */
     private $client;
 
     private $host;
@@ -173,13 +174,15 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->useHttpProxy) {
-            if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
-                $proxy = self::HTTP_PROXY_ONLINE;
-            } else {
-                $proxy = self::HTTP_PROXY_DEV;
+            $host = Config::get("zan.httpProxy.host", null);
+            $port = Config::get("zan.httpProxy.port", 80);
+            if ($host === null) {
+                if (RunMode::isOnline()) {
+                    list($host, $port) = self::HTTP_PROXY_ONLINE;
+                } else {
+                    list($host, $port) = self::HTTP_PROXY_DEV;
+                }
             }
-            $host = $proxy;
-            $port = 80;
         } else {
             $host = $this->host;
             $port = $this->port;
