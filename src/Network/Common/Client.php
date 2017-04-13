@@ -14,6 +14,7 @@ class Client implements Async
 {
     const JAVA_TYPE = 'java';
     const PHP_TYPE = 'php';
+    const DEFAULT_TIMEOUT = 3000;
 
     private static $apiConfig;
 
@@ -229,7 +230,6 @@ class Client implements Async
     
     public static function getApiConfig($api)
     {
-        $runMode = RunMode::get();
         if (is_null(self::$apiConfig)) {
             self::loadConfig();
             self::loadBizDefinedConfig();
@@ -254,8 +254,7 @@ class Client implements Async
         $port = isset($hostInfo[1]) ? $hostInfo[1] : 80;
         $type = isset($target['type']) ? $target['type'] : 'local';
         $host = isset($hostInfo[0]) ? str_replace('/', '', $hostInfo[0]) : 'api.koudaitong.com';
-        $defaultTime = $runMode == 'test' ? 15000 : 3000;
-        $timeout = isset($target['timeout']) ? $target['timeout'] : $defaultTime;
+        $timeout = isset($target['timeout']) ? $target['timeout'] : static::DEFAULT_TIMEOUT;
 
         return [
             'host' => $host,
