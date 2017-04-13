@@ -65,7 +65,11 @@ class NovaClient extends Base implements Connection
     }
 
     public function onReceive(SwooleClient $cli, $data) {
-        call_user_func($this->clientCb, $data);
+        try {
+            call_user_func($this->clientCb, $data);
+        } catch (\Exception $e) {
+            echo_exception($e);
+        }
     }
 
     public function onError(SwooleClient $cli){
