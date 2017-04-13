@@ -62,7 +62,7 @@ class SmsCaptchaValidation
 
     public static function checkCode($response, $mobile, $biz)
     {
-        if( !in_array(RunMode::get(), ['online', 'pre'], true)) {
+        if(!RunMode::isOnline()) {
             yield true;
             return;
         }

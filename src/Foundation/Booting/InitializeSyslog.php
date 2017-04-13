@@ -19,11 +19,19 @@ class InitializeSyslog implements Bootable
     public function bootstrap(Application $app)
     {
         Config::set('log.zan_framework', 'syslog://info/zan_framework?module=soa-framework');
-        $runMode = RunMode::get();
+
+        if (RunMode::isOnline()) {
+            $host = Config::get("zan.syslog.host", "127.0.0.1");
+            $port = Config::get("zan.syslog.port", 5140);
+        } else {
+            $host = Config::get("zan.syslog.host", "10.9.65.239");
+            $port = Config::get("zan.syslog.port", 5140);
+        }
 
         $logConf = [
             'engine'=> 'syslog',
-            'port' => '5140',
+            'host' => $host,
+            'port' => $port,
             'timeout' => 5000,
             'persistent' => true,
             'pool' => [
@@ -33,13 +41,6 @@ class InitializeSyslog implements Bootable
                 'minimum-connection-count' => 1,
             ],
         ];
-
-        if ($runMode == 'pre' || $runMode == 'online') {
-            $logConf['host'] = '127.0.0.1';
-        } else {
-            $logConf['host'] = '10.9.65.239';
-        }
-
         Config::set('connection.syslog.zan_framework', $logConf);
     }
 } 
