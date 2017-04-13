@@ -17,9 +17,6 @@ class HttpClient implements Async
     const GET = 'GET';
     const POST = 'POST';
 
-    const HTTP_PROXY_ONLINE = ['proxy-static.s.qima-inc.com', 80];
-    const HTTP_PROXY_DEV = ['10.9.29.87', 80];
-
     /** @var  \swoole_http_client */
     private $client;
 
@@ -174,19 +171,18 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->useHttpProxy) {
-            $host = Config::get("zan.httpProxy.host", null);
-            $port = Config::get("zan.httpProxy.port", 80);
-            if ($host === null) {
-                if (RunMode::isOnline()) {
-                    list($host, $port) = self::HTTP_PROXY_ONLINE;
-                } else {
-                    list($host, $port) = self::HTTP_PROXY_DEV;
-                }
+            if (RunMode::isOnline()) {
+                $host = Config::get("zan.httpProxy.host", "proxy-static.s.qima-inc.com");
+                $port = Config::get("zan.httpProxy.port", 80);
+            } else {
+                $host = Config::get("zan.httpProxy.host", "10.9.29.87");
+                $port = Config::get("zan.httpProxy.port", 80);
             }
         } else {
             $host = $this->host;
             $port = $this->port;
         }
+
         $dnsCallbackFn = function($host, $ip) use ($port) {
             if ($ip) {
                 $this->request($ip, $port);

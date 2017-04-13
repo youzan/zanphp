@@ -8,8 +8,6 @@
 
 namespace Zan\Framework\Foundation\Core;
 
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-
 class RunMode
 {
     private static $modeMap  = [
@@ -34,9 +32,6 @@ class RunMode
 
     public static function set($runMode)
     {
-        if (!isset(self::$modeMap[$runMode])) {
-            throw new InvalidArgumentException('invalid runMode in RunMode::set');
-        }
         self::$runMode = $runMode;
     }
 
@@ -47,13 +42,13 @@ class RunMode
         }
 
         $envInput = getenv('KDT_RUN_MODE');
-        if (isset(self::$modeMap[$envInput])) {
+        if ($envInput) {
             self::$runMode = $envInput;
             return;
         }
 
         $iniInput = get_cfg_var('kdt.RUN_MODE');
-        if (isset(self::$modeMap[$iniInput])) {
+        if ($iniInput) {
             self::$runMode = $iniInput;
             return;
         }
