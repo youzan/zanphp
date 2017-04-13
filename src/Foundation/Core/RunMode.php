@@ -21,7 +21,8 @@ class RunMode {
         'qatest'    => 7,
         'pubtest'   => 8,
         'ci'        => 9,
-        'perf'   => 10,
+        'perf'      => 10,
+        'daily'     => 11,
     ];
     private static $runMode = null;
 
