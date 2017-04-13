@@ -42,13 +42,13 @@ class RunMode
         }
 
         $envInput = getenv('KDT_RUN_MODE');
-        if ($envInput) {
+        if ($envInput !== false) {
             self::$runMode = $envInput;
             return;
         }
 
         $iniInput = get_cfg_var('kdt.RUN_MODE');
-        if ($iniInput) {
+        if ($iniInput !== false) {
             self::$runMode = $iniInput;
             return;
         }
