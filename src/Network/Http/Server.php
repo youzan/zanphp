@@ -97,7 +97,7 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        sys_echo("server starting .....");
+        sys_echo("server starting .....[$swooleServer->host:$swooleServer->port]");
     }
 
     public function onShutdown($swooleServer)
