@@ -43,7 +43,10 @@ class RequestHandler
     {
         try {
             $request = Request::createFromSwooleHttpRequest($swooleRequest);
-            $this->initContext($request, $swooleResponse);
+            if (false === $this->initContext($request, $swooleResponse)) {
+                //filter ico file access
+                return;
+            }
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();
@@ -83,6 +86,8 @@ class RequestHandler
 
         $router = Router::getInstance();
         $route = $router->route($request);
+        if ($route === false)
+            return false;
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
 

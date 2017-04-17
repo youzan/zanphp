@@ -49,7 +49,7 @@ class Router {
     {
         $requestUri = $request->server->get('REQUEST_URI');
         if(preg_match('/\.ico$/i', $requestUri)){
-            $requestUri = '';
+            return false;
         }
         $this->prepare($requestUri);
         $this->parseRequestFormat($requestUri);
