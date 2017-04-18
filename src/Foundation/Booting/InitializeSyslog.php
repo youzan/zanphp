@@ -18,15 +18,10 @@ class InitializeSyslog implements Bootable
 {
     public function bootstrap(Application $app)
     {
+        // TODO: 转移到 zan-config
         Config::set('log.zan_framework', 'syslog://info/zan_framework?module=soa-framework');
-
-        if (RunMode::isOnline()) {
-            $host = Config::get("zan_syslog.host", "127.0.0.1");
-            $port = Config::get("zan_syslog.port", 5140);
-        } else {
-            $host = Config::get("zan_syslog.host", "10.9.65.239");
-            $port = Config::get("zan_syslog.port", 5140);
-        }
+        $host = Config::get("zan_syslog.host", "127.0.0.1");
+        $port = Config::get("zan_syslog.port", 5140);
 
         $logConf = [
             'engine'=> 'syslog',
