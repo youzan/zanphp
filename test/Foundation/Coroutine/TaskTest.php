@@ -18,14 +18,6 @@ use Zan\Framework\Test\Foundation\Coroutine\Task\YieldValues;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Response;
 
 class TaskTest extends \TestCase {
-    public function setUp() {
-        parent::setUp();
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-    }
-
     public function testSimpleYieldWorkFine() {
         $context = new Context();
 

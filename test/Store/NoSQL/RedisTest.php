@@ -21,16 +21,18 @@ class RedisTest extends TaskTest {
 
     public function taskSetGet()
     {
-        yield Cache::set("pf.test.test", ["zan", "test"], "redisTest");
+        $value = "redisTest";
+        yield Cache::set("pf.test.test", ["zan", "test"], $value);
+        $this->assertEquals($value, "redisTest");
         $result = (yield Cache::get("pf.test.test", ["zan", "test"]));
         $this->assertEquals($result, "redisTest");
     }
 
     public function taskDel()
     {
-        yield Cache::set("pf.test.test", ["zan", "test"], "redisTest");
-        yield Cache::del("pf.test.test", ["zan", "test"]);
-        $result = (yield Cache::get("pf.test.test", ["zan", "test"]));
+        yield Cache::set("pf.test.test", ["zan", "test1"], "redisTest1");
+        yield Cache::del("pf.test.test", ["zan", "test1"]);
+        $result = (yield Cache::get("pf.test.test", ["zan", "test1"]));
         $this->assertEquals($result, null);
     }
 }

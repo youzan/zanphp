@@ -26,7 +26,6 @@ class ConfigTest extends \TestCase
         Config::clear();
     }
 
-
     public function testGetConfigWork()
     {
         RunMode::set('online');

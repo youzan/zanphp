@@ -19,10 +19,6 @@ class ConfigLoaderTest extends \TestCase {
         $this->path = __DIR__ . '/config/online';
     }
 
-    public function tearDown()
-    {
-    }
-
     public function test(){
         $config = ConfigLoader::getInstance();
         $result = $config->load($this->path);
@@ -31,8 +27,4 @@ class ConfigLoaderTest extends \TestCase {
         $this->assertEquals('pf', $result['pf']['a']['a'], 'ConfigLoader::load fail');
         $this->assertEquals('online', $result['pf']['b']['test'], 'ConfigLoader::load fail');
     }
-
-
-
-
 }

@@ -10,7 +10,6 @@ return [
     'table'=>'market_category',
 
     'insert'=>[
-
         'sql'     => 'INSERT INTO market_category #INSERT#',
     ],
 

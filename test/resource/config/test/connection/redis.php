@@ -13,4 +13,15 @@ return [
             'init-connection'=> 10,
         ],
     ],
+    'uuid' => [
+        'engine'=> 'redis',
+        'host' => 'idgen-qa.s.qima-inc.com',
+        'port' => 6000,
+        'pool'  => [
+            'maximum-connection-count' => '50',
+            'minimum-connection-count' => '10',
+            'keeping-sleep-time' => '10',
+            'init-connection'=> '2',
+        ],
+    ],
 ];
