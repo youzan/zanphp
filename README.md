@@ -44,14 +44,17 @@ Zan PHP 的文档仓库地址：[zan-doc](https://github.com/youzan/zan-doc/blob
 - [zan-doc](https://github.com/youzan/zan-doc) - Zan PHP 开发者文档
 - [zan-installer](https://github.com/youzan/zan-installer) - Zan PHP 脚手架工具
 - [zanhttp](https://github.com/youzan/zanhttp) - Zan PHP HTTP demo
-- [zan-hign-performance-mysql](https://github.com/youzan/zan_high_performance_mysql) - Zan PHP 高性能MySQL实践
+- [PHP异步编程: 手把手教你实现co与Koa](https://github.com/youzan/php-co-koa) 
 
 
-## 开发交流
+## 官方交流渠道
+官网：[点我进入](http://zanphp.io)
 QQ群：115728122
 
+## 捐赠我们
+[捐赠通道](http://zanphp.io/donate)
 
 ## License
 
-我们 [有赞](https://youzan.com/) 的 [Zan PHP 框架](https://github.com/youzan/zan) 基于 [MIT license](https://opensource.org/licenses/MIT) 进行开源。
+[Zan PHP 框架](https://github.com/youzan/zan)基于 [MIT license](https://opensource.org/licenses/MIT) 进行开源。
 
