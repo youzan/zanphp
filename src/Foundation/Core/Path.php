@@ -11,7 +11,8 @@ namespace Zan\Framework\Foundation\Core;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\Types\Dir;
 
-class Path {
+class Path
+{
     const DEFAULT_CONFIG_PATH   = 'resource/config/';
     const DEFAULT_SQL_PATH      = 'resource/sql/';
     const DEFAULT_LOG_PATH      = 'resource/log/';
@@ -20,12 +21,13 @@ class Path {
     const DEFAULT_MODEL_PATH    = 'resource/model/';
     const DEFAULT_TABLE_PATH    = 'resource/config/share/table/';
     const DEFAULT_ROUTING_PATH  = 'resource/routing/';
-    const DEFAULT_MIDDLEWARE_PATH = 'resource/middleware';
-    const DEFAULT_IRON_PATH = 'vendor/zan-config/iron/files/';
-    const DEFAULT_APP_PATH = 'vendor/zan-config/app/';
+    const DEFAULT_MIDDLEWARE_PATH   = 'resource/middleware';
     const DEFAULT_CRON_PATH         = 'resource/config/share/cron/';
     const DEFAULT_MQWORKER_PATH     = 'resource/config/share/mqworker/';
     const DEFAULT_MODULE_CONFIG_PATH_PREFIX = 'resource/config_';
+    const DEFAULT_ZAN_PATH       = 'vendor/zan-config/zan/src/';
+    const DEFAULT_IRON_PATH      = 'vendor/zan-config/iron/files/';
+    const DEFAULT_APP_PATH       = 'vendor/zan-config/app/';
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
     const CONFIG_PATH_CONFIG_KEY  = 'path.config';
@@ -37,8 +39,9 @@ class Path {
     const TABLE_PATH_CONFIG_KEY   = 'path.table';
     const ROUTING_PATH_CONFIG_KEY = 'path.routing';
     const MIDDLEWARE_PATH_CONFIG_KEY = 'path.middleware';
-    const IRON_PATH_CONFIG_KEY = 'path.iron';
-    const APP_PATH_CONFIG_KEY = 'path.app';
+    const IRON_PATH_CONFIG_KEY    = 'path.iron';
+    const APP_PATH_CONFIG_KEY     = 'path.app';
+    const ZAN_PATH_CONFIG_KEY     = 'path.zan';
     const CRON_PATH_CONFIG_KEY          = 'path.cron';
     const MQ_WORKER_PATH_CONFIG_KEY     = 'path.mqworker';
     const MODULE_CONFIG_PATH_CONFIG_KEY = 'path.module_config';
@@ -53,6 +56,7 @@ class Path {
     private static $tablePath   = null;
     private static $routingPath = null;
     private static $middlewarePath = null;
+    private static $zanConfigPath = null;
     private static $ironConfigPath = null;
     private static $appConfigPath = null;
     private static $cronConfigPath = null;
@@ -124,6 +128,11 @@ class Path {
         return self::$middlewarePath;
     }
 
+    public static function getZanPath()
+    {
+        return self::$zanConfigPath;
+    }
+
     public static function getIronPath(){
         return self::$ironConfigPath;
     }
@@ -163,6 +172,7 @@ class Path {
         self::$tablePath = self::$rootPath . self::DEFAULT_TABLE_PATH;
         self::$routingPath = self::$rootPath . self::DEFAULT_ROUTING_PATH;
         self::$middlewarePath = self::$rootPath . self::DEFAULT_MIDDLEWARE_PATH;
+        self::$zanConfigPath =  self::$rootPath . self::DEFAULT_ZAN_PATH;
         self::$ironConfigPath = self::$rootPath .self::DEFAULT_IRON_PATH;
         self::$appConfigPath = self::$rootPath .self::DEFAULT_APP_PATH;
         self::$cronConfigPath = self::$rootPath . self::DEFAULT_CRON_PATH;
@@ -176,6 +186,7 @@ class Path {
     {
         Config::set(self::ROOT_PATH_CONFIG_KEY, self::$rootPath);
         Config::set(self::CONFIG_PATH_CONFIG_KEY, self::$configPath);
+        Config::set(self::ZAN_PATH_CONFIG_KEY, self::$zanConfigPath);
         Config::set(self::SQL_PATH_CONFIG_KEY, self::$sqlPath);
         Config::set(self::LOG_PATH_CONFIG_KEY, self::$logPath);
         Config::set(self::CACHE_PATH_CONFIG_KEY, self::$cachePath);
