@@ -15,7 +15,7 @@
 6. 可继承的View布局及组件化支持，方便完成 bigPipe/bigRender/ 首屏加载优化等不同的渲染方式
 7. 基于模型驱动的 SQLMap，实现了 SQL 的快速定位及方便的 sharding、cache 支持
 8. 提供类似于 [Laravel](https://github.com/laravel/laravel) 的 middleware(Filters & Terminators) 机制
-9. Di及单元测试的良好支持
+9. Di 及单元测试的良好支持
 10. 良好的服务化对接支持
 
 ## 框架定位
@@ -27,10 +27,10 @@ PHP 在业务系统开发上的优势明显，而 Golang 相信会是将来系�
 
 Zan 和 Golang 的边界是：Zan做业务系统；Golang 做系统（中间件或基础服务组件）。    
 
-而 Zan 和 Golang 编程模型的驱近，是希望能给PHP程序员一个更好的桥梁到 Golang。            
+而 Zan 和 Golang 编程模型的驱近，是希望能给 PHP 程序员一个更好的桥梁到 Golang。            
 理想的技术栈是：Zan + Go + 少量的 C/C++。
 
-当然对于致力于终身coding的码农来说：Java依然是很难跨过去的坎。
+当然对于致力于终身 coding 的码农来说：Java 依然是很难跨过去的坎。
 
 
 ## 官方文档
