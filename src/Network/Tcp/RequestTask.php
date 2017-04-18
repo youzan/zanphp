@@ -10,6 +10,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use Thrift\Exception\TApplicationException;
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Exception\GenericInvokeException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Sdk\Log\Log;
@@ -69,12 +70,9 @@ class RequestTask {
                     $this->request->getMethodName(),
                     $this->request->getRemoteIp());
             }
-            $result = $this->middleWareManager->handleException($e);
 
-            if ($result instanceof \Exception)
-                $this->response->sendException($result);
-            else
-                $this->response->sendException($e);
+            $coroutine = RequestHandler::handleException($this->middleWareManager, $this->response, $e);
+            Task::execute($coroutine, $this->context);
 
             $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
