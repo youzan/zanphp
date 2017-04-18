@@ -27,8 +27,9 @@ function taskSleep($ms)
 function newTask(\Generator $gen = null)
 {
     return new SysCall(function (Task $task) use ($gen) {
-        $task->send(null);
-
+	    $newTask = new Task( $gen );
+	    $newTask->run();
+	    $task->send( $newTask );
         return Signal::TASK_CONTINUE;
     });
 }

@@ -37,6 +37,10 @@ class Mysqli implements ConnectionFactory
         $this->conn = new \mysqli();
         $this->conn->connect($this->config['host'], $this->config['user'], $this->config['password'],
             $this->config['database'], $this->config['port']);
+	    if( !empty( $this->config['charset'] ) )
+	    {
+		    $this->conn->set_charset( $this->config['charset'] );
+	    }
         $this->conn->autocommit(true);
 
         $connection = new \Zan\Framework\Network\Connection\Driver\Mysqli();
