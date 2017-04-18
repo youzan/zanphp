@@ -67,12 +67,13 @@ class MiddlewareManager
             }
 
             try {
-                $e = $middleware->handle($e);
+                $e = (yield $middleware->handle($e));
             } catch (\Exception $handlerException) {
-                return $handlerException;
+                yield $handlerException;
+                return;
             }
         }
-        return $e;
+        yield $e;
     }
 
     public function executePostFilters($response)

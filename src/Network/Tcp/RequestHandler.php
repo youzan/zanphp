@@ -101,19 +101,25 @@ class RequestHandler {
                 $this->logErr($e);
             }
 
-            $result = null;
-            if ($this->middleWareManager) {
-                $result = $this->middleWareManager->handleException($e);
-            }
-
-            if ($result instanceof \Exception)
-                $response->sendException($result);
-            else
-                $response->sendException($e);
+            $coroutine = static::handleException($this->middleWareManager, $response, $e);
+            Task::execute($coroutine, $this->context);
 
             $this->event->fire($this->getRequestFinishJobId());
             return;
         }
+    }
+
+    public static function handleException($middleware, $response, $e)
+    {
+        $result = null;
+        if ($middleware) {
+            $result = (yield $middleware->handleException($e));
+        }
+
+        if ($result instanceof \Exception)
+            $response->sendException($result);
+        else
+            $response->sendException($e);
     }
 
     public function handleRequestFinish()
@@ -137,12 +143,9 @@ class RequestHandler {
 
         $this->reportHawk();
         $this->logErr($e);
-        $result = $this->middleWareManager->handleException($e);
 
-        if ($result instanceof \Exception)
-            $this->response->sendException($result);
-        else
-            $this->response->sendException($e);
+        $coroutine = static::handleException($this->middleWareManager, $this->response, $e);
+        Task::execute($coroutine, $this->context);
         $this->event->fire($this->getRequestFinishJobId());
     }
 
