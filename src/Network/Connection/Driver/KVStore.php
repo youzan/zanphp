@@ -19,7 +19,7 @@ class KVStore extends Base implements Connection
         try {
             $this->getSocket()->close();
         } catch (\Exception $e) {
-            //todo log
+            echo_exception($e);
         }
     }
 }
