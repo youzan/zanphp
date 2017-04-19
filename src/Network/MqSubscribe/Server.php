@@ -3,20 +3,12 @@
 namespace Zan\Framework\Network\MqSubscribe;
 
 use Zan\Framework\Network\Http\RequestHandler;
-use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
-use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
-use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
-use Zan\Framework\Network\Http\ServerStart\InitializeMiddleware;
-use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\MqSubscribe\WorkerStart\InitializeMqSubscribe;
-use Zan\Framework\Network\MqSubscribe\WorkerStart\MqSubscribeStart;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
-use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
+use Zan\Framework\Network\Server\WorkerStart\InitializeExceptionHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
-use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
-use Zan\Framework\Network\Http\ServerStart\InitializeQiniuConfig;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
@@ -35,6 +27,7 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
+        InitializeExceptionHandler::class,
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
         InitializeServerDiscovery::class,
@@ -103,15 +96,15 @@ class Server extends ServerBase implements ServerContract
     public function onWorkerStart($swooleServer, $workerId)
     {
         $this->bootWorkerStartItem($workerId);
-        sys_echo("worker #$workerId starting .....");
+        sys_echo("worker *$workerId starting .....");
         (new MqSubscribe())->start();
-        sys_echo("mq subscribe in worker #$workerId starting .....");
+        sys_echo("mq subscribe in worker *$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
         ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
-        sys_echo("worker #$workerId stopping .....");
+        sys_echo("worker *$workerId stopping .....");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)

@@ -17,7 +17,6 @@ use Zan\Framework\Foundation\Booting\InitializeDebug;
 use Zan\Framework\Foundation\Booting\InitializeEnv;
 use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
-use Zan\Framework\Foundation\Exception\Handler;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Network\Server\Factory as ServerFactory;
 
@@ -87,8 +86,6 @@ class Application
 
     protected function bootstrap()
     {
-        Handler::initErrorHandler();
-
         $this->setContainer();
 
         // TODO 配置化
