@@ -11,6 +11,7 @@ use Zan\Framework\Foundation\Coroutine\Parallel;
 use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\SysCall;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Network\Http\Cookie;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Tcp\RpcContext;
 
@@ -211,10 +212,9 @@ function cookieSet($key, $value = null, $expire = 0, $path = null, $domain = nul
     $args = func_get_args();
     return new SysCall(function (Task $task) use ($args) {
         $context = $task->getContext();
+        /** @var Cookie $cookie */
         $cookie = $context->get('cookie');
-        $func = [$cookie, 'set'];
-
-        $ret = call_user_func_array($func, $args);
+        $ret = $cookie->set(...$args);
         $task->send($ret);
 
         return Signal::TASK_CONTINUE;

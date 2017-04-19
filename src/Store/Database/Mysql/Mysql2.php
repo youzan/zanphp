@@ -160,7 +160,8 @@ class Mysql2 implements DriverInterface
         $this->result = $result;
 
         if ($this->callback) {
-            call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+            $callback = $this->callback;
+            $callback(new MysqliResult($this), $exception);
             $this->callback = null;
         }
     }
@@ -191,7 +192,9 @@ class Mysql2 implements DriverInterface
                     "sql" => $sql,
                     "duration" => $duration,
                 ];
-                call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx)]);
+                $callback = $this->callback;
+                $ex = new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx);
+                $callback(null, $ex);
             }
         };
     }

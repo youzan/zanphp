@@ -27,6 +27,8 @@ use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
  * @method int incrBy(string $key, int $value);
  * @method int hIncrBy(string $key, string $field, int $value);
  * @method bool del(string $key);
+ * @method bool hMGet(string $key, ...$params);
+ * @method bool hMSet(string $key, ...$params);
  */
 class Redis implements Async
 {
@@ -45,7 +47,7 @@ class Redis implements Async
     public function __call($name, $arguments)
     {
         $arguments[] = [$this, 'recv'];
-        call_user_func_array([$this->sock, $name], $arguments);
+        $this->sock->$name(...$arguments);
         $this->beginTimeoutTimer($name, $arguments);
         yield $this;
     }
@@ -86,7 +88,10 @@ class Redis implements Async
                     "args" => $args,
                     "duration" => $duration,
                 ];
-                call_user_func_array($this->callback, [null, new RedisCallTimeoutException("Redis call $name timeout", 0, null, $ctx)]);
+
+                $callback = $this->callback;
+                $ex = new RedisCallTimeoutException("Redis call $name timeout", 0, null, $ctx);
+                $callback(null, $ex);
             }
         };
     }
