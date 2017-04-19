@@ -43,7 +43,7 @@ class Dispatcher {
         $args    = $this->request->getArgs();
         $args    = is_array($args) ? $args : [$args];
 
-        yield $service->$method(...$args);
+        yield $service->$method(...array_values($args));
     }
 
     private function getServiceName()
