@@ -114,6 +114,7 @@ class MiddlewareConfig
     {
         $baseFilters = [
             TraceFilter::class,
+            ChromeTraceFilter::class,
         ];
         return array_merge($baseFilters, $this->zanFilters, $filters);
     }

@@ -84,6 +84,8 @@ class Request implements BaseRequest {
 
     public function getAttachData()
     {
+
+        // TODO add chrome trace
         return $this->rpcContext->pack();
     }
 
