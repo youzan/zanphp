@@ -26,29 +26,25 @@ class TraceBuilder
     public function buildHeader(array $header)
     {
         $this->lintSeparator($header);
-        array_unshift($header, "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n");
-        $this->data .= call_user_func_array("sprintf", $header);
+        $this->data .= sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n", ...$header);
     }
 
     public function buildTransaction(array $transaction)
     {
         $this->lintSeparator($transaction);
-        array_unshift($transaction, "%s\t%s\t%s\t\n");
-        $this->data .= call_user_func_array("sprintf", $transaction);
+        $this->data .= sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n", ...$transaction);
     }
 
     public function commitTransaction(array $transaction)
     {
         $this->lintSeparator($transaction);
-        array_unshift($transaction, "%s\t%s\t%s\t%s\t%s\t%s\t\n");
-        $this->data .= call_user_func_array("sprintf", $transaction);
+        $this->data .= sprintf("%s\t%s\t%s\t%s\t%s\t%s\t\n", ...$transaction);
     }
 
     public function buildEvent(array $event)
     {
         $this->lintSeparator($event);
-        array_unshift($event, "%s\t%s\t%s\t%s\t%s\t\n");
-        $this->data .= call_user_func_array("sprintf", $event);
+        $this->data .= sprintf("%s\t%s\t%s\t%s\t%s\t\n", ...$event);
     }
 
     public function isNotEmpty() {
