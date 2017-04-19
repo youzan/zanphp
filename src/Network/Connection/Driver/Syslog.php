@@ -41,12 +41,14 @@ class Syslog extends Base implements Connection
         $this->release();
 
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
+        sys_echo("syslog client connect to server " . $this->getConnString());
     }
 
     public function onClose(SwooleClient $cli)
     {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
+        sys_echo("syslog client close " . $this->getConnString());
     }
 
     public function onReceive(SwooleClient $cli, $data)
@@ -59,6 +61,7 @@ class Syslog extends Base implements Connection
     {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
+        sys_error("syslog client error " . $this->getConnString());
     }
 
     public function setClientCb(callable $cb)
@@ -71,7 +74,7 @@ class Syslog extends Base implements Connection
         try {
             $this->getSocket()->close();
         } catch (\Exception $e) {
-            //todo log
+            echo_exception($e);
         }
     }
 }

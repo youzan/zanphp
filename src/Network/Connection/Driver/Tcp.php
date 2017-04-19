@@ -24,10 +24,9 @@ class Tcp extends Base implements Connection
         try {
             $this->getSocket()->close();
         } catch (\Exception $e) {
-            //todo log
+            echo_exception($e);
         }
     }
-
 
     public function init() {
         //set callback
@@ -43,13 +42,13 @@ class Tcp extends Base implements Connection
         $this->release();
 
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
-        sys_echo("tcp client connect to server");
+        sys_echo("tcp client connect to server " . $this->getConnString());
     }
 
     public function onClose(SwooleClient $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        sys_echo("tcp client close");
+        sys_echo("tcp client close " . $this->getConnString());
     }
 
     public function onReceive(SwooleClient $cli, $data) {
@@ -59,7 +58,7 @@ class Tcp extends Base implements Connection
     public function onError(SwooleClient $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        sys_echo("tcp client error");
+        sys_error("tcp client error " . $this->getConnString());
     }
     
     public function setClientCb(callable $cb) {
