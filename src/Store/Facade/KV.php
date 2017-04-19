@@ -376,7 +376,7 @@ class KV
             $keys = [$keys];
         }
 
-        return sprintf($format, ...$keys);
+        return sprintf($format, ...array_values($keys));
     }
 
     private static function getConfigCacheKey($configKey)
