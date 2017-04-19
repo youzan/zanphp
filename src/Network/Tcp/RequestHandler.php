@@ -58,6 +58,8 @@ class RequestHandler {
         $request = new Request($this->fd, $this->fromId, $data);
         $response = $this->response = new Response($this->swooleServer, $request);
 
+        $this->context->set('request', $request);
+        $this->context->set('swoole_response', $this->response);
         $this->context->set('request_time', Time::stamp());
         $request_timeout = Config::get('server.request_timeout');
         $request_timeout = $request_timeout ? $request_timeout : self::DEFAULT_TIMEOUT;
