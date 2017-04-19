@@ -32,7 +32,7 @@ class TraceBuilder
     public function buildTransaction(array $transaction)
     {
         $this->lintSeparator($transaction);
-        $this->data .= sprintf("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t\n", ...$transaction);
+        $this->data .= sprintf("%s\t%s\t%s\t\n", ...$transaction);
     }
 
     public function commitTransaction(array $transaction)
