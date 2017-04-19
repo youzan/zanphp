@@ -11,6 +11,7 @@ use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
 {
@@ -37,6 +38,8 @@ class HttpClient implements Async
     private $body;
 
     private $callback;
+
+    /** @var Trace */
     private $trace;
 
     private $useHttpProxy = false;
