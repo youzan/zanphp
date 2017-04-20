@@ -110,9 +110,9 @@ final class JSONObject implements JsonSerializable
         $self->json["rows"][] = ["groupEnd", [], null];
     }
 
-    private function encode($level = 0)
+    private function encode()
     {
-        base64_encode(json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return base64_encode(json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
 
         $jsonStr = json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
