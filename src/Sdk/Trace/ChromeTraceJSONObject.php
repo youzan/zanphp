@@ -11,6 +11,7 @@ namespace Zan\Framework\Sdk\Trace;
 
 use JsonSerializable;
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Utilities\Encode\LZ4;
 
 class ChromeTraceJSONObject implements JsonSerializable
@@ -18,10 +19,14 @@ class ChromeTraceJSONObject implements JsonSerializable
     private static $appName;
     private static $hostName;
     private static $ip;
+    private static $port;
     private static $pid;
 
     private $json = [
-        "version" => "1.0.0",
+        "app" => "",
+        "host" => "",
+        "ip" => "",
+        "pid" => "",
         /**
          * type: chrome::console.{type}
          * log: 日志信息
@@ -32,23 +37,18 @@ class ChromeTraceJSONObject implements JsonSerializable
         "rows"    => [],
     ];
 
-    public function __construct(array $json = null)
+    public function __construct($json = null)
     {
         $this->initEnv();
         if ($json) {
             $this->json = $json;
+        } else {
+            $this->json["app"] = self::$appName;
+            $this->json["host"] = self::$hostName;
+            $this->json["ip"] = self::$ip;
+            $this->json["port"] = self::$port;
+            $this->json["pid"] = self::$pid;
         }
-    }
-
-    public function addAppInfo()
-    {
-        $appInfo = [
-            "app"   => self::$appName,
-            "host"  => self::$hostName,
-            "ip"    => self::$ip,
-            "pid"   => self::$pid,
-        ];
-        $this->addRow("info", [self::$appName, $appInfo]);
     }
 
     public function encode()
@@ -75,13 +75,14 @@ class ChromeTraceJSONObject implements JsonSerializable
             $jsonStr = LZ4::getInstance()->decode($lz4Str);
             if ($jsonStr !== false) {
                 $json = json_decode($jsonStr, true);
-                if (isset($json["columns"]) && isset($json["rows"]) && isset($json["version"])) {
+                // TODO +default
+                if (isset($json["columns"]) && isset($json["rows"])) {
                     return new self($json);
                 }
             }
         }
         sys_error("ChromeTrace decode fail, raw=" . strval($raw));
-        return new self;
+        return new self();
     }
 
     private function initEnv()
@@ -94,6 +95,7 @@ class ChromeTraceJSONObject implements JsonSerializable
         self::$hostName = gethostname();
         /** @noinspection PhpUndefinedFunctionInspection */
         self::$ip = nova_get_ip();
+        self::$port = Config::get("server.port");
         self::$pid = getmypid();
     }
 

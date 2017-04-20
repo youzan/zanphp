@@ -11,7 +11,6 @@ namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Utilities\Encode\LZ4;
 
 class ChromeTrace
 {
@@ -42,7 +41,6 @@ class ChromeTrace
         }
 
         $this->jsonObject = new ChromeTraceJSONObject();
-        $this->jsonObject->addAppInfo();
         $this->stack = new \SplStack();
     }
 
@@ -143,7 +141,6 @@ class ChromeTrace
         $ok = $response->header(self::TRANS_KEY, $this->buildTrace());
         if ($ok === false) {
             $jsonObj = new ChromeTraceJSONObject();
-            $jsonObj->addAppInfo();
             $jsonObj->addRow("error", ["ERROR", "header value is too long"]);
             $response->header(self::TRANS_KEY, $this->buildTrace($jsonObj));
         }
