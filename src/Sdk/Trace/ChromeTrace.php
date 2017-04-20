@@ -15,7 +15,7 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 class ChromeTrace
 {
     const CLASS_KEY = '___class_name';
-    const TRANS_KEY = 'X-ChromeTrace-Data';
+    const TRANS_KEY = 'X-ChromeLogger-Data';
 
     /* trace level */
     const INFO = 'info';
@@ -62,9 +62,9 @@ class ChromeTrace
      * 与transactionBegin配对
      * @param string $logType chrome::console.${logType}
      * @param mixed $res 响应数据
-     * @param null|JSONObject $remote 远程trace数据
+     * @param array|null $remoteCtx 远程trace数据 httpHeader or novaAttachment
      */
-    public function commit($logType, $res, JSONObject $remote = null)
+    public function commit($logType, $res, array &$remoteCtx = null)
     {
         list($begin, $traceType, $req) = $this->stack->pop();
 
@@ -79,8 +79,10 @@ class ChromeTrace
         ];
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
-        if ($remote) {
-            $this->jsonObject->addJSONObject($remote);
+
+        $remoteCtx = JSONObject::fromRemote($remoteCtx);
+        if ($remoteCtx) {
+            $this->jsonObject->addJSONObject($remoteCtx);
         }
     }
 
@@ -124,7 +126,7 @@ class ChromeTrace
         $ok = $response->header(self::TRANS_KEY, $this->jsonObject);
         if ($ok === false) {
             $jsonObj = new JSONObject();
-            $jsonObj->addRow("error", ["ERROR", "header value is too long"]);
+            $jsonObj->addRow("error", ["ERROR", "maybe header value is too long"]);
             $response->header(self::TRANS_KEY, $jsonObj);
         }
     }
