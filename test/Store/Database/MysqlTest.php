@@ -16,6 +16,7 @@ use Zan\Framework\Store\Facade\Db;
 
 class MysqlTest extends TaskTest
 {
+    const INSERT_COUNT = 3000;
     public function initTask()
     {
         //sql map
@@ -55,7 +56,7 @@ class MysqlTest extends TaskTest
 
     private function insert()
     {
-        for ($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < static::INSERT_COUNT; $i++) {
             $sid = 'market.category.insert';
             $data = [
                 'insert'=> [
@@ -63,8 +64,12 @@ class MysqlTest extends TaskTest
                     'goods_id' => 2222,
                 ],
             ];
-            $result = (yield Db::execute($sid, $data));
-            $sid = 'market.category.batch_insert';
+            $last_insert_id = (yield Db::execute($sid, $data));
+            $this->assertTrue($last_insert_id === $i + 1, "Db insert one column failed");
+        }
+
+        for ($i = 0; $i < static::INSERT_COUNT; $i++) {
+            $sid = 'market.category.insert_multi_rows';
             $data = [
                 'inserts' => [
                     [
@@ -77,8 +82,8 @@ class MysqlTest extends TaskTest
                     ],
                 ],
             ];
-            $result = (yield Db::execute($sid, $data));
-            $this->assertTrue($result, "Db insert failed");
+            $last_insert_id = (yield Db::execute($sid, $data));
+            $this->assertTrue($last_insert_id === static::INSERT_COUNT + 2 * $i + 1, "Db insert multi column failed");
         }
 
     }
@@ -86,30 +91,24 @@ class MysqlTest extends TaskTest
     public function select()
     {
         $sid = 'market.category.all_rows';
-        $data = [
-            'var'=> [
-                'relation_id' => 5
-            ],
-            'limit' => 20,
-        ];
+        $data = [];
         $result = (yield Db::execute($sid, $data));
-        $this->assertEquals(count($result), 3000, "3000 records excepted");
+        $this->assertEquals(count($result), 3 * static::INSERT_COUNT, 3 * static::INSERT_COUNT." records excepted");
     }
 
     public function update()
     {
-        $sid = 'market.category.update_by_id';
+        $sid = 'market.category.affected_update_by_id';
         $data = [
             'data'=> [
-                'market_id' => 1111,
-                'goods_id' => 2222,
+                'market_id' => 12,
             ],
             'var' => [
-                'relation_id' => 2
+                'goods_id' => 2222
             ]
         ];
         $result = (yield Db::execute($sid, $data));
-        $this->assertTrue($result, "Db update failed");
+        $this->assertTrue($result === 2 * static::INSERT_COUNT, "Db update failed");
     }
 
     public function delete()

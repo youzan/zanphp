@@ -8,7 +8,7 @@
 
 namespace Zan\Framework\Test\Network\Http;
 
-use Zan\Framework\Network\Http\JsVar;
+use Zan\Framework\Foundation\View\JsVar;
 
 class JsVarTest extends \TestCase
 {

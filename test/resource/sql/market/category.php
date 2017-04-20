@@ -13,7 +13,7 @@ return [
         'sql'     => 'INSERT INTO market_category #INSERT#',
     ],
 
-    'batch_insert'=>[
+    'insert_multi_rows'=>[
         'require' => [],
         'limit'   => [],
         'sql'     => 'INSERT INTO market_category #INSERTS#',
@@ -37,46 +37,10 @@ return [
         'sql'     => 'SELECT * FROM market_category'
     ],
 
-    'row_by_categoryid'=>[
-        'require' => ['market_id','category_id','parent_id'],
-        'limit'   => [],
-        'sql'     => 'SELECT * FROM market_category WHERE  market_id= #{market_id} and parent_id= #{parent_id} and category_id=#{category_id}',
-    ],
-
-    'select_by_categoryids'=>[
-        'require' => ['market_id','category_id','parent_id'],
-        'limit'   => [],
-        'sql'     => 'SELECT * FROM market_category WHERE  market_id= #{market_id} and parent_id= #{parent_id} and  category_id in #{category_ids}',
-    ],
-
-    'select_by_marketid_display'=>[
-        'require' => ['market_id'],
-        'limit'   => [],
-        'sql'     => 'SELECT * FROM market_category WHERE  market_id= #{market_id} and is_display=#{is_display}',
-    ],
-
-    'select_by_marketid'=>[
-        'require' => ['market_id'],
-        'limit'   => [],
-        'sql'     => 'SELECT * FROM market_category WHERE  market_id= #{market_id}',
-    ],
-
-    'select_by_parentid'=>[
-        'require' => ['market_id'],
-        'limit'   => [],
-        'sql'     => 'SELECT * FROM market_category WHERE  market_id= #{market_id} and parent_id= #{parent_id}',
-    ],
-
-    'select_by_parentid_display'=>[
-        'require' => ['market_id'],
-        'limit'   => [],
-        'sql'     => 'SELECT * FROM market_category WHERE  market_id= #{market_id} and parent_id= #{parent_id} and is_display=#{is_display}',
-    ],
-
-    'update_by_id'=>[
+    'affected_update_by_id'=>[
         'require' => ['relation_id'],
         'limit'   => [],
-        'sql'     => ' UPDATE market_category SET #DATA# WHERE relation_id = #{relation_id} ',
+        'sql'     => ' UPDATE market_category SET #DATA# WHERE goods_id = #{goods_id} ',
     ],
     'update_append_categoryid'=>[
         'require' => ['market_id'],

@@ -172,6 +172,12 @@ class HttpClient implements Async
 
     public function handle()
     {
+        if ($this->timeout !== null) {
+            $timeoutFn = [$this, "dnsLookupTimeout"];
+        } else {
+            $timeoutFn = null;
+        }
+
         if ($this->useHttpProxy) {
             if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
                 $proxy = self::HTTP_PROXY_ONLINE;
@@ -184,19 +190,16 @@ class HttpClient implements Async
             $host = $this->host;
             $port = $this->port;
         }
-        $dnsCallbackFn = function($host, $ip) use ($port) {
+
+        var_dump("dnsLookup function\n");
+        DnsClient::lookup($host, function ($host, $ip) use ($port) {
             if ($ip) {
                 $this->request($ip, $port);
             } else {
                 $this->whenHostNotFound($host);
             }
-        };
+        }, $timeoutFn, $this->timeout);
 
-        if ($this->timeout === null) {
-            DnsClient::lookupWithoutTimeout($host, $dnsCallbackFn);
-        } else {
-            DnsClient::lookup($host, $dnsCallbackFn, [$this, "dnsLookupTimeout"], $this->timeout);
-        }
     }
 
     public function request($ip, $port)
@@ -251,7 +254,6 @@ class HttpClient implements Async
         }
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
-        $this->client->close();
     }
 
     public function whenHostNotFound($host)

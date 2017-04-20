@@ -15,23 +15,11 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 
 class ClientTest extends TaskTest {
-
-    public function setUp()
-    {
-        $path = __DIR__ . '/config/';
-        Path::setConfigPath($path);
-        RunMode::set('dev');
-
-        Config::init();
-        Config::get('services.php');
-    }
-
     public function testTaskCall()
     {
         $context = new Context();
         $task = new Task($this->makeCoroutine($context), null, 8);
         $task->run();
-
     }
 
     private function makeCoroutine($context)
@@ -40,9 +28,6 @@ class ClientTest extends TaskTest {
             'kdt_goods_id' => 1500107
         ]));
         $context->set('result', $result);
-
-        var_dump($result);exit;
-
         yield 'success';
     }
 }

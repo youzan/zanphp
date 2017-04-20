@@ -55,9 +55,9 @@ class SysCallTest extends \TestCase
     {
         $context = new Context();
 
-        $context->set('first_coroutine', '战场原黑仪最萌');
-        $context->set('second_coroutine', '两仪式？no no no');
-        $context->set('third_coroutine', '魔法少女小圆');
+        $context->set('first_coroutine', 'Hello');
+        $context->set('second_coroutine', 'World');
+        $context->set('third_coroutine', 'coroutine');
 
         $job = new Parallel($context);
         $coroutine = $job->run();

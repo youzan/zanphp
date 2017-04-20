@@ -9,5 +9,15 @@ use Zan\Framework\Testing\TaskTest;
  */
 class TcpClientTest extends TaskTest
 {
+    public function setUp()
+    {
 
+    }
+    public function taskTcp()
+    {
+        $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));
+        $tcpClient = new TcpClient($connection);
+
+        yield $tcpClient->send($this->builder->getData());
+    }
 }

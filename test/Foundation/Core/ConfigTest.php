@@ -28,14 +28,14 @@ class ConfigTest extends \TestCase
 
     public function testGetConfigWork()
     {
-        RunMode::set('online');
+        RunMode::set('test');
         Config::init();
         $data = Config::get('a.share');
         $this->assertEquals('share', $data, 'Config::get share get failed');
         $data = Config::get('a.config');
-        $this->assertEquals('online', $data, 'Config::get share get failed');
+        $this->assertEquals('test', $data, 'Config::get share get failed');
         $data = Config::get('pf.b.test');
-        $this->assertEquals('online', $data, 'Config::get share get failed');
+        $this->assertEquals('test', $data, 'Config::get share get failed');
         $data = Config::get('pf.b.db');
         $this->assertEquals('pf', $data, 'Config::get share get failed');
         Config::set('pf.b.new','new');
