@@ -36,10 +36,6 @@ class ChromeTrace
 
     public function __construct()
     {
-        if (!Debug::get()) {
-            return;
-        }
-
         $this->jsonObject = new JSONObject();
         $this->stack = new \SplStack();
     }
@@ -47,19 +43,6 @@ class ChromeTrace
     public function getJSONObject()
     {
         return $this->jsonObject;
-    }
-
-    public function buildTrace(JSONObject $jsonObject = null)
-    {
-        if ($jsonObject === null) {
-            $jsonObject = $this->jsonObject;
-        }
-        return $jsonObject->encode();
-    }
-
-    public function unpack($value)
-    {
-        return JSONObject::decode($value);
     }
 
     /**
@@ -76,8 +59,8 @@ class ChromeTrace
     }
 
     /**
-     * 与transactionBegin配对, 成功 level = "info", 失败 level = "error"
-     * @param string $logType chrome::console.{level}
+     * 与transactionBegin配对
+     * @param string $logType chrome::console.${logType}
      * @param mixed $res 响应数据
      * @param null|JSONObject $remote 远程trace数据
      */
@@ -89,16 +72,11 @@ class ChromeTrace
         $end = $sec + $usec;
 
         $ctx = [
+            "time" => $begin,
+            "cost" => $end - $begin,
             "req" => self::convert($req),
             "res" => self::convert($res),
-            "cost" => $end - $begin
         ];
-
-//        if ($trace) {
-//            $this->jsonObject->addRow($logType, [$traceType, $ctx], $trace);
-//        } else {
-//            $this->jsonObject->addRow($logType, [$traceType, $ctx]);
-//        }
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
         if ($remote) {
@@ -107,14 +85,14 @@ class ChromeTrace
     }
 
     /**
-     * @param string $logType chrome::console.{level}
+     * @param string $logType chrome::console.${logType}
      * @param string $traceType trace类型
      * @param mixed $args trace信息
      */
     public function trace($logType, $traceType, $args)
     {
-        $logs = self::convert($args);
-        $this->jsonObject->addRow($logType, [$traceType, $logs]);
+        $args = self::convert($args);
+        $this->jsonObject->addRow($logType, [$traceType, $args]);
     }
 
     /**
@@ -143,11 +121,11 @@ class ChromeTrace
 
     private function sendHeader(\swoole_http_response $response)
     {
-        $ok = $response->header(self::TRANS_KEY, $this->buildTrace());
+        $ok = $response->header(self::TRANS_KEY, $this->jsonObject);
         if ($ok === false) {
             $jsonObj = new JSONObject();
             $jsonObj->addRow("error", ["ERROR", "header value is too long"]);
-            $response->header(self::TRANS_KEY, $this->buildTrace($jsonObj));
+            $response->header(self::TRANS_KEY, $jsonObj);
         }
     }
 

@@ -13,6 +13,7 @@ use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\JSONObject;
 use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
@@ -280,7 +281,8 @@ class HttpClient implements Async
             $key = strtolower(ChromeTrace::TRANS_KEY);
 
             if (isset($cli->headers[$key])) {
-                $trace = $this->chromeTrace->unpack($cli->headers[$key]);
+                $raw = $cli->headers[$key];
+                $trace = JSONObject::decode($raw);
                 unset($cli->headers[$key]);
                 $this->chromeTrace->commit("info", $res, $trace);
             } else {

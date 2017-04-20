@@ -27,28 +27,25 @@ class JSONObject implements JsonSerializable
         "host" => "",
         "ip" => "",
         "pid" => "",
-        /**
-         * type: chrome::console.{type}
-         * log: 日志信息
-         * backtrace:
-         * trace: 远程信息
-         */
-        "columns" => ["type", "log", "trace", "backtrace"],
+
+        "columns" => ["type", "log", "backtrace"],
         "rows"    => [],
     ];
 
     public function __construct($json = null)
     {
-        $this->initEnv();
         if ($json) {
-            $this->json = $json;
+            $this->json = $json + $this->json;
         } else {
+            $this->init();
             $this->json["app"] = self::$appName;
             $this->json["host"] = self::$hostName;
             $this->json["ip"] = self::$ip;
             $this->json["port"] = self::$port;
             $this->json["pid"] = self::$pid;
         }
+
+        self::group($this);
     }
 
     public function encode()
@@ -85,7 +82,41 @@ class JSONObject implements JsonSerializable
         return new self();
     }
 
-    private function initEnv()
+    public function addRow($logType, array $logs, JSONObject $trace = null, $backtrace = null)
+    {
+        $this->json['rows'][] = [$logType, $logs, $trace, $backtrace];
+    }
+
+    public function addJSONObject(JSONObject $remote)
+    {
+        $this->json["rows"] = array_merge($this->json["rows"], $remote->json["rows"]);
+        self::groupEnd($remote);
+    }
+
+    public function jsonSerialize()
+    {
+        self::groupEnd($this);
+        return $this->json;
+    }
+
+    public function __toString()
+    {
+        return $this->encode();
+    }
+
+    private static function group(JSONObject $self)
+    {
+        $trace = $self->json;
+        $title = "{$trace["app"]}  [host={$trace["host"]}, ip={$trace["ip"]}, port={$trace["port"]}, pid={$trace["pid"]}]";
+        $self->json["rows"][] = ["group", [$title], null, null];
+    }
+
+    private static function groupEnd(JSONObject $self)
+    {
+        $self->json["rows"][] = ["groupEnd", [], null, null];
+    }
+
+    private function init()
     {
         if (self::$appName) {
             return;
@@ -97,24 +128,5 @@ class JSONObject implements JsonSerializable
         self::$ip = nova_get_ip();
         self::$port = Config::get("server.port");
         self::$pid = getmypid();
-    }
-
-    public function addJSONObject(JSONObject $remote)
-    {
-        $trace = $remote->json;
-        $title = "{$trace["app"]}  [host={$trace["host"]}, ip={$trace["ip"]}, port={$trace["port"]}, pid={$trace["pid"]}]";
-        $this->json["rows"][] = ["group", [$title], null, null];
-        $this->json["rows"] = array_merge($this->json["rows"], $trace["rows"]);
-        $this->json["rows"][] = ["groupEnd", [], null, null];
-    }
-
-    public function addRow($logType, array $logs, JSONObject $trace = null, $backtrace = null)
-    {
-        $this->json['rows'][] = [$logType, $logs, $trace, $backtrace];
-    }
-
-    public function jsonSerialize()
-    {
-        return $this->json;
     }
 }
