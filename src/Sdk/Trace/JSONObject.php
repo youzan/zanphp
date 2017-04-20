@@ -14,7 +14,7 @@ use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Utilities\Encode\LZ4;
 
-class ChromeTraceJSONObject implements JsonSerializable
+class JSONObject implements JsonSerializable
 {
     private static $appName;
     private static $hostName;
@@ -99,9 +99,18 @@ class ChromeTraceJSONObject implements JsonSerializable
         self::$pid = getmypid();
     }
 
-    public function addRow($level, array $logs, ChromeTraceJSONObject $trace = null, $backtrace = null)
+    public function addJSONObject(JSONObject $remote)
     {
-        $this->json['rows'][] = [$level, $logs, $trace, $backtrace];
+        $trace = $remote->json;
+        $title = "{$trace["app"]}  [host={$trace["host"]}, ip={$trace["ip"]}, port={$trace["port"]}, pid={$trace["pid"]}]";
+        $this->json["rows"][] = ["group", [$title], null, null];
+        $this->json["rows"] = array_merge($this->json["rows"], $trace["rows"]);
+        $this->json["rows"][] = ["groupEnd", [], null, null];
+    }
+
+    public function addRow($logType, array $logs, JSONObject $trace = null, $backtrace = null)
+    {
+        $this->json['rows'][] = [$logType, $logs, $trace, $backtrace];
     }
 
     public function jsonSerialize()

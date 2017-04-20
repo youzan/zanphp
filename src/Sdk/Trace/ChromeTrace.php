@@ -40,7 +40,7 @@ class ChromeTrace
             return;
         }
 
-        $this->jsonObject = new ChromeTraceJSONObject();
+        $this->jsonObject = new JSONObject();
         $this->stack = new \SplStack();
     }
 
@@ -49,7 +49,7 @@ class ChromeTrace
         return $this->jsonObject;
     }
 
-    public function buildTrace(ChromeTraceJSONObject $jsonObject = null)
+    public function buildTrace(JSONObject $jsonObject = null)
     {
         if ($jsonObject === null) {
             $jsonObject = $this->jsonObject;
@@ -59,7 +59,7 @@ class ChromeTrace
 
     public function unpack($value)
     {
-        return ChromeTraceJSONObject::decode($value);
+        return JSONObject::decode($value);
     }
 
     /**
@@ -77,11 +77,11 @@ class ChromeTrace
 
     /**
      * 与transactionBegin配对, 成功 level = "info", 失败 level = "error"
-     * @param string $level chrome::console.{level}
+     * @param string $logType chrome::console.{level}
      * @param mixed $res 响应数据
-     * @param null|ChromeTraceJSONObject $trace 远程trace数据
+     * @param null|JSONObject $remote 远程trace数据
      */
-    public function commit($level, $res, ChromeTraceJSONObject $trace = null)
+    public function commit($logType, $res, JSONObject $remote = null)
     {
         list($begin, $traceType, $req) = $this->stack->pop();
 
@@ -94,22 +94,27 @@ class ChromeTrace
             "cost" => $end - $begin
         ];
 
-        if ($trace) {
-            $this->jsonObject->addRow($level, [$traceType, $ctx], $trace);
-        } else {
-            $this->jsonObject->addRow($level, [$traceType, $ctx]);
+//        if ($trace) {
+//            $this->jsonObject->addRow($logType, [$traceType, $ctx], $trace);
+//        } else {
+//            $this->jsonObject->addRow($logType, [$traceType, $ctx]);
+//        }
+
+        $this->jsonObject->addRow($logType, [$traceType, $ctx]);
+        if ($remote) {
+            $this->jsonObject->addJSONObject($remote);
         }
     }
 
     /**
-     * @param string $level chrome::console.{level}
+     * @param string $logType chrome::console.{level}
      * @param string $traceType trace类型
      * @param mixed $args trace信息
      */
-    public function trace($level, $traceType, $args)
+    public function trace($logType, $traceType, $args)
     {
         $logs = self::convert($args);
-        $this->jsonObject->addRow($level, [$traceType, $logs]);
+        $this->jsonObject->addRow($logType, [$traceType, $logs]);
     }
 
     /**
@@ -140,7 +145,7 @@ class ChromeTrace
     {
         $ok = $response->header(self::TRANS_KEY, $this->buildTrace());
         if ($ok === false) {
-            $jsonObj = new ChromeTraceJSONObject();
+            $jsonObj = new JSONObject();
             $jsonObj->addRow("error", ["ERROR", "header value is too long"]);
             $response->header(self::TRANS_KEY, $this->buildTrace($jsonObj));
         }
