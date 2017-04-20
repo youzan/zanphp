@@ -62,9 +62,9 @@ class ChromeTrace
      * 与transactionBegin配对
      * @param string $logType chrome::console.${logType}
      * @param mixed $res 响应数据
-     * @param array|null $remoteCtx 远程trace数据 httpHeader or novaAttachment
+     * @param JSONObject $remote
      */
-    public function commit($logType, $res, array &$remoteCtx = null)
+    public function commit($logType, $res, JSONObject $remote = null)
     {
         list($begin, $traceType, $req) = $this->stack->pop();
 
@@ -73,16 +73,16 @@ class ChromeTrace
 
         $ctx = [
             "cost" => $end - $begin,
-//            "req" => self::convert($req),
-//            "res" => self::convert($res),
+            // "req" => self::convert($req),
+            // "res" => self::convert($res),
             "req" => $req,
             "res" => $res,
         ];
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
 
-        if ($remoteCtx && $jsonObject = JSONObject::fromRemote($remoteCtx)) {
-            $this->jsonObject->addJSONObject($jsonObject);
+        if ($remote) {
+            $this->jsonObject->addJSONObject($remote);
         }
     }
 
@@ -93,7 +93,7 @@ class ChromeTrace
      */
     public function trace($logType, $traceType, $args)
     {
-        $args = self::convert($args);
+        // $args = self::convert($args);
         $this->jsonObject->addRow($logType, [$traceType, $args]);
     }
 

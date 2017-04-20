@@ -275,10 +275,19 @@ class HttpClient implements Async
         if ($this->chromeTrace instanceof ChromeTrace) {
             $res = [
                 "code" => $cli->statusCode,
-                "header" => $cli->headers,
+                "header" => &$cli->headers,
                 "body" => $cli->body,
             ];
-            $this->chromeTrace->commit("info", $res, $cli->headers);
+
+            $key = strtolower(ChromeTrace::TRANS_KEY); // swoole_header
+            if (isset($cli->headers[$key])) {
+                $raw = $cli->headers[$key];
+                $remote = JSONObject::unpack($raw);
+                unset($cli->headers[$key]);
+                $this->chromeTrace->commit("info", $res, $remote);
+            } else {
+                $this->chromeTrace->commit("info", $res);
+            }
         }
 
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);

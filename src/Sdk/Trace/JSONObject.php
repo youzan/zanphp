@@ -47,21 +47,8 @@ final class JSONObject implements JsonSerializable
         self::group($this);
     }
 
-    public static function fromRemote(array &$ctx)
+    public static function unpack($raw)
     {
-        $key1 = strtolower(ChromeTrace::TRANS_KEY); // swoole_header
-        $key2 = ChromeTrace::TRANS_KEY;
-
-        if (isset($ctx[$key1])) {
-            $raw = $ctx[$key1];
-            unset($ctx[$key1]);
-        } else if (isset($ctx[$key2])) {
-            $raw = $ctx[$key2];
-            unset($ctx[$key2]);
-        } else {
-            return null;
-        }
-
         if ($raw && $json = self::decode($raw)) {
             $self = new self();
             $self->json = $json + $self->json;
