@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
@@ -255,6 +256,12 @@ class HttpClient implements Async
             $this->header['Scheme'] = 'https';
         }
 
+        /*
+        if (Debug::get() && $this->chromeTrace) {
+            $this->header[ChromeTrace::TRANS_KEY] = $this->chromeTrace->buildTrace();
+        }
+        */
+
         $this->client->setHeaders($this->header);
     }
 
@@ -268,7 +275,7 @@ class HttpClient implements Async
             $res = [
                 "code" => $cli->statusCode,
                 "header" => $cli->headers,
-                "body" => $cli->body,
+                "body" => substr($cli->body, 0, 1024 * 2), // TODO
             ];
             if (isset($cli->headers[ChromeTrace::TRANS_KEY])) {
                 $res[ChromeTrace::TRANS_KEY] = $cli->headers[ChromeTrace::TRANS_KEY];

@@ -9,7 +9,6 @@
 namespace Zan\Framework\Sdk\Trace;
 
 
-use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -18,6 +17,7 @@ class ChromeTrace
     const CLASS_KEY = '___class_name';
     const TRANS_KEY = 'X-ChromeLogger-Data';
 
+    /* trace level */
     const INFO = 'info';
     const WARN = 'warn';
     const ERROR = 'error';
@@ -25,11 +25,6 @@ class ChromeTrace
     const GROUP_END = 'groupEnd';
     const GROUP_COLLAPSED = 'groupCollapsed';
     const TABLE = 'table';
-
-    private static $appName;
-    private static $hostName;
-    private static $ip;
-    private static $pid;
 
     private $jsonObject;
     private $stack;
@@ -44,31 +39,22 @@ class ChromeTrace
         if (!Debug::get()) {
             return;
         }
-        $this->init();
+
         $this->jsonObject = new ChromeTraceJSONObject();
         $this->stack = new \SplStack();
-        $this->trace(static::INFO, self::$appName, [
-            "app" => self::$appName,
-            "host" => self::$hostName,
-            "ip" => self::$ip,
-        ]);
-    }
-
-    private function init()
-    {
-        if (self::$appName) {
-            return;
-        }
-
-        self::$appName = Application::getInstance()->getName();
-        self::$hostName = gethostname();
-        self::$ip = nova_get_ip();
-        self::$pid = getmypid();
     }
 
     public function getJSONObject()
     {
         return $this->jsonObject;
+    }
+
+    public function buildTrace(ChromeTraceJSONObject $jsonObject = null)
+    {
+        if ($jsonObject === null) {
+            $jsonObject = $this->jsonObject;
+        }
+        return base64_encode(json_encode($jsonObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
     /**
@@ -125,7 +111,7 @@ class ChromeTrace
         if (Debug::get()) {
             $self = (yield getContext('chrome_trace'));
             if ($self instanceof static) {
-                $response->header(self::TRANS_KEY, $self->buildTrace());
+                $self->sendHeader($response);
             }
         }
     }
@@ -135,28 +121,22 @@ class ChromeTrace
         if (Debug::get()) {
             $self = $ctx->get('chrome_trace');
             if ($self instanceof static) {
-                $response->header(self::TRANS_KEY, $self->buildTrace());
+                $self->sendHeader($response);
             }
         }
     }
 
-    public static function getByCtx(Context $ctx)
+    private function sendHeader(\swoole_http_response $response)
     {
-        if (Debug::get()) {
-            $self = $ctx->get('chrome_trace');
-            if ($self instanceof static) {
-            }
+        $ok = $response->header(self::TRANS_KEY, $this->buildTrace());
+        if ($ok === false) {
+            $jsonObj = new ChromeTraceJSONObject();
+            $jsonObj->addRow("error", "header value is too long");
+            $this->buildTrace($jsonObj);
         }
-        return [];
     }
 
-
-    private function buildTrace()
-    {
-        return base64_encode(json_encode($this->jsonObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    }
-
-    private static function convert($var)
+    public static function convert($var)
     {
         $var = is_array($var) ? $var : [ $var ];
         return array_map(["self", "objectConvert"], $var);

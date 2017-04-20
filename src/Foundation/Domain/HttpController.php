@@ -95,10 +95,6 @@ class HttpController extends Controller
             'data' => $data,
         ];
 
-        if (Debug::get()) {
-            $data[ChromeTrace::TRANS_KEY] = ChromeTrace::getByCtx($this->context);
-        }
-
         return new JsonResponse($data);
     }
 
