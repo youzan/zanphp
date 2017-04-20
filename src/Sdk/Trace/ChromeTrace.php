@@ -11,6 +11,7 @@ namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Encode\LZ4;
 
 class ChromeTrace
 {
@@ -41,6 +42,7 @@ class ChromeTrace
         }
 
         $this->jsonObject = new ChromeTraceJSONObject();
+        $this->jsonObject->addAppInfo();
         $this->stack = new \SplStack();
     }
 
@@ -54,7 +56,12 @@ class ChromeTrace
         if ($jsonObject === null) {
             $jsonObject = $this->jsonObject;
         }
-        return base64_encode(json_encode($jsonObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        return $jsonObject->encode();
+    }
+
+    public function unpack($value)
+    {
+        return ChromeTraceJSONObject::decode($value);
     }
 
     /**
@@ -74,21 +81,26 @@ class ChromeTrace
      * 与transactionBegin配对, 成功 level = "info", 失败 level = "error"
      * @param string $level chrome::console.{level}
      * @param mixed $res 响应数据
+     * @param null|ChromeTraceJSONObject $trace 远程trace数据
      */
-    public function commit($level, $res)
+    public function commit($level, $res, ChromeTraceJSONObject $trace = null)
     {
         list($begin, $traceType, $req) = $this->stack->pop();
 
         list($usec, $sec) = explode(' ', microtime());
         $end = $sec + $usec;
 
-        $trace = [
+        $ctx = [
             "req" => self::convert($req),
             "res" => self::convert($res),
             "cost" => $end - $begin
         ];
 
-        $this->jsonObject->addRow($level, [$traceType, $trace]);
+        if ($trace) {
+            $this->jsonObject->addRow($level, [$traceType, $ctx], $trace);
+        } else {
+            $this->jsonObject->addRow($level, [$traceType, $ctx]);
+        }
     }
 
     /**
@@ -131,8 +143,9 @@ class ChromeTrace
         $ok = $response->header(self::TRANS_KEY, $this->buildTrace());
         if ($ok === false) {
             $jsonObj = new ChromeTraceJSONObject();
-            $jsonObj->addRow("error", "header value is too long");
-            $this->buildTrace($jsonObj);
+            $jsonObj->addAppInfo();
+            $jsonObj->addRow("error", ["ERROR", "header value is too long"]);
+            $response->header(self::TRANS_KEY, $this->buildTrace($jsonObj));
         }
     }
 

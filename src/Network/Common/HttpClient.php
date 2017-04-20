@@ -217,7 +217,7 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
-        if ($this->chromeTrace) {
+        if ($this->chromeTrace instanceof ChromeTrace) {
             $this->chromeTrace->beginTransaction("http", [
                 'host' => $this->host,
                 'port' => $this->port,
@@ -271,17 +271,21 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
-        if ($this->chromeTrace) {
+        if ($this->chromeTrace instanceof ChromeTrace) {
             $res = [
                 "code" => $cli->statusCode,
                 "header" => $cli->headers,
                 "body" => substr($cli->body, 0, 1024 * 2), // TODO
             ];
-            if (isset($cli->headers[ChromeTrace::TRANS_KEY])) {
-                $res[ChromeTrace::TRANS_KEY] = $cli->headers[ChromeTrace::TRANS_KEY];
-                unset($cli->headers[ChromeTrace::TRANS_KEY]);
+            $key = strtolower(ChromeTrace::TRANS_KEY);
+
+            if (isset($cli->headers[$key])) {
+                $trace = $this->chromeTrace->unpack($cli->headers[$key]);
+                unset($cli->headers[$key]);
+                $this->chromeTrace->commit("info", $res, $trace);
+            } else {
+                $this->chromeTrace->commit("info", $res);
             }
-            $this->chromeTrace->commit("info", $res);
         }
 
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
@@ -365,15 +369,10 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit($exception);
         }
-        if ($this->chromeTrace) {
+        if ($this->chromeTrace instanceof ChromeTrace) {
             $this->chromeTrace->commit("error", $exception);
         }
 
         call_user_func($this->callback, null, $exception);
-    }
-
-    private function getDnsResolveTimerId()
-    {
-        return spl_object_hash($this) . "_dns_lookup";
     }
 }
