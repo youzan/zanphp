@@ -15,7 +15,7 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 class ChromeTrace
 {
     const CLASS_KEY = '___class_name';
-    const TRANS_KEY = 'X-ChromeLogger-Data';
+    const TRANS_KEY = 'X-ChromeTrace-Data';
 
     /* trace level */
     const INFO = 'info';
