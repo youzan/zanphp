@@ -71,9 +71,11 @@ class Flow
         $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
         $sqlLog = Config::get("monitor.sql");
         if (is_array($sqlLog) && isset($sqlLog['path'])) {
-            if (is_writable($sqlLog['path']))
+            $dir = dirname($sqlLog['path']);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
                 file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", FILE_APPEND);
         }
+
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
@@ -96,7 +98,8 @@ class Flow
     {
         $sqlLog = Config::get("monitor.sql");
         if (is_array($sqlLog) && isset($sqlLog['path'])) {
-            if (is_writable($sqlLog['path']))
+            $dir = dirname($sqlLog['path']);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
                 file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sql."\n", FILE_APPEND);
         }
         $database = Table::getInstance()->getDatabase($table);
