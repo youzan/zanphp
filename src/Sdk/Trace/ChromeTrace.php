@@ -31,7 +31,7 @@ class ChromeTrace
 
     public static function getInstance()
     {
-        yield getContext("chrome_trace");
+
     }
 
     public function __construct()

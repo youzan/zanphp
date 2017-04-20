@@ -7,6 +7,8 @@
  */
 namespace Zan\Framework\Store\Database;
 
+use Zan\Framework\Foundation\Core\Debug;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 use Zan\Framework\Store\Database\Mysql\Mysqli;
 use Zan\Framework\Store\Database\Mysql\Mysql;
@@ -71,9 +73,21 @@ class Flow
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
+        /** @var ChromeTrace $trace */
+        $trace = (yield getContext("chrome_trace"));
+        $traceEnable = Debug::get() && $trace instanceof ChromeTrace;
         try {
+            if ($traceEnable) {
+                $trace->beginTransaction("sql", $sqlMap['sql']);
+            }
             $dbResult = (yield $driver->query($sqlMap['sql']));
+            if ($traceEnable) {
+                $trace->commit("info", []);
+            }
         } catch (\Exception $e) {
+            if ($traceEnable) {
+                $trace->commit("info", $e);
+            }
             yield $this->queryException($e, $connection);
             throw $e;
         }
