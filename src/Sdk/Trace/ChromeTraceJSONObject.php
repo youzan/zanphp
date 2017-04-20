@@ -19,10 +19,10 @@ class ChromeTraceJSONObject implements JsonSerializable
         'rows'    => [],
     ];
 
-    public function addRow($type, array $logs)
+    public function addRow($level, array $logs)
     {
-        $backtrace = null;
-        $this->json['rows'][] = [$logs, $backtrace, $type];
+        $backtrace = null; /* 节省header-size */
+        $this->json['rows'][] = [$logs, $backtrace, $level];
     }
 
     public function jsonSerialize()

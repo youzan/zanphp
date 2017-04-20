@@ -10,6 +10,7 @@ use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\Trace;
 
@@ -41,6 +42,9 @@ class HttpClient implements Async
 
     /** @var Trace */
     private $trace;
+
+    /** @var ChromeTrace  */
+    private $chromeTrace;
 
     private $useHttpProxy = false;
 
@@ -151,6 +155,7 @@ class HttpClient implements Async
     private function build()
     {
         $this->trace = (yield getContext('trace'));
+        $this->chromeTrace = (yield getContext('chrome_trace'));
 
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
@@ -211,6 +216,19 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
+        if ($this->chromeTrace) {
+            $this->chromeTrace->beginTransaction("http", [
+                'host' => $this->host,
+                'port' => $this->port,
+                'ssl' => $this->ssl,
+                'uri' => $this->uri,
+                'method' => $this->method,
+                'params' => $this->params,
+                'body' => $this->body,
+                'header' => $this->header,
+                'use_http_proxy' => $this->useHttpProxy,
+            ]);
+        }
 
         if('GET' === $this->method){
             if ($this->trace) {
@@ -246,6 +264,19 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
+        if ($this->chromeTrace) {
+            $res = [
+                "code" => $cli->statusCode,
+                "header" => $cli->headers,
+                "body" => $cli->body,
+            ];
+            if (isset($cli->headers[ChromeTrace::TRANS_KEY])) {
+                $res[ChromeTrace::TRANS_KEY] = $cli->headers[ChromeTrace::TRANS_KEY];
+                unset($cli->headers[ChromeTrace::TRANS_KEY]);
+            }
+            $this->chromeTrace->commit("info", $res);
+        }
+
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
         $this->client->close();
@@ -289,9 +320,14 @@ class HttpClient implements Async
         ];
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
         }
+        if ($this->chromeTrace) {
+            $this->chromeTrace->commit("error", $exception);
+        }
+
         call_user_func($this->callback, null, $exception);
     }
 
@@ -318,9 +354,14 @@ class HttpClient implements Async
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
         }
+        if ($this->chromeTrace) {
+            $this->chromeTrace->commit("error", $exception);
+        }
+
         call_user_func($this->callback, null, $exception);
     }
 

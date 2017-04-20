@@ -3,11 +3,13 @@
 namespace Zan\Framework\Foundation\Domain;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
 use Zan\Framework\Network\Http\Response\JsonResponse;
 use Zan\Framework\Foundation\View\View;
 use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Foundation\View\JsVar;
 
@@ -92,6 +94,11 @@ class HttpController extends Controller
             'msg'  => $msg,
             'data' => $data,
         ];
+
+        if (Debug::get()) {
+            $data[ChromeTrace::TRANS_KEY] = ChromeTrace::getByCtx($this->context);
+        }
+
         return new JsonResponse($data);
     }
 

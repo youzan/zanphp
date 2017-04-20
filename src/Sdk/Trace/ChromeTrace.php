@@ -29,23 +29,41 @@ class ChromeTrace
     private static $appName;
     private static $hostName;
     private static $ip;
+    private static $pid;
 
     private $jsonObject;
+    private $stack;
+
+    public static function getInstance()
+    {
+        yield getContext("chrome_trace");
+    }
 
     public function __construct()
     {
         if (!Debug::get()) {
             return;
         }
-
-        $this->jsonObject = new ChromeTraceJSONObject();
-
         $this->init();
-        $this->log(static::INFO, [
-            'app' => self::$appName,
-            'host' => self::$hostName,
-            'ip' => self::$ip,
+        $this->jsonObject = new ChromeTraceJSONObject();
+        $this->stack = new \SplStack();
+        $this->trace(static::INFO, self::$appName, [
+            "app" => self::$appName,
+            "host" => self::$hostName,
+            "ip" => self::$ip,
         ]);
+    }
+
+    private function init()
+    {
+        if (self::$appName) {
+            return;
+        }
+
+        self::$appName = Application::getInstance()->getName();
+        self::$hostName = gethostname();
+        self::$ip = nova_get_ip();
+        self::$pid = getmypid();
     }
 
     public function getJSONObject()
@@ -53,33 +71,49 @@ class ChromeTrace
         return $this->jsonObject;
     }
 
-    public function log($type, array $args)
+    /**
+     * 发起请求
+     * @param string $traceType trace类型
+     * @param mixed $req 请求数据
+     */
+    public function beginTransaction($traceType, $req)
     {
-        if (count($args) === 0 && $type != static::GROUP_END) {
-            return;
-        }
-
-        $logs = [];
-        foreach ($args as $arg) {
-            $logs[] = $this->convert($arg);
-        }
-
-        $this->jsonObject->addRow($type, $logs);
+        list($usec, $sec) = explode(' ', microtime());
+        $begin = $sec + $usec;
+        $trace = [$begin, $traceType, $req];
+        $this->stack->push($trace);
     }
 
     /**
-     * @param $type
-     * @param array $args
-     * @return \Generator
+     * 与transactionBegin配对, 成功 level = "info", 失败 level = "error"
+     * @param string $level chrome::console.{level}
+     * @param mixed $res 响应数据
      */
-    public static function trace($type, array $args)
+    public function commit($level, $res)
     {
-        if (Debug::get()) {
-            $self = (yield getContext('chrome_trace'));
-            if ($self instanceof static) {
-                $self->log($type, $args);
-            }
-        }
+        list($begin, $traceType, $req) = $this->stack->pop();
+
+        list($usec, $sec) = explode(' ', microtime());
+        $end = $sec + $usec;
+
+        $trace = [
+            "req" => self::convert($req),
+            "res" => self::convert($res),
+            "cost" => $end - $begin
+        ];
+
+        $this->jsonObject->addRow($level, [$traceType, $trace]);
+    }
+
+    /**
+     * @param string $level chrome::console.{level}
+     * @param string $traceType trace类型
+     * @param mixed $args trace信息
+     */
+    public function trace($level, $traceType, $args)
+    {
+        $logs = self::convert($args);
+        $this->jsonObject->addRow($level, [$traceType, $logs]);
     }
 
     /**
@@ -106,23 +140,29 @@ class ChromeTrace
         }
     }
 
-    public function tcpTrace()
+    public static function getByCtx(Context $ctx)
     {
-
-    }
-
-    private function init()
-    {
-        if (self::$appName) {
-            return;
+        if (Debug::get()) {
+            $self = $ctx->get('chrome_trace');
+            if ($self instanceof static) {
+            }
         }
-
-        self::$appName = Application::getInstance()->getName();
-        self::$hostName = gethostname();
-        self::$ip = nova_get_ip();
+        return [];
     }
 
-    private function convert($object, $processed = [])
+
+    private function buildTrace()
+    {
+        return base64_encode(json_encode($this->jsonObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    private static function convert($var)
+    {
+        $var = is_array($var) ? $var : [ $var ];
+        return array_map(["self", "objectConvert"], $var);
+    }
+
+    public static function objectConvert($object, $processed = [])
     {
         if (!is_object($object)) {
             return $object;
@@ -141,7 +181,7 @@ class ChromeTrace
             }
 
             $accessModifier = self::getAccessModifier($prop);
-            $kv[$accessModifier] = $this->convert($value);
+            $kv[$accessModifier] = self::objectConvert($value);
         }
 
         return $kv;
@@ -160,10 +200,5 @@ class ChromeTrace
         } else {
             return 'unknown';
         }
-    }
-
-    private function buildTrace()
-    {
-        return base64_encode(json_encode($this->jsonObject, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 }
