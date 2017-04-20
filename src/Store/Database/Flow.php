@@ -82,7 +82,7 @@ class Flow
             }
             $dbResult = (yield $driver->query($sqlMap['sql']));
             if ($traceEnable) {
-                $trace->commit("info", []);
+                $trace->commit("info", null);
             }
         } catch (\Exception $e) {
             if ($traceEnable) {
@@ -94,7 +94,7 @@ class Flow
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
         }
-        $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
+        $resultFormatter = new ResultFormatter($dbResult, [$sqlMap['result_type']]);
         $result = (yield $resultFormatter->format());
         yield $this->releaseConnection($connection);
         yield $result;
@@ -105,9 +105,21 @@ class Flow
         $database = Table::getInstance()->getDatabase($table);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
+        /** @var ChromeTrace $trace */
+        $trace = (yield getContext("chrome_trace"));
+        $traceEnable = Debug::get() && $trace instanceof ChromeTrace;
         try {
+            if ($traceEnable) {
+                $trace->beginTransaction("sql", [$sql]);
+            }
             $dbResult = (yield $driver->query($sql));
+            if ($traceEnable) {
+                $trace->commit("info", null);
+            }
         } catch (\Exception $e) {
+            if ($traceEnable) {
+                $trace->commit("info", $e);
+            }
             yield $this->queryException($e, $connection);
             throw $e;
         }
