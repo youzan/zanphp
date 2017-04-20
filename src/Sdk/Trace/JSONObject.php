@@ -16,6 +16,8 @@ use Zan\Framework\Utilities\Encode\LZ4;
 
 final class JSONObject implements JsonSerializable
 {
+    const MAX_SIZE = 1024 * 4;
+
     private static $appName;
     private static $hostName;
     private static $ip;
@@ -69,21 +71,25 @@ final class JSONObject implements JsonSerializable
         }
     }
 
-    public function addRow($logType, array $logs, JSONObject $trace = null, $backtrace = null)
+    public function addRow($logType, array $logs)
     {
-        $this->json['rows'][] = [$logType, $logs, $trace, $backtrace];
+        $backtrace = null;
+        $this->json['rows'][] = [$logType, $logs, $backtrace];
     }
 
     public function addJSONObject(JSONObject $remote)
     {
-        self::group($remote);
         $this->json["rows"] = array_merge($this->json["rows"], $remote->json["rows"]);
         self::groupEnd($remote);
     }
 
     public function __toString()
     {
-        return $this->encode();
+        try {
+            return $this->encode();
+        } catch (\Exception $ex) {
+            echo_exception($ex);
+        }
     }
 
     public function jsonSerialize()
@@ -96,17 +102,17 @@ final class JSONObject implements JsonSerializable
     {
         $trace = $self->json;
         $title = "{$trace["app"]}  [host={$trace["host"]}, ip={$trace["ip"]}, port={$trace["port"]}, pid={$trace["pid"]}]";
-        $self->json["rows"][] = ["group", [$title], null, null];
+        $self->json["rows"][] = ["group", [$title], null];
     }
 
     private static function groupEnd(JSONObject $self)
     {
-        $self->json["rows"][] = ["groupEnd", [], null, null];
+        $self->json["rows"][] = ["groupEnd", [], null];
     }
 
-    private function encode()
+    private function encode($level = 0)
     {
-        return base64_encode(json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        base64_encode(json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
 
         $jsonStr = json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

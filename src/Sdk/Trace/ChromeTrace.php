@@ -80,9 +80,8 @@ class ChromeTrace
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
 
-        $remoteCtx = JSONObject::fromRemote($remoteCtx);
-        if ($remoteCtx) {
-            $this->jsonObject->addJSONObject($remoteCtx);
+        if ($remoteCtx && $jsonObject = JSONObject::fromRemote($remoteCtx)) {
+            $this->jsonObject->addJSONObject($jsonObject);
         }
     }
 
