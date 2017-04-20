@@ -72,10 +72,11 @@ class ChromeTrace
         $end = $sec + $usec;
 
         $ctx = [
-            "time" => $begin,
             "cost" => $end - $begin,
-            "req" => self::convert($req),
-            "res" => self::convert($res),
+//            "req" => self::convert($req),
+//            "res" => self::convert($res),
+            "req" => $req,
+            "res" => $res,
         ];
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
