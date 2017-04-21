@@ -62,9 +62,9 @@ class ChromeTrace
      * 与transactionBegin配对
      * @param string $logType chrome::console.${logType}
      * @param mixed $res 响应数据
-     * @param JSONObject $remote
+     * @param JSONObject|null $remote
      */
-    public function commit($logType, $res, JSONObject $remote = null)
+    public function commit($logType, $res, $remote = null)
     {
         list($begin, $traceType, $req) = $this->stack->pop();
 
@@ -81,7 +81,7 @@ class ChromeTrace
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
 
-        if ($remote) {
+        if ($remote instanceof JSONObject) {
             $this->jsonObject->addJSONObject($remote);
         }
     }
