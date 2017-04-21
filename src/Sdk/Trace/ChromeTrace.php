@@ -9,6 +9,7 @@
 namespace Zan\Framework\Sdk\Trace;
 
 
+use bar\baz\source_with_namespace;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -28,11 +29,6 @@ class ChromeTrace
 
     private $jsonObject;
     private $stack;
-
-    public static function getInstance()
-    {
-
-    }
 
     public function __construct()
     {
@@ -73,10 +69,8 @@ class ChromeTrace
 
         $ctx = [
             "cost" => $end - $begin,
-            // "req" => self::convert($req),
-            // "res" => self::convert($res),
-            "req" => $req,
-            "res" => $res,
+            "req" => self::convert($req),
+            "res" => self::convert($res),
         ];
 
         $this->jsonObject->addRow($logType, [$traceType, $ctx]);
@@ -134,32 +128,45 @@ class ChromeTrace
     public static function convert($var)
     {
         $var = is_array($var) ? $var : [ $var ];
-        return array_map(["self", "objectConvert"], $var);
+        return array_map(["self", "convertHelper"], $var);
     }
 
-    public static function objectConvert($object, $processed = [])
+    public static function convertHelper($object, $processed = [])
     {
-        if (!is_object($object)) {
-            return $object;
+        $type = gettype($object);
+        switch ($type) {
+            case "string":
+                if (strlen($object) > 100) {
+                    return substr($object, 0, 99) . "...";
+                } else {
+                    return $object;
+                }
+            case "array":
+                return array_map(["self", "convertHelper"], $object);
+            case "object":
+                $processed[] = $object;
+                $kv = [ static::CLASS_KEY => get_class($object) ];
+                $reflect = new \ReflectionClass($object);
+                foreach ($reflect->getProperties() as $prop) {
+                    $prop->setAccessible(true);
+                    $value = $prop->getValue($object);
+                    if ($value === $object || in_array($value, $processed, true)) {
+                        $value = '*recursion* - parent object [' . get_class($value) . ']';
+                    }
+                    $accessModifier = self::getAccessModifier($prop);
+                    $kv[$accessModifier] = self::convertHelper($value);
+                }
+                return $kv;
+
+            case "boolean":
+            case "integer":
+            case "double":
+            case "resource":
+            case "NULL":
+            case "unknown type":
+            default:
+                return $object;
         }
-
-        $processed[] = $object;
-        $kv = [ static::CLASS_KEY => get_class($object) ];
-
-        $reflect = new \ReflectionClass($object);
-        foreach ($reflect->getProperties() as $prop) {
-            $prop->setAccessible(true);
-            $value = $prop->getValue($object);
-
-            if ($value === $object || in_array($value, $processed, true)) {
-                $value = '*recursion* - parent object [' . get_class($value) . ']';
-            }
-
-            $accessModifier = self::getAccessModifier($prop);
-            $kv[$accessModifier] = self::objectConvert($value);
-        }
-
-        return $kv;
     }
 
     private static function getAccessModifier(\ReflectionProperty $prop)
