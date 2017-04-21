@@ -116,21 +116,18 @@ final class JSONObject implements JsonSerializable
     {
         $trace = $self->json;
         $title = "{$trace["app"]}  [host={$trace["host"]}, ip={$trace["ip"]}, port={$trace["port"]}, pid={$trace["pid"]}]";
-        $self->json["rows"][] = ["group", [""], null];
         $self->json["rows"][] = ["group", [$title], null];
     }
 
     private static function groupEnd(JSONObject $self)
     {
         $self->json["rows"][] = ["groupEnd", [], null];
-        $self->json["rows"][] = ["groupEnd", [], null];
     }
 
     private function encode()
     {
         return base64_encode(json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-
+        /*
         $jsonStr = json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($jsonStr !== false) {
             $lz4Str = LZ4::getInstance()->encode($jsonStr);
@@ -139,12 +136,13 @@ final class JSONObject implements JsonSerializable
             }
         }
         return false;
+        */
     }
 
     private static function decode($raw)
     {
         return json_decode(base64_decode($raw), true);
-
+        /*
         $lz4Str = base64_decode($raw);
         if ($lz4Str !== false) {
             $jsonStr = LZ4::getInstance()->decode($lz4Str);
@@ -157,6 +155,7 @@ final class JSONObject implements JsonSerializable
         }
         sys_error("ChromeTrace decode fail, raw=" . strval($raw));
         return [];
+        */
     }
 
     private function init()
