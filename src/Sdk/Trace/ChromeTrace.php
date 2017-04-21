@@ -144,6 +144,9 @@ class ChromeTrace
             case "array":
                 return array_map(["self", "convertHelper"], $object);
             case "object":
+                if ($object instanceof \Exception) {
+                    return substr($object->getTraceAsString(), 0, 99) . "...";
+                }
                 $processed[] = $object;
                 $kv = [ static::CLASS_KEY => get_class($object) ];
                 $reflect = new \ReflectionClass($object);

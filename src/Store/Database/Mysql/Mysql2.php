@@ -10,7 +10,9 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
@@ -40,6 +42,11 @@ class Mysql2 implements DriverInterface
      * @var Trace
      */
     private $trace;
+
+    /**
+     * @var ChromeTrace
+     */
+    private $chromeTrace;
 
     private $countAlias;
 
@@ -89,6 +96,14 @@ class Mysql2 implements DriverInterface
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::SQL, $sql);
+        }
+
+        if (Debug::get()) {
+            $chromeTrace = (yield getContext("chrome_trace"));
+            if ($chromeTrace instanceof ChromeTrace) {
+                $this->chromeTrace = $chromeTrace;
+                $chromeTrace->beginTransaction("sql", $sql);
+            }
         }
 
         $this->sql = $sql;
@@ -153,8 +168,16 @@ class Mysql2 implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit($exception->getTraceAsString());
             }
-        } else if ($this->trace) {
-            $this->trace->commit(Constant::SUCCESS);
+            if ($this->chromeTrace) {
+                $this->chromeTrace->commit("error", $exception);
+            }
+        } else {
+            if ($this->trace) {
+                $this->trace->commit(Constant::SUCCESS);
+            }
+            if ($this->chromeTrace) {
+                $this->chromeTrace->commit("info", $result);
+            }
         }
 
         $this->result = $result;
@@ -184,6 +207,9 @@ class Mysql2 implements DriverInterface
         return function() use($sql, $start, $type) {
             if ($this->trace) {
                 $this->trace->commit("$type timeout");
+            }
+            if ($this->chromeTrace) {
+                $this->chromeTrace->commit("warn", "$type timeout");
             }
 
             if ($this->callback) {

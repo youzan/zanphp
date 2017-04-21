@@ -7,8 +7,9 @@
  */
 namespace Zan\Framework\Store\Database;
 
-use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Sdk\Trace\ChromeTrace;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 use Zan\Framework\Store\Database\Mysql\Mysqli;
 use Zan\Framework\Store\Database\Mysql\Mysql;
@@ -70,24 +71,20 @@ class Flow
     public function query($sid, $data, $options)
     {
         $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
+        $sqlLog = Config::get("monitor.sql");
+        if (Debug::get() && is_array($sqlLog) && isset($sqlLog['path'])) {
+            $dir = dirname($sqlLog['path']);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
+                file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", FILE_APPEND);
+        }
+
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
-        /** @var ChromeTrace $trace */
-        $trace = (yield getContext("chrome_trace"));
-        $traceEnable = Debug::get() && $trace instanceof ChromeTrace;
         try {
-            if ($traceEnable) {
-                $trace->beginTransaction("sql", $sqlMap['sql']);
-            }
             $dbResult = (yield $driver->query($sqlMap['sql']));
-            if ($traceEnable) {
-                $trace->commit("info", null);
-            }
         } catch (\Exception $e) {
-            if ($traceEnable) {
                 $trace->commit("info", $e);
-            }
             yield $this->queryException($e, $connection);
             throw $e;
         }
@@ -102,24 +99,18 @@ class Flow
 
     public function queryRaw($table, $sql)
     {
+        $sqlLog = Config::get("monitor.sql");
+        if (Debug::get() && is_array($sqlLog) && isset($sqlLog['path'])) {
+            $dir = dirname($sqlLog['path']);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
+                file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sql."\n", FILE_APPEND);
+        }
         $database = Table::getInstance()->getDatabase($table);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
-        /** @var ChromeTrace $trace */
-        $trace = (yield getContext("chrome_trace"));
-        $traceEnable = Debug::get() && $trace instanceof ChromeTrace;
         try {
-            if ($traceEnable) {
-                $trace->beginTransaction("sql", [$sql]);
-            }
             $dbResult = (yield $driver->query($sql));
-            if ($traceEnable) {
-                $trace->commit("info", null);
-            }
         } catch (\Exception $e) {
-            if ($traceEnable) {
-                $trace->commit("info", $e);
-            }
             yield $this->queryException($e, $connection);
             throw $e;
         }

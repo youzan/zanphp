@@ -331,7 +331,7 @@ class HttpClient implements Async
             $this->trace->commit($exception);
         }
         if ($this->chromeTrace) {
-            $this->chromeTrace->commit("error", $exception);
+            $this->chromeTrace->commit("warn", $exception);
         }
 
         call_user_func($this->callback, null, $exception);
@@ -365,7 +365,7 @@ class HttpClient implements Async
             $this->trace->commit($exception);
         }
         if ($this->chromeTrace instanceof ChromeTrace) {
-            $this->chromeTrace->commit("error", $exception);
+            $this->chromeTrace->commit("warn", $exception);
         }
 
         call_user_func($this->callback, null, $exception);

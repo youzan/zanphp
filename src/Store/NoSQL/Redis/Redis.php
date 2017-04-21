@@ -10,8 +10,12 @@ namespace Zan\Framework\Store\NoSQL\Redis;
 
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\Debug;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 
 /**
@@ -35,6 +39,13 @@ class Redis implements Async
     private $callback;
     private $conn;
     private $sock;
+    private $cmd;
+    private $args;
+
+    /**
+     * @var ChromeTrace
+     */
+    private $chromeTrace;
 
     const DEFAULT_CALL_TIMEOUT = 2000;
 
@@ -46,6 +57,8 @@ class Redis implements Async
 
     public function __call($name, $arguments)
     {
+        $this->cmd = $name;
+        $this->args = $arguments;
         $arguments[] = [$this, 'recv'];
         $this->sock->$name(...$arguments);
         $this->beginTimeoutTimer($name, $arguments);
@@ -54,12 +67,30 @@ class Redis implements Async
 
     public function recv($client, $ret)
     {
+        if ($this->chromeTrace) {
+            $this->chromeTrace->commit("info", $ret);
+        }
+
         $this->cancelTimeoutTimer();
         call_user_func($this->callback, $ret);
     }
 
     public function execute(callable $callback, $task)
     {
+        if (Debug::get()) {
+            /** @var Task $task */
+            /** @var Context $ctx */
+            $ctx = $task->getContext();
+            $chromeTrace = $ctx->get("chrome_trace", null);
+            if ($chromeTrace instanceof ChromeTrace) {
+                $this->chromeTrace = $chromeTrace;
+                $chromeTrace->beginTransaction("redis", [
+                    "cmd" => $this->cmd,
+                    "args" => $this->args,
+                ]);
+            }
+        }
+
         $this->callback = $callback;
     }
 
@@ -67,7 +98,7 @@ class Redis implements Async
     {
         $config = $this->conn->getConfig();
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_CALL_TIMEOUT;
-        Timer::after($timeout, $this->onTimeout($name, $args), spl_object_hash($this));
+        Timer::after($timeout, $this->onTimeout(), spl_object_hash($this));
     }
 
     private function cancelTimeoutTimer()
@@ -75,22 +106,24 @@ class Redis implements Async
         Timer::clearAfterJob(spl_object_hash($this));
     }
 
-    private function onTimeout($name, $args)
+    private function onTimeout()
     {
         $start = microtime(true);
-        return function() use($name, $args, $start) {
-            // TODO TRACE
-
+        return function() use($start) {
             if ($this->callback) {
                 $duration = microtime(true) - $start;
                 $ctx = [
-                    "name" => $name,
-                    "args" => $args,
+                    "cmd" => $this->cmd,
+                    "args" => $this->args,
                     "duration" => $duration,
                 ];
 
+                if ($this->chromeTrace) {
+                    $this->chromeTrace->commit("warn", $ctx);
+                }
+
                 $callback = $this->callback;
-                $ex = new RedisCallTimeoutException("Redis call $name timeout", 0, null, $ctx);
+                $ex = new RedisCallTimeoutException("Redis call {$this->cmd} timeout", 0, null, $ctx);
                 $callback(null, $ex);
             }
         };
