@@ -114,6 +114,8 @@ final class JSONObject implements JsonSerializable
 
     private static function group(JSONObject $self)
     {
+        $self->json["rows"][] = ["group", [""], null];
+
         $trace = $self->json;
         $title = "{$trace["app"]}  [host={$trace["host"]}, ip={$trace["ip"]}, port={$trace["port"]}, pid={$trace["pid"]}]";
         $self->json["rows"][] = ["group", [$title], null];
@@ -121,6 +123,8 @@ final class JSONObject implements JsonSerializable
 
     private static function groupEnd(JSONObject $self)
     {
+        $self->json["rows"][] = ["groupEnd", [], null];
+
         $self->json["rows"][] = ["groupEnd", [], null];
     }
 
