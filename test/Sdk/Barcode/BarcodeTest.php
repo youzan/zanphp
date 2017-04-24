@@ -5,6 +5,7 @@
  * Date: 2017/4/6
  * Time: 上午10:48
  */
+namespace Zan\Framework\Test\Sdk\Barcode;
 
 use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Sdk\Barcode\Barcode;

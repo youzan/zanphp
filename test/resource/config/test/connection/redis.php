@@ -3,8 +3,8 @@
 return [
     'default_write' => [
         'engine'=> 'redis',
-        //'host' => 'redis-dev.s.qima-inc.com',
-        'host' => '127.0.0.1',
+        'host' => 'redis-dev.s.qima-inc.com',
+        //'host' => '127.0.0.1',
         'port' => 6379,
         'pool'  => [
             'maximum-connection-count' => 50,

@@ -5,6 +5,7 @@
  * Date: 2017/4/10
  * Time: 下午1:00
  */
+namespace Zan\Framework\Test\Sdk\Log;
 
 use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Testing\TaskTest;
@@ -26,6 +27,7 @@ class LogTest extends TaskTest
 
     public function taskLogLog()
     {
+        // log file position: resource/log/log.txt
         yield Log::make("log_log")->info('log to file');
     }
 }

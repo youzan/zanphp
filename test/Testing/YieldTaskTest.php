@@ -8,7 +8,6 @@
 
 namespace Zan\Framework\Test\Testing;
 
-
 use Zan\Framework\Testing\TaskTest;
 
 class YieldTaskTest extends TaskTest {

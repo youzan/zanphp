@@ -1,4 +1,5 @@
 <?php
+namespace Zan\Framework\Test\Sdk\Uuid;
 
 use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Sdk\Uuid\RedisUuid;
@@ -16,13 +17,13 @@ class RedisUuidTest extends TaskTest {
     {
         $tableName = 'unit_test_uuid_table';
         $res = (yield RedisUuid::getInstance()->get($tableName));
-        var_dump($res);
+        $this->assertTrue(is_integer($res));
         $serialId = (yield RedisUuid::getInstance()->getSerialId());
-        var_dump($serialId);
+        $this->assertTrue(is_integer($serialId));
         $snowflake = (yield RedisUuid::getInstance()->getSnowflake());
-        var_dump($snowflake);
+        $this->assertTrue(is_integer($snowflake));
         $objId = (yield RedisUuid::getInstance()->getObjectId());
-        var_dump($objId);
+        $this->assertTrue(is_string($objId));
         yield $res;
     }
 }

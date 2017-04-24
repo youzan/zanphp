@@ -5,8 +5,6 @@
  * Date: 16/4/12
  * Time: 10:15
  */
-
-
 namespace Zan\Framework\Test\Network\Connection;
 
 use Zan\Framework\Network\Connection\ConnectionInitiator;

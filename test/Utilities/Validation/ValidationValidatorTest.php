@@ -2,16 +2,10 @@
 
 namespace Zan\Framework\Test\Utilities\Validation;
 
-use Mockery as m;
 use Zan\Framework\Utilities\Validation\Validator;
 
 class ValidationValidatorTest extends \TestCase
 {
-    public function tearDown()
-    {
-        m::close();
-    }
-
     public function testSometimesWorksOnNestedArrays()
     {
         $v = new Validator(['foo' => ['bar' => ['baz' => '']]], ['foo.bar.baz' => 'sometimes|required']);

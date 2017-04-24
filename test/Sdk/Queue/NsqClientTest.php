@@ -1,4 +1,5 @@
 <?php
+namespace Zan\Framework\Test\Sdk\Queue;
 
 use Zan\Framework\Testing\TaskTest;
 use Kdt\Iron\NSQ\Message\Msg;
@@ -60,7 +61,6 @@ class NsqClientTest extends TaskTest
         $queue = new Queue();
 
         yield $queue->subscribe($topic, $channel, function($msg) {
-            var_dump($msg->data());
             $this->assertEquals($msg->data(), $this->data);
         });
     }

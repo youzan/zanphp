@@ -1,4 +1,7 @@
 <?php
+use Zan\Framework\Network\Common\TcpClient;
+use Zan\Framework\Network\Connection\ConnectionInitiator;
+use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Testing\TaskTest;
 
 /**
@@ -11,13 +14,18 @@ class TcpClientTest extends TaskTest
 {
     public function setUp()
     {
-
+        //connection pool init
+        ConnectionInitiator::getInstance()->init('connection', null);
+        parent::initTask();
     }
+
     public function taskTcp()
     {
-        $connection = (yield ConnectionManager::getInstance()->get("tcp.trace"));
+        $connection = (yield ConnectionManager::getInstance()->get("tcp.echo"));
         $tcpClient = new TcpClient($connection);
 
-        yield $tcpClient->send($this->builder->getData());
+        $request = "Hello TcpClientTest";
+        $response = (yield $tcpClient->send($request));
+        $this->assertEquals($response, $request, "tcp echo test failed");
     }
 }

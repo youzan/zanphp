@@ -51,9 +51,4 @@ class UrlTest extends \TestCase
         $url = URL::cdnSite('/upload_files/2016/01/06/Ftnfdi_-zrIVkmeRUCZoTT2Scagu.jpg!40X40.jpg', '!45x45.jpg', false, true);
         $this->assertEquals("https://dn-kdt-img.qbox.me/upload_files/2016/01/06/Ftnfdi_-zrIVkmeRUCZoTT2Scagu.jpg?imageView2/2/w/45/h/45/q/75/format/jpg", $url, 'URL::site fail');
     }
-
-    public function testgetRequestUri(){
-        $time = Time::current(true);
-        var_dump($time);
-    }
 }
