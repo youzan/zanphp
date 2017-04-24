@@ -15,6 +15,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Utilities\Encode\LZ4;
+use Zan\Framework\Utilities\Types\Json;
 
 /**
  * Class JSONObject
@@ -56,6 +57,16 @@ final class JSONObject implements JsonSerializable
         $this->json["pid"] = self::$pid;
 
         self::group($this);
+    }
+
+    public static function fromException(\Exception $ex)
+    {
+        $self = new self();
+        $self->addRow("error", ["ERROR", [
+            "class" => get_class($ex),
+            "msg" => $ex->getMessage(),
+        ]]);
+        return $self;
     }
 
     public static function fromHeader(array &$headers)
@@ -135,36 +146,25 @@ final class JSONObject implements JsonSerializable
 
     private function encode()
     {
-        return base64_encode(json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        /*
-        $jsonStr = json_encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if ($jsonStr !== false) {
-            $lz4Str = LZ4::getInstance()->encode($jsonStr);
-            if ($lz4Str !== false) {
-                return base64_encode($lz4Str);
-            }
+        try {
+            $jsonStr = Json::encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            return base64_encode($jsonStr);
+        } catch (\Exception $ex) {
+            return self::fromException($ex)->encode();
         }
-        return false;
-        */
     }
 
     private static function decode($raw)
     {
-        return json_decode(base64_decode($raw), true);
-        /*
-        $lz4Str = base64_decode($raw);
-        if ($lz4Str !== false) {
-            $jsonStr = LZ4::getInstance()->decode($lz4Str);
-            if ($jsonStr !== false) {
-                $json = json_decode($jsonStr, true);
-                if (isset($json["columns"]) && isset($json["rows"])) {
-                    return $json;
-                }
+        $jsonStr = base64_decode($raw);
+        if ($jsonStr !== false) {
+            $json = json_decode($jsonStr, true);
+            if (isset($json["columns"]) && isset($json["rows"])) {
+                return $json;
             }
         }
         sys_error("ChromeTrace decode fail, raw=" . strval($raw));
         return [];
-        */
     }
 
     private function init()

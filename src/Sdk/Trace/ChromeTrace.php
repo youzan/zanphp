@@ -10,6 +10,7 @@ namespace Zan\Framework\Sdk\Trace;
 
 
 use Zan\Framework\Foundation\Core\Debug;
+use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Encode\LZ4;
 use Zan\Framework\Utilities\Types\Json;
@@ -121,8 +122,7 @@ class ChromeTrace
     {
         $ok = $response->header(self::TRANS_KEY, $this->jsonObject);
         if ($ok === false) {
-            $jsonObj = new JSONObject();
-            $jsonObj->addRow("error", ["ERROR", "maybe header value is too long"]);
+            $jsonObj = JSONObject::fromException(new ZanException("swoole_http_response::header fail, maybe header value is too long"));
             $response->header(self::TRANS_KEY, $jsonObj);
         }
     }
