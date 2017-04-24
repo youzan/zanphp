@@ -257,12 +257,6 @@ class HttpClient implements Async
             $this->header['Scheme'] = 'https';
         }
 
-        /*
-        if (Debug::get() && $this->chromeTrace) {
-            $this->header[ChromeTrace::TRANS_KEY] = $this->chromeTrace->buildTrace();
-        }
-        */
-
         $this->client->setHeaders($this->header);
     }
 
