@@ -16,6 +16,15 @@ use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Utilities\Encode\LZ4;
 
+/**
+ * Class JSONObject
+ * @package Zan\Framework\Sdk\Trace
+ *
+ * 兼容 Chrome-Logger 格式
+ * https://craig.is/writing/chrome-logger
+ * https://craig.is/writing/chrome-logger/techspecs
+ * https://github.com/ccampbell/chromelogger
+ */
 final class JSONObject implements JsonSerializable
 {
     const MAX_SIZE = 1024 * 4;
