@@ -92,7 +92,6 @@ class HttpController extends Controller
             'msg'  => $msg,
             'data' => $data,
         ];
-
         return new JsonResponse($data);
     }
 
