@@ -118,12 +118,7 @@ final class JSONObject implements JsonSerializable
 
     public function __toString()
     {
-        try {
-            return $this->encode();
-        } catch (\Exception $ex) {
-            echo_exception($ex);
-            return base64_encode("encode ex:" . $ex->getMessage());
-        }
+        return $this->encode();
     }
 
     public function jsonSerialize()
@@ -147,7 +142,7 @@ final class JSONObject implements JsonSerializable
     private function encode()
     {
         try {
-            $jsonStr = Json::encode($this, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $jsonStr = Json::encode($this->json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             return base64_encode($jsonStr);
         } catch (\Exception $ex) {
             return self::fromException($ex)->encode();
