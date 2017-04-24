@@ -11,6 +11,7 @@ namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Encode\LZ4;
 use Zan\Framework\Utilities\Types\Json;
 
 class ChromeTrace
@@ -137,6 +138,10 @@ class ChromeTrace
         $type = gettype($object);
         switch ($type) {
             case "string":
+                $lz4 = LZ4::getInstance();
+                if ($lz4->isLZ4($object)) {
+                    $object = $lz4->decode($object);
+                }
                 if (strlen($object) > self::MAX_HEADER_VAL_LEN) {
                     $object = substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
                 }
