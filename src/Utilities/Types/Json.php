@@ -64,7 +64,7 @@ class Json
      * @param $value
      * @return array
      */
-    private static function cleanUtf8($value)
+    public static function cleanUtf8($value)
     {
         $cleanScalar = function(&$string) {
             if (is_string($string)) {

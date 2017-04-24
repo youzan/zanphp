@@ -11,6 +11,7 @@ namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Utilities\Types\Json;
 
 class ChromeTrace
 {
@@ -137,10 +138,9 @@ class ChromeTrace
         switch ($type) {
             case "string":
                 if (strlen($object) > self::MAX_HEADER_VAL_LEN) {
-                    return substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
-                } else {
-                    return $object;
+                    $object = substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
                 }
+                return Json::cleanUtf8($object);
             case "array":
                 return array_map(["self", "convertHelper"], $object);
             case "object":
