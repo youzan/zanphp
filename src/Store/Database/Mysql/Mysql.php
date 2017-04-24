@@ -130,7 +130,7 @@ class Mysql implements DriverInterface
             $chromeTrace = (yield getContext("chrome_trace"));
             if ($chromeTrace instanceof ChromeTrace) {
                 $this->chromeTrace = $chromeTrace;
-                $chromeTrace->beginTransaction("sql", $sql);
+                $chromeTrace->beginTransaction("mysql", $sql);
             }
         }
 
