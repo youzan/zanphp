@@ -267,11 +267,10 @@ class HttpClient implements Async
             $this->trace->commit(Constant::SUCCESS);
         }
         if ($this->chromeTrace instanceof ChromeTrace) {
-            mb_internal_encoding("UTF-8");
             $res = [
                 "code" => $cli->statusCode,
                 "header" => &$cli->headers,
-                "body" => utf8_encode($cli->body),
+                "body" => mb_convert_encoding($cli->body, 'UTF-8', 'UTF-8'),
             ];
 
             $remote = JSONObject::fromHeader($cli->headers);

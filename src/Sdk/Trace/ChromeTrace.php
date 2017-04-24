@@ -145,8 +145,11 @@ class ChromeTrace
                 if (strlen($object) > self::MAX_HEADER_VAL_LEN) {
                     $object = /*mb_*/substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
                 }
+                /*
                 mb_internal_encoding("UTF-8"); // for utf8_encode() -> json_encode()
                 return utf8_encode($object);
+                */
+                return mb_convert_encoding($object, 'UTF-8', 'UTF-8'); // remove invalid characters.
             case "array":
                 return array_map(["self", "convertHelper"], $object);
             case "object":
