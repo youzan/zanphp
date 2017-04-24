@@ -143,9 +143,10 @@ class ChromeTrace
                     $object = $lz4->decode($object);
                 }
                 if (strlen($object) > self::MAX_HEADER_VAL_LEN) {
-                    $object = mb_substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
+                    $object = /*mb_*/substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
                 }
-                return $object;
+                mb_internal_encoding("UTF-8"); // for utf8_encode() -> json_encode()
+                return utf8_encode($object);
             case "array":
                 return array_map(["self", "convertHelper"], $object);
             case "object":
