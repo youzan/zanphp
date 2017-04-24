@@ -84,14 +84,13 @@ class Flow
         try {
             $dbResult = (yield $driver->query($sqlMap['sql']));
         } catch (\Exception $e) {
-                $trace->commit("info", $e);
             yield $this->queryException($e, $connection);
             throw $e;
         }
         if (isset($sqlMap['count_alias'])) {
             $driver->setCountAlias($sqlMap['count_alias']);
         }
-        $resultFormatter = new ResultFormatter($dbResult, [$sqlMap['result_type']]);
+        $resultFormatter = new ResultFormatter($dbResult, $sqlMap['result_type']);
         $result = (yield $resultFormatter->format());
         yield $this->releaseConnection($connection);
         yield $result;
