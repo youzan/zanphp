@@ -7,7 +7,6 @@
  */
 namespace Zan\Framework\Store\Database;
 
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
