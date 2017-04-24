@@ -68,7 +68,7 @@ class ChromeTrace
         $end = $sec + $usec;
 
         $ctx = [
-            "cost" => $end - $begin,
+            "cost" => ceil(($end - $begin) * 1000) . "ms",
             "req" => self::convert($req),
             "res" => self::convert($res),
         ];
