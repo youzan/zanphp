@@ -9,12 +9,12 @@
 namespace Zan\Framework\Sdk\Trace;
 
 
-use bar\baz\source_with_namespace;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class ChromeTrace
 {
+    const MAX_HEADER_VAL_LEN = 1024;
     const CLASS_KEY = '___class_name';
     const TRANS_KEY = 'X-ChromeLogger-Data';
 
@@ -136,8 +136,8 @@ class ChromeTrace
         $type = gettype($object);
         switch ($type) {
             case "string":
-                if (strlen($object) > 100) {
-                    return substr($object, 0, 99) . "...";
+                if (strlen($object) > self::MAX_HEADER_VAL_LEN) {
+                    return substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
                 } else {
                     return $object;
                 }
@@ -145,7 +145,7 @@ class ChromeTrace
                 return array_map(["self", "convertHelper"], $object);
             case "object":
                 if ($object instanceof \Exception) {
-                    return substr($object->getTraceAsString(), 0, 99) . "...";
+                    return substr($object->getTraceAsString(), 0, self::MAX_HEADER_VAL_LEN) . "...";
                 }
                 $processed[] = $object;
                 $kv = [ static::CLASS_KEY => get_class($object) ];
