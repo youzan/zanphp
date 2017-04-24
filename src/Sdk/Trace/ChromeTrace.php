@@ -145,7 +145,10 @@ class ChromeTrace
                 return array_map(["self", "convertHelper"], $object);
             case "object":
                 if ($object instanceof \Exception) {
-                    return substr($object->getTraceAsString(), 0, self::MAX_HEADER_VAL_LEN) . "...";
+                    return [
+                        "class" => get_class($object),
+                        "msg" => $object->getMessage(),
+                    ];
                 }
                 $processed[] = $object;
                 $kv = [ static::CLASS_KEY => get_class($object) ];
