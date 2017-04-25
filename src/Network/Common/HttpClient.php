@@ -4,13 +4,16 @@ namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\JSONObject;
 use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
@@ -41,6 +44,9 @@ class HttpClient implements Async
 
     /** @var Trace */
     private $trace;
+
+    /** @var ChromeTrace  */
+    private $chromeTrace;
 
     private $useHttpProxy = false;
 
@@ -151,6 +157,7 @@ class HttpClient implements Async
     private function build()
     {
         $this->trace = (yield getContext('trace'));
+        $this->chromeTrace = (yield getContext('chrome_trace'));
 
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
@@ -211,6 +218,19 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
+        if ($this->chromeTrace instanceof ChromeTrace) {
+            $this->chromeTrace->beginTransaction("http", [
+                'host' => $this->host,
+                'port' => $this->port,
+                'ssl' => $this->ssl,
+                'uri' => $this->uri,
+                'method' => $this->method,
+                'params' => $this->params,
+                'body' => $this->body,
+                'header' => $this->header,
+                'use_http_proxy' => $this->useHttpProxy,
+            ]);
+        }
 
         if('GET' === $this->method){
             if ($this->trace) {
@@ -246,6 +266,17 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
+        if ($this->chromeTrace instanceof ChromeTrace) {
+            $res = [
+                "code" => $cli->statusCode,
+                "header" => &$cli->headers,
+                "body" => mb_convert_encoding($cli->body, 'UTF-8', 'UTF-8'),
+            ];
+
+            $remote = JSONObject::fromHeader($cli->headers);
+            $this->chromeTrace->commit("info", $res, $remote);
+        }
+
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
         $this->client->close();
@@ -289,9 +320,14 @@ class HttpClient implements Async
         ];
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
         }
+        if ($this->chromeTrace) {
+            $this->chromeTrace->commit("warn", $exception);
+        }
+
         call_user_func($this->callback, null, $exception);
     }
 
@@ -318,14 +354,14 @@ class HttpClient implements Async
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
         }
-        call_user_func($this->callback, null, $exception);
-    }
+        if ($this->chromeTrace instanceof ChromeTrace) {
+            $this->chromeTrace->commit("warn", $exception);
+        }
 
-    private function getDnsResolveTimerId()
-    {
-        return spl_object_hash($this) . "_dns_lookup";
+        call_user_func($this->callback, null, $exception);
     }
 }

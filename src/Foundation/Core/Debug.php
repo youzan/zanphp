@@ -8,7 +8,8 @@
 
 namespace Zan\Framework\Foundation\Core;
 
-class Debug {
+class Debug
+{
 
     private static $debug = null;
 
@@ -30,13 +31,13 @@ class Debug {
     public static function detect()
     {
         if(null !== self::$debug){
-            return true;
+            return;
         }
 
         $iniInput = get_cfg_var('kdt.DEBUG');
         if($iniInput){
             self::$debug = true;
-            return true;
+            return;
         }
 
         self::$debug = false;
