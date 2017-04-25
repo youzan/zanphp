@@ -12,9 +12,7 @@ namespace Zan\Framework\Sdk\Trace;
 use JsonSerializable;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Tcp\RpcContext;
-use Zan\Framework\Utilities\Encode\LZ4;
 use Zan\Framework\Utilities\Types\Json;
 
 /**
@@ -71,10 +69,6 @@ final class JSONObject implements JsonSerializable
 
     public static function fromHeader(array &$headers)
     {
-        if (!Debug::get()) {
-            return null;
-        }
-
         $key = strtolower(ChromeTrace::TRANS_KEY);
         if (isset($headers[$key])) {
             $value = $headers[$key];
@@ -90,10 +84,6 @@ final class JSONObject implements JsonSerializable
 
     public static function fromRpcContext(RpcContext $rpcCtx)
     {
-        if (!Debug::get()) {
-            return null;
-        }
-
         $json = $rpcCtx->get(ChromeTrace::TRANS_KEY);
         if ($json) {
             $self = new self();

@@ -10,7 +10,6 @@ namespace Zan\Framework\Store\NoSQL\Redis;
 
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Trace\ChromeTrace;
@@ -77,18 +76,16 @@ class Redis implements Async
 
     public function execute(callable $callback, $task)
     {
-        if (Debug::get()) {
-            /** @var Task $task */
-            /** @var Context $ctx */
-            $ctx = $task->getContext();
-            $chromeTrace = $ctx->get("chrome_trace", null);
-            if ($chromeTrace instanceof ChromeTrace) {
-                $this->chromeTrace = $chromeTrace;
-                $chromeTrace->beginTransaction("redis", [
-                    "cmd" => $this->cmd,
-                    "args" => $this->args,
-                ]);
-            }
+        /** @var Task $task */
+        /** @var Context $ctx */
+        $ctx = $task->getContext();
+        $chromeTrace = $ctx->get("chrome_trace", null);
+        if ($chromeTrace instanceof ChromeTrace) {
+            $this->chromeTrace = $chromeTrace;
+            $chromeTrace->beginTransaction("redis", [
+                "cmd" => $this->cmd,
+                "args" => $this->args,
+            ]);
         }
 
         $this->callback = $callback;

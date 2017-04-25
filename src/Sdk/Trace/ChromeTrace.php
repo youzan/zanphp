@@ -9,11 +9,9 @@
 namespace Zan\Framework\Sdk\Trace;
 
 
-use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Encode\LZ4;
-use Zan\Framework\Utilities\Types\Json;
 
 class ChromeTrace
 {
@@ -100,21 +98,17 @@ class ChromeTrace
      */
     public static function send(\swoole_http_response $response)
     {
-        if (Debug::get()) {
-            $self = (yield getContext('chrome_trace'));
-            if ($self instanceof static) {
-                $self->sendHeader($response);
-            }
+        $self = (yield getContext('chrome_trace'));
+        if ($self instanceof static) {
+            $self->sendHeader($response);
         }
     }
 
     public static function sendByCtx(\swoole_http_response $response, Context $ctx)
     {
-        if (Debug::get()) {
-            $self = $ctx->get('chrome_trace');
-            if ($self instanceof static) {
-                $self->sendHeader($response);
-            }
+        $self = $ctx->get('chrome_trace');
+        if ($self instanceof static) {
+            $self->sendHeader($response);
         }
     }
 

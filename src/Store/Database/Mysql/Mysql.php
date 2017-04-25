@@ -4,7 +4,6 @@ namespace Zan\Framework\Store\Database\Mysql;
 
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
@@ -126,12 +125,10 @@ class Mysql implements DriverInterface
             $this->trace->transactionBegin(Constant::SQL, $sql);
         }
 
-        if (Debug::get()) {
-            $chromeTrace = (yield getContext("chrome_trace"));
-            if ($chromeTrace instanceof ChromeTrace) {
-                $this->chromeTrace = $chromeTrace;
-                $chromeTrace->beginTransaction("mysql", $sql);
-            }
+        $chromeTrace = (yield getContext("chrome_trace"));
+        if ($chromeTrace instanceof ChromeTrace) {
+            $this->chromeTrace = $chromeTrace;
+            $chromeTrace->beginTransaction("mysql", $sql);
         }
 
         $this->sql = $sql;
