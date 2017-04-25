@@ -62,8 +62,8 @@ class Router {
             foreach ($rewriteRule as $key => $value) {
                 $key = ltrim($key, "/");
                 $value = ltrim($value, "/");
-                if (preg_match('$'.$key.'$', $this->route)) {
-                    $this->route = preg_replace('$'.$key.'$', $value, $this->route);
+                if (preg_match('`'.$key.'`', $this->route)) {
+                    $this->route = preg_replace('`'.$key.'`', $value, $this->route);
                     break;
                 }
             }
