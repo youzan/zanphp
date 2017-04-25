@@ -63,6 +63,10 @@ class ChromeTrace
      */
     public function commit($logType, $res, $remote = null)
     {
+        if ($this->stack->isEmpty()) {
+            return;
+        }
+
         list($begin, $traceType, $req) = $this->stack->pop();
 
         list($usec, $sec) = explode(' ', microtime());

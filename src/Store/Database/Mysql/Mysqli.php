@@ -93,8 +93,13 @@ class Mysqli implements DriverInterface
 
         $chromeTrace = (yield getContext("chrome_trace"));
         if ($chromeTrace instanceof ChromeTrace) {
+            $req = ["sql" => $sql];
+            $conf = $this->connection->getConfig();
+            if (isset($conf["host"]) && isset($conf["port"])) {
+                $req["dsn"] = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
+            }
+            $chromeTrace->beginTransaction("mysql", $req);
             $this->chromeTrace = $chromeTrace;
-            $chromeTrace->beginTransaction("mysql", $sql);
         }
 
         $config = $this->connection->getConfig();

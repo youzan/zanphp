@@ -66,7 +66,7 @@ class Redis implements Async
 
     public function recv($client, $ret)
     {
-        if ($this->chromeTrace) {
+        if ($this->chromeTrace instanceof ChromeTrace) {
             $this->chromeTrace->commit("info", $ret);
         }
 
@@ -81,11 +81,18 @@ class Redis implements Async
         $ctx = $task->getContext();
         $chromeTrace = $ctx->get("chrome_trace", null);
         if ($chromeTrace instanceof ChromeTrace) {
-            $this->chromeTrace = $chromeTrace;
-            $chromeTrace->beginTransaction("redis", [
+            $req = [
                 "cmd" => $this->cmd,
                 "args" => $this->args,
-            ]);
+            ];
+            $conf = $this->conn->getConfig();
+            if (isset($conf["path"])) {
+                $req["dst"] = $conf["path"];
+            } else if (isset($conf["host"]) && isset($conf["port"])) {
+                $req["dst"] = "{$conf["host"]}:{$conf["port"]}";
+            }
+            $chromeTrace->beginTransaction("redis", $req);
+            $this->chromeTrace = $chromeTrace;
         }
 
         $this->callback = $callback;
@@ -115,7 +122,7 @@ class Redis implements Async
                     "duration" => $duration,
                 ];
 
-                if ($this->chromeTrace) {
+                if ($this->chromeTrace instanceof ChromeTrace) {
                     $this->chromeTrace->commit("warn", $ctx);
                 }
 
