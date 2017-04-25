@@ -11,7 +11,6 @@ namespace Zan\Framework\Sdk\Trace;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Network\Common\TcpClient;
 use Zan\Framework\Network\Connection\ConnectionManager;
-use Zan\Framework\Utilities\Encrpt\Uuid;
 
 class Trace
 {

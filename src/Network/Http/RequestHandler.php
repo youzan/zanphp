@@ -17,6 +17,7 @@ use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -43,7 +44,10 @@ class RequestHandler
     {
         try {
             $request = Request::createFromSwooleHttpRequest($swooleRequest);
-            $this->initContext($request, $swooleResponse);
+            if (false === $this->initContext($request, $swooleResponse)) {
+                //filter ico file access
+                return;
+            }
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();
@@ -83,6 +87,8 @@ class RequestHandler
 
         $router = Router::getInstance();
         $route = $router->route($request);
+        if ($route === false)
+            return false;
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
 
@@ -111,7 +117,6 @@ class RequestHandler
             $this->task->setStatus(Signal::TASK_KILLED);
             $request = $this->context->get('request');
             if ($request && $request->wantsJson()) {
-                // @TODO 分配code
                 $data = [
                     'code' => 10000,
                     'msg' => '网络超时',
@@ -124,6 +129,7 @@ class RequestHandler
 
             $this->context->set('response', $response);
             $swooleResponse = $this->context->get('swoole_response');
+            ChromeTrace::sendByCtx($swooleResponse, $this->context);
             $response->sendBy($swooleResponse);
             $this->event->fire($this->getRequestFinishJobId());
         } catch (\Exception $ex) {

@@ -22,7 +22,7 @@ class Redis extends Base implements Connection
         try {
             $this->getSocket()->close();
         } catch (\Exception $e) {
-            //todo log
+            echo_exception($e);
         }
     }
 
@@ -35,12 +35,12 @@ class Redis extends Base implements Connection
     public function onClose($redis){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        sys_echo("redis client close");
+        sys_echo("redis client close " . $this->getConnString());
     }
 
     public function onConnect($redis, $res) {
         if (false === $res) {
-            sys_echo("redis client connect error");
+            sys_error("redis client connect error" . $this->getConnString());
             $this->close();
             return;
         }
@@ -48,7 +48,7 @@ class Redis extends Base implements Connection
         //put conn to active_pool
         $this->release();
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
-        sys_echo("redis client connect to server");
+        sys_echo("redis client connect to server " . $this->getConnString());
     }
 
     public function onMessage($redis, $message) {

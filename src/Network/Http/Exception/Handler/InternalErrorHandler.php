@@ -8,10 +8,10 @@
 
 namespace Zan\Framework\Network\Http\Exception\Handler;
 
-use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Path;
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
 use Zan\Framework\Network\Http\Response\Response;
@@ -30,7 +30,7 @@ class InternalErrorHandler implements ExceptionHandler
         try {
             $config = Config::get($this->configKey, null);
             if (!$config) {
-                if (Config::get('debug') && Config::get('run_mode') != 'online') {
+                if (Config::get('debug') && !RunMode::isOnline()) {
                     $errorInfo = [
                         'code' => 99999,
                         'msg' => $e->getMessage(),

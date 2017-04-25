@@ -428,7 +428,7 @@ class Store
             if(!is_array($fmtArgs)){
                 $fmtArgs = [$fmtArgs];
             }
-            return $kvPrefix . sprintf($format, ...$fmtArgs);
+            return $kvPrefix . sprintf($format, ...array_values($fmtArgs));
         }
     }
 

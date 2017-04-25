@@ -49,12 +49,25 @@ class Router {
     {
         $requestUri = $request->server->get('REQUEST_URI');
         if(preg_match('/\.ico$/i', $requestUri)){
-            $requestUri = '';
+            return false;
         }
+
         $this->prepare($requestUri);
         $this->parseRequestFormat($requestUri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
         $this->repairRoute();
+
+        $rewriteRule = Config::get("rewrite");
+        if (is_array($rewriteRule)) {
+            foreach ($rewriteRule as $key => $value) {
+                $key = ltrim($key, "/");
+                $value = ltrim($value, "/");
+                if (preg_match('`'.$key.'`', $this->route)) {
+                    $this->route = preg_replace('`'.$key.'`', $value, $this->route);
+                    break;
+                }
+            }
+        }
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
         $this->setParameters($request, $this->parameters);

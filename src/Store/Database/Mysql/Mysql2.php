@@ -11,6 +11,7 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
@@ -40,6 +41,11 @@ class Mysql2 implements DriverInterface
      * @var Trace
      */
     private $trace;
+
+    /**
+     * @var ChromeTrace
+     */
+    private $chromeTrace;
 
     private $countAlias;
 
@@ -89,6 +95,17 @@ class Mysql2 implements DriverInterface
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::SQL, $sql);
+        }
+
+        $chromeTrace = (yield getContext("chrome_trace"));
+        if ($chromeTrace instanceof ChromeTrace) {
+            $req = ["sql" => $sql];
+            $conf = $this->connection->getConfig();
+            if (isset($conf["host"]) && isset($conf["port"])) {
+                $req["dsn"] = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
+            }
+            $chromeTrace->beginTransaction("mysql", $req);
+            $this->chromeTrace = $chromeTrace;
         }
 
         $this->sql = $sql;
@@ -153,14 +170,23 @@ class Mysql2 implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit($exception->getTraceAsString());
             }
-        } else if ($this->trace) {
-            $this->trace->commit(Constant::SUCCESS);
+            if ($this->chromeTrace) {
+                $this->chromeTrace->commit("error", $exception);
+            }
+        } else {
+            if ($this->trace) {
+                $this->trace->commit(Constant::SUCCESS);
+            }
+            if ($this->chromeTrace) {
+                $this->chromeTrace->commit("info", $result);
+            }
         }
 
         $this->result = $result;
 
         if ($this->callback) {
-            call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+            $callback = $this->callback;
+            $callback(new MysqliResult($this), $exception);
             $this->callback = null;
         }
     }
@@ -184,6 +210,9 @@ class Mysql2 implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit("$type timeout");
             }
+            if ($this->chromeTrace) {
+                $this->chromeTrace->commit("warn", "$type timeout");
+            }
 
             if ($this->callback) {
                 $duration = microtime(true) - $start;
@@ -191,7 +220,9 @@ class Mysql2 implements DriverInterface
                     "sql" => $sql,
                     "duration" => $duration,
                 ];
-                call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx)]);
+                $callback = $this->callback;
+                $ex = new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx);
+                $callback(null, $ex);
             }
         };
     }

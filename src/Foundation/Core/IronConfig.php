@@ -66,8 +66,6 @@ class IronConfig
 
     private static function load(array $files,$ignoreStructure = false)
     {
-
-
         $path = Dir::formatPath(Path::getIronPath());
         $configMap = [];
         foreach($files as $file){

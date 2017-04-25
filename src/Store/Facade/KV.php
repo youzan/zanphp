@@ -376,9 +376,7 @@ class KV
             $keys = [$keys];
         }
 
-        array_unshift($keys, $format);
-        $key = call_user_func_array('sprintf', $keys);
-        return $key;
+        return sprintf($format, ...array_values($keys));
     }
 
     private static function getConfigCacheKey($configKey)

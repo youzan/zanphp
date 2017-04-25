@@ -45,14 +45,14 @@ class ServerDiscoveryInitiator
 
         if ($workerId === 0) {
         // if (ServerStore::getInstance()->lockDiscovery($workerId)) {
-            sys_echo("worker #$workerId service discovery from etcd");
+            sys_echo("worker *$workerId service discovery from etcd");
             foreach ($config['app_names'] as $appName) {
                 $appConf = $appConfigs[$appName];
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
                 $serverDiscovery->workByEtcd();
             }
         } else {
-            sys_echo("worker #$workerId service discovery from apcu");
+            sys_echo("worker *$workerId service discovery from apcu");
             foreach ($config['app_names'] as $appName) {
                 $appConf = $appConfigs[$appName];
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);

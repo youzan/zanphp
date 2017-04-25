@@ -15,6 +15,7 @@ class Json
      */
     public static function encode($value, $options = 0, $depth = 512)
     {
+        $args = func_get_args();
         $options = $options | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION;
         $data = json_encode($value, $options, $depth);
 
@@ -28,7 +29,7 @@ class Json
                 }
             } else {
                 ex:
-                throw new InvalidArgumentException("JSON encoding failed: " . json_last_error_msg(), $errno, null, func_get_args());
+                throw new InvalidArgumentException("JSON Encode Failed: " . json_last_error_msg(), $errno, null, $args);
             }
         }
 
@@ -48,12 +49,12 @@ class Json
         if (!is_string($json)) {
             return $json;
         }
-
+        $args = func_get_args();
         $data = json_decode($json, $assoc, $depth, $options);
 
         $errno = json_last_error();
         if ($errno !== JSON_ERROR_NONE) {
-            throw new InvalidArgumentException("JSON decode failed: " . json_last_error_msg(), $errno, null, func_get_args());
+            throw new InvalidArgumentException("JSON Decode Failed: " . json_last_error_msg() . ". [raw=$json]", $errno, null, $args);
         }
 
         return $data;

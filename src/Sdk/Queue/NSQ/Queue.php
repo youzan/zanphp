@@ -104,7 +104,7 @@ class Queue implements Async
                 $this->trace->commit($exception->getTraceAsString());
             }
 
-            call_user_func_array($callback, [null, $exception]);
+            $callback(null, $exception);
         };
     }
 
