@@ -11,8 +11,8 @@ namespace Zan\Framework\Foundation\Exception;
 use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Exception\Handler\ExceptionLogger;
 use Zan\Framework\Network\Http\Response\BaseResponse;
-use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Network\Http\Response\ResponseTrait;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 
 class ExceptionHandlerChain
 {
@@ -37,9 +37,8 @@ class ExceptionHandlerChain
         /** @var ExceptionHandler[] $handlerChain */
         $handlerChain = array_merge(array_values($extraHandlerChain), $this->handlerChain);
         if (empty($handlerChain)) {
-            //@TODO 输出到console
+            echo_exception($e);
             return;
-            // throw $e;
         }
 
         $response = null;
@@ -62,15 +61,15 @@ class ExceptionHandlerChain
         if (is_a($response, BaseResponse::class)) {
             $swooleResponse = (yield getContext('swoole_response'));
             $response->exception = $e->getMessage();
+            yield ChromeTrace::send($swooleResponse);
             /** @var $response ResponseTrait */
             yield $response->sendBy($swooleResponse);
             return;
         }
 
         if (false === $exceptionHandled) {
-            //@TODO 输出到console
+            echo_exception($e);
             return;
-            // throw $e;
         }
         yield null;
     }
