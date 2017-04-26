@@ -11,6 +11,7 @@ namespace Zan\Framework\Network\Server\Middleware;
 
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Contract\Network\RequestFilter;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Sdk\Trace\ChromeTrace;
@@ -20,7 +21,7 @@ class ChromeTraceFilter implements RequestFilter
 {
     public function doFilter(Request $request, Context $context)
     {
-        if (Debug::get()) {
+        if (Debug::get() && Config::get("monitor.chrome_trace.run")) {
             $trace = new ChromeTrace();
             $context->set('chrome_trace', $trace);
 
