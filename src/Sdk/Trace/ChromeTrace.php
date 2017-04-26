@@ -15,7 +15,8 @@ use Zan\Framework\Utilities\Encode\LZ4;
 
 class ChromeTrace
 {
-    const MAX_HEADER_VAL_LEN = 1024;
+    const MAX_STR_VAL_LEN = 1024;
+    const MAX_HEAD_VAL_LEN = 1024 * 15;
     const CLASS_KEY = '___class_name';
     const TRANS_KEY = 'X-ChromeLogger-Data';
 
@@ -118,7 +119,12 @@ class ChromeTrace
 
     private function sendHeader(\swoole_http_response $response)
     {
-        $ok = $response->header(self::TRANS_KEY, $this->jsonObject);
+        $headerVal = $this->jsonObject->__toString();
+        if (strlen($headerVal) > self::MAX_HEAD_VAL_LEN) {
+            $ok = false;
+        } else {
+            $ok = $response->header(self::TRANS_KEY, $this->jsonObject);
+        }
         if ($ok === false) {
             $jsonObj = JSONObject::fromException(new ZanException("swoole_http_response::header fail, maybe header value is too long"));
             $response->header(self::TRANS_KEY, $jsonObj);
@@ -140,8 +146,8 @@ class ChromeTrace
                 if ($lz4->isLZ4($object)) {
                     $object = $lz4->decode($object);
                 }
-                if (strlen($object) > self::MAX_HEADER_VAL_LEN) {
-                    $object = /*mb_*/substr($object, 0, self::MAX_HEADER_VAL_LEN) . "...";
+                if (strlen($object) > self::MAX_STR_VAL_LEN) {
+                    $object = /*mb_*/substr($object, 0, self::MAX_STR_VAL_LEN) . "...";
                 }
                 /*
                 mb_internal_encoding("UTF-8"); // for utf8_encode() -> json_encode()
