@@ -67,7 +67,7 @@ class Redis implements Async
     public function recv($client, $ret)
     {
         if ($this->chromeTrace instanceof ChromeTrace) {
-            $this->chromeTrace->commit("info", $ret);
+            $this->chromeTrace->commit("info", []/*$ret*/);
         }
 
         $this->cancelTimeoutTimer();

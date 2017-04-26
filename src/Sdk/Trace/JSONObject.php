@@ -26,8 +26,6 @@ use Zan\Framework\Utilities\Types\Json;
  */
 final class JSONObject implements JsonSerializable
 {
-    const MAX_SIZE = 1024 * 4;
-
     private static $appName;
     private static $hostName;
     private static $ip;

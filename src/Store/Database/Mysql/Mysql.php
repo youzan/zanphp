@@ -207,7 +207,7 @@ class Mysql implements DriverInterface
                 $this->trace->commit(Constant::SUCCESS);
             }
             if ($this->chromeTrace) {
-                $this->chromeTrace->commit("info", $result);
+                $this->chromeTrace->commit("info", []/*$result*/);
             }
         }
 
