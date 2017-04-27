@@ -40,7 +40,6 @@ class RegisterClassAliases implements Bootable
     {
         return [
             'Config'          => 'Zan\\Framework\\Foundation\\Core\\Config',
-            'Handler'         => 'Zan\\Framework\\Foundation\\Exception\\Handler',
             'HttpServer'      => 'Zan\\Framework\\Network\\Http\\Server',
             'TcpServer'       => 'Zan\\Framework\\Network\\Tcp\\Server',
             'Url'             => 'Zan\\Framework\\Utilities\\Types\\URL',

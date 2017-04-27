@@ -12,9 +12,6 @@ namespace Zan\Framework\Network\Connection\Driver;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
-use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Connection\NovaClientPool;
-use Zan\Framework\Network\Connection\Pool;
 
 
 abstract class Base implements Connection
@@ -134,7 +131,18 @@ abstract class Base implements Connection
 
     public function onConnectTimeout()
     {
-        $client = substr(static::class, strrpos(static::class, "\\") + 1);
-        sys_echo("$client client connect timeout");
+        $client = lcfirst(substr(static::class, strrpos(static::class, "\\") + 1));
+        sys_error("$client client connect timeout " . $this->getConnString());
+    }
+
+    public function getConnString()
+    {
+        if (isset($this->config["path"])) {
+            return "[path={$this->config["path"]}]";
+        } else if (isset($this->config["host"]) && isset($this->config["port"])){
+            return "[host={$this->config["host"]}, port={$this->config["port"]}]";
+        } else {
+            return "";
+        }
     }
 }

@@ -88,9 +88,7 @@ class Cache {
 
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
-        array_unshift($args, $realKey);
-
-        $result = (yield call_user_func_array([$redis, $func], $args));
+        $result = (yield $redis->$func($realKey, ...$args));
 
         yield self::deleteActiveConnectionFromContext($conn);
         $conn->release();
@@ -158,9 +156,8 @@ class Cache {
         $redis = new Redis($conn);
         $realKey = self::getRealKey($config, $keys);
         $oriFields = $fields;
-        array_unshift($fields, $realKey);
+        $results = (yield $redis->hMGet($realKey, ...$fields));
 
-        $results = (yield call_user_func_array([$redis, 'hMGet'], $fields));
         $retval = [];
         if ($results) {
             foreach ($results as $k => $result) {
@@ -217,8 +214,7 @@ class Cache {
             $params[] = $k;
             $params[] = $v;
         }
-        array_unshift($params, $realKey);
-        $result = (yield call_user_func_array([$redis, 'hMSet'], $params));
+        $result = (yield $redis->hMSet($realKey, ...$params));
 
         $ttl = isset($config['exp']) ? $config['exp'] : 0;
         if($result && $ttl){
@@ -535,9 +531,7 @@ class Cache {
             $keys = [$keys];
         }
 
-        array_unshift($keys, $format);
-        $key = call_user_func_array('sprintf', $keys);
-        return $key;
+        return sprintf($format, ...array_values($keys));
     }
 
     private static function getConfigCacheKey($configKey)

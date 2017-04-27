@@ -18,5 +18,7 @@ class InitializeRunMode implements Bootable
     public function bootstrap(Application $app)
     {
         RunMode::detect();
+        $mode = RunMode::get();
+        sys_echo("Running in $mode mode");
     }
 }

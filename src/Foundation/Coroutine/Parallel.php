@@ -49,7 +49,7 @@ class Parallel
         if ($this->childTasks == []) {
             $event->fire($taskDoneEventName);
         }
-
+        
         foreach ($this->childTasks as $childTask){
             $childTask->run();
         }

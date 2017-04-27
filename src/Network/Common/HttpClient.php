@@ -3,23 +3,25 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\JSONObject;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
 {
     const GET = 'GET';
     const POST = 'POST';
-    // TODO 改成zan-config里的配置
-    const HTTP_PROXY_ONLINE = 'proxy-static.s.qima-inc.com';
-    const HTTP_PROXY_DEV = '10.9.29.87';
 
-    /** @var  swoole_http_client */
+    /** @var  \swoole_http_client */
     private $client;
 
     private $host;
@@ -39,7 +41,12 @@ class HttpClient implements Async
     private $body;
 
     private $callback;
+
+    /** @var Trace */
     private $trace;
+
+    /** @var ChromeTrace  */
+    private $chromeTrace;
 
     private $useHttpProxy = false;
 
@@ -150,6 +157,7 @@ class HttpClient implements Async
     private function build()
     {
         $this->trace = (yield getContext('trace'));
+        $this->chromeTrace = (yield getContext('chrome_trace'));
 
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
@@ -172,33 +180,27 @@ class HttpClient implements Async
 
     public function handle()
     {
-        if ($this->timeout !== null) {
-            $timeoutFn = [$this, "dnsLookupTimeout"];
-        } else {
-            $timeoutFn = null;
-        }
-
         if ($this->useHttpProxy) {
-            if (RunMode::get() == 'online' || RunMode::get() == 'pre') {
-                $proxy = self::HTTP_PROXY_ONLINE;
-            } else {
-                $proxy = self::HTTP_PROXY_DEV;
-            }
-            $host = $proxy;
-            $port = 80;
+            $host = Config::get("zan_http_proxy.host", "proxy-static.s.qima-inc.com");
+            $port = Config::get("zan_http_proxy.port", 80);
         } else {
             $host = $this->host;
             $port = $this->port;
         }
 
-        DnsClient::lookup($host, function ($host, $ip) use ($port) {
+        $dnsCallbackFn = function($host, $ip) use ($port) {
             if ($ip) {
                 $this->request($ip, $port);
             } else {
                 $this->whenHostNotFound($host);
             }
-        }, $timeoutFn, $this->timeout);
+        };
 
+        if ($this->timeout === null) {
+            DnsClient::lookupWithoutTimeout($host, $dnsCallbackFn);
+        } else {
+            DnsClient::lookup($host, $dnsCallbackFn, [$this, "dnsLookupTimeout"], $this->timeout);
+        }
     }
 
     public function request($ip, $port)
@@ -215,6 +217,19 @@ class HttpClient implements Async
 
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
+        }
+        if ($this->chromeTrace instanceof ChromeTrace) {
+            $this->chromeTrace->beginTransaction("http", [
+                'host' => $this->host,
+                'port' => $this->port,
+                'ssl' => $this->ssl,
+                'uri' => $this->uri,
+                'method' => $this->method,
+                'params' => $this->params,
+                'body' => $this->body,
+                'header' => $this->header,
+                'use_http_proxy' => $this->useHttpProxy,
+            ]);
         }
 
         if('GET' === $this->method){
@@ -251,8 +266,20 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
+        if ($this->chromeTrace instanceof ChromeTrace) {
+            $res = [
+                "code" => $cli->statusCode,
+                "header" => &$cli->headers,
+                "body" => mb_convert_encoding($cli->body, 'UTF-8', 'UTF-8'),
+            ];
+
+            $remote = JSONObject::fromHeader($cli->headers);
+            $this->chromeTrace->commit("info", $res, $remote);
+        }
+
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
+        $this->client->close();
     }
 
     public function whenHostNotFound($host)
@@ -293,9 +320,14 @@ class HttpClient implements Async
         ];
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
         }
+        if ($this->chromeTrace) {
+            $this->chromeTrace->commit("warn", $exception);
+        }
+
         call_user_func($this->callback, null, $exception);
     }
 
@@ -322,14 +354,14 @@ class HttpClient implements Async
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
         }
-        call_user_func($this->callback, null, $exception);
-    }
+        if ($this->chromeTrace instanceof ChromeTrace) {
+            $this->chromeTrace->commit("warn", $exception);
+        }
 
-    private function getDnsResolveTimerId()
-    {
-        return spl_object_hash($this) . "_dns_lookup";
+        call_user_func($this->callback, null, $exception);
     }
 }

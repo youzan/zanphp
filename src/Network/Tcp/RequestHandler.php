@@ -58,6 +58,8 @@ class RequestHandler {
         $request = new Request($this->fd, $this->fromId, $data);
         $response = $this->response = new Response($this->swooleServer, $request);
 
+        $this->context->set('request', $request);
+        $this->context->set('swoole_response', $this->response);
         $this->context->set('request_time', Time::stamp());
         $request_timeout = Config::get('server.request_timeout');
         $request_timeout = $request_timeout ? $request_timeout : self::DEFAULT_TIMEOUT;
@@ -101,19 +103,25 @@ class RequestHandler {
                 $this->logErr($e);
             }
 
-            $result = null;
-            if ($this->middleWareManager) {
-                $result = $this->middleWareManager->handleException($e);
-            }
-
-            if ($result instanceof \Exception)
-                $response->sendException($result);
-            else
-                $response->sendException($e);
+            $coroutine = static::handleException($this->middleWareManager, $response, $e);
+            Task::execute($coroutine, $this->context);
 
             $this->event->fire($this->getRequestFinishJobId());
             return;
         }
+    }
+
+    public static function handleException($middleware, $response, $e)
+    {
+        $result = null;
+        if ($middleware) {
+            $result = (yield $middleware->handleException($e));
+        }
+
+        if ($result instanceof \Exception)
+            $response->sendException($result);
+        else
+            $response->sendException($e);
     }
 
     public function handleRequestFinish()
@@ -137,12 +145,9 @@ class RequestHandler {
 
         $this->reportHawk();
         $this->logErr($e);
-        $result = $this->middleWareManager->handleException($e);
 
-        if ($result instanceof \Exception)
-            $this->response->sendException($result);
-        else
-            $this->response->sendException($e);
+        $coroutine = static::handleException($this->middleWareManager, $this->response, $e);
+        Task::execute($coroutine, $this->context);
         $this->event->fire($this->getRequestFinishJobId());
     }
 

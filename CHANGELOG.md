@@ -1,5 +1,13 @@
 ## Change Log
 
+### 20170425 加入ChromeTrace 
+
+https://chrome.google.com/webstore/detail/chrome-logger/noaneddfkdjfnfdakjjmocngnfkfehhd
+
+安装该扩展可以通过Chrome控制台实时追踪调用链条
+
+注意：需要编译安装swoole/php7分支最新代码
+
 ### 20170320 Redis调用加入超时，默认2000ms，可在连接中配置 (影响Store + Cache) 
 
 ```php

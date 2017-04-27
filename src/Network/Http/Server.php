@@ -10,6 +10,7 @@ use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
+use Zan\Framework\Network\Server\WorkerStart\InitializeExceptionHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
@@ -40,6 +41,7 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
+        InitializeExceptionHandler::class,
         InitializeWorkerMonitor::class,
         InitializeHawkMonitor::class,
         InitializeConnectionPool::class,
@@ -97,7 +99,7 @@ class Server extends ServerBase implements ServerContract
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        sys_echo("server starting .....");
+        sys_echo("server starting .....[$swooleServer->host:$swooleServer->port]");
     }
 
     public function onShutdown($swooleServer)
@@ -110,16 +112,16 @@ class Server extends ServerBase implements ServerContract
     {
         $_SERVER["WORKER_ID"] = $workerId;
         $this->bootWorkerStartItem($workerId);
-        sys_echo("worker #$workerId starting .....");
+        sys_echo("worker *$workerId starting .....");
     }
 
     public function onWorkerStop($swooleServer, $workerId)
     {
         ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
-        sys_echo("worker #$workerId stopping .....");
+        sys_echo("worker *$workerId stopping .....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        sys_echo("worker #$workerId still has $num requests in progress...");
+        sys_echo("worker *$workerId still has $num requests in progress...");
     }
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
@@ -129,7 +131,7 @@ class Server extends ServerBase implements ServerContract
         sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
-        sys_echo("worker #$workerId still has $num requests in progress...");
+        sys_echo("worker *$workerId still has $num requests in progress...");
     }
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)

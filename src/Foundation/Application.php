@@ -17,7 +17,6 @@ use Zan\Framework\Foundation\Booting\InitializeDebug;
 use Zan\Framework\Foundation\Booting\InitializeEnv;
 use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
-use Zan\Framework\Foundation\Exception\Handler;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Network\Server\Factory as ServerFactory;
 
@@ -64,6 +63,11 @@ class Application
     protected $container;
 
     /**
+     * @var \Zan\Framework\Network\Server\ServerBase;
+     */
+    protected $server;
+
+    /**
      * Create a new Zan application instance.
      *
      * @param string $appName
@@ -82,8 +86,6 @@ class Application
 
     protected function bootstrap()
     {
-        Handler::initErrorHandler();
-
         $this->setContainer();
 
         // TODO 配置化
@@ -245,9 +247,13 @@ class Application
      */
     public function createHttpServer()
     {
-        return $this->getContainer()
+        $server = $this->getContainer()
             ->make(ServerFactory::class)
             ->createHttpServer();
+
+        $this->server = $server;
+
+        return $server;
     }
 
     /**
@@ -257,9 +263,13 @@ class Application
      */
     public function createTcpServer()
     {
-        return $this->getContainer()
+        $server = $this->getContainer()
             ->make(ServerFactory::class)
             ->createTcpServer();
+
+        $this->server = $server;
+
+        return $server;
     }
 
     /**
@@ -269,8 +279,20 @@ class Application
      */
     public function createMqServer()
     {
-        return $this->getContainer()
+        $server = $this->getContainer()
             ->make(ServerFactory::class)
             ->createMqServer();
+
+        $this->server = $server;
+
+        return $server;
+    }
+
+    /**
+     * @return \Zan\Framework\Network\Server\ServerBase
+     */
+    public function getServer()
+    {
+        return $this->server;
     }
 }

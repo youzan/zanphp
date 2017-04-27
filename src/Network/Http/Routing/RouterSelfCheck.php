@@ -26,10 +26,6 @@ class RouterSelfCheck
     public $checkResult;
     public $checkMsg = '';
 
-    const CHECK_SUCCESS = 'success';
-    const CHECK_FAILED = 'failed';
-    const OUTPUT_PREFIX = '【RouteSelfCheck】';
-
     public function setUrlRules($urlRules)
     {
         $this->urlRules = $urlRules;
@@ -42,12 +38,12 @@ class RouterSelfCheck
 
     public function check()
     {
-        $this->checkResult = self::CHECK_SUCCESS;
+        $this->checkResult = true;
         $router = Router::getInstance();
         $swooleHttpRequest = new SwooleHttpRequest();
         foreach($this->urlRules as $rule => $target) {
             if(!isset($this->checkList[$rule]) or empty($this->checkList[$rule])) {
-                $this->checkResult = self::CHECK_FAILED;
+                $this->checkResult = false;
                 $this->checkMsg = "rule : {$rule} test failed, reason : no testcase";
                 break;
             }
@@ -60,13 +56,16 @@ class RouterSelfCheck
                 $result = $this->_mixRouteResult($request->getRoute(), $request->query->all());
                 $realRoute = ltrim($realRoute, '/');
                 if($result != $realRoute) {
-                    $this->checkResult = self::CHECK_FAILED;
+                    $this->checkResult = false;
                     $this->checkMsg = "rule : {$rule} test failed, reason : realRoute is '{$result}', expected is '{$realRoute}'";
                     break 2;
                 }
             }
         }
-        $this->output();
+
+        if($this->checkResult === false) {
+            throw new RouteCheckFailedException("route check fail, {$this->checkMsg}");
+        }
     }
 
     private function _mixRouteResult($route, $parameters)
@@ -75,14 +74,5 @@ class RouterSelfCheck
             return $route;
         }
         return $route . '?' . http_build_query($parameters);
-    }
-
-    protected function output()
-    {
-        if(self::CHECK_SUCCESS == $this->checkResult) {
-            sys_echo(self::OUTPUT_PREFIX . 'check success');
-        } else {
-            throw new RouteCheckFailedException(self::OUTPUT_PREFIX . $this->checkMsg);
-        }
     }
 }

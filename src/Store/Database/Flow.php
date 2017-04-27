@@ -8,6 +8,7 @@
 namespace Zan\Framework\Store\Database;
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 use Zan\Framework\Store\Database\Mysql\Mysqli;
 use Zan\Framework\Store\Database\Mysql\Mysql;
@@ -70,10 +71,12 @@ class Flow
     {
         $sqlMap = SqlMap::getInstance()->getSql($sid, $data, $options);
         $sqlLog = Config::get("monitor.sql");
-        if (is_array($sqlLog) && isset($sqlLog['path'])) {
-            if (is_writable($sqlLog['path']))
+        if (Debug::get() && is_array($sqlLog) && isset($sqlLog['path'])) {
+            $dir = dirname($sqlLog['path']);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
                 file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", FILE_APPEND);
         }
+
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
@@ -95,8 +98,9 @@ class Flow
     public function queryRaw($table, $sql)
     {
         $sqlLog = Config::get("monitor.sql");
-        if (is_array($sqlLog) && isset($sqlLog['path'])) {
-            if (is_writable($sqlLog['path']))
+        if (Debug::get() && is_array($sqlLog) && isset($sqlLog['path'])) {
+            $dir = dirname($sqlLog['path']);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
                 file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sql."\n", FILE_APPEND);
         }
         $database = Table::getInstance()->getDatabase($table);
