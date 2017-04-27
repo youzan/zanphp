@@ -5,16 +5,12 @@
  */
 namespace Zan\Framework\Test\Network\Http;
 
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Core\Path;
-use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\Common\Client;
-use Zan\Framework\Testing\TaskTest;
-
+use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\Context;
 
-class ClientTest extends TaskTest {
+class ClientTest extends \TestCase {
     public function testTaskCall()
     {
         $context = new Context();
@@ -24,9 +20,15 @@ class ClientTest extends TaskTest {
 
     private function makeCoroutine($context)
     {
-         $result = (yield Client::call('fenxiao.supplier.goods.getGoodsByKdtGoodsId', [
-            'kdt_goods_id' => 1500107
-        ]));
+        try {
+            $result = (yield Client::call('fenxiao.supplier.goods.getGoodsByKdtGoodsId', [
+                'kdt_goods_id' => 1500107
+            ]));
+        } catch (\Exception $e) {
+            $this->assertInstanceOf(HttpClientTimeoutException::class, $e, "Unexpected exception thrown");
+            return;
+        }
+
         $context->set('result', $result);
         yield 'success';
     }

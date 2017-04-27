@@ -9,7 +9,7 @@ class RedisUuidTest extends TaskTest {
     public function initTask()
     {
         //connection pool init
-        ConnectionInitiator::getInstance()->init('connection', null);
+//        ConnectionInitiator::getInstance()->init('connection', null);
         parent::initTask();
     }
 

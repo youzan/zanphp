@@ -80,6 +80,6 @@ class SysCallTest extends \TestCase
 
     public function tearDown()
     {
-        swoole_event_exit();
+        //swoole_event_exit();
     }
 }

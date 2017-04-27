@@ -12,13 +12,6 @@ use Zan\Framework\Testing\TaskTest;
  */
 class TcpClientTest extends TaskTest
 {
-    public function setUp()
-    {
-        //connection pool init
-        ConnectionInitiator::getInstance()->init('connection', null);
-        parent::initTask();
-    }
-
     public function taskTcp()
     {
         $connection = (yield ConnectionManager::getInstance()->get("tcp.echo"));

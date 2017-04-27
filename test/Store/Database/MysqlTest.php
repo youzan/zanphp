@@ -19,12 +19,12 @@ class MysqlTest extends TaskTest
     const INSERT_COUNT = 3000;
     public function initTask()
     {
-        //sql map
-        SqlMapInitiator::getInstance()->init();
-        //table
-        Table::getInstance()->init();
-        //connection pool init
-        ConnectionInitiator::getInstance()->init('connection', null);
+//        //sql map
+//        SqlMapInitiator::getInstance()->init();
+//        //table
+//        Table::getInstance()->init();
+//        //connection pool init
+//        ConnectionInitiator::getInstance()->init('connection', null);
         parent::initTask();
     }
 

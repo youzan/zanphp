@@ -12,7 +12,7 @@ use Zan\Framework\Foundation\Core\ConfigLoader;
 use Zan\Framework\Network\Server\Middleware\MiddlewareConfig;
 use Zan\Framework\Contract\Network\Request;
 
-class RequestTest implements Request{
+class RequestTest implements Request {
 
     private $route;
 

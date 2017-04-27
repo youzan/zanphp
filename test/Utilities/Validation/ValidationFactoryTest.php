@@ -9,7 +9,6 @@ class ValidationFactoryTest extends \TestCase
 {
     public function testMakeMethodCreatesValidValidator()
     {
-        //$factory = new Factory();
         $validator = Factory::make(['foo' => 'bar'], ['baz' => 'boom']);
         $this->assertEquals(['foo' => 'bar'], $validator->getData());
         $this->assertEquals(['baz' => ['boom']], $validator->getRules());

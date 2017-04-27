@@ -10,8 +10,6 @@
 $server = new swoole_server('0.0.0.0', 5140);
 
 $server->on("receive", function ($server, $fd, $from_id, $data) {
-    var_dump(func_get_args());
-    echo "received $data\n";
 });
 
 $server->start();

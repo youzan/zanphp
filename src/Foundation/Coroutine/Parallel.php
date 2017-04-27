@@ -45,7 +45,11 @@ class Parallel
             $evtName = 'task_event_' . $newTaskId;
             $eventChain->before($evtName, $taskDoneEventName);
         }
-        
+
+        if ($this->childTasks == []) {
+            $event->fire($taskDoneEventName);
+        }
+
         foreach ($this->childTasks as $childTask){
             $childTask->run();
         }

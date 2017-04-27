@@ -17,7 +17,6 @@ class AsyncDnsClient implements Async {
 
     public function visit($url) {
         DnsClient::lookup($url, function ($host, $ip) {
-            var_dump(func_get_args());
             call_user_func_array($this->callback, [$host, $ip]);
         }, function () {
             assert(false);

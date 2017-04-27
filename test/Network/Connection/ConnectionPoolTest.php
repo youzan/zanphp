@@ -12,20 +12,11 @@ use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Testing\TaskTest;
 
 class ConnectionPoolTest extends TaskTest {
-    public function initTask()
-    {
-        //connection pool init
-        ConnectionInitiator::getInstance()->init('connection', null);
-        parent::initTask();
-    }
-
     public function taskPoolWork()
     {
-        for ($i=0; $i<5; $i++) {
-            $pool = (yield ConnectionManager::getInstance()->get('mysql.default_write'));
-            $pool->close();
-            $pool = (yield ConnectionManager::getInstance()->get('redis.default_write'));
-            $pool->close();
-        }
+        $pool = (yield ConnectionManager::getInstance()->get('mysql.default_write'));
+        //$pool->close();
+        $pool = (yield ConnectionManager::getInstance()->get('redis.default_write'));
+//        $pool->close();
     }
 }

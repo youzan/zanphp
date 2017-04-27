@@ -191,7 +191,6 @@ class HttpClient implements Async
             $port = $this->port;
         }
 
-        var_dump("dnsLookup function\n");
         DnsClient::lookup($host, function ($host, $ip) use ($port) {
             if ($ip) {
                 $this->request($ip, $port);

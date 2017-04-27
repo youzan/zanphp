@@ -24,9 +24,16 @@ class FileOpTest extends TaskTest {
 
     public function taskallTest()
     {
+        var_dump("taskallTest0");
+
         yield $this->onceWrite();
+        var_dump("taskallTest1");
+
         yield $this->onceRead();
+        var_dump("taskallTest2");
+
         yield $this->readWrite();
+        var_dump("taskallTest4");
         yield $this->destruct();
     }
 
@@ -45,7 +52,7 @@ class FileOpTest extends TaskTest {
         `diff $f $f_copy`;
         $this->files[] = $f;
         $this->files[] = $f_copy;
-        assert($size === $len);
+        $this->assertEquals($size, $len, "onceWrite failed");
     }
 
     public function onceRead()
@@ -57,7 +64,7 @@ class FileOpTest extends TaskTest {
         $of = new OnceFile();
         $txt = (yield $of->getContents($f));
 
-        assert($size === strlen($txt));
+        $this->assertEquals($size, strlen($txt), "onceRead failed");
         $this->files[] = $f;
     }
 
@@ -73,26 +80,26 @@ class FileOpTest extends TaskTest {
 
         $txt1 = file_get_contents($f1);
         $len = (yield $file->write($txt1));
-        assert($len === strlen($txt1));
+        $this->assertEquals($len, strlen($txt1), "readWrite $f1 failed");
 
         $txt2 = file_get_contents($f2);
         $len = (yield $file->write($txt2));
-        assert($len === strlen($txt2));
+        $this->assertEquals($len, strlen($txt2), "readWrite $f2 failed");
 
         $file->seek(0);
 
         $txt = (yield $file->read(-1));
-        assert($txt === "$txt1$txt2");
+        $this->assertEquals($txt, "$txt1$txt2", "read AllContents failed");
 
         $file->seek(0);
         $len = 1024 * 1024 + 1;
         $txt1 = (yield $file->read($len));
-        assert(strlen($txt1) === $len);
-        assert($file->tell() === $len);
+        $this->assertEquals(strlen($txt1), $len, "Length of $txt1 not equal to $len");
+        $this->assertEquals($file->tell(), $len, "File tell failed");
 
         $txt2 = (yield $file->read($len));
-        assert(strlen($txt2) === $len);
-        assert($file->tell() === $len * 2);
+        $this->assertEquals(strlen($txt2), $len, "Length of $txt2 not equal to $len");
+        $this->assertEquals($file->tell(), $len * 2, "File tell failed");
 
         $file->seek(0);
         $this->files[] = $f;
@@ -102,7 +109,10 @@ class FileOpTest extends TaskTest {
 
     public function destruct()
     {
-        foreach ($this->files as $file)
-            @unlink($file);
+        foreach ($this->files as $file) {
+            unlink($file);
+            echo "unlink $file\n";
+        }
+
     }
 }

@@ -15,22 +15,9 @@ use Zan\Framework\Testing\TaskTest;
  * Time: 上午10:06
  */
 class RedisTimeoutTest extends TaskTest {
-    public function taskConnectFailed()
-    {
-        $config  = [
-            'host' => '127.0.0.1',
-            'port' => 1234,
-            'connect_timeout' => 1,
-        ];
-        $factory = new RedisFactory($config);
-        $conn = $factory->create();
-        $this->assertNull($conn, "Expected create return null");
-    }
-
     public function taskCallTimeout()
     {
         try {
-            //redis connection pool init
             ConnectionInitiator::getInstance()->init('connection.redis', null);
             $conn = (yield ConnectionManager::getInstance()->get("default_write"));
             $config = $this->getProperty($conn, "config");

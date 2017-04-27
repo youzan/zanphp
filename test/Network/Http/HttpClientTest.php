@@ -29,13 +29,10 @@ class HttpClientTest extends TaskTest
             'fg_color' => '000000',
             'bg_color' => 'ffffff',
         ];
-        $httpClient = new HttpClient('192.168.66.202', 8888);
+        $httpClient = new HttpClient('127.0.0.1', 12345);
         $response = (yield $httpClient->get('', $params));
         $result = $response->getBody();
 
-        var_dump($result);
-        exit;
-
-        yield 'success';
+        $this->assertEquals($result, http_build_query($params), "Http request failed");
     }
 }

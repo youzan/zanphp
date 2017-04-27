@@ -138,7 +138,7 @@ class ValidationValidatorTest extends \TestCase
         $v = new Validator(['color' => '1', 'bar' => ''], ['bar' => 'RequiredIf:color,1'], ['name.required_if' => 'The :attribute field is required when :other is :value.', 'validation.values.color.1' => 'red']);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('The bar field is required when color is red.', $v->messages()->first('bar'));
+        $this->assertEquals('bar_RequiredIf', $v->messages()->first('bar'));
 
         //in:foo,bar,...
         $msg = [
@@ -149,7 +149,7 @@ class ValidationValidatorTest extends \TestCase
         $v = new Validator(['type' => '4'], ['type' => 'in:5,300'], $msg);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('type must be included in Short, Long.', $v->messages()->first('type'));
+        $this->assertEquals('type_In', $v->messages()->first('type'));
 
         // test addCustomValues
         $customValues = [
@@ -165,7 +165,7 @@ class ValidationValidatorTest extends \TestCase
         $v->addCustomValues($customValues);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('type must be included in Short, Long.', $v->messages()->first('type'));
+        $this->assertEquals('type_In', $v->messages()->first('type'));
 
         // set custom values by setter
         $v = new Validator(['type' => '4'], ['type' => 'in:5,300'], [
@@ -175,7 +175,7 @@ class ValidationValidatorTest extends \TestCase
         ]);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('type must be included in Short, Long.', $v->messages()->first('type'));
+        $this->assertEquals('type_In', $v->messages()->first('type'));
     }
 
     public function testCustomValidationLinesAreRespected()
@@ -192,8 +192,8 @@ class ValidationValidatorTest extends \TestCase
         $v->each('name', 'required|max:255');
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('all are really required!', $v->messages()->first('name.0'));
-        $this->assertEquals('all are really required!', $v->messages()->first('name.1'));
+        $this->assertEquals('name.0_Required', $v->messages()->first('name.0'));
+        $this->assertEquals('name.1_Required', $v->messages()->first('name.1'));
     }
 
     public function testInlineValidationMessagesAreRespected()
@@ -424,7 +424,7 @@ class ValidationValidatorTest extends \TestCase
         // error message when passed multiple values (required_if:foo,bar,baz)
         $v = new Validator(['first' => 'dayle', 'last' => ''], ['last' => 'RequiredIf:first,taylor,dayle'], ['name.required_if' => 'The :attribute field is required when :other is :value.']);
         $this->assertFalse($v->passes());
-        $this->assertEquals('The last field is required when first is dayle.', $v->messages()->first('last'));
+        $this->assertEquals('last_RequiredIf', $v->messages()->first('last'));
     }
 
     public function testRequiredUnless()
@@ -453,7 +453,7 @@ class ValidationValidatorTest extends \TestCase
         
         $v = new Validator(['first' => 'dayle', 'last' => ''], ['last' => 'RequiredUnless:first,taylor,sven']);
         $this->assertFalse($v->passes());
-        $this->assertEquals('The last field is required unless first is in taylor, sven.', $v->messages()->first('last'));
+        $this->assertEquals('last_RequiredUnless', $v->messages()->first('last'));
     }
 
     public function testValidateInArray()
@@ -475,7 +475,7 @@ class ValidationValidatorTest extends \TestCase
         $this->assertTrue($v->passes());
 
         $v = new Validator(['foo' => [1, 2, 3], 'bar' => [1, 2]], ['foo.*' => 'in_array:bar.*']);
-        $this->assertEquals('The value of foo.2 does not exist in bar.*.', $v->messages()->first('foo.2'));
+        $this->assertEquals('foo.2_InArray', $v->messages()->first('foo.2'));
     }
 
     public function testValidateConfirmed()
@@ -832,12 +832,12 @@ class ValidationValidatorTest extends \TestCase
         $v = new Validator(['name' => '3'], ['name' => 'Numeric|Min:5']);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('numeric', $v->messages()->first('name'));
+        $this->assertEquals('name_Min', $v->messages()->first('name'));
 
         $v = new Validator(['name' => 'asasdfadsfd'], ['name' => 'Size:2']);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('string', $v->messages()->first('name'));
+        $this->assertEquals('name_Size', $v->messages()->first('name'));
     }
 
     public function testValidateIn()
@@ -1482,27 +1482,27 @@ class ValidationValidatorTest extends \TestCase
         $v->addExtension('foo', function () { return false; });
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('foo!', $v->messages()->first('name'));
+        $this->assertEquals('name_Foo', $v->messages()->first('name'));
 
         $v = new Validator(['name' => 'taylor'], ['name' => 'foo_bar']);
         $v->addExtension('FooBar', function () { return false; });
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('foo!', $v->messages()->first('name'));
+        $this->assertEquals('name_FooBar', $v->messages()->first('name'));
 
         $v = new Validator(['name' => 'taylor'], ['name' => 'foo_bar']);
         $v->addExtension('FooBar', function () { return false; });
         $v->setFallbackMessages(['foo_bar' => 'foo!']);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('foo!', $v->messages()->first('name'));
+        $this->assertEquals('name_FooBar', $v->messages()->first('name'));
 
         $v = new Validator(['name' => 'taylor'], ['name' => 'foo_bar']);
         $v->addExtensions(['FooBar' => function () { return false; }]);
         $v->setFallbackMessages(['foo_bar' => 'foo!']);
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('foo!', $v->messages()->first('name'));
+        $this->assertEquals('name_FooBar', $v->messages()->first('name'));
     }
 
     public function testClassBasedCustomValidators()
@@ -1511,7 +1511,7 @@ class ValidationValidatorTest extends \TestCase
         $v->addExtension('foo', 'Foo@bar');
         $this->assertFalse($v->passes());
         $v->messages()->setFormat(':message');
-        $this->assertEquals('foo!', $v->messages()->first('name'));
+        $this->assertEquals('name_Foo', $v->messages()->first('name'));
     }
 
     public function testCustomImplicitValidators()
