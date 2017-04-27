@@ -28,7 +28,7 @@ class DebuggerTrace
     private $stack;
     private $json;
 
-    public static function fromCtx($ctx)
+    public static function of($ctx)
     {
         if (empty($ctx)) {
             return null;

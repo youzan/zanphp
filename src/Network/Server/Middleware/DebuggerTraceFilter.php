@@ -49,10 +49,12 @@ class DebuggerTraceFilter implements RequestFilter
                 ];
             }
 
-            $trace = DebuggerTrace::fromCtx($ctx);
-            $trace->beginTransaction($type, $req);
+            $trace = DebuggerTrace::of($ctx);
 
-            $context->set("debugger_trace", $trace);
+            if ($trace) {
+                $trace->beginTransaction($type, $req);
+                $context->set("debugger_trace", $trace);
+            }
         }
     }
 }
