@@ -8,46 +8,58 @@
 
 namespace Zan\Framework\Sdk\Trace;
 
-
-use Zan\Framework\Foundation\Exception\ZanException;
-use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Utilities\Encode\LZ4;
 
-class ChromeTrace
+class DebuggerTrace
 {
-    const MAX_STR_VAL_LEN = 500;
-    const MAX_HEAD_VAL_LEN = 1024 * 15;
-    const CLASS_KEY = '___class_name';
-    const TRANS_KEY = 'X-ChromeLogger-Data';
+    private static $hostInfo;
+    private static $reportTimeout = 5000;
 
-    /* trace level */
-    const INFO = 'info';
-    const WARN = 'warn';
-    const ERROR = 'error';
-    const GROUP = 'group';
-    const GROUP_END = 'groupEnd';
-    const GROUP_COLLAPSED = 'groupCollapsed';
-    const TABLE = 'table';
+    const HOST_KEY = "X-Trace-Host";
+    const PORT_KEY = "X-Trace-Port";
+    const ID_KEY = "X-Trace-Id";
 
-    private $jsonObject;
+    private $traceHost;
+    private $tracePort;
+    private $traceUri = "/";
+
     private $stack;
+    private $json;
 
-    public function __construct()
+    public static function fromCtx($ctx)
     {
-        $this->jsonObject = new JSONObject();
+        if (empty($ctx)) {
+            return null;
+        }
+
+        if (is_array($ctx)) {
+            $ctx = array_change_key_case($ctx, CASE_LOWER);
+            $k1 = strtolower(self::HOST_KEY);
+            $k2 = strtolower(self::PORT_KEY);
+            $k3 = strtolower(self::ID_KEY);
+            if (isset($ctx[$k1]) && isset($ctx[$k2]) && $ctx[$k3]) {
+                return new static($ctx[$k1],$ctx[$k2],  $ctx[$k3]);
+            }
+        }
+
+        return null;
+    }
+
+    private function __construct($host, $port, $traceId)
+    {
+        $this->detectHostInfo();
+
+        $this->json = self::$hostInfo;
+        $this->json["trace_id"] = $traceId;
+        $this->json["traces"] = [];
+
         $this->stack = new \SplStack();
+        $this->traceHost = $host;
+        $this->tracePort = $port;
     }
 
-    public function getJSONObject()
-    {
-        return $this->jsonObject;
-    }
-
-    /**
-     * 发起请求
-     * @param string $traceType trace类型
-     * @param mixed $req 请求数据
-     */
     public function beginTransaction($traceType, $req)
     {
         list($usec, $sec) = explode(' ', microtime());
@@ -56,13 +68,7 @@ class ChromeTrace
         $this->stack->push($trace);
     }
 
-    /**
-     * 与transactionBegin配对
-     * @param string $logType chrome::console.${logType}
-     * @param mixed $res 响应数据
-     * @param JSONObject|null $remote
-     */
-    public function commit($logType, $res, $remote = null)
+    public function commit($logType, $res = [])
     {
         if ($this->stack->isEmpty()) {
             return;
@@ -73,62 +79,34 @@ class ChromeTrace
         list($usec, $sec) = explode(' ', microtime());
         $end = $sec + $usec;
 
-        $ctx = [
+        $info = [
             "cost" => ceil(($end - $begin) * 1000) . "ms",
             "req" => self::convert($req),
             "res" => self::convert($res),
         ];
 
-        $this->jsonObject->addRow($logType, [$traceType, $ctx]);
-
-        if ($remote instanceof JSONObject) {
-            $this->jsonObject->addJSONObject($remote);
-        }
+        $this->trace($logType, $traceType, $info);
     }
 
-    /**
-     * @param string $logType chrome::console.${logType}
-     * @param string $traceType trace类型
-     * @param mixed $args trace信息
-     */
-    public function trace($logType, $traceType, $args)
+    public function trace($logType, $traceType, $detail)
     {
-        // $args = self::convert($args);
-        $this->jsonObject->addRow($logType, [$traceType, $args]);
+        $this->json['traces'][] = [$logType, $traceType, $detail];
     }
 
-    /**
-     * @param \swoole_http_response $response
-     * @return \Generator
-     */
-    public static function send(\swoole_http_response $response)
+    public function report()
     {
-        $self = (yield getContext('chrome_trace'));
-        if ($self instanceof static) {
-            $self->sendHeader($response);
-        }
-    }
+        swoole_async_dns_lookup($this->traceHost, function($host, $ip) {
+            $cli = new \swoole_http_client($ip, intval($this->tracePort));
+            $cli->setHeaders(["Connection" => "Closed"]);
+            $timerId = swoole_timer_after(self::$reportTimeout, function() use($cli) {
+                $cli->close();
+            });
 
-    public static function sendByCtx(\swoole_http_response $response, Context $ctx)
-    {
-        $self = $ctx->get('chrome_trace');
-        if ($self instanceof static) {
-            $self->sendHeader($response);
-        }
-    }
-
-    private function sendHeader(\swoole_http_response $response)
-    {
-        $headerVal = $this->jsonObject->__toString();
-        if (strlen($headerVal) > self::MAX_HEAD_VAL_LEN) {
-            $ok = false;
-        } else {
-            $ok = $response->header(self::TRANS_KEY, $this->jsonObject);
-        }
-        if ($ok === false) {
-            $jsonObj = JSONObject::fromException(new ZanException("swoole_http_response::header fail, maybe header value is too long"));
-            $response->header(self::TRANS_KEY, $jsonObj);
-        }
+            $cli->post($this->traceUri, $this->json, function(\swoole_http_client $cli) use($timerId) {
+                swoole_timer_clear($timerId);
+                $cli->close();
+            });
+        });
     }
 
     public static function convert($var)
@@ -146,11 +124,7 @@ class ChromeTrace
                 if ($lz4->isLZ4($object)) {
                     $object = $lz4->decode($object);
                 }
-                if (strlen($object) > self::MAX_STR_VAL_LEN) {
-                    $object = /*mb_*/substr($object, 0, self::MAX_STR_VAL_LEN) . "...";
-                }
-                // return utf8_encode($object);
-                return mb_convert_encoding($object, 'UTF-8', 'UTF-8'); // remove invalid characters.
+                return mb_convert_encoding($object, 'UTF-8', 'UTF-8');
             case "array":
                 return array_map(["self", "convertHelper"], $object);
             case "object":
@@ -161,7 +135,7 @@ class ChromeTrace
                     ];
                 }
                 $processed[] = $object;
-                $kv = [ static::CLASS_KEY => get_class($object) ];
+                $kv = [ "class" => get_class($object) ];
                 $reflect = new \ReflectionClass($object);
                 foreach ($reflect->getProperties() as $prop) {
                     $prop->setAccessible(true);
@@ -198,5 +172,21 @@ class ChromeTrace
         } else {
             return 'unknown';
         }
+    }
+
+    private function detectHostInfo()
+    {
+        if (self::$hostInfo) {
+            return;
+        }
+
+        /** @noinspection PhpUndefinedFunctionInspection */
+        self::$hostInfo = [
+            "app" => Application::getInstance()->getName(),
+            "host" => gethostname(),
+            "ip" => nova_get_ip(),
+            "port" => Config::get("server.port"),
+            "pid" => getmypid(),
+        ];
     }
 }

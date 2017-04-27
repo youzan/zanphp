@@ -4,16 +4,13 @@ namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Core\Debug;
-use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
-use Zan\Framework\Sdk\Trace\JSONObject;
+use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
@@ -45,8 +42,8 @@ class HttpClient implements Async
     /** @var Trace */
     private $trace;
 
-    /** @var ChromeTrace  */
-    private $chromeTrace;
+    /** @var DebuggerTrace  */
+    private $debuggerTrace;
 
     private $useHttpProxy = false;
 
@@ -157,7 +154,7 @@ class HttpClient implements Async
     private function build()
     {
         $this->trace = (yield getContext('trace'));
-        $this->chromeTrace = (yield getContext('chrome_trace'));
+        $this->debuggerTrace = (yield getContext('debugger_trace'));
 
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
@@ -218,8 +215,8 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
-        if ($this->chromeTrace instanceof ChromeTrace) {
-            $this->chromeTrace->beginTransaction("http", [
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->debuggerTrace->beginTransaction(Constant::HTTP, [
                 'host' => $this->host,
                 'port' => $this->port,
                 'ssl' => $this->ssl,
@@ -266,15 +263,14 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
-        if ($this->chromeTrace instanceof ChromeTrace) {
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
             $res = [
                 "code" => $cli->statusCode,
-                "header" => &$cli->headers,
+                "header" => $cli->headers,
                 "body" => mb_convert_encoding($cli->body, 'UTF-8', 'UTF-8'),
             ];
 
-            $remote = JSONObject::fromHeader($cli->headers);
-            $this->chromeTrace->commit("info", $res, $remote);
+            $this->debuggerTrace->commit("info", $res);
         }
 
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
@@ -324,8 +320,8 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit($exception);
         }
-        if ($this->chromeTrace) {
-            $this->chromeTrace->commit("warn", $exception);
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->debuggerTrace->commit("warn", $exception);
         }
 
         call_user_func($this->callback, null, $exception);
@@ -358,8 +354,8 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit($exception);
         }
-        if ($this->chromeTrace instanceof ChromeTrace) {
-            $this->chromeTrace->commit("warn", $exception);
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->debuggerTrace->commit("warn", $exception);
         }
 
         call_user_func($this->callback, null, $exception);

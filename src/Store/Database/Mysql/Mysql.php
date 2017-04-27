@@ -5,8 +5,8 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
@@ -43,9 +43,9 @@ class Mysql implements DriverInterface
     private $trace;
 
     /**
-     * @var ChromeTrace
+     * @var DebuggerTrace
      */
-    private $chromeTrace;
+    private $debuggerTrace;
 
     private $countAlias;
 
@@ -125,18 +125,19 @@ class Mysql implements DriverInterface
             $this->trace->transactionBegin(Constant::SQL, $sql);
         }
 
-        $chromeTrace = (yield getContext("chrome_trace"));
-        if ($chromeTrace instanceof ChromeTrace) {
+        $debuggerTrace = (yield getContext("debugger_trace"));
+        if ($debuggerTrace instanceof DebuggerTrace) {
             $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
             if (isset($conf["host"]) && isset($conf["port"])) {
                 $req["dsn"] = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
             }
-            $chromeTrace->beginTransaction("mysql", $req);
-            $this->chromeTrace = $chromeTrace;
+            $debuggerTrace->beginTransaction("mysql", $req);
+            $this->debuggerTrace = $debuggerTrace;
         }
 
         $this->sql = $sql;
+        /** @noinspection PhpMethodParametersCountMismatchInspection */
         $r = $this->swooleMysql->query($this->sql, [], [$this, "onSqlReady"]);
         yield $this->checkResult($r, __FUNCTION__);
     }
@@ -144,6 +145,7 @@ class Mysql implements DriverInterface
     public function beginTransaction($flags = 0)
     {
         $this->sql = "START TRANSACTION";
+        /** @noinspection PhpUndefinedMethodInspection */
         $r = $this->swooleMysql->begin([$this, "onSqlReady"]);
         yield $this->checkResult($r, __FUNCTION__);
     }
@@ -151,6 +153,7 @@ class Mysql implements DriverInterface
     public function commit($flags = 0)
     {
         $this->sql = "COMMIT";
+        /** @noinspection PhpUndefinedMethodInspection */
         $r = $this->swooleMysql->commit([$this, "onSqlReady"]);
         yield $this->checkResult($r, __FUNCTION__);
     }
@@ -158,6 +161,7 @@ class Mysql implements DriverInterface
     public function rollback($flags = 0)
     {
         $this->sql = "ROLLBACK";
+        /** @noinspection PhpUndefinedMethodInspection */
         $r = $this->swooleMysql->rollback([$this, "onSqlReady"]);
         yield $this->checkResult($r, __FUNCTION__);
     }
@@ -165,7 +169,6 @@ class Mysql implements DriverInterface
     /**
      * @param \swoole_mysql $link
      * @param array|bool $result
-     * @return void|\Zan\Framework\Contract\Store\Database\DbResultInterface
      * @throws MysqliConnectionLostException
      * @throws MysqliQueryDuplicateEntryUniqueKeyException
      * @throws MysqliQueryException
@@ -199,15 +202,15 @@ class Mysql implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit($exception->getTraceAsString());
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("error", $exception);
+            if ($this->debuggerTrace) {
+                $this->debuggerTrace->commit("error", $exception);
             }
         } else {
             if ($this->trace) {
                 $this->trace->commit(Constant::SUCCESS);
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("info", []/*$result*/);
+            if ($this->debuggerTrace) {
+                $this->debuggerTrace->commit("info", $result);
             }
         }
 
@@ -239,8 +242,8 @@ class Mysql implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit("$type timeout");
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("warn", "$type timeout");
+            if ($this->debuggerTrace) {
+                $this->debuggerTrace->commit("warn", "$type timeout");
             }
 
             if ($this->callback) {
