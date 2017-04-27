@@ -134,12 +134,16 @@ class DebuggerTrace
     {
         swoole_async_dns_lookup($this->traceHost, function($host, $ip) {
             $cli = new \swoole_http_client($ip, intval($this->tracePort));
-            $cli->setHeaders(["Connection" => "Closed"]);
+            $cli->setHeaders([
+                "Connection" => "Closed",
+                "Content-Type" => "application/json;charset=utf-8",
+            ]);
             $timerId = swoole_timer_after(self::$reportTimeout, function() use($cli) {
                 $cli->close();
             });
 
-            $cli->post($this->traceUri, $this->json, function(\swoole_http_client $cli) use($timerId) {
+            $body = json_encode($this->json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{"err":"json_encode fail"}';
+            $cli->post($this->traceUri, $body, function(\swoole_http_client $cli) use($timerId) {
                 swoole_timer_clear($timerId);
                 $cli->close();
             });
