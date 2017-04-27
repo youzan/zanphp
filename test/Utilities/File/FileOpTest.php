@@ -7,7 +7,6 @@
  */
 namespace Zan\Framework\Test\Utilities\File;
 
-use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Utilities\File\File;
 use Zan\Framework\Utilities\File\OnceFile;
@@ -24,16 +23,9 @@ class FileOpTest extends TaskTest {
 
     public function taskallTest()
     {
-        var_dump("taskallTest0");
-
         yield $this->onceWrite();
-        var_dump("taskallTest1");
-
         yield $this->onceRead();
-        var_dump("taskallTest2");
-
         yield $this->readWrite();
-        var_dump("taskallTest4");
         yield $this->destruct();
     }
 
@@ -111,7 +103,6 @@ class FileOpTest extends TaskTest {
     {
         foreach ($this->files as $file) {
             unlink($file);
-            echo "unlink $file\n";
         }
 
     }

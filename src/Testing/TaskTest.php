@@ -27,22 +27,19 @@ class TaskTest extends UnitTest
 
     public function testTasksWork()
     {
-        echo "enter taskTest\n";
-        $this->initTask();
         self::$nTasks++;
-        echo self::$nTasks, "\n";
-        $this->taskCounter++;
-        $this->eventChain->before('test_task_num_' . $this->taskCounter, 'test_task_done');
-
-        $this->scanTasks();
-        $taskCoroutine = $this->runTaskTests();
-
-        self::$jobs[] = $taskCoroutine;
+        self::$jobs[] = $this;
 
         if (self::$isRunningJob) {
             return;
         }
-        $taskCoroutine = array_shift(self::$jobs);
+
+        $task = array_shift(self::$jobs);
+        $task->initTask();
+        $task->taskCounter++;
+        $task->eventChain->before('test_task_num_' . $task->taskCounter, 'test_task_done');
+        $task->scanTasks();
+        $taskCoroutine = $task->runTaskTests();
         self::$isRunningJob = true;
         $context = new Context();
         $context->set('request_time', Time::stamp());
@@ -83,14 +80,16 @@ class TaskTest extends UnitTest
         $this->eventChain = $this->event->getEventChain();
         
         $this->event->bind('test_task_done', function () {
-            echo "task done...\n";
             --self::$nTasks;
-            echo self::$nTasks, "\n";
             if (self::$jobs == []) {
                 self::$isRunningJob = false;
             } else {
-                echo "scheduling......\n";
-                $taskCoroutine = array_shift(self::$jobs);
+                $task = array_shift(self::$jobs);
+                $task->initTask();
+                $task->taskCounter++;
+                $task->eventChain->before('test_task_num_' . $task->taskCounter, 'test_task_done');
+                $task->scanTasks();
+                $taskCoroutine = $task->runTaskTests();
                 $context = new Context();
                 $context->set('request_time', Time::stamp());
                 $request_timeout = 30;
@@ -99,7 +98,6 @@ class TaskTest extends UnitTest
                 return;
             }
             if (self::$nTasks == 0) {
-                echo "exiting....\n";
                 swoole_event_exit();
             }
         });

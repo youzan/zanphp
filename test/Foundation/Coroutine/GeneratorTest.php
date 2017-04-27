@@ -8,7 +8,6 @@
 
 namespace Zan\Framework\Test\Foundation\Coroutine;
 
-
 class GeneratorTest extends Base {
     protected function step()
     {

@@ -17,7 +17,7 @@
             <directory suffix="Test.php">./test/Store</directory>
             <directory suffix="Test.php">./test/Testing</directory>
             <directory suffix="Test.php">./test/Utilities</directory>
-            <!--<directory suffix="Test.php">./test/Foundation</directory>-->
+            <directory suffix="Test.php">./test/Foundation</directory>
         </testsuite>
     </testsuites>
 </phpunit>

@@ -7,22 +7,19 @@
  */
 namespace Zan\Framework\Test\Sdk\Log;
 
-use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Sdk\Log\Log;
 
 class LogTest extends TaskTest
 {
-    public function initTask()
-    {
-        //connection pool init
-//        ConnectionInitiator::getInstance()->init('connection', null);
-        parent::initTask();
-    }
-
     public function taskSysLog()
     {
-        yield Log::make("default")->info('log to syslog');
+        try {
+            yield Log::make("default")->info('log to syslog');
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
+
     }
 
     public function taskLogLog()

@@ -1,6 +1,7 @@
 <?php
 namespace Zan\Framework\Test\Sdk\Sms;
 
+use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Sdk\Sms\Channel;
 use Zan\Framework\Sdk\Sms\MessageContext;
@@ -17,10 +18,15 @@ class SmsClientTest extends TaskTest
             'link' => "http://www.baidu.com"
         );
 
-        $result = (yield SmsService::getInstance()->send(
-            new MessageContext('virtualPaySuc', $param),
-            [new Recipient(Channel::SMS, 15527999628)]
-        ));
+        try {
+            $result = (yield SmsService::getInstance()->send(
+                new MessageContext('virtualPaySuc', $param),
+                [new Recipient(Channel::SMS, 15527999628)]
+            ));
+        } catch (\Exception $e) {
+            $this->assertInstanceOf(HttpClientTimeoutException::class, $e);
+            return;
+        }
 
         yield $result;
     }

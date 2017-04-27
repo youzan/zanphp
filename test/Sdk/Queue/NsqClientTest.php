@@ -11,8 +11,13 @@ class NsqClientTest extends TaskTest
 
     public function taskPubSub()
     {
-//        yield $this->sub();
-//        yield $this->pub();
+        try {
+            yield $this->sub();
+            yield $this->pub();
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
+
     }
 
     private function pub()

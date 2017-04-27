@@ -23,7 +23,11 @@ class BarcodeTest extends TaskTest {
             'hrt' => 1
         ];
         $barcode = 20;
+        try {
+            yield Barcode::createDataUrl($text, $height, $styles, $barcode);
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
 
-        yield Barcode::createDataUrl($text, $height, $styles, $barcode);
     }
 }

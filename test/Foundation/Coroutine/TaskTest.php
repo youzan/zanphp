@@ -11,7 +11,6 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Test\Foundation\Coroutine\Task\AsyncJob;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Coroutine;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Error;
-use Zan\Framework\Test\Foundation\Coroutine\Task\ErrorException;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Simple;
 use Zan\Framework\Test\Foundation\Coroutine\Task\Steps;
 use Zan\Framework\Test\Foundation\Coroutine\Task\YieldValues;

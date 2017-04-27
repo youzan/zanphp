@@ -13,7 +13,11 @@ use Zan\Framework\Utilities\Types\ShortUrl;
 class ShortURLTest extends TaskTest {
     public function taskGetShortURL()
     {
-        $shortUrl = (yield ShortUrl::get("http://koudaitong.com"));
-        $this->assertStringStartsWith("http://kdt.im/", $shortUrl, "url: $shortUrl is invalid, int should start with http://kdt.im/");
+        try {
+            $shortUrl = (yield ShortUrl::get("http://koudaitong.com"));
+            $this->assertStringStartsWith("http://kdt.im/", $shortUrl, "url: $shortUrl is invalid, int should start with http://kdt.im/");
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
     }
 }

@@ -7,16 +7,19 @@
  */
 
 namespace Zan\Framework\Test\Network\Connection;
-use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Testing\TaskTest;
 
 class ConnectionPoolTest extends TaskTest {
     public function taskPoolWork()
     {
-        $pool = (yield ConnectionManager::getInstance()->get('mysql.default_write'));
-        //$pool->close();
-        $pool = (yield ConnectionManager::getInstance()->get('redis.default_write'));
+        try {
+            $conn = (yield ConnectionManager::getInstance()->get('mysql.default_write'));
+            //$pool->close();
+            $conn = (yield ConnectionManager::getInstance()->get('redis.default_write'));
 //        $pool->close();
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
     }
 }

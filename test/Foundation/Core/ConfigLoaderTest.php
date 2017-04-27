@@ -9,7 +9,6 @@ namespace Zan\Framework\Test\Foundation\Core;
 
 use Zan\Framework\Foundation\Core\ConfigLoader;
 
-
 class ConfigLoaderTest extends \TestCase {
 
     private $path;
@@ -20,7 +19,7 @@ class ConfigLoaderTest extends \TestCase {
     }
 
     public function test(){
-        $config = ConfigLoader::getInstance();
+        $config = new ConfigLoader();
         $result = $config->load($this->path);
         $this->assertEquals('test', $result['a']['config'], 'ConfigLoader::load fail');
         $this->assertEquals('pf', $result['pf']['b']['db'], 'ConfigLoader::load fail');

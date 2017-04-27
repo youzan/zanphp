@@ -7,18 +7,10 @@ namespace Zan\Framework\Test\Network\Http;
 
 use Zan\Framework\Network\Common\Client;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Test\Foundation\Coroutine\Context;
+use Zan\Framework\Testing\TaskTest;
 
-class ClientTest extends \TestCase {
-    public function testTaskCall()
-    {
-        $context = new Context();
-        $task = new Task($this->makeCoroutine($context), null, 8);
-        $task->run();
-    }
-
-    private function makeCoroutine($context)
+class ClientTest extends TaskTest {
+    public function taskClientCall()
     {
         try {
             $result = (yield Client::call('fenxiao.supplier.goods.getGoodsByKdtGoodsId', [
@@ -29,7 +21,6 @@ class ClientTest extends \TestCase {
             return;
         }
 
-        $context->set('result', $result);
         yield 'success';
     }
 }

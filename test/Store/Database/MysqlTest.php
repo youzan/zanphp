@@ -7,26 +7,13 @@
  */
 namespace Zan\Framework\Test\Store\Database;
 
-use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Store\Database\Flow;
-use Zan\Framework\Store\Database\Sql\SqlMapInitiator;
-use Zan\Framework\Store\Database\Sql\Table;
 use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Store\Facade\Db;
 
 class MysqlTest extends TaskTest
 {
-    const INSERT_COUNT = 3000;
-    public function initTask()
-    {
-//        //sql map
-//        SqlMapInitiator::getInstance()->init();
-//        //table
-//        Table::getInstance()->init();
-//        //connection pool init
-//        ConnectionInitiator::getInstance()->init('connection', null);
-        parent::initTask();
-    }
+    const INSERT_COUNT = 30;
 
     public function taskCRUD()
     {

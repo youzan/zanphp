@@ -8,7 +8,6 @@
 namespace Zan\Framework\Test\Sdk\Qrcode;
 
 use Zan\Framework\Testing\TaskTest;
-use Zan\Framework\Sdk\Barcode\Barcode;
 use Zan\Framework\Utilities\Types\Qrcode;
 
 class QrcodeTest extends TaskTest {
@@ -16,7 +15,12 @@ class QrcodeTest extends TaskTest {
     {
         $text = "youzan";
         $size = '270x270';
-        $qrCode = (yield Qrcode::create($text, $size, true));
+        try {
+            $qrCode = (yield Qrcode::create($text, $size, true));
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
+        }
+
         $this->assertStringStartsWith("data", $qrCode, "qrCode get failed");
     }
 }
