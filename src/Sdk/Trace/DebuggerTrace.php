@@ -40,7 +40,7 @@ class DebuggerTrace
             $k2 = strtolower(self::PORT_KEY);
             $k3 = strtolower(self::ID_KEY);
             if (isset($ctx[$k1]) && isset($ctx[$k2]) && $ctx[$k3]) {
-                return new static($ctx[$k1],$ctx[$k2],  $ctx[$k3]);
+                return new static($ctx[$k1], $ctx[$k2], $ctx[$k3]);
             }
         }
 

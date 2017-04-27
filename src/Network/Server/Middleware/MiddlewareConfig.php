@@ -128,6 +128,7 @@ class MiddlewareConfig
             CacheTerminator::class,
             KVTerminator::class,
 
+            DebuggerTraceTerminator::class,
             TraceTerminator::class,
 //            ClearContextTerminator::class,
         ];
