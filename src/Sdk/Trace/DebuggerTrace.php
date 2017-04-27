@@ -10,7 +10,12 @@ namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Utilities\Encode\LZ4;
+use Zan\Framework\Contract\Network\Request;
+use Zan\Framework\Network\Http\Request\Request as HttpRequest;
+use Zan\Framework\Network\Tcp\Request as TcpRequest;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class DebuggerTrace
 {
@@ -28,23 +33,55 @@ class DebuggerTrace
     private $stack;
     private $json;
 
-    public static function of($ctx)
+    public static function make(Request $request, Context $context)
     {
-        if (empty($ctx)) {
-            return null;
+        if ($request instanceof HttpRequest) {
+            $protocolHeader = $request->headers->all();
+            $type = Constant::HTTP;
+            $req = [
+                "method" => $request->getMethod(),
+                "uri" => $request->getRequestUri(),
+                "get" => $request->request->all(),
+                "post" => $request->query->all(),
+                "cookie" => $request->cookies->all(),
+            ];
+        } else if ($request instanceof TcpRequest) {
+            $protocolHeader = $request->getRpcContext()->get();
+            $type = Constant::NOVA;
+            $req = [
+                "service" => $request->getGenericServiceName(),
+                "method" => $request->getMethodName(),
+                "args" => $request->getArgs(),
+                "remote_ip" => $request->getRemoteIp(),
+                "remote_port" => $request->getRemotePort(),
+                "seq" => $request->getSeqNo(),
+            ];
+        } else {
+            return;
         }
 
-        if (is_array($ctx)) {
-            $ctx = array_change_key_case($ctx, CASE_LOWER);
-            $k1 = strtolower(self::HOST_KEY);
-            $k2 = strtolower(self::PORT_KEY);
-            $k3 = strtolower(self::ID_KEY);
-            if (isset($ctx[$k1]) && isset($ctx[$k2]) && $ctx[$k3]) {
-                return new static($ctx[$k1], $ctx[$k2], $ctx[$k3]);
+        $h = array_change_key_case($protocolHeader, CASE_LOWER);
+        $k1 = strtolower(self::HOST_KEY);
+        $k2 = strtolower(self::PORT_KEY);
+        $k3 = strtolower(self::ID_KEY);
+
+        if (isset($h[$k1]) && isset($h[$k2]) && $h[$k3]) {
+            $host = $h[$k1];
+            $port = $h[$k2];
+            $id = $h[$k3];
+
+            $trace = new static($host, $port, $id);
+
+            $trace->beginTransaction($type, $req);
+            $context->set("debugger_trace", $trace);
+
+            $rpcCtx = $context->get(RpcContext::KEY);
+            if ($rpcCtx instanceof RpcContext) {
+                $rpcCtx->set(DebuggerTrace::HOST_KEY, $host);
+                $rpcCtx->set(DebuggerTrace::PORT_KEY, $port);
+                $rpcCtx->set(DebuggerTrace::ID_KEY, $id);
             }
         }
-
-        return null;
     }
 
     private function __construct($host, $port, $traceId)
