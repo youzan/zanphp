@@ -42,13 +42,7 @@ class DebuggerTrace
             $name = $request->getMethod() . '-' . $request->getUrl();
             $type = Constant::HTTP;
         } else if ($request instanceof TcpRequest) {
-
-            $req = [
-                "args" => $request->getArgs(),
-                "remote_ip" => $request->getRemoteIp(),
-                "remote_port" => $request->getRemotePort(),
-                "seq" => $request->getSeqNo(),
-            ];
+            $req = $request->getArgs();
             $header = $request->getRpcContext()->get();
             $name = $request->getServiceName() . '.' . $request->getMethodName();
             $type = Constant::NOVA;
@@ -69,7 +63,7 @@ class DebuggerTrace
             $keys = self::parseKey($key);
             if ($keys) {
                 $trace = new static(...$keys);
-                $trace->beginTransaction($type, $name, $req);
+                $trace->beginTransaction($type, "self-$name", $req);
                 $context->set("debugger_trace", $trace);
             }
 
