@@ -61,7 +61,12 @@ class DebuggerTrace
 
         if (isset($header[$key])) {
 
-            $keys = self::parseKey($header[$key]);
+            $key = $header[$key];
+            if (is_array($key) && $key) {
+                $key = $key[0];
+            }
+
+            $keys = self::parseKey($key);
             if ($keys) {
                 $trace = new static(...$keys);
                 $trace->beginTransaction($type, $name, $req);
