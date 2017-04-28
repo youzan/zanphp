@@ -35,3 +35,4 @@ iron.iml
 composer.lock
 /vendor
 *.iml
+!test/bootstrap.php

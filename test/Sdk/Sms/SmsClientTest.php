@@ -1,47 +1,33 @@
 <?php
+namespace Zan\Framework\Test\Sdk\Sms;
 
-require __DIR__ . '/../../bootstrap.php';
-
-//namespace Zan\Framework\Test\Sdk\Sms;
-
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Sdk\Sms\Channel;
 use Zan\Framework\Sdk\Sms\MessageContext;
 use Zan\Framework\Sdk\Sms\Recipient;
 use Zan\Framework\Sdk\Sms\SmsService;
 
-
-class SmsClientTest extends \TestCase
+class SmsClientTest extends TaskTest
 {
-    public function testSearch()
-    {
-
-        $context = new Context();
-
-        $coroutine = $this->wahaha();
-
-        $task = new Task($coroutine, $context, 19);
-        $task->run();
-
-    }
-
-    private function wahaha()
+    public function taskSendSms()
     {
         $param = array(
-            'goodsTitle' => 'aaaaa',
-            'reason' => 'hahaha',
+            'goodsName' => '饮料',
+            'realPay' => '1.5',
+            'link' => "http://www.baidu.com"
         );
 
-        $result = (yield SmsService::getInstance()->send(
-            new MessageContext('fenxiaoRevokeBestGoods', $param),
-            [new Recipient(Channel::SMS, 15757110811)]
-        ));
+        try {
+            $result = (yield SmsService::getInstance()->send(
+                new MessageContext('virtualPaySuc', $param),
+                [new Recipient(Channel::SMS, 15527999628)]
+            ));
+        } catch (\Exception $e) {
+            $this->assertInstanceOf(HttpClientTimeoutException::class, $e);
+            return;
+        }
 
-        var_dump($result);
+        yield $result;
     }
-
-
 }
-
-(new SmsClientTest())->testSearch();

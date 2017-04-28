@@ -12,31 +12,40 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Foundation\Core\Path;
 
-
 class ConfigTest extends \TestCase
 {
+    private $configPath;
+    private $config;
+    private $runMode;
+
     public function setUp()
     {
         $path = __DIR__ . '/config/';
+        $this->configPath = Path::getConfigPath();
         Path::setConfigPath($path);
+        $this->runMode = RunMode::get();
+        RunMode::set('test');
+        $config = new Config();
+        $this->config = $this->getProperty($config, "configMap");
+        Config::init();
     }
 
     public function tearDown()
     {
-        Config::clear();
+        $config = new Config();
+        $this->setPropertyValue($config, "configMap", $this->config);
+        RunMode::set($this->runMode);
+        Path::setConfigPath($this->configPath);
     }
-
 
     public function testGetConfigWork()
     {
-        RunMode::set('online');
-        Config::init();
         $data = Config::get('a.share');
         $this->assertEquals('share', $data, 'Config::get share get failed');
         $data = Config::get('a.config');
-        $this->assertEquals('online', $data, 'Config::get share get failed');
+        $this->assertEquals('test', $data, 'Config::get share get failed');
         $data = Config::get('pf.b.test');
-        $this->assertEquals('online', $data, 'Config::get share get failed');
+        $this->assertEquals('test', $data, 'Config::get share get failed');
         $data = Config::get('pf.b.db');
         $this->assertEquals('pf', $data, 'Config::get share get failed');
         Config::set('pf.b.new','new');

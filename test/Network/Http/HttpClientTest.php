@@ -1,26 +1,13 @@
 <?php
 namespace Zan\Framework\Test\Network\Http;
 
+use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Testing\TaskTest;
 
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Test\Foundation\Coroutine\Context;
-
 class HttpClientTest extends TaskTest
 {
-
-
-
-    public function testTaskCall()
-    {
-        $context = new Context();
-        $task = new Task($this->makeCoroutine($context), null, 8);
-        $task->run();
-
-    }
-
-    private function makeCoroutine($context)
+    public function taskHttpGet()
     {
         $params = [
             'txt' => 'aaa',
@@ -33,12 +20,16 @@ class HttpClientTest extends TaskTest
             'fg_color' => '000000',
             'bg_color' => 'ffffff',
         ];
-        $response = (yield HttpClient::newInstance('192.168.66.202', 8888)->get('', $params));
+        $httpClient = new HttpClient('127.0.0.1', 12345);
+        try {
+            $response = (yield $httpClient->get('', $params));
+        } catch (\Exception $e) {
+            $this->assertInstanceOf(HttpClientTimeoutException::class, $e, $e->getMessage());
+            return;
+        }
+
         $result = $response->getBody();
 
-        var_dump($result);
-        exit;
-
-        yield 'success';
+        $this->assertEquals($result, http_build_query($params), "Http request failed");
     }
 }

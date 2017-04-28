@@ -3,18 +3,21 @@
          backupStaticAttributes="false"
          bootstrap="test/bootstrap.php"
          colors="true"
-         convertErrorsToExceptions="true"
          convertNoticesToExceptions="true"
          convertWarningsToExceptions="true"
-         processIsolation="false"
-         stopOnError="false"
-         stopOnFailure="false"
-         syntaxCheck="true"
-         verbose="true"
+         stopOnError="true"
+         stopOnFailure="true"
+         stopOnIncomplete="true"
+         stopOnSkipped="true">
 >
     <testsuites>
         <testsuite name="Zan Test Suite">
-            <directory suffix="Test.php">./test</directory>
+            <directory suffix="Test.php">./test/Network</directory>
+            <directory suffix="Test.php">./test/Sdk</directory>
+            <directory suffix="Test.php">./test/Store</directory>
+            <directory suffix="Test.php">./test/Testing</directory>
+            <directory suffix="Test.php">./test/Utilities</directory>
+            <directory suffix="Test.php">./test/Foundation</directory>
         </testsuite>
     </testsuites>
 </phpunit>

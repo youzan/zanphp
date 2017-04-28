@@ -7,9 +7,12 @@
  */
 
 namespace Zan\Framework\Test\Utilities\Types;
-
 use Zan\Framework\Utilities\Types\ObjectArray;
 
+class UserTest {
+    public $a = 1;
+    public $b = 2;
+}
 
 class ObjectArrayTest extends \TestCase {
 
@@ -26,17 +29,12 @@ class ObjectArrayTest extends \TestCase {
         $this->arrayObject->push($o2);
         $this->arrayObject->push($o3);
 
-        //$ret = $this->arrayObject->pop();
-        //var_dump($ret);
+        $obj = $this->arrayObject->pop();
 
-        //$this->arrayObject->remove($ret);
-        $length = $this->arrayObject->length();
-        for ($i =0; $i<$length; $i++) {
-            $ret = $this->arrayObject->pop();
-            var_dump($ret);
-
-        }
-
+        $this->assertEquals($o3, $obj);
+        $obj = $this->arrayObject->pop();
+        $this->assertEquals($o2, $obj);
+        $obj = $this->arrayObject->pop();
+        $this->assertEquals($o1, $obj);
     }
-
 }

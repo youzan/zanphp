@@ -11,12 +11,14 @@
 | loading of any our classes "manually". Feels great to relax.
 |
 */
-require __DIR__.'/../vendor/autoload.php';
+use Zan\Framework\Foundation\Application;
 
-$home = getenv('HOME');
-if (!empty($home)) {
-    $globalAutoloadFile = $home . '/.composer/vendor/autoload.php';
-    if (file_exists($globalAutoloadFile)) {
-        require $globalAutoloadFile;
-    }
-}
+require __DIR__ . '/../vendor/autoload.php';
+
+$appName = 'zan-test';
+$rootPath = realpath(__DIR__);
+
+$app = new Application($appName, $rootPath);
+
+return $app;
+
