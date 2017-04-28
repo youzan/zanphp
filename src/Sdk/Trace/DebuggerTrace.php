@@ -88,7 +88,7 @@ class DebuggerTrace
 
     public function getKey()
     {
-        return self::buildKey($this->tracePort, $this->tracePort, $this->tracePath, $this->traceArgs);
+        return self::buildKey($this->traceHost, $this->tracePort, $this->tracePath, $this->traceArgs);
     }
 
     public function beginTransaction($traceType, $name, $req)
