@@ -251,6 +251,10 @@ class HttpClient implements Async
             $this->header['Scheme'] = 'https';
         }
 
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->header[DebuggerTrace::KEY] = $this->debuggerTrace->getKey();
+        }
+
         $this->client->setHeaders($this->header);
     }
 

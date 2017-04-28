@@ -10,7 +10,6 @@ namespace Zan\Framework\Sdk\Trace;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Utilities\Encode\LZ4;
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Network\Http\Request\Request as HttpRequest;
@@ -20,13 +19,13 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 class DebuggerTrace
 {
     private static $hostInfo;
-    private static $reportTimeout = 5000;
 
     const KEY = "X-Trace-Callback";
 
     private $traceHost;
     private $tracePort;
-    private $traceUri = "/";
+    private $tracePath = "/";
+    private $traceArgs;
 
     private $stack;
     private $json;
@@ -59,34 +58,37 @@ class DebuggerTrace
 
         $header = array_change_key_case($header, CASE_LOWER);
         $key = strtolower(self::KEY);
-        if (isset($header[$key])) {
-            list($host, $port, $path, $args) = self::parseKey($header[$key]);
-            if ($host && $port) {
-                $trace = new static($host, $port, $path, $args["id"]);
 
+        if (isset($header[$key])) {
+
+            $keys = self::parseKey($header[$key]);
+            if ($keys) {
+                $trace = new static(...$keys);
                 $trace->beginTransaction($type, $name, $req);
                 $context->set("debugger_trace", $trace);
-
-                $rpcCtx = $context->get(RpcContext::KEY);
-                if ($rpcCtx instanceof RpcContext) {
-                    $rpcCtx->set(self::KEY, self::buildKey($host, $port, $path, $args));
-                }
             }
+
         }
     }
 
-    private function __construct($host, $port, $path, $traceId)
+    private function __construct($host, $port, $path, array $args = [])
     {
         $this->detectHostInfo();
 
         $this->json = self::$hostInfo;
-        $this->json["trace_id"] = $traceId;
+        $this->json["trace_id"] = $args["id"];
         $this->json["traces"] = [];
 
         $this->stack = new \SplStack();
         $this->traceHost = $host;
         $this->tracePort = $port;
-        $this->traceUri = $path;
+        $this->tracePath = $path;
+        $this->traceArgs = $args;
+    }
+
+    public function getKey()
+    {
+        return self::buildKey($this->tracePort, $this->tracePort, $this->tracePath, $this->traceArgs);
     }
 
     public function beginTransaction($traceType, $name, $req)
@@ -127,18 +129,20 @@ class DebuggerTrace
 
     public function report()
     {
+        /** @noinspection PhpUnusedParameterInspection */
         swoole_async_dns_lookup($this->traceHost, function($host, $ip) {
             $cli = new \swoole_http_client($ip, intval($this->tracePort));
             $cli->setHeaders([
                 "Connection" => "Closed",
                 "Content-Type" => "application/json;charset=utf-8",
             ]);
-            $timerId = swoole_timer_after(self::$reportTimeout, function() use($cli) {
+            $timeout = isset($this->traceArgs["timeout"]) ? intval($this->traceArgs["timeout"]) : 5000;
+            $timerId = swoole_timer_after($timeout, function() use($cli) {
                 $cli->close();
             });
 
             $body = json_encode($this->json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{"err":"json_encode fail"}';
-            $cli->post($this->traceUri, $body, function(\swoole_http_client $cli) use($timerId) {
+            $cli->post($this->tracePath, $body, function(\swoole_http_client $cli) use($timerId) {
                 swoole_timer_clear($timerId);
                 $cli->close();
             });
@@ -219,7 +223,7 @@ class DebuggerTrace
         parse_str($query, $args);
 
         if (empty($host) || empty($port)) {
-            return [null, null, null, null];
+            return false;
         }
 
         if (!isset($args["id"])) {
