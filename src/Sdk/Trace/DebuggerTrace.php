@@ -141,7 +141,9 @@ class DebuggerTrace
             });
 
             $body = json_encode($this->json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{"err":"json_encode fail"}';
-            $cli->post($this->tracePath, $body, function(\swoole_http_client $cli) use($timerId) {
+            $query = http_build_query($this->traceArgs);
+            $uri = "{$this->tracePath}?{$query}";
+            $cli->post($uri, $body, function(\swoole_http_client $cli) use($timerId) {
                 swoole_timer_clear($timerId);
                 $cli->close();
             });
