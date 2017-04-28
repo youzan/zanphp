@@ -216,12 +216,9 @@ class HttpClient implements Async
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
         if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $this->debuggerTrace->beginTransaction(Constant::HTTP, [
-                'host' => $this->host,
-                'port' => $this->port,
-                'ssl' => $this->ssl,
-                'uri' => $this->uri,
-                'method' => $this->method,
+            $scheme = $this->ssl ? "https://" : "http://";
+            $name = "{$this->method}-{$scheme}{$this->host}:{$this->port}{$this->uri}";
+            $this->debuggerTrace->beginTransaction(Constant::HTTP, $name, [
                 'params' => $this->params,
                 'body' => $this->body,
                 'header' => $this->header,

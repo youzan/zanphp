@@ -22,9 +22,7 @@ class DebuggerTrace
     private static $hostInfo;
     private static $reportTimeout = 5000;
 
-    const HOST_KEY = "X-Trace-Host";
-    const PORT_KEY = "X-Trace-Port";
-    const ID_KEY = "X-Trace-Id";
+    const KEY = "X-Trace-Callback";
 
     private $traceHost;
     private $tracePort;
@@ -36,55 +34,48 @@ class DebuggerTrace
     public static function make(Request $request, Context $context)
     {
         if ($request instanceof HttpRequest) {
-            $protocolHeader = $request->headers->all();
-            $type = Constant::HTTP;
             $req = [
-                "method" => $request->getMethod(),
-                "uri" => $request->getRequestUri(),
                 "get" => $request->request->all(),
                 "post" => $request->query->all(),
                 "cookie" => $request->cookies->all(),
             ];
+            $header = $req["get"] + $req["post"] + $request->headers->all();
+            $name = $request->getMethod() . '-' . $request->getUrl();
+            $type = Constant::HTTP;
         } else if ($request instanceof TcpRequest) {
-            $protocolHeader = $request->getRpcContext()->get();
-            $type = Constant::NOVA;
+
             $req = [
-                "service" => $request->getGenericServiceName(),
-                "method" => $request->getMethodName(),
                 "args" => $request->getArgs(),
                 "remote_ip" => $request->getRemoteIp(),
                 "remote_port" => $request->getRemotePort(),
                 "seq" => $request->getSeqNo(),
             ];
+            $header = $request->getRpcContext()->get();
+            $name = $request->getServiceName() . '.' . $request->getMethodName();
+            $type = Constant::NOVA;
         } else {
             return;
         }
 
-        $h = array_change_key_case($protocolHeader, CASE_LOWER);
-        $k1 = strtolower(self::HOST_KEY);
-        $k2 = strtolower(self::PORT_KEY);
-        $k3 = strtolower(self::ID_KEY);
+        $header = array_change_key_case($header, CASE_LOWER);
+        $key = strtolower(self::KEY);
+        if (isset($header[$key])) {
+            list($host, $port, $path, $args) = self::parseKey($header[$key]);
+            if ($host && $port) {
+                $trace = new static($host, $port, $path, $args["id"]);
 
-        if (isset($h[$k1]) && isset($h[$k2]) && $h[$k3]) {
-            $host = $h[$k1];
-            $port = $h[$k2];
-            $id = $h[$k3];
+                $trace->beginTransaction($type, $name, $req);
+                $context->set("debugger_trace", $trace);
 
-            $trace = new static($host, $port, $id);
-
-            $trace->beginTransaction($type, $req);
-            $context->set("debugger_trace", $trace);
-
-            $rpcCtx = $context->get(RpcContext::KEY);
-            if ($rpcCtx instanceof RpcContext) {
-                $rpcCtx->set(DebuggerTrace::HOST_KEY, $host);
-                $rpcCtx->set(DebuggerTrace::PORT_KEY, $port);
-                $rpcCtx->set(DebuggerTrace::ID_KEY, $id);
+                $rpcCtx = $context->get(RpcContext::KEY);
+                if ($rpcCtx instanceof RpcContext) {
+                    $rpcCtx->set(self::KEY, self::buildKey($host, $port, $path, $args));
+                }
             }
         }
     }
 
-    private function __construct($host, $port, $traceId)
+    private function __construct($host, $port, $path, $traceId)
     {
         $this->detectHostInfo();
 
@@ -95,13 +86,16 @@ class DebuggerTrace
         $this->stack = new \SplStack();
         $this->traceHost = $host;
         $this->tracePort = $port;
+        $this->traceUri = $path;
     }
 
-    public function beginTransaction($traceType, $req)
+    public function beginTransaction($traceType, $name, $req)
     {
         list($usec, $sec) = explode(' ', microtime());
         $begin = $sec + $usec;
-        $trace = [$begin, $traceType, $req];
+        $ts = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
+
+        $trace = [$begin, $ts, $traceType, $name, $req];
         $this->stack->push($trace);
     }
 
@@ -111,23 +105,24 @@ class DebuggerTrace
             return;
         }
 
-        list($begin, $traceType, $req) = $this->stack->pop();
+        list($begin, $ts, $traceType, $name, $req) = $this->stack->pop();
 
         list($usec, $sec) = explode(' ', microtime());
         $end = $sec + $usec;
 
         $info = [
+            "ts" => $ts,
             "cost" => ceil(($end - $begin) * 1000) . "ms",
             "req" => self::convert($req),
             "res" => self::convert($res),
         ];
 
-        $this->trace($logType, $traceType, $info);
+        $this->trace($logType, $traceType, $name, $info);
     }
 
-    public function trace($logType, $traceType, $detail)
+    public function trace($logType, $traceType, $name, $detail)
     {
-        $this->json['traces'][] = [$logType, $traceType, $detail];
+        $this->json['traces'][] = [$logType, $traceType, $name, $detail];
     }
 
     public function report()
@@ -213,6 +208,29 @@ class DebuggerTrace
         } else {
             return 'unknown';
         }
+    }
+
+    private static function parseKey($str)
+    {
+        $host = parse_url($str, PHP_URL_HOST);
+        $port = parse_url($str, PHP_URL_PORT);
+        $path = parse_url($str, PHP_URL_PATH) ?: "/";
+        $query = parse_url($str, PHP_URL_QUERY) ?: "";
+        parse_str($query, $args);
+
+        if (empty($host) || empty($port)) {
+            return [null, null, null, null];
+        }
+
+        if (!isset($args["id"])) {
+            $args["id"] = TraceBuilder::generateId();
+        }
+        return [$host, $port, $path, $args];
+    }
+
+    private static function buildKey($host, $port, $path, $args)
+    {
+        return "{$host}:{$port}{$path}?" . http_build_query($args);
     }
 
     private function detectHostInfo()

@@ -101,10 +101,8 @@ class Mysql2 implements DriverInterface
         if ($debuggerTrace instanceof DebuggerTrace) {
             $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
-            if (isset($conf["host"]) && isset($conf["port"])) {
-                $req["dsn"] = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
-            }
-            $debuggerTrace->beginTransaction("mysql", $req);
+            $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
+            $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
             $this->debuggerTrace = $debuggerTrace;
         }
 

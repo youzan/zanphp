@@ -13,6 +13,7 @@ use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
 use Zan\Framework\Utilities\DesignPattern\Context;
@@ -93,17 +94,18 @@ class Redis implements Async
         $ctx = $task->getContext();
         $debuggerTrace = $ctx->get("debugger_trace", null);
         if ($debuggerTrace instanceof DebuggerTrace) {
-            $req = [
-                "cmd" => $this->cmd,
-                "args" => $this->args,
-            ];
             $conf = $this->conn->getConfig();
             if (isset($conf["path"])) {
-                $req["dst"] = $conf["path"];
+                $dsn = $conf["path"];
             } else if (isset($conf["host"]) && isset($conf["port"])) {
-                $req["dst"] = "{$conf["host"]}:{$conf["port"]}";
+                $dsn = "{$conf["host"]}:{$conf["port"]}";
+            } else {
+                $dsn = "";
             }
-            $debuggerTrace->beginTransaction("redis", $req);
+            $debuggerTrace->beginTransaction(Constant::REDIS, $this->cmd, [
+                "args" => $this->args,
+                "dsn" => $dsn,
+            ]);
             $this->debuggerTrace = $debuggerTrace;
         }
 
