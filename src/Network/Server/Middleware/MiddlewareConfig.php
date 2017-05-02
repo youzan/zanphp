@@ -11,7 +11,6 @@ namespace Zan\Framework\Network\Server\Middleware;
 
 use Zan\Framework\Contract\Network\Request;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Network\Http\RequestExceptionHandlerChain;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class MiddlewareConfig
@@ -114,7 +113,7 @@ class MiddlewareConfig
     {
         $baseFilters = [
             TraceFilter::class,
-            ChromeTraceFilter::class,
+            DebuggerTraceFilter::class,
         ];
         return array_merge($baseFilters, $this->zanFilters, $filters);
     }
@@ -129,6 +128,7 @@ class MiddlewareConfig
             CacheTerminator::class,
             KVTerminator::class,
 
+            DebuggerTraceTerminator::class,
             TraceTerminator::class,
 //            ClearContextTerminator::class,
         ];

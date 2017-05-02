@@ -9,10 +9,12 @@
 namespace Zan\Framework\Store\NoSQL\Redis;
 
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -36,18 +38,28 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 class Redis implements Async
 {
     private $callback;
+    /**
+     * @var \Zan\Framework\Network\Connection\Driver\Redis
+     */
     private $conn;
+    /**
+     * @var \swoole_redis
+     */
     private $sock;
     private $cmd;
     private $args;
 
     /**
-     * @var ChromeTrace
+     * @var DebuggerTrace
      */
-    private $chromeTrace;
+    private $debuggerTrace;
 
     const DEFAULT_CALL_TIMEOUT = 2000;
 
+    /**
+     * Redis constructor.
+     * @param Connection $conn
+     */
     public function __construct($conn)
     {
         $this->conn = $conn;
@@ -60,14 +72,15 @@ class Redis implements Async
         $this->args = $arguments;
         $arguments[] = [$this, 'recv'];
         $this->sock->$name(...$arguments);
-        $this->beginTimeoutTimer($name, $arguments);
+        $this->beginTimeoutTimer();
         yield $this;
     }
 
-    public function recv($client, $ret)
+    public function recv(/** @noinspection PhpUnusedParameterInspection */
+        $client, $ret)
     {
-        if ($this->chromeTrace instanceof ChromeTrace) {
-            $this->chromeTrace->commit("info", []/*$ret*/);
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->debuggerTrace->commit("info", $ret);
         }
 
         $this->cancelTimeoutTimer();
@@ -79,26 +92,27 @@ class Redis implements Async
         /** @var Task $task */
         /** @var Context $ctx */
         $ctx = $task->getContext();
-        $chromeTrace = $ctx->get("chrome_trace", null);
-        if ($chromeTrace instanceof ChromeTrace) {
-            $req = [
-                "cmd" => $this->cmd,
-                "args" => $this->args,
-            ];
+        $debuggerTrace = $ctx->get("debugger_trace", null);
+        if ($debuggerTrace instanceof DebuggerTrace) {
             $conf = $this->conn->getConfig();
             if (isset($conf["path"])) {
-                $req["dst"] = $conf["path"];
+                $dsn = $conf["path"];
             } else if (isset($conf["host"]) && isset($conf["port"])) {
-                $req["dst"] = "{$conf["host"]}:{$conf["port"]}";
+                $dsn = "{$conf["host"]}:{$conf["port"]}";
+            } else {
+                $dsn = "";
             }
-            $chromeTrace->beginTransaction("redis", $req);
-            $this->chromeTrace = $chromeTrace;
+            $debuggerTrace->beginTransaction(Constant::REDIS, $this->cmd, [
+                "args" => $this->args,
+                "dsn" => $dsn,
+            ]);
+            $this->debuggerTrace = $debuggerTrace;
         }
 
         $this->callback = $callback;
     }
 
-    private function beginTimeoutTimer($name, $args)
+    private function beginTimeoutTimer()
     {
         $config = $this->conn->getConfig();
         $timeout = isset($config['timeout']) ? $config['timeout'] : self::DEFAULT_CALL_TIMEOUT;
@@ -122,8 +136,8 @@ class Redis implements Async
                     "duration" => $duration,
                 ];
 
-                if ($this->chromeTrace instanceof ChromeTrace) {
-                    $this->chromeTrace->commit("warn", $ctx);
+                if ($this->debuggerTrace instanceof DebuggerTrace) {
+                    $this->debuggerTrace->commit("warn", $ctx);
                 }
 
                 $callback = $this->callback;
