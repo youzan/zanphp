@@ -137,7 +137,9 @@ class DebuggerTrace
             ]);
             $timeout = isset($this->traceArgs["timeout"]) ? intval($this->traceArgs["timeout"]) : 5000;
             $timerId = swoole_timer_after($timeout, function() use($cli) {
-                $cli->close();
+                if ($cli->isConnected()) {
+                    $cli->close();
+                }
             });
 
             $body = json_encode($this->json, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?: '{"err":"json_encode fail"}';
