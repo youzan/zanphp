@@ -34,8 +34,8 @@ class DebuggerTrace
     {
         if ($request instanceof HttpRequest) {
             $req = [
-                "get" => $request->request->all(),
-                "post" => $request->query->all(),
+                "post" => $request->request->all(),
+                "get" => $request->query->all(),
                 "cookie" => $request->cookies->all(),
             ];
             $header = $req["get"] + $req["post"] + $request->headers->all();
