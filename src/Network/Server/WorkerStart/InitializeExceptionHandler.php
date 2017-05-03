@@ -13,7 +13,7 @@ class InitializeExceptionHandler implements Bootable
     public function bootstrap($server)
     {
         if (Debug::get()) {
-            set_error_handler([self::class, 'handleError']);
+            set_error_handler([self::class, 'handleError'], E_ALL & ~E_DEPRECATED);
         } else {
             set_error_handler([self::class, 'handleError'], E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED & ~E_WARNING);
         }
