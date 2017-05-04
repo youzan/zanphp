@@ -8,6 +8,7 @@
 
 namespace Zan\Framework\Sdk\Queue\NSQ;
 
+use Kdt\Iron\NSQ\Message\MsgBag;
 use Kdt\Iron\NSQ\Message\MsgInterface;
 use Kdt\Iron\NSQ\Queue as NSQueue;
 use Zan\Framework\Foundation\Contract\Async;
@@ -60,6 +61,21 @@ class Queue implements Async
             NSQueue::publish($topic, $message, $this->getResultCallback($callback), $this->getExceptionCallBack($callback));
         };
         
+        yield $this;
+    }
+
+    public function publishBatch($topic, MsgBag $msgBag)
+    {
+        $this->trace = (yield getContext('trace'));
+
+        $this->handler = function ($callback) use ($topic, $msgBag) {
+            if ($this->trace) {
+                $this->trace->transactionBegin(Constant::NSQ_PUB, $topic);
+            }
+
+            NSQueue::publish($topic, $msgBag, $this->getResultCallback($callback), $this->getExceptionCallBack($callback));
+        };
+
         yield $this;
     }
 
