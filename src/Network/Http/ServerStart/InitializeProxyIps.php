@@ -17,7 +17,7 @@ class InitializeProxyIps
      */
     public function bootstrap($server)
     {
-        $proxy = Config::get("proxy");
+        $proxy = Config::get("server.proxy");
         if (is_array($proxy)) {
             BaseRequest::setTrustedProxies($proxy);
         }
