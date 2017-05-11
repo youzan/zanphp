@@ -65,6 +65,7 @@ class RequestTask
             $this->context->set('response', $response);
             /** @var ResponseTrait $response */
             yield $response->sendBy($this->swooleResponse);
+            $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
             return;
         }
 

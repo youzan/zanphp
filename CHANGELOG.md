@@ -1,5 +1,7 @@
 ## Change Log
 
+### 20170511 修复请求filter流程定时器没有清除BUG
+
 ### 20170425 加入ChromeTrace 
 
 https://chrome.google.com/webstore/detail/chrome-logger/noaneddfkdjfnfdakjjmocngnfkfehhd
