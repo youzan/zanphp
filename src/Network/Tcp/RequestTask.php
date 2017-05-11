@@ -87,6 +87,7 @@ class RequestTask {
             } else {
                 $this->output($response);
             }
+            $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
             return;
         }
 

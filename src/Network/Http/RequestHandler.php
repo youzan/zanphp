@@ -31,6 +31,9 @@ class RequestHandler
     private $task = null;
     private $event = null;
 
+    /** @var Request */
+    private $request = null;
+
     const DEFAULT_TIMEOUT = 30 * 1000;
 
     public function __construct()
@@ -80,7 +83,7 @@ class RequestHandler
 
     private function initContext($request, SwooleHttpResponse $swooleResponse)
     {
-
+        $this->request = $request;
         $this->context->set('request', $request);
         $this->context->set('swoole_response', $swooleResponse);
 
@@ -113,6 +116,13 @@ class RequestHandler
     public function handleTimeout()
     {
         try {
+            printf(
+                "[%s] TIMEOUT %s?%s\n",
+                Time::current('Y-m-d H:i:s'),
+                $this->request->getRoute(),
+                http_build_query($this->request->query->all())
+            );
+
             $this->task->setStatus(Signal::TASK_KILLED);
             $request = $this->context->get('request');
             if ($request && $request->wantsJson()) {
