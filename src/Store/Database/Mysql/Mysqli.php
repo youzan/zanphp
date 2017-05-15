@@ -6,18 +6,18 @@
  * Time: 下午2:28
  */
 namespace Zan\Framework\Store\Database\Mysql;
+
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliSqlSyntaxException;
-use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUniqueKeyException;
 
 class Mysqli implements DriverInterface
@@ -42,9 +42,9 @@ class Mysqli implements DriverInterface
     private $trace;
 
     /**
-     * @var ChromeTrace
+     * @var DebuggerTrace
      */
-    private $chromeTrace;
+    private $DebuggerTrace;
 
     private $countAlias;
 
@@ -83,6 +83,7 @@ class Mysqli implements DriverInterface
     /**
      * @param $sql
      * @return DbResultInterface
+     * @throws MysqliConnectionLostException
      */
     public function query($sql)
     {
@@ -91,15 +92,13 @@ class Mysqli implements DriverInterface
             $this->trace->transactionBegin(Constant::SQL, $sql);
         }
 
-        $chromeTrace = (yield getContext("chrome_trace"));
-        if ($chromeTrace instanceof ChromeTrace) {
+        $debuggerTrace = (yield getContext("debugger_trace"));
+        if ($debuggerTrace instanceof DebuggerTrace) {
             $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
-            if (isset($conf["host"]) && isset($conf["port"])) {
-                $req["dsn"] = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
-            }
-            $chromeTrace->beginTransaction("mysql", $req);
-            $this->chromeTrace = $chromeTrace;
+            $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
+            $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
+            $this->DebuggerTrace = $debuggerTrace;
         }
 
         $config = $this->connection->getConfig();
@@ -116,6 +115,8 @@ class Mysqli implements DriverInterface
     }
 
     /**
+     * @param $link
+     * @param $result
      * @return DbResultInterface
      */
     public function onSqlReady($link, $result)
@@ -142,15 +143,15 @@ class Mysqli implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit($exception->getTraceAsString());
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("error", $exception);
+            if ($this->DebuggerTrace) {
+                $this->DebuggerTrace->commit("error", $exception);
             }
         } else {
             if ($this->trace) {
                 $this->trace->commit(Constant::SUCCESS);
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("info", $result);
+            if ($this->DebuggerTrace) {
+                $this->DebuggerTrace->commit("info", $result);
             }
         }
 
@@ -165,8 +166,8 @@ class Mysqli implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit("SQL query timeout");
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("warn", "SQL query timeout");
+            if ($this->DebuggerTrace) {
+                $this->DebuggerTrace->commit("warn", "SQL query timeout");
             }
 
             $ctx = [

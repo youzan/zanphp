@@ -17,7 +17,6 @@ use Zan\Framework\Network\Http\Routing\Router;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -31,6 +30,9 @@ class RequestHandler
     /** @var Task */
     private $task = null;
     private $event = null;
+
+    /** @var Request */
+    private $request = null;
 
     const DEFAULT_TIMEOUT = 30 * 1000;
 
@@ -81,7 +83,7 @@ class RequestHandler
 
     private function initContext($request, SwooleHttpResponse $swooleResponse)
     {
-
+        $this->request = $request;
         $this->context->set('request', $request);
         $this->context->set('swoole_response', $swooleResponse);
 
@@ -114,6 +116,13 @@ class RequestHandler
     public function handleTimeout()
     {
         try {
+            printf(
+                "[%s] TIMEOUT %s?%s\n",
+                Time::current('Y-m-d H:i:s'),
+                $this->request->getRoute(),
+                http_build_query($this->request->query->all())
+            );
+
             $this->task->setStatus(Signal::TASK_KILLED);
             $request = $this->context->get('request');
             if ($request && $request->wantsJson()) {
@@ -129,7 +138,6 @@ class RequestHandler
 
             $this->context->set('response', $response);
             $swooleResponse = $this->context->get('swoole_response');
-            ChromeTrace::sendByCtx($swooleResponse, $this->context);
             $response->sendBy($swooleResponse);
             $this->event->fire($this->getRequestFinishJobId());
         } catch (\Exception $ex) {

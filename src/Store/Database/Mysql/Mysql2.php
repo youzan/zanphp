@@ -11,8 +11,8 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
@@ -43,9 +43,9 @@ class Mysql2 implements DriverInterface
     private $trace;
 
     /**
-     * @var ChromeTrace
+     * @var DebuggerTrace
      */
-    private $chromeTrace;
+    private $debuggerTrace;
 
     private $countAlias;
 
@@ -97,15 +97,13 @@ class Mysql2 implements DriverInterface
             $this->trace->transactionBegin(Constant::SQL, $sql);
         }
 
-        $chromeTrace = (yield getContext("chrome_trace"));
-        if ($chromeTrace instanceof ChromeTrace) {
+        $debuggerTrace = (yield getContext("debugger_trace"));
+        if ($debuggerTrace instanceof DebuggerTrace) {
             $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
-            if (isset($conf["host"]) && isset($conf["port"])) {
-                $req["dsn"] = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
-            }
-            $chromeTrace->beginTransaction("mysql", $req);
-            $this->chromeTrace = $chromeTrace;
+            $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
+            $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
+            $this->debuggerTrace = $debuggerTrace;
         }
 
         $this->sql = $sql;
@@ -170,15 +168,15 @@ class Mysql2 implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit($exception->getTraceAsString());
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("error", $exception);
+            if ($this->debuggerTrace) {
+                $this->debuggerTrace->commit("error", $exception);
             }
         } else {
             if ($this->trace) {
                 $this->trace->commit(Constant::SUCCESS);
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("info", $result);
+            if ($this->debuggerTrace) {
+                $this->debuggerTrace->commit("info", $result);
             }
         }
 
@@ -210,8 +208,8 @@ class Mysql2 implements DriverInterface
             if ($this->trace) {
                 $this->trace->commit("$type timeout");
             }
-            if ($this->chromeTrace) {
-                $this->chromeTrace->commit("warn", "$type timeout");
+            if ($this->debuggerTrace) {
+                $this->debuggerTrace->commit("warn", "$type timeout");
             }
 
             if ($this->callback) {

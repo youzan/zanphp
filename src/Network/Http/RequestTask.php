@@ -17,7 +17,6 @@ use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\InternalErrorResponse;
 use Zan\Framework\Network\Http\Response\ResponseTrait;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class RequestTask
@@ -64,9 +63,9 @@ class RequestTask
         $response = (yield $this->middleWareManager->executeFilters());
         if (null !== $response) {
             $this->context->set('response', $response);
-            yield ChromeTrace::send($this->swooleResponse);
             /** @var ResponseTrait $response */
             yield $response->sendBy($this->swooleResponse);
+            $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
             return;
         }
 
@@ -80,7 +79,6 @@ class RequestTask
         yield $this->middleWareManager->executePostFilters($response);
 
         $this->context->set('response', $response);
-        yield ChromeTrace::send($this->swooleResponse);
         yield $response->sendBy($this->swooleResponse);
 
         $this->context->getEvent()->fire($this->context->get('request_end_event_name'));

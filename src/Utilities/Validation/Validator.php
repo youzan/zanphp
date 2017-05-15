@@ -298,7 +298,8 @@ class Validator implements ValidatorContract
     {
         $current = isset($this->rules[$attribute]) ? $this->rules[$attribute] : [];
 
-        $merge = reset($this->explodeRules([$rules]));
+        $rule = $this->explodeRules([$rules]);
+        $merge = reset($rule);
 
         $this->rules[$attribute] = array_merge($current, $merge);
     }

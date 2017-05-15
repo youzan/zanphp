@@ -4,8 +4,8 @@ namespace Zan\Framework\Utilities\Types;
 
 use ArrayAccess;
 use JsonSerializable;
-use Zan\Framework\Foundation\Contract\Jsonable;
-use Zan\Framework\Foundation\Contract\Arrayable;
+use Zan\Framework\Contract\Foundation\Arrayable;
+use Zan\Framework\Contract\Foundation\Jsonable;
 
 class Fluent implements ArrayAccess, Arrayable, Jsonable, JsonSerializable
 {

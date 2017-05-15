@@ -20,6 +20,7 @@ class Constant
     const HTTP = "Http";
     const REMOTE_CALL = "RemoteCall";
     const SQL = "SQL";
+    const REDIS = "Redis";
     const HTTP_CALL = "HttpCall";
     const NSQ_PUB = 'nsq.pub';
 

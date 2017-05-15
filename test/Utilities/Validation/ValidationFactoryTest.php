@@ -2,20 +2,13 @@
 
 namespace Zan\Framework\Test\Utilities\Validation;
 
-use Mockery as m;
 use Zan\Framework\Utilities\Validation\Factory;
 use Zan\Framework\Utilities\Validation\Validator;
 
 class ValidationFactoryTest extends \TestCase
 {
-    public function tearDown()
-    {
-        m::close();
-    }
-
     public function testMakeMethodCreatesValidValidator()
     {
-        //$factory = new Factory();
         $validator = Factory::make(['foo' => 'bar'], ['baz' => 'boom']);
         $this->assertEquals(['foo' => 'bar'], $validator->getData());
         $this->assertEquals(['baz' => ['boom']], $validator->getRules());

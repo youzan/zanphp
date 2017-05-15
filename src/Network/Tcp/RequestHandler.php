@@ -44,7 +44,6 @@ class RequestHandler {
 
     public function handle(SwooleServer $swooleServer, $fd, $fromId, $data)
     {
-
         $this->swooleServer = $swooleServer;
         $this->fd = $fd;
         $this->fromId = $fromId;

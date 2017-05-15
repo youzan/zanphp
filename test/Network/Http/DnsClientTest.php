@@ -5,24 +5,42 @@
  * Date: 2017/3/6
  * Time: 下午3:10
  */
+namespace Zan\Framework\Test\Network\Http;
 
-use Zan\Framework\Test\Foundation\Coroutine\TaskTest;
+use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Network\Common\DnsClient;
+use Zan\Framework\Testing\TaskTest;
+
+class AsyncDnsClient implements Async {
+    private $callback;
+
+    public function visit($url) {
+        DnsClient::lookup($url, function ($host, $ip) {
+            call_user_func_array($this->callback, [$host, $ip]);
+        }, function () {
+            assert(false);
+        });
+        yield $this;
+    }
+
+    public function execute(callable $callback, $task)
+    {
+        $this->callback = function ($host, $ip) use($callback) {
+            $callback([$host, $ip], null);
+        };
+    }
+}
 
 class DnsClientTest extends TaskTest {
-    public function testAccessableHost()
+    public function taskAccessableHost()
     {
-        DnsClient::lookup("www.baidu.com", function ($host, $ip) {
-            var_dump(func_get_args());
-        });
+        $client = new AsyncDnsClient();
+        yield $client->visit("www.baidu.com");
     }
-    public function testUnAccessableHost()
+
+    public function taskUnAccessableHost()
     {
-        DnsClient::lookup("unreachable", function ($host, $ip) {
-            var_dump(func_get_args());
-        },
-        function () {
-            var_dump(func_get_args());
-        });
+        $client = new AsyncDnsClient();
+        yield $client->visit("unreachable");
     }
 }

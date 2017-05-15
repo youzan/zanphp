@@ -5,146 +5,106 @@
  * Date: 15/12/18
  * Time: 17:20
  */
-
-
 namespace Zan\Framework\Test\Store\Database;
+
+use Zan\Framework\Store\Database\Flow;
 use Zan\Framework\Testing\TaskTest;
 use Zan\Framework\Store\Facade\Db;
+
 class MysqlTest extends TaskTest
 {
-    public function testInit()
+    const INSERT_COUNT = 30;
+
+    public function taskCRUD()
     {
-        //sql map
-        //table
-        //connection
-
-
-
-
+        yield $this->create();
+        yield $this->insert();
+        yield $this->select();
+        yield $this->update();
+        yield $this->delete();
     }
 
-    public function testInsert()
+    private function create()
     {
-        $sid = '';
-        $data = [];
-        $data = (yield Db::execute());
-        $this->assertGreaterThan(0, $data);
+        $table = "market_category";
+        $flow = new Flow();
+
+        $sql = "DROP TABLE IF EXISTS $table";
+        yield $flow->queryRaw($table, $sql);
+        $flow = new Flow();
+        $sql = "CREATE TABLE $table (
+          relation_id int(10) unsigned NOT NULL AUTO_INCREMENT,
+          market_id int(10) NOT NULL,
+          goods_id int(10) NOT NULL,
+          PRIMARY KEY (relation_id)
+        ) ENGINE=InnoDB";
+        yield $flow->queryRaw($table, $sql);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /*
-        public function testUpdate()
-        {
-            $context = new Context();
-            $job = new UpdateJob($context);
-            $sid = 'demo.demo_sql_update1';
+    private function insert()
+    {
+        for ($i = 0; $i < static::INSERT_COUNT; $i++) {
+            $sid = 'market.category.insert';
             $data = [
-                'data' => [
-                    'name' => "abcd",
-                    'nick_name' => 'b',
-                    'id_number' => '330323198888888888',
-                    'gender' => 1
+                'insert'=> [
+                    'market_id' => 1111,
+                    'goods_id' => 2222,
                 ],
-                'var' => ['name' => 'allen'],
-                'and' => [
-                    ['gender', '=', 0],
-                ],
-                'and1' => [
-                    ['id_number', '=', 0],
-                ],
-
             ];
-            $options = [];
-            $job->setSid($sid)->setData($data)->setOptions($options);
-            $coroutine = $job->run();
-
-            $task = new Task($coroutine);
-            $task->run();
-            $result = $context->show();
-            $this->assertTrue($result['response']);
+            $last_insert_id = (yield Db::execute($sid, $data));
+            $this->assertTrue($last_insert_id === $i + 1, "Db insert one column failed");
         }
-    */
-    public function testSelectOne()
+
+        for ($i = 0; $i < static::INSERT_COUNT; $i++) {
+            $sid = 'market.category.insert_multi_rows';
+            $data = [
+                'inserts' => [
+                    [
+                        'market_id' => 1111,
+                        'goods_id' => 2222,
+                    ],
+                    [
+                        'market_id' => 222,
+                        'goods_id' => 333,
+                    ],
+                ],
+            ];
+            $last_insert_id = (yield Db::execute($sid, $data));
+            $this->assertTrue($last_insert_id === static::INSERT_COUNT + 2 * $i + 1, "Db insert multi column failed");
+        }
+
+    }
+
+    public function select()
     {
-        $context = new Context();
-        $job = new SelectJob($context);
-        $sid = 'demo.demo_sql_id1_1';
+        $sid = 'market.category.all_rows';
+        $data = [];
+        $result = (yield Db::execute($sid, $data));
+        $this->assertEquals(count($result), 3 * static::INSERT_COUNT, 3 * static::INSERT_COUNT." records excepted");
+    }
+
+    public function update()
+    {
+        $sid = 'market.category.affected_update_by_id';
         $data = [
-            'var' => ['name' => 'a', 'nick_name' => 'b'],
-            'and' => [
-                ['gender', '=', 1],
+            'data'=> [
+                'market_id' => 12,
             ],
-            'and1' => [
-                ['id_number', '=', 2147483647],
-            ],
-            'limit' => '1'
-
+            'var' => [
+                'goods_id' => 2222
+            ]
         ];
-        $options = [];
-        $job->setSid($sid)->setData($data)->setOptions($options);
-        $coroutine = $job->run();
-        $task = new Task($coroutine);
-        $task->run();
-        $result = $context->show();
-//        var_dump(11111);exit;
-        //var_dump($result);
-        //exit;
-        //$this->assertTrue($result['response'] instanceof QueryResult);
-        //$this->assertArrayHasKey('name', $result['response']->one());
+        $result = (yield Db::execute($sid, $data));
+        $this->assertTrue($result === 2 * static::INSERT_COUNT, "Db update failed");
     }
 
-/*
-    public function testSelectByWhere()
+    public function delete()
     {
-        $context = new Context();
-        $job = new SelectJob($context);
-        $sid = 'demo.demo_sql_id2';
-        $data = [
-            'where' => [
-                ['name', '=', 'a'], ['nick_name', '=', 'b']
-            ],
-            'order' => 'id desc',
-            'group' => 'name',
-            'limit' => 1,
-
-        ];
-        $options = [];
-        $job->setSid($sid)->setData($data)->setOptions($options);
-        $coroutine = $job->run();
-
-        $task = new Task($coroutine);
-        $task->run();
-        $result = $context->show();
-        $this->assertTrue($result['response'] instanceof QueryResult);
-        $this->assertArrayHasKey('name', $result['response']->one());
+        $sid = 'market.category.delete_all_rows';
+        $result = (yield Db::execute($sid, []));
+        $this->assertTrue($result, "Db delete failed");
+        $sid = 'market.category.all_rows';
+        $result = (yield Db::execute($sid, []));
+        $this->assertEmpty($result, "Expected database cleared empty");
     }
-    public function testSelectRequireLimit()
-    {
-
-    }
-
-
-*/
-
 }

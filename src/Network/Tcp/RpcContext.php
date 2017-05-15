@@ -7,6 +7,8 @@ use Zan\Framework\Utilities\DesignPattern\Context;
 
 class RpcContext
 {
+    const MAX_NOVA_ATTACH_LEN = 30000; // nova header 总长度 0x7fff;
+
     const KEY = "__rpc_ctx";
 
     private $ctx = [];
@@ -78,6 +80,11 @@ class RpcContext
         $ctx = $this->ctx;
         if ($ctx === [])
             $ctx = new \stdClass();
-        return json_encode($ctx, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        $raw = json_encode($ctx, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (strlen($raw) >= self::MAX_NOVA_ATTACH_LEN) {
+            return '{"error":"len of attach overflow"}';
+        } else {
+            return $raw;
+        }
     }
 }

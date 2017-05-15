@@ -37,9 +37,11 @@ class LayoutTest extends \TestCase
 
     public function testBlockAndEndBlock()
     {
+        ob_start();
         $this->layout->block('title');
         echo 'content';
         $this->layout->endBlock('title');
+        ob_get_clean();
 
         $curLevel = $this->getProperty($this->layout, 'curLevel');
         $blockQueue = $this->getProperty($this->layout, 'blockQueue');
@@ -59,7 +61,9 @@ class LayoutTest extends \TestCase
 
     public function testPlace()
     {
+        ob_start();
         $this->layout->place('title', 'content');
+        ob_get_clean();
         $blocks = $this->getProperty($this->layout, 'blocks');
         $blockLevelMap = $this->getProperty($this->layout, 'blockLevelMap');
 
@@ -72,9 +76,11 @@ class LayoutTest extends \TestCase
 
     public function testSuper()
     {
+        ob_start();
         $this->layout->block('title');
         echo 'content';
         $this->layout->endBlock('title');
+        ob_get_clean();
 
         ob_start();
         $this->layout->super('title');

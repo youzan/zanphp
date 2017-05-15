@@ -10,7 +10,6 @@ namespace Zan\Framework\Test\Utilities\Types;
 
 use Zan\Framework\Utilities\Types\Arr;
 
-
 class ArrTest extends \TestCase {
     public function testArrJoin()
     {

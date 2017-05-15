@@ -2,6 +2,7 @@
 
 namespace Zan\Framework\Network\Http;
 
+use Zan\Framework\Network\Http\ServerStart\InitializeProxyIps;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouter;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlRule;
 use Zan\Framework\Network\Http\ServerStart\InitializeRouterSelfCheck;
@@ -38,6 +39,7 @@ class Server extends ServerBase implements ServerContract
         InitializeExceptionHandlerChain::class,
         InitLogConfig::class,
         InitializeSqlMap::class,
+        InitializeProxyIps::class,
     ];
 
     protected $workerStartItems = [

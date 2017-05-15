@@ -8,15 +8,26 @@
 
 namespace Zan\Framework\Test\Testing;
 
-
 use Zan\Framework\Testing\TaskTest;
 
 class YieldTaskTest extends TaskTest {
+    private function simpleFunction()
+    {
+        return;
+    }
+
+    private function generator()
+    {
+        yield 3;
+    }
+
     public function taskYield()
     {
-        $a = (yield 1);
+        $a = (yield $this->simpleFunction());
+        $this->assertEquals(NULL, $a, 'Yield simpleFunction return value test failed');
 
-        $this->assertEquals(1, $a, 'Yield Task test failed');
+        $a = (yield $this->generator());
+        $this->assertEquals(3, $a, 'Yield Generator test failed');
     }
 
 }

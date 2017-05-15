@@ -12,7 +12,6 @@ use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Exception\Handler\ExceptionLogger;
 use Zan\Framework\Network\Http\Response\BaseResponse;
 use Zan\Framework\Network\Http\Response\ResponseTrait;
-use Zan\Framework\Sdk\Trace\ChromeTrace;
 
 class ExceptionHandlerChain
 {
@@ -61,7 +60,6 @@ class ExceptionHandlerChain
         if (is_a($response, BaseResponse::class)) {
             $swooleResponse = (yield getContext('swoole_response'));
             $response->exception = $e->getMessage();
-            yield ChromeTrace::send($swooleResponse);
             /** @var $response ResponseTrait */
             yield $response->sendBy($swooleResponse);
             return;
