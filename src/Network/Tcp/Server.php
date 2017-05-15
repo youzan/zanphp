@@ -40,18 +40,7 @@ class Server extends ServerBase {
         InitializeHawkMonitor::class,
     ];
 
-    /**
-     * @var SwooleServer
-     */
-    public $swooleServer;
-
-    public function __construct(SwooleServer $swooleServer, array $config)
-    {
-        $this->swooleServer = $swooleServer;
-        $this->swooleServer->set($config);
-    }
-
-    public function start()
+    public function setSwooleEvent()
     {
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
@@ -62,19 +51,10 @@ class Server extends ServerBase {
 
         $this->swooleServer->on('connect', [$this, 'onConnect']);
         $this->swooleServer->on('receive', [$this, 'onReceive']);
-
         $this->swooleServer->on('close', [$this, 'onClose']);
-
-        \swoole_async_set(["socket_dontwait" => 1]);
-
-        $this->init();
-
-        $this->bootServerStartItem();
-        
-        $this->swooleServer->start();
     }
 
-    private function init()
+    protected function init()
     {
         $config = Config::get('nova.novaApi', null);
         if(null === $config){
