@@ -12,14 +12,13 @@ use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
-use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 
-class Server extends ServerBase implements ServerContract
+class Server extends ServerBase
 {
     protected $serverStartItems = [
         InitializeSqlMap::class,
