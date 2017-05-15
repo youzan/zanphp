@@ -13,19 +13,19 @@ use Zan\Framework\Network\MqSubscribe\Server as MqServer;
 
 class Factory
 {
-    private $configFile;
+    private $configName;
     private $host;
     private $port;
     private $serverConfig;
 
-    public function __construct($configFile)
+    public function __construct($configName)
     {
-        $this->configFile = $configFile;
+        $this->configName = $configName;
     }
 
     private function validConfig()
     {
-        $config = Config::get($this->configFile);
+        $config = Config::get($this->configName);
         if (empty($config)) {
             throw new RuntimeException('server config not found');
         }
