@@ -248,7 +248,7 @@ class Application
     public function createHttpServer()
     {
         $server = $this->getContainer()
-            ->make(ServerFactory::class)
+            ->make(ServerFactory::class, ['server'])
             ->createHttpServer();
 
         $this->server = $server;
@@ -264,7 +264,7 @@ class Application
     public function createTcpServer()
     {
         $server = $this->getContainer()
-            ->make(ServerFactory::class)
+            ->make(ServerFactory::class, ['server'])
             ->createTcpServer();
 
         $this->server = $server;
@@ -280,7 +280,7 @@ class Application
     public function createMqServer()
     {
         $server = $this->getContainer()
-            ->make(ServerFactory::class)
+            ->make(ServerFactory::class, ['subscribeServer'])
             ->createMqServer();
 
         $this->server = $server;

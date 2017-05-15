@@ -13,29 +13,44 @@ use Zan\Framework\Network\MqSubscribe\Server as MqServer;
 
 class Factory
 {
+    private $configFile;
+    private $host;
+    private $port;
+    private $serverConfig;
+
+    public function __construct($configFile)
+    {
+        $this->configFile = $configFile;
+    }
+
+    private function validConfig()
+    {
+        $config = Config::get($this->configFile);
+        if (empty($config)) {
+            throw new RuntimeException('server config not found');
+        }
+
+        $this->host = $config['host'];
+        $this->port = $config['port'];
+        $this->serverConfig = $config['config'];
+        if (empty($this->host) || empty($this->port)) {
+            throw new RuntimeException('server config error: empty ip/port');
+        }
+
+        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
+        $this->serverConfig["max_request"] = 0;
+    }
+
     /**
      * @return \Zan\Framework\Network\Http\Server
      */
     public function createHttpServer()
     {
-        $config = Config::get('server');
-        if (empty($config)) {
-            throw new RuntimeException('http server config not found');
-        }
+        $this->validConfig();
 
-        $host = $config['host'];
-        $port = $config['port'];
-        $config = $config['config'];
-        if (empty($host) || empty($port)) {
-            throw new RuntimeException('http server config error: empty ip/port');
-        }
+        $swooleServer = Di::make(SwooleHttpServer::class, [$this->host, $this->port], true);
 
-        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
-        $config["max_request"] = 0;
-
-        $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port], true);
-
-        $server = Di::make(HttpServer::class, [$swooleServer, $config]);
+        $server = Di::make(HttpServer::class, [$swooleServer, $this->serverConfig]);
 
         return $server;
     }
@@ -45,24 +60,11 @@ class Factory
      */
     public function createTcpServer()
     {
-        $config = Config::get('server');
-        if (empty($config)) {
-            throw new RuntimeException('tcp server config not found');
-        }
+        $this->validConfig();
 
-        $host = $config['host'];
-        $port = $config['port'];
-        $config = $config['config'];
-        if (empty($host) || empty($port)) {
-            throw new RuntimeException('tcp server config error: empty ip/port');
-        }
+        $swooleServer = Di::make(SwooleTcpServer::class, [$this->host, $this->port], true);
 
-        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
-        $config["max_request"] = 0;
-
-        $swooleServer = Di::make(SwooleTcpServer::class, [$host, $port], true);
-
-        $server = Di::make(TcpServer::class, [$swooleServer, $config]);
+        $server = Di::make(TcpServer::class, [$swooleServer, $this->serverConfig]);
 
         return $server;
     }
@@ -72,24 +74,11 @@ class Factory
      */
     public function createMqServer()
     {
-        $config = Config::get('subscribeServer');
-        if (empty($config)) {
-            throw new RuntimeException('subscribe server config not found');
-        }
+        $this->validConfig();
 
-        $host = $config['host'];
-        $port = $config['port'];
-        $config = $config['config'];
-        if (empty($host) || empty($port)) {
-            throw new RuntimeException('subscribe server config error: empty ip/port');
-        }
+        $swooleServer = Di::make(SwooleHttpServer::class, [$this->host, $this->port], true);
 
-        // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制
-        $config["max_request"] = 0;
-
-        $swooleServer = Di::make(SwooleHttpServer::class, [$host, $port], true);
-
-        $server = Di::make(MqServer::class, [$swooleServer, $config]);
+        $server = Di::make(MqServer::class, [$swooleServer, $this->serverConfig]);
 
         return $server;
     }
