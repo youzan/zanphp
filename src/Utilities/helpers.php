@@ -82,7 +82,7 @@ if (! function_exists('echo_exception')) {
         
         
 ###################################################################################
-          \033[1;31mGot a exception\033[0m
+          \033[1;31mGot an exception\033[0m
           code: $code
           message: $msg
           
