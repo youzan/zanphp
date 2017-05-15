@@ -31,22 +31,10 @@ class Server extends ServerBase implements ServerContract
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
         InitializeServerDiscovery::class,
-
         InitializeMqSubscribe::class,
     ];
 
-    /**
-     * @var swooleServer
-     */
-    public $swooleServer;
-
-    public function __construct(SwooleServer $swooleServer, array $config)
-    {
-        $this->swooleServer = $swooleServer;
-        $this->swooleServer->set($config);
-    }
-
-    public function start()
+    public function setSwooleEvent()
     {
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
@@ -56,29 +44,15 @@ class Server extends ServerBase implements ServerContract
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
-
-        $this->bootServerStartItem();
-        $this->init();
-        $this->swooleServer->start();
     }
 
-    private function init()
+    protected function init()
     {
         $config = Config::get('haunt');
         if (!isset($config['app_names']) || [] === $config['app_names']) {
             return;
         }
         ServerStore::getInstance()->resetLockDiscovery();
-    }
-
-    public function stop()
-    {
-
-    }
-
-    public function reload()
-    {
-
     }
 
     public function onStart($swooleServer)
@@ -107,7 +81,7 @@ class Server extends ServerBase implements ServerContract
         sys_echo("worker *$workerId stopping .....");
     }
 
-    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
         ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
     }

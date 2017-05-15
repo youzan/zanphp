@@ -50,18 +50,7 @@ class Server extends ServerBase implements ServerContract
         InitializeServerDiscovery::class,
     ];
 
-    /**
-     * @var swooleServer
-     */
-    public $swooleServer;
-
-    public function __construct(SwooleServer $swooleServer, array $config)
-    {
-        $this->swooleServer = $swooleServer;
-        $this->swooleServer->set($config);
-    }
-
-    public function start()
+    public function setSwooleEvent()
     {
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
@@ -71,31 +60,15 @@ class Server extends ServerBase implements ServerContract
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
-
-        \swoole_async_set(["socket_dontwait" => 1]);
-
-        $this->bootServerStartItem();
-        $this->init();
-        $this->swooleServer->start();
     }
 
-    private function init()
+    protected function init()
     {
         $config = Config::get('haunt');
         if (!isset($config['app_names']) || [] === $config['app_names']) {
             return;
         }
         ServerStore::getInstance()->resetLockDiscovery();
-    }
-
-    public function stop()
-    {
-
-    }
-
-    public function reload()
-    {
-
     }
 
     public function onStart($swooleServer)
@@ -138,10 +111,6 @@ class Server extends ServerBase implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
-//        try {
-            (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
-//        } catch (\Exception $e) {
-//            RequestExceptionHandlerChain::getInstance()->handle($e, $swooleHttpRequest, $swooleHttpResponse);
-//        }
+        (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
     }
 }
