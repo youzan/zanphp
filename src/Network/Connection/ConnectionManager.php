@@ -13,6 +13,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\Exception\CanNotCreateConnectionException;
 use Zan\Framework\Network\Connection\Exception\ConnectTimeoutException;
+use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Monitor\Constant;
 use Zan\Framework\Sdk\Monitor\Hawk;
@@ -29,15 +30,11 @@ class ConnectionManager
     private static $poolMap = [];
 
     /**
-     * @var SwooleConnectionPool[]
+     * @var PoolEx[]
      */
     private static $swPoolMap = [];
 
     private static $server;
-
-    public function __construct()
-    {
-    }
 
     /**
      * @param string $connKey
@@ -47,44 +44,59 @@ class ConnectionManager
      */
     public function get($connKey, $timeout = 0)
     {
-        if(!isset(self::$poolMap[$connKey])){
-            if (!isset(self::$swPoolMap[$connKey])) {
-                throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
-            }
-
-            $pool = self::$swPoolMap[$connKey];
-            yield $pool->get($timeout);
-            return;
+        if (isset(self::$swPoolMap[$connKey])) {
+            yield $this->getFromSwoole($connKey, $timeout);
+        } else if(isset(self::$poolMap[$connKey])){
+            yield $this->getFromZan($connKey);
+        } else {
+            throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
         }
+    }
 
+    private function getFromZan($connKey)
+    {
         $pool = self::$poolMap[$connKey];
-
-        $poolConf = $pool->getPoolConfig();
-        $maxWaitNum = $poolConf['pool']['maximum-wait-connection'];
-        if ($pool->waitNum > $maxWaitNum) {
-            throw new CanNotCreateConnectionException("Connection $connKey has up to the maximum waiting connection number");
-        }
+        $this->assertMaxWaitNum($connKey, $pool);
 
         $connection = (yield $pool->get());
         if ($connection) {
             yield $connection;
-            return;
+        } else {
+            $conf = $pool->getPoolConfig();
+            yield new FutureConnection($this, $connKey, $conf["connect_timeout"], $pool);
         }
+    }
 
-        $pool->waitNum++;
-        yield new FutureConnection($this, $connKey, $poolConf['connect_timeout'], $pool);
+    private function assertMaxWaitNum($connKey, Pool $pool)
+    {
+        $conf = $pool->getPoolConfig();
+        $maxWaitNum = $conf['pool']['maximum-wait-connection'];
+        if ($pool->waitNum > $maxWaitNum) {
+            throw new CanNotCreateConnectionException("Connection $connKey has up to the maximum waiting connection number");
+        }
+    }
+
+    private function getFromSwoole($connKey, $timeout)
+    {
+        $pool = self::$swPoolMap[$connKey];
+        $connection = (yield $pool->get($timeout));
+        if ($connection) {
+            yield $connection;
+        } else {
+            throw new GetConnectionTimeoutFromPool("get connection $connKey timeout");
+        }
     }
 
     /**
      * @param $poolKey
-     * @param Pool|SwooleConnectionPool $pool
+     * @param Pool|PoolEx $pool
      * @throws InvalidArgumentException
      */
     public function addPool($poolKey, $pool)
     {
         if ($pool instanceof Pool) {
             self::$poolMap[$poolKey] = $pool;
-        } else if ($pool instanceof SwooleConnectionPool) {
+        } else if ($pool instanceof PoolEx) {
             self::$swPoolMap[$poolKey] = $pool;
         } else {
             throw new InvalidArgumentException("invalid pool type, poolKey=$poolKey");

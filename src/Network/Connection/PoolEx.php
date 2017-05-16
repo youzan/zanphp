@@ -15,11 +15,12 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 
-class SwooleConnectionPool implements Async/*, ConnectionPool*/
+class PoolEx implements Async
 {
     public $poolType;
+
     /**
-     * @var \swoole_conn_pool
+     * @var \swoole_connpool
      */
     public $pool;
 
@@ -30,10 +31,10 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
     public $callback;
 
     public $typeMap = [
-        'Mysqli' => \swoole_conn_pool::SWOOLE_CONNPOOL_MYSQL,
-        'Redis' => \swoole_conn_pool::SWOOLE_CONNPOOL_REDIS,
-        'Tcp' => \swoole_conn_pool::SWOOLE_CONNPOOL_TCP,
-        'Syslog' => \swoole_conn_pool::SWOOLE_CONNPOOL_TCP,
+        'Mysqli' => \swoole_connpool::SWOOLE_CONNPOOL_MYSQL,
+        'Redis' => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
+        'Tcp' => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
+        'Syslog' => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
     ];
 
     public function __construct($factoryType, array $config, ConnPoolHeartbeatDelegate $heartbeatHandler)
@@ -42,7 +43,7 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
             throw new InvalidArgumentException("Not Support Swoole Connection Pool Factory Type $factoryType");
         }
 
-        $this->pool = new \swoole_conn_pool($this->typeMap[$factoryType]);
+        $this->pool = new \swoole_connpool($this->typeMap[$factoryType]);
         $this->config = $config;
         $this->poolType = $factoryType;
         $this->heartbeatHandler = $heartbeatHandler;
@@ -51,8 +52,9 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
     public function init()
     {
         $this->pool->on("hbConstruct", $this->heartbeatHandler->onHeartbeatConstruct);
-        $this->pool->on("hbeatCheck", $this->heartbeatHandler->onHeartbeatCallback);
-        $this->pool->setConnInfo();
+        $this->pool->on("hbCheck", $this->heartbeatHandler->onHeartbeatCallback);
+
+        $this->pool->setConfig();
         $this->pool->initConnPool();
     }
 
@@ -65,7 +67,7 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
 
         $r = $this->pool->get($timeout, [$this, "getConnectionDone"]);
         if ($r === false) {
-            throw new ZanException("fail to call swoole_conn_pool::get ");
+            throw new ZanException("fail to call swoole_connpool::get ");
         }
 
         yield $this;
@@ -73,7 +75,7 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
 
     public function release($conn, $error = false)
     {
-        $status = $error ? \swoole_conn_pool::SWOOLE_CONNOBJ_CONNERR : \swoole_conn_pool::SWOOLE_CONNOBJ_CONNECTED;
+        $status = $error ? \swoole_connpool::SWOOLE_CONNOBJ_CONNERR : \swoole_connpool::SWOOLE_CONNOBJ_CONNECTED;
         return $this->pool->release($conn, $status);
     }
 
@@ -81,7 +83,7 @@ class SwooleConnectionPool implements Async/*, ConnectionPool*/
     {
         if ($cc = $this->callback) {
             if ($result) {
-                $poolConnection = new SwoolePoolConnection($conn, $this);
+                $poolConnection = new ConnectionEx($conn, $this);
                 $cc($poolConnection);
             } else {
                 $cc(null, new GetConnectionTimeoutFromPool("get connection timeout, $this"));

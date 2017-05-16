@@ -32,6 +32,7 @@ class FutureConnection implements Async
         $this->connKey = $connKey;
         $this->timeout = $timeout;
         $this->pool = $pool;
+        $pool->waitNum++;
         $this->init();
     }
 

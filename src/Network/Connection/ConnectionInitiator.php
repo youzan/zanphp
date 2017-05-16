@@ -39,6 +39,14 @@ class ConnectionInitiator
         'tcp',
     ];
 
+    private $swoolePoolEngineMap = [
+        'mysqli',
+        'tcp',
+        'syslog',
+        'redis',
+        'kVStore',
+    ];
+
     public $directory = '';
 
     public $poolName='';
@@ -91,11 +99,14 @@ class ConnectionInitiator
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
                 $cf['pool']['pool_name'] = $this->poolName;
-                if (class_exists("swoole_conn_pool")) {
+
+                $isInitFromSwoole = class_exists("swoole_connpool") && in_array($factoryType, $this->swoolePoolEngineMap);
+                if ($isInitFromSwoole) {
                     $this->initSwoolePool($factoryType, $cf);
                 } else {
                     $this->initPool($factoryType, $cf);
                 }
+
                 $fileConfigKeys = array_keys($config);
                 $endKey = end($fileConfigKeys);
                 $this->poolName = $k == $endKey ? '' : $dir;
@@ -158,7 +169,8 @@ class ConnectionInitiator
 
     private function initSwoolePool($factoryType, $config)
     {
-        $swooleConnectionPool = new SwooleConnectionPool($factoryType, $config);
+        // TODO
+        $swooleConnectionPool = new PoolEx($factoryType, $config);
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $swooleConnectionPool);
     }
 }

@@ -11,12 +11,12 @@ namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Contract\Network\Connection;
 
-class SwoolePoolConnection implements Connection
+class ConnectionEx implements Connection
 {
     public $conn;
     public $pool;
 
-    public function __construct($conn, SwooleConnectionPool $pool)
+    public function __construct($conn, PoolEx $pool)
     {
         $this->pool = $pool;
     }
