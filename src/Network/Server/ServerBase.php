@@ -84,7 +84,6 @@ abstract class ServerBase
     }
 
     /**
-     * @TODO 改成可以支持自定义
      * @return string
      */
     protected function getPidFilePath()

@@ -17,7 +17,6 @@ use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
 use Zan\Framework\Network\Http\ServerStart\InitializeQiniuConfig;
-use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Network\Server\ServerBase;

@@ -3,8 +3,6 @@
 namespace Zan\Framework\Foundation\Coroutine;
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Network\Exception\ServerTimeoutException;
-use Zan\Framework\Utilities\Types\Time;
 
 class Scheduler
 {

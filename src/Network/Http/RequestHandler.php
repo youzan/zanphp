@@ -116,14 +116,9 @@ class RequestHandler
     public function handleTimeout()
     {
         try {
-            printf(
-                "[%s] TIMEOUT %s?%s\n",
-                Time::current('Y-m-d H:i:s'),
-                $this->request->getRoute(),
-                http_build_query($this->request->query->all())
-            );
-
             $this->task->setStatus(Signal::TASK_KILLED);
+            $this->logTimeout();
+
             $request = $this->context->get('request');
             if ($request && $request->wantsJson()) {
                 $data = [
@@ -143,6 +138,15 @@ class RequestHandler
         } catch (\Exception $ex) {
             echo_exception($ex);
         }
+    }
+
+    private function logTimeout()
+    {
+        // 注意: 此处需要配置 server.proxy
+        $remoteIp = $this->request->getClientIp();
+        $route = $this->request->getRoute();
+        $query = http_build_query($this->request->query->all());
+        sys_error("SERVER TIMEOUT [remoteIP=$remoteIp, url=$route?$query]");
     }
 
     private function getRequestFinishJobId()

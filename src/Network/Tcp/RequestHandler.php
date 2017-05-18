@@ -10,6 +10,7 @@ use Zan\Framework\Foundation\Coroutine\Signal;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Exception\ExcessConcurrencyException;
+use Zan\Framework\Network\Exception\ServerTimeoutException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareConfig;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
@@ -132,22 +133,45 @@ class RequestHandler {
 
     public function handleTimeout()
     {
-        printf(
-            "[%s] TIMEOUT %s %s\n",
-            Time::current('Y-m-d H:i:s'),
-            $this->request->getRoute(),
-            http_build_query($this->request->getArgs())
-        );
-
         $this->task->setStatus(Signal::TASK_KILLED);
-        $e = new \Exception('server timeout');
-
         $this->reportHawk();
-        $this->logErr($e);
-
-        $coroutine = static::handleException($this->middleWareManager, $this->response, $e);
+        $ex = $this->logTimeout();
+        $coroutine = static::handleException($this->middleWareManager, $this->response, $ex);
         Task::execute($coroutine, $this->context);
         $this->event->fire($this->getRequestFinishJobId());
+    }
+
+    private function logTimeout()
+    {
+        $request = $this->request;
+
+        if ($request->isGenericInvoke()) {
+            $route = $request->getGenericRoute();
+            $serviceName = $request->getGenericServiceName();
+            $methodName = $request->getGenericMethodName();
+        } else {
+            $route = $request->getRoute();
+            $serviceName = $request->getServiceName();
+            $methodName = $request->getMethodName();
+        }
+        $remoteIp = long2ip($request->getRemoteIp());
+        $remotePort = $request->getRemotePort();
+
+        sys_error("SERVER TIMEOUT [remote=$remoteIp:$remotePort, route=$route]");
+
+        $metaData = [
+            "isGenericInvoke" => $request->isGenericInvoke(),
+            "service"   => $serviceName,
+            "method"    => $methodName,
+            "args"      => $request->getArgs(),
+            "remote"    => $request->getRemote(),
+        ];
+
+        $ex = new ServerTimeoutException("SERVER TIMEOUT");
+        $ex->setMetadata($metaData);
+        $this->logErr($ex);
+
+        return $ex;
     }
 
     private function getRequestFinishJobId()
@@ -160,7 +184,8 @@ class RequestHandler {
         return spl_object_hash($this) . '_handle_timeout';
     }
 
-    private function reportHawk() {
+    private function reportHawk()
+    {
         $hawk = Hawk::getInstance();
         $hawk->addTotalFailureTime(Hawk::SERVER,
             $this->request->getServiceName(),
@@ -173,7 +198,8 @@ class RequestHandler {
             $this->request->getRemoteIp());
     }
 
-    private function logErr($e) {
+    private function logErr(\Exception $e)
+    {
         $trace = $this->context->get('trace');
         $traceId = '';
         if ($trace) {
