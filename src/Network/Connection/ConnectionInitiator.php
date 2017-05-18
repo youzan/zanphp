@@ -93,7 +93,7 @@ class ConnectionInitiator
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
                 $cf['pool']['pool_name'] = $this->poolName;
-                if (isset($cf['host']) && !isset($cf["path"])) {
+                if (!filter_var($cf['host'], FILTER_VALIDATE_IP) && isset($cf['host']) && !isset($cf["path"])) {
                     $poolName = $this->poolName;
                     $this->host2Ip($cf, $poolName, $factoryType);
                 } else {
@@ -111,7 +111,7 @@ class ConnectionInitiator
     {
         DnsClient::lookup($cf['host'], function ($host, $ip) use (&$cf, $poolName, $factoryType) {
             if (empty($ip)) {
-                sys_error("dns look up failed: ".$cf['host']."\n");
+                sys_error("dns look up failed: ".$cf['host']);
                 Timer::after(500, function() use (&$cf, $poolName, $factoryType) {
                     $this->host2Ip($cf, $poolName, $factoryType);
                 });
@@ -120,8 +120,8 @@ class ConnectionInitiator
                 $cf['pool']['pool_name'] = $poolName;
                 $this->initPool($factoryType, $cf);
             }
-        }, function () use ($cf, $poolName, $factoryType) {
-            sys_error("dns look up failed: ".$cf['host']."\n");
+        }, function () use (&$cf, $poolName, $factoryType) {
+            sys_error("dns look up failed: ".$cf['host']);
             Timer::after(500, function() use (&$cf, $poolName, $factoryType) {
                 $this->host2Ip($cf, $poolName, $factoryType);
             });
