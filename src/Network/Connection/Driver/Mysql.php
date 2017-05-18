@@ -32,14 +32,20 @@ class Mysql extends Base implements Connection
     // mariodb connect 回调无result 参数
     public function onConnect(\swoole_mysql $cli, $result = true) {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
-        if ($result) {
+        if (property_exists($cli, "connect_errno")) {
+            $so_errno = $cli->connect_errno;
+        } else {
+            $so_errno = 0;
+        }
+        // (非mariodb驱动)swoole bug: $result 恒等于true
+        if ($result && $so_errno === 0) {
             $this->release();
             ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));
             $this->heartbeat();
             sys_echo("mysql client connect to server " . $this->getConnString());
         } else {
             if ($cli->connect_errno) {
-                sys_error("mysql connect fail {$cli->connect_errno}({$cli->connect_error}) " . $this->getConnString());
+                sys_error("mysql connect fail [errno={$cli->connect_errno}, errmsg={$cli->connect_error}] " . $this->getConnString());
                 $this->close();
             }
         }
