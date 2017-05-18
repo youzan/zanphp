@@ -88,7 +88,6 @@ class Application
     {
         $this->setContainer();
 
-        // TODO 配置化
         $bootstrapItems = [
             CheckIfBootable::class,
             InitializeEnv::class,
