@@ -107,12 +107,12 @@ class ConnectionInitiator
         }
     }
 
-    private function host2Ip(&$cf, $poolName, $factoryType)
+    private function host2Ip($cf, $poolName, $factoryType)
     {
-        DnsClient::lookup($cf['host'], function ($host, $ip) use (&$cf, $poolName, $factoryType) {
+        DnsClient::lookup($cf['host'], function ($host, $ip) use ($cf, $poolName, $factoryType) {
             if (empty($ip)) {
                 sys_error("dns look up failed: ".$cf['host']);
-                Timer::after(500, function() use (&$cf, $poolName, $factoryType) {
+                Timer::after(500, function() use ($cf, $poolName, $factoryType) {
                     $this->host2Ip($cf, $poolName, $factoryType);
                 });
             } else {
@@ -120,7 +120,7 @@ class ConnectionInitiator
                 $cf['pool']['pool_name'] = $poolName;
                 $this->initPool($factoryType, $cf);
             }
-        }, function () use (&$cf, $poolName, $factoryType) {
+        }, function () use ($cf, $poolName, $factoryType) {
             sys_error("dns look up failed: ".$cf['host']);
             Timer::after(500, function() use (&$cf, $poolName, $factoryType) {
                 $this->host2Ip($cf, $poolName, $factoryType);
