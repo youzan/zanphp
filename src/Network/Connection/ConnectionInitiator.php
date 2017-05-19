@@ -93,7 +93,7 @@ class ConnectionInitiator
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
                 $cf['pool']['pool_name'] = $this->poolName;
-                if (!filter_var($cf['host'], FILTER_VALIDATE_IP) && isset($cf['host']) && !isset($cf["path"])) {
+                if (isset($cf['host']) && !filter_var($cf['host'], FILTER_VALIDATE_IP) && !isset($cf["path"])) {
                     $poolName = $this->poolName;
                     $this->host2Ip($cf, $poolName, $factoryType);
                 } else {
