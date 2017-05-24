@@ -46,6 +46,11 @@ class Container
         $this->setMockInstance($className, $stub);
     }
 
+    public function cleanStub()
+    {
+        $this->mockInstances = [];
+    }
+
     public function singleton($abstract, array $parameters = [])
     {
         $abstract = $this->normalize($abstract);
