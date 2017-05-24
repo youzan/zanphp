@@ -29,6 +29,8 @@ class Redis implements ConnectionFactory
     public function create()
     {
         $socket = new SwooleRedis();
+        /** @noinspection PhpUndefinedFieldInspection */
+        $socket->isClosed = null;
         $connection = new Client();
         $connection->setSocket($socket);
         $connection->setConfig($this->config);
@@ -56,6 +58,8 @@ class Redis implements ConnectionFactory
     {
         return function() use ($connection) {
             $connection->close();
+            /** @noinspection PhpUndefinedFieldInspection */
+            $connection->getSocket()->isClosed = true;
             $connection->onConnectTimeout();
         };
     }
