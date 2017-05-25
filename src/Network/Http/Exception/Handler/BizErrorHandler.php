@@ -12,16 +12,18 @@ use Zan\Framework\Contract\Foundation\ExceptionHandler;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Exception\BusinessException;
+use Zan\Framework\Foundation\View\JsVar;
+use Zan\Framework\Foundation\View\View;
 use Zan\Framework\Network\Http\Response\JsonResponse;
 use Zan\Framework\Network\Http\Response\Response;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class BizErrorHandler implements ExceptionHandler
 {
     public function handle(\Exception $e)
     {
-        $errMsg = $e->getMessage();
-        $errorPagePath = $this->getErrorPagePath($e);
-        $errorPage = require $errorPagePath;
+        $context = (yield getContextObject());
+        $errorPage = $this->getErrorPage($e, $context);
 
         $code = $e->getCode();
         if (!BusinessException::isValidCode($code)) {
@@ -43,21 +45,43 @@ class BizErrorHandler implements ExceptionHandler
         }
     }
 
-    private function getErrorPagePath(\Exception $e)
+    private function getErrorPage(\Exception $e, Context $context)
     {
-        $default = Path::getRootPath() . '/vendor/zanphp/zan/src/Foundation/View/Pages/Error.php';
         $ref = new \ReflectionClass($e);
-        $errorPage = $this->parseConfig($ref->getName());
-        return (!empty($errorPage) && is_file($errorPage)) ? $errorPage : $default;
+        $tpl = $this->parseConfig($ref->getName());
+        if (!empty($tpl)) {
+            $errorPage = $this->getTplErrorPage($tpl, $e, $context);
+        } else {
+            $errMsg = $e->getMessage();
+            $errorPagePath = Path::getRootPath() . '/vendor/zanphp/zan/src/Foundation/View/Pages/Error.php';
+            $errorPage = require $errorPagePath;
+        }
+        return $errorPage;
+    }
+
+    private function getTplErrorPage($tpl, \Exception $e, Context $context)
+    {
+        $jsVar = new JsVar();
+        $env = $context->get('env', []);
+        foreach ($env as $k => $v) {
+            $jsVar->setBusiness($k, $v);
+        }
+        $csrfToken = $context->get('csrf_token', '');
+        $jsVar->setCsrfToken($csrfToken);
+        $viewData['exception'] = $e;
+        $viewData['_js_var'] = $jsVar->get();
+
+        $errorPage = View::display($tpl, $viewData);
+        return $errorPage;
     }
 
     private function parseConfig($exceptionClassName)
     {
-		$configMap = array_change_key_case(Config::get('exception_error_page'));
+        $configMap = array_change_key_case(Config::get('biz_exception_error_page'));
         $exceptionClassName = strtolower($exceptionClassName);
 
         if (empty($configMap)) {
-			return [];
+            return [];
         }
 
         $parts = explode('\\', $exceptionClassName);
@@ -66,7 +90,7 @@ class BizErrorHandler implements ExceptionHandler
         }
 
         $prefix = [];
-        $exceptionPagePath = '';
+        $value = '';
 
         foreach ($parts as $part) {
             if ($part) {
@@ -75,14 +99,14 @@ class BizErrorHandler implements ExceptionHandler
                 $wildcard = ltrim($namespace . '\\*', '\\');
 
                 if (isset($configMap[$request])) {
-                    $exceptionPagePath = $configMap[$request];
+                    $value = $configMap[$request];
                 } else if (isset($configMap[$wildcard])) {
-                    $exceptionPagePath = $configMap[$wildcard];
+                    $value = $configMap[$wildcard];
                 }
 
                 $prefix[] = $part;
             }
         }
-		return $exceptionPagePath;
+        return $value;
     }
 }
