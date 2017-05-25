@@ -201,6 +201,7 @@ class ServerDiscovery
 
     private function watchByEtcd()
     {
+        return;
         while (true) {
             $this->setDoWatchByEtcd();
             try {

@@ -13,36 +13,39 @@ use Zan\Framework\Contract\Network\Connection;
 
 class ConnectionEx implements Connection
 {
-    public $conn;
-    public $pool;
+    public $connEx;
+    public $poolEx;
 
-    public function __construct($conn, PoolEx $pool)
+    public function __construct($connEx, PoolEx $pool)
     {
-        $this->pool = $pool;
+        $this->connEx = $connEx;
+        $this->poolEx = $pool;
     }
 
     public function getSocket()
     {
-        return $this->conn;
+        return $this->connEx;
     }
 
     public function release()
     {
-        $this->pool->release($this->conn);
+        return $this->poolEx->release($this->connEx);
     }
 
     public function getEngine()
     {
-        return $this->pool->poolType;
+        return $this->poolEx->poolType;
     }
 
     public function getConfig()
     {
-        // $config['timeout']
-        // $config['pool']['pool_name']
-        return $this->pool->config;
+        return $this->poolEx->config;
+    }
+
+    public function close()
+    {
+        return $this->poolEx->close($this->connEx);
     }
 
     public function heartbeat() { }
-    public function close() { }
 }

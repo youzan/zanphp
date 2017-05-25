@@ -9,7 +9,6 @@
 namespace Zan\Framework\Network\Connection;
 
 
-use Zan\Framework\Contract\Network\ConnPoolHeartbeatDelegate;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Foundation\Exception\ZanException;
@@ -22,87 +21,105 @@ class PoolEx implements Async
     /**
      * @var \swoole_connpool
      */
-    public $pool;
+    public $poolEx;
 
     public $config;
-
-    public $heartbeatHandler;
 
     public $callback;
 
     public $typeMap = [
-        'Mysqli' => \swoole_connpool::SWOOLE_CONNPOOL_MYSQL,
-        'Redis' => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
-        'Tcp' => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
-        'Syslog' => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
+        'Mysqli'    => \swoole_connpool::SWOOLE_CONNPOOL_MYSQL,
+        'Tcp'       => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
+        'Syslog'    => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
+        'Redis'     => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
+        'KVStore'   => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
     ];
 
-    public function __construct($factoryType, array $config, ConnPoolHeartbeatDelegate $heartbeatHandler)
+    public static $engineMapEx = ['Mysqli', 'Tcp', 'Syslog', 'Redis', 'KVStore'];
+
+    public static function support($factoryType)
+    {
+        return class_exists("swoole_connpool") && in_array($factoryType, static::$engineMapEx, true);
+    }
+
+    public function __construct($factoryType, array $config)
     {
         if (!isset($this->typeMap[$factoryType])) {
-            throw new InvalidArgumentException("Not Support Swoole Connection Pool Factory Type $factoryType");
+            throw new InvalidArgumentException("not pool type '$factoryType'");
         }
 
-        $this->pool = new \swoole_connpool($this->typeMap[$factoryType]);
+        $this->poolEx = new \swoole_connpool($this->typeMap[$factoryType]);
         $this->config = $config;
         $this->poolType = $factoryType;
-        $this->heartbeatHandler = $heartbeatHandler;
+
+        $this->init();
     }
 
-    public function init()
+    private function init()
     {
-        $this->pool->on("hbConstruct", $this->heartbeatHandler->onHeartbeatConstruct);
-        $this->pool->on("hbCheck", $this->heartbeatHandler->onHeartbeatCallback);
+        $poolConf = $this->config["pool"];
+        $conf = $this->config;
+        $conf["connectTimeout"] = $this->config["connect_timeout"];
 
-        $this->pool->setConfig();
-        $this->pool->initConnPool();
-    }
+        if (isset($poolConf["heartbeat-construct"]) && isset($poolConf["heartbeat-check"])) {
+            $conf["hbIntervalTime"] = $poolConf["heartbeat-time"];
+            $conf["hbTimeout"] = $poolConf["heartbeat-timeout"];
 
-    public function get($timeout = 0)
-    {
-        if ($timeout === 0) {
-            // TODO
-            // $timeout = // get from config
+            $this->poolEx->on("hbConstruct", $poolConf["heartbeat-construct"]);
+            $this->poolEx->on("hbCheck", $poolConf["heartbeat-check"]);
         }
 
-        $r = $this->pool->get($timeout, [$this, "getConnectionDone"]);
+        $r = $this->poolEx->setConfig($conf);
         if ($r === false) {
-            throw new ZanException("fail to call swoole_connpool::get ");
+            throw new InvalidArgumentException("invalid connection pool config, [pool=$this->poolType]");
         }
 
+        $min = $poolConf["minimum-connection-count"];
+        $max = $poolConf["maximum-connection-count"];
+        $r = $this->poolEx->createConnPool($min, $max);
+        if ($r === false) {
+            throw new ZanException("create conn pool fail [pool=$this->poolType]");
+        }
+    }
+
+    public function get()
+    {
+        // 从连接池获取连接的超时时间与建立连接超时时间保持一致
+        $timeout = $this->config["connect_timeout"];
+        $r = $this->poolEx->get($timeout, [$this, "getCallback"]);
+        if ($r === false) {
+            throw new ZanException("get connection fail [pool=$this->poolType]");
+        }
         yield $this;
     }
 
-    public function release($conn, $error = false)
+    public function release($conn)
     {
-        $status = $error ? \swoole_connpool::SWOOLE_CONNOBJ_CONNERR : \swoole_connpool::SWOOLE_CONNOBJ_CONNECTED;
-        return $this->pool->release($conn, $status);
+        return $this->poolEx->release($conn);
     }
 
-    public function getConnectionDone($result, $conn)
+    public function close($conn)
+    {
+        return $this->poolEx->release($conn, \swoole_connpool::SWOOLE_CONNNECT_ERR);
+    }
+
+    public function getCallback(\swoole_connpool $pool, $conn)
     {
         if ($cc = $this->callback) {
-            if ($result) {
-                $poolConnection = new ConnectionEx($conn, $this);
-                $cc($poolConnection);
+            if ($conn !== false) {
+                $cc(new ConnectionEx($conn, $this));
             } else {
-                $cc(null, new GetConnectionTimeoutFromPool("get connection timeout, $this"));
+                $cc(null, new GetConnectionTimeoutFromPool("get connection timeout [pool=$this->poolType]"));
             }
         } else {
             // swoole 内部发生同步call异步回调, 不应该发生
             assert(false);
+            throw new ZanException("internal error happened in swoole connection pool [pool=$this->poolType]");
         }
     }
 
     public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
-    }
-
-    public function __toString()
-    {
-        // TODO 打包配置信息
-
-        // TODO: Implement __toString() method.
     }
 }
