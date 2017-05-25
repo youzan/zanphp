@@ -20,7 +20,7 @@ class BizErrorHandler implements ExceptionHandler
     public function handle(\Exception $e)
     {
         $errMsg = $e->getMessage();
-        $errorPagePath = (yield $this->getErrorPagePath($e));
+        $errorPagePath = $this->getErrorPagePath($e);
         $errorPage = require $errorPagePath;
 
         $code = $e->getCode();
@@ -47,8 +47,8 @@ class BizErrorHandler implements ExceptionHandler
     {
         $default = Path::getRootPath() . '/vendor/zanphp/zan/src/Foundation/View/Pages/Error.php';
         $ref = new \ReflectionClass($e);
-        $path = $this->parseConfig($ref->getName());
-        yield empty($path) ? $default : $path;
+        $errorPage = $this->parseConfig($ref->getName());
+        return (!empty($errorPage) && is_file($errorPage)) ? $errorPage : $default;
     }
 
     private function parseConfig($exceptionClassName)
