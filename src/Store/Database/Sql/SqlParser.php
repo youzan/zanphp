@@ -111,7 +111,7 @@ class SqlParser
             'REPLACE'=> '/(?<=REPLACE\s)\S*/i'
         ];
         if (isset($map['table']) && '' !== $map['table']) {
-            return $map;
+            return $map['table'];
         }
         $sql = $map['sql'];
         $type = strtoupper(substr($sql, 0, strpos($sql, ' ')));

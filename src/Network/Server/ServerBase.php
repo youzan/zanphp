@@ -4,15 +4,25 @@ namespace Zan\Framework\Network\Server;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
-use Zan\Framework\Foundation\Core\RunMode;
 
-class ServerBase
+abstract class ServerBase
 {
     protected $serverStartItems = [
     ];
 
     protected $workerStartItems = [
     ];
+
+    public $swooleServer;
+
+    public function __construct($swooleServer, array $config)
+    {
+        $this->swooleServer = $swooleServer;
+        $this->swooleServer->set($config);
+    }
+
+    abstract protected function init();
+    abstract protected function setSwooleEvent();
 
     protected function bootServerStartItem()
     {
@@ -36,6 +46,17 @@ class ServerBase
         foreach ($workerStartItems as $bootstrap) {
             Di::make($bootstrap)->bootstrap($this, $workerId);
         }
+    }
+
+    public function start()
+    {
+        $this->setSwooleEvent();
+
+        \swoole_async_set(["socket_dontwait" => 1]);
+
+        $this->bootServerStartItem();
+        $this->init();
+        $this->swooleServer->start();
     }
 
     protected function getCustomizedServerStartItems()
@@ -63,7 +84,6 @@ class ServerBase
     }
 
     /**
-     * @TODO 改成可以支持自定义
      * @return string
      */
     protected function getPidFilePath()

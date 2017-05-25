@@ -10,7 +10,8 @@ namespace Zan\Framework\Foundation\Exception;
 
 use Exception;
 
-class ZanException extends Exception {
+class ZanException extends Exception
+{
     /**
      * @var null
      *  * null : do not logging
@@ -30,9 +31,14 @@ class ZanException extends Exception {
 
         $this->metaData = $metaData;
     }
-    
+
     public function getMetadata()
     {
         return $this->metaData;
+    }
+
+    public function setMetadata(array $metaData)
+    {
+        $this->metaData = $metaData;
     }
 }

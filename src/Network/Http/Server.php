@@ -11,23 +11,21 @@ use Zan\Framework\Network\Http\ServerStart\InitializeExceptionHandlerChain;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
-use Zan\Framework\Network\Server\WorkerStart\InitializeExceptionHandler;
+use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
 use Zan\Framework\Network\Http\ServerStart\InitializeQiniuConfig;
-use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
-use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\ServerStart\InitializeSqlMap;
 
-class Server extends ServerBase implements ServerContract
+class Server extends ServerBase
 {
     protected $serverStartItems = [
         InitializeRouter::class,
@@ -43,25 +41,14 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
-        InitializeExceptionHandler::class,
+        InitializeErrorHandler::class,
         InitializeWorkerMonitor::class,
         InitializeHawkMonitor::class,
         InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
     ];
 
-    /**
-     * @var swooleServer
-     */
-    public $swooleServer;
-
-    public function __construct(SwooleServer $swooleServer, array $config)
-    {
-        $this->swooleServer = $swooleServer;
-        $this->swooleServer->set($config);
-    }
-
-    public function start()
+    public function setSwooleEvent()
     {
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
@@ -71,31 +58,15 @@ class Server extends ServerBase implements ServerContract
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
-
-        \swoole_async_set(["socket_dontwait" => 1]);
-
-        $this->bootServerStartItem();
-        $this->init();
-        $this->swooleServer->start();
     }
 
-    private function init()
+    protected function init()
     {
         $config = Config::get('haunt');
         if (!isset($config['app_names']) || [] === $config['app_names']) {
             return;
         }
         ServerStore::getInstance()->resetLockDiscovery();
-    }
-
-    public function stop()
-    {
-
-    }
-
-    public function reload()
-    {
-
     }
 
     public function onStart($swooleServer)
@@ -138,10 +109,6 @@ class Server extends ServerBase implements ServerContract
 
     public function onRequest(SwooleHttpRequest $swooleHttpRequest, SwooleHttpResponse $swooleHttpResponse)
     {
-//        try {
-            (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
-//        } catch (\Exception $e) {
-//            RequestExceptionHandlerChain::getInstance()->handle($e, $swooleHttpRequest, $swooleHttpResponse);
-//        }
+        (new RequestHandler())->handle($swooleHttpRequest, $swooleHttpResponse);
     }
 }

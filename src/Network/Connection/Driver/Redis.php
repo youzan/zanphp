@@ -39,12 +39,23 @@ class Redis extends Base implements Connection
     }
 
     public function onConnect($redis, $res) {
+        // 避免swoolebug
+        /** @noinspection PhpUndefinedFieldInspection */
+        if ($this->getSocket()->isClosed) {
+            if ($res) {
+                $this->getSocket()->close();
+            }
+            return;
+        }
+
+
+        Timer::clearAfterJob($this->getConnectTimeoutJobId());
+
         if (false === $res) {
             sys_error("redis client connect error" . $this->getConnString());
             $this->close();
             return;
         }
-        Timer::clearAfterJob($this->getConnectTimeoutJobId());
         //put conn to active_pool
         $this->release();
         ReconnectionPloy::getInstance()->connectSuccess(spl_object_hash($this));

@@ -6,20 +6,19 @@ use Zan\Framework\Network\Http\RequestHandler;
 use Zan\Framework\Network\MqSubscribe\WorkerStart\InitializeMqSubscribe;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
-use Zan\Framework\Network\Server\WorkerStart\InitializeExceptionHandler;
+use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use swoole_http_server as SwooleServer;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
-use Zan\Framework\Contract\Network\Server as ServerContract;
 use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 
-class Server extends ServerBase implements ServerContract
+class Server extends ServerBase
 {
     protected $serverStartItems = [
         InitializeSqlMap::class,
@@ -27,26 +26,14 @@ class Server extends ServerBase implements ServerContract
     ];
 
     protected $workerStartItems = [
-        InitializeExceptionHandler::class,
+        InitializeErrorHandler::class,
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
         InitializeServerDiscovery::class,
-
         InitializeMqSubscribe::class,
     ];
 
-    /**
-     * @var swooleServer
-     */
-    public $swooleServer;
-
-    public function __construct(SwooleServer $swooleServer, array $config)
-    {
-        $this->swooleServer = $swooleServer;
-        $this->swooleServer->set($config);
-    }
-
-    public function start()
+    public function setSwooleEvent()
     {
         $this->swooleServer->on('start', [$this, 'onStart']);
         $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
@@ -56,29 +43,15 @@ class Server extends ServerBase implements ServerContract
         $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
 
         $this->swooleServer->on('request', [$this, 'onRequest']);
-
-        $this->bootServerStartItem();
-        $this->init();
-        $this->swooleServer->start();
     }
 
-    private function init()
+    protected function init()
     {
         $config = Config::get('haunt');
         if (!isset($config['app_names']) || [] === $config['app_names']) {
             return;
         }
         ServerStore::getInstance()->resetLockDiscovery();
-    }
-
-    public function stop()
-    {
-
-    }
-
-    public function reload()
-    {
-
     }
 
     public function onStart($swooleServer)
@@ -107,7 +80,7 @@ class Server extends ServerBase implements ServerContract
         sys_echo("worker *$workerId stopping .....");
     }
 
-    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode)
+    public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
         ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
     }

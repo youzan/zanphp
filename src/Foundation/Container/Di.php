@@ -39,6 +39,11 @@ class Di
         return static::$instance->addStub($stub);
     }
 
+    public static function cleanStub()
+    {
+        static::$instance->cleanStub();
+    }
+
     /**
      * Handle dynamic, static calls to the object.
      *

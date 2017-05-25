@@ -10,11 +10,13 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Network\Common\DnsClient;
 use Zan\Framework\Network\Connection\Factory\KVStore;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 use Zan\Framework\Network\Connection\Factory\Tcp;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
 use Zan\Framework\Network\Connection\Factory\Mysqli;
@@ -99,10 +101,9 @@ class ConnectionInitiator
             if (in_array($factoryType, $this->engineMap)) {
                 $factoryType = ucfirst($factoryType);
                 $cf['pool']['pool_name'] = $this->poolName;
-
-                $isInitFromSwoole = class_exists("swoole_connpool") && in_array($factoryType, $this->swoolePoolEngineMap);
-                if ($isInitFromSwoole) {
-                    $this->initSwoolePool($factoryType, $cf);
+                if (isset($cf['host']) && !filter_var($cf['host'], FILTER_VALIDATE_IP) && !isset($cf["path"])) {
+                    $poolName = $this->poolName;
+                    $this->host2Ip($cf, $poolName, $factoryType);
                 } else {
                     $this->initPool($factoryType, $cf);
                 }
@@ -112,6 +113,27 @@ class ConnectionInitiator
                 $this->poolName = $k == $endKey ? '' : $dir;
             }
         }
+    }
+
+    private function host2Ip($cf, $poolName, $factoryType)
+    {
+        DnsClient::lookup($cf['host'], function ($host, $ip) use ($cf, $poolName, $factoryType) {
+            if (empty($ip)) {
+                sys_error("dns look up failed: ".$cf['host']);
+                Timer::after(500, function() use ($cf, $poolName, $factoryType) {
+                    $this->host2Ip($cf, $poolName, $factoryType);
+                });
+            } else {
+                $cf['host'] = $ip;
+                $cf['pool']['pool_name'] = $poolName;
+                $this->initPool($factoryType, $cf);
+            }
+        }, function () use ($cf, $poolName, $factoryType) {
+            sys_error("dns look up failed: ".$cf['host']);
+            Timer::after(500, function() use (&$cf, $poolName, $factoryType) {
+                $this->host2Ip($cf, $poolName, $factoryType);
+            });
+        });
     }
 
     private function fixConfig(array &$config)
