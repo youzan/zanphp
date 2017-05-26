@@ -47,8 +47,7 @@ class BizErrorHandler implements ExceptionHandler
 
     private function getErrorPage(\Exception $e, Context $context)
     {
-        $ref = new \ReflectionClass($e);
-        $tpl = $this->parseConfig($ref->getName());
+        $tpl = $this->parseConfig(get_class($e));
         if (!empty($tpl)) {
             $errorPage = $this->getTplErrorPage($tpl, $e, $context);
         } else {
@@ -84,7 +83,6 @@ class BizErrorHandler implements ExceptionHandler
             return [];
         }
 
-        $parts = explode('\\', $exceptionClassName);
         if (isset($configMap[$exceptionClassName])) {
             return $configMap[$exceptionClassName];
         }
@@ -92,6 +90,7 @@ class BizErrorHandler implements ExceptionHandler
         $prefix = [];
         $value = '';
 
+        $parts = explode('\\', $exceptionClassName);
         foreach ($parts as $part) {
             if ($part) {
                 $namespace = implode('\\', $prefix);
