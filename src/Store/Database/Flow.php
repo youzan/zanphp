@@ -160,7 +160,7 @@ class Flow
 
     /**
      * @param Connection $connection
-     * @return Mysql
+     * @return Mysql2
      */
     private function getDriver(Connection $connection)
     {

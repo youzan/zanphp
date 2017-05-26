@@ -113,8 +113,7 @@ class PoolEx implements Async
             }
         } else {
             // swoole 内部发生同步call异步回调, 不应该发生
-            assert(false);
-            throw new ZanException("internal error happened in swoole connection pool [pool=$this->poolType]");
+            $cc(null, new ZanException("internal error happened in swoole connection pool [pool=$this->poolType]"));
         }
     }
 
