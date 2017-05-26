@@ -15,21 +15,18 @@ class ConnectionEx implements Connection
 {
     public $connEx;
     public $poolEx;
+    public $isReleased;
 
     public function __construct($connEx, PoolEx $pool)
     {
         $this->connEx = $connEx;
         $this->poolEx = $pool;
+        $this->isReleased = false;
     }
 
     public function getSocket()
     {
         return $this->connEx;
-    }
-
-    public function release()
-    {
-        return $this->poolEx->release($this->connEx);
     }
 
     public function getEngine()
@@ -42,9 +39,24 @@ class ConnectionEx implements Connection
         return $this->poolEx->config;
     }
 
+    public function release()
+    {
+        return $this->releaseOnce();
+    }
+
     public function close()
     {
-        return $this->poolEx->close($this->connEx);
+        return $this->releaseOnce(true);
+    }
+
+    private function releaseOnce($close = false)
+    {
+        if ($this->isReleased) {
+            return false;
+        }
+
+        $this->isReleased = true;
+        return $this->poolEx->release($this->connEx, $close);
     }
 
     public function heartbeat() { }

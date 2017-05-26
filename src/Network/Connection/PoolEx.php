@@ -93,14 +93,13 @@ class PoolEx implements Async
         yield $this;
     }
 
-    public function release($conn)
+    public function release($conn, $close = false)
     {
-        return $this->poolEx->release($conn);
-    }
-
-    public function close($conn)
-    {
-        return $this->poolEx->release($conn, \swoole_connpool::SWOOLE_CONNNECT_ERR);
+        if ($close) {
+            return $this->poolEx->release($conn, \swoole_connpool::SWOOLE_CONNNECT_ERR);
+        } else {
+            return $this->poolEx->release($conn, \swoole_connpool::SWOOLE_CONNNECT_OK);
+        }
     }
 
     public function getCallback(\swoole_connpool $pool, $conn)
