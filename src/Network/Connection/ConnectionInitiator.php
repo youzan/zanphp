@@ -133,6 +133,8 @@ class ConnectionInitiator
         return Arr::merge([
             "connect_timeout" => static::CONNECT_TIMEOUT,
             "pool" => [
+                "minimum-connection-count" => 10,
+                "maximum-connection-count" => 50,
                 "maximum-wait-connection" => static::CONCURRENCY_CONNECTION_LIMIT,
                 "heartbeat-time" => static::HEARTBEAT_INTERVAL,
                 "heartbeat-timeout" => static::HEARTBEAT_TIMEOUT,
