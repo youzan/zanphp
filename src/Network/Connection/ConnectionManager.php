@@ -9,6 +9,7 @@
 namespace Zan\Framework\Network\Connection;
 
 
+use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\Exception\CanNotCreateConnectionException;
@@ -64,7 +65,7 @@ class ConnectionManager
 
         $connection = (yield $pool->get());
 
-        if ($connection) {
+        if ($connection instanceof Connection) {
             yield $connection;
         } else {
             yield new FutureConnection($this, $connKey, $conf["connect_timeout"], $pool);
@@ -76,7 +77,7 @@ class ConnectionManager
         $pool = self::$poolExMap[$connKey];
         $connection = (yield $pool->get());
 
-        if ($connection) {
+        if ($connection instanceof Connection) {
             yield $connection;
         } else {
             throw new GetConnectionTimeoutFromPool("get connection $connKey timeout");

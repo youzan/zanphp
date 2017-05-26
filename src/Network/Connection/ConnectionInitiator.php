@@ -140,33 +140,6 @@ class ConnectionInitiator
                 "heartbeat-timeout" => static::HEARTBEAT_TIMEOUT,
             ],
         ], $config);
-
-
-
-        if (isset($config['connect_timeout'])) {
-            $config['connect_timeout'] = intval($config['connect_timeout']);
-        } else {
-            $config['connect_timeout'] = static::CONNECT_TIMEOUT;
-        }
-
-        if (isset($config['pool']['maximum-wait-connection'])) {
-            $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-wait-connection']);
-        } else {
-            $config['pool']['maximum-wait-connection'] = static::CONCURRENCY_CONNECTION_LIMIT;
-        }
-
-        if (isset($config['pool']['heartbeat-time'])) {
-             $config['pool']['heartbeat-time'] = intval($config['pool']['heartbeat-time']);
-        } else {
-             $config['pool']['heartbeat-time'] = static::HEARTBEAT_INTERVAL;
-        }
-        if (isset($config['pool']['heartbeat-timeout'])) {
-            $config['pool']['heartbeat-timeout'] = intval($config['pool']['heartbeat-timeout']);
-        } else {
-            $config['pool']['heartbeat-timeout'] = static::HEARTBEAT_TIMEOUT;
-        }
-
-        return $config;
     }
 
     /**

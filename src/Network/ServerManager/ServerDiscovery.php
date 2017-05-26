@@ -209,11 +209,11 @@ class ServerDiscovery
                     $this->updateServersByEtcd($raw);
                 }
             } catch (HttpClientTimeoutException $e) {
-                yield taskSleep(100);
+                yield taskSleep(50);
             } catch (\Exception $ex) {
                 // 防止worker fatal error
                 echo_exception($ex);
-                yield taskSleep(100);
+                yield taskSleep(50);
             }
         }
     }
