@@ -16,6 +16,9 @@ class Polling implements LoadBalancingStrategyInterface
 
     const NAME = "polling";
 
+    /**
+     * @var NovaClientPool
+     */
     private $connectionPool;
 
     /**上次选择的服务器*/
