@@ -16,7 +16,7 @@ use Zan\Framework\Network\Connection\Exception\AsyncConnectionHasReleasedExcepti
 use Zan\Framework\Network\Connection\Exception\AsyncConnectionIsNotReadyException;
 use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 
-class AsyncConnection implements Async, Connection
+class AsyncConnection implements Async
 {
     /**
      * @var bool
@@ -33,23 +33,17 @@ class AsyncConnection implements Async, Connection
      */
     private $poolEx;
 
-    /**
-     * @var \swoole_client|\swoole_redis|\swoole_mysql
-     */
-    private $connEx;
-
     public function __construct(PoolEx $poolEx)
     {
         $this->poolEx = $poolEx;
         $this->isReleased = false;
     }
 
-    public function __invoke(\swoole_connpool $pool, $conn)
+    public function __invoke(\swoole_connpool $pool, $connEx)
     {
         if ($cc = $this->callback) {
-            if ($conn !== false) {
-                $this->connEx = $conn;
-                $cc($this);
+            if ($connEx !== false) {
+                $cc(new ConnectionEx($connEx, $this->poolEx));
             } else {
                 $cc(null, new GetConnectionTimeoutFromPool("get connection timeout [pool=$this->poolEx->poolType]"));
             }
@@ -63,52 +57,5 @@ class AsyncConnection implements Async, Connection
     public function execute(callable $callback, $task)
     {
         $this->callback = $callback;
-    }
-
-    public function getSocket()
-    {
-        $this->assertReady();
-        return $this->connEx;
-    }
-
-    public function getEngine()
-    {
-        return $this->poolEx->poolType;
-    }
-
-    public function getConfig()
-    {
-        return $this->poolEx->config;
-    }
-
-    public function release()
-    {
-        return $this->releaseOnce();
-    }
-
-    public function close()
-    {
-        return $this->releaseOnce(true);
-    }
-
-    public function heartbeat() { }
-
-    private function releaseOnce($close = false)
-    {
-        if ($this->isReleased) {
-            return false;
-        }
-
-        $this->isReleased = true;
-        return $this->poolEx->release($this->connEx, $close);
-    }
-
-    private function assertReady()
-    {
-        if ($this->connEx === null) {
-            throw new AsyncConnectionIsNotReadyException("asynchronous connection is not ready [pool=$this->poolEx->poolType]");
-        } else if ($this->isReleased) {
-            throw new AsyncConnectionHasReleasedException("asynchronous connection has released [pool=$this->poolEx->poolType] ");
-        }
     }
 }
