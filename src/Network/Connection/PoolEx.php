@@ -9,12 +9,10 @@
 namespace Zan\Framework\Network\Connection;
 
 
-use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Foundation\Exception\ZanException;
-use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 
-class PoolEx implements Async
+class PoolEx
 {
     public $poolType;
 
@@ -24,8 +22,6 @@ class PoolEx implements Async
     public $poolEx;
 
     public $config;
-
-    public $callback;
 
     public $typeMap = [
         'Mysqli'    => \swoole_connpool::SWOOLE_CONNPOOL_MYSQL,
@@ -84,13 +80,16 @@ class PoolEx implements Async
 
     public function get()
     {
+        $asyncConn = new AsyncConnection($this);
+
         // 从连接池获取连接的超时时间与建立连接超时时间保持一致
         $timeout = $this->config["connect_timeout"];
-        $r = $this->poolEx->get($timeout, [$this, "getCallback"]);
+        $r = $this->poolEx->get($timeout, $asyncConn);
         if ($r === false) {
             throw new ZanException("get connection fail [pool=$this->poolType]");
         }
-        yield $this;
+
+        yield $asyncConn;
     }
 
     public function release($conn, $close = false)
@@ -100,24 +99,5 @@ class PoolEx implements Async
         } else {
             return $this->poolEx->release($conn, \swoole_connpool::SWOOLE_CONNNECT_OK);
         }
-    }
-
-    public function getCallback(\swoole_connpool $pool, $conn)
-    {
-        if ($cc = $this->callback) {
-            if ($conn !== false) {
-                $cc(new ConnectionEx($conn, $this));
-            } else {
-                $cc(null, new GetConnectionTimeoutFromPool("get connection timeout [pool=$this->poolType]"));
-            }
-        } else {
-            // swoole 内部发生同步call异步回调, 不应该发生
-            $cc(null, new ZanException("internal error happened in swoole connection pool [pool=$this->poolType]"));
-        }
-    }
-
-    public function execute(callable $callback, $task)
-    {
-        $this->callback = $callback;
     }
 }
