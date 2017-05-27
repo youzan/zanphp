@@ -15,6 +15,7 @@ class Polling implements LoadBalancingStrategyInterface
 {
 
     const NAME = "polling";
+    const MAX_GET_RETRY = 5;
 
     /**
      * @var NovaClientPool
@@ -97,15 +98,24 @@ class Polling implements LoadBalancingStrategyInterface
         return $weight;
     }
 
-    public function get()
+    public function get($timeout = 50)
     {
-        // no server alive return null
-        if (!is_numeric($this->serverCount) && $this->serverCount < 1) {
+        $retryInterval = min(50, max(10, ceil($timeout / static::MAX_GET_RETRY)));
+        yield $this->getWithRetry($retryInterval, static::MAX_GET_RETRY);
+    }
+
+    private function getWithRetry($retryInterval, $retry)
+    {
+        if ($retry > 0) {
+            if (intval($this->serverCount) > 0) {
+                yield $this->algorithm();
+            } else {
+                yield taskSleep($retryInterval);
+                yield $this->getWithRetry($retryInterval, --$retry);
+            }
+        } else {
             yield null;
-            return;
         }
-        
-        yield $this->algorithm();
     }
 
     /**
