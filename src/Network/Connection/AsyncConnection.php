@@ -45,12 +45,12 @@ class AsyncConnection implements Async
             if ($connEx !== false) {
                 $cc(new ConnectionEx($connEx, $this->poolEx));
             } else {
-                $cc(null, new GetConnectionTimeoutFromPool("get connection timeout [pool=$this->poolEx->poolType]"));
+                $cc(null, new GetConnectionTimeoutFromPool("get connection timeout [pool={$this->poolEx->poolType}]"));
             }
             $this->callback = null;
         } else {
             // swoole 内部发生同步call异步回调, 不应该发生
-            $cc(null, new ZanException("internal error happened in swoole connection pool [pool=$this->poolEx->poolType]"));
+            $cc(null, new ZanException("internal error happened in swoole connection pool [pool={$this->poolEx->poolType}]"));
         }
     }
 
