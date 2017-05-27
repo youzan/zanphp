@@ -17,6 +17,7 @@ use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Log\Log;
 use Zan\Framework\Sdk\Monitor\Hawk;
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -141,6 +142,18 @@ class RequestHandler {
         $this->event->fire($this->getRequestFinishJobId());
     }
 
+    private function getTraceIdInfo()
+    {
+        $trace = $this->task->getContext()->get("trace");
+        if ($trace instanceof Trace) {
+            return [
+                "rootId" => $trace->getRootId(),
+                "parentId" => $trace->getParentId(),
+            ];
+        }
+        return null;
+    }
+
     private function logTimeout()
     {
         $request = $this->request;
@@ -164,7 +177,8 @@ class RequestHandler {
             "service"   => $serviceName,
             "method"    => $methodName,
             "args"      => $request->getArgs(),
-            "remote"    => $request->getRemote(),
+            "remote"    => "$remoteIp:$remotePort",
+            "trace"     => $this->getTraceIdInfo(),
         ];
 
         $ex = new ServerTimeoutException("SERVER TIMEOUT");
