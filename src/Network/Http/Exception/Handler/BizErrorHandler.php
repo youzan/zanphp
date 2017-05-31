@@ -76,7 +76,11 @@ class BizErrorHandler implements ExceptionHandler
 
     private function parseConfig($exceptionClassName)
     {
-        $configMap = array_change_key_case(Config::get('biz_exception_error_page'));
+        $configMap = Config::get('biz_exception_error_page');
+        if (!is_array($configMap) || empty($configMap)) {
+            return [];
+        }
+        $configMap = array_change_key_case($configMap);
         $exceptionClassName = strtolower($exceptionClassName);
 
         if (empty($configMap)) {
