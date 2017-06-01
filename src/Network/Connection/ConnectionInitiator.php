@@ -19,7 +19,6 @@ use Zan\Framework\Network\Connection\Factory\Tcp;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
-use Zan\Framework\Network\Connection\Factory\Mysqli;
 use Zan\Framework\Network\Connection\Factory\Mysql;
 
 
@@ -159,11 +158,7 @@ class ConnectionInitiator
                 $factory = new Http($config);
                 break;
             case 'Mysqli':
-                if (swoole2x()) {
-                    $factory = new Mysql($config);
-                } else {
-                    $factory = new Mysqli($config);
-                }
+                $factory = new Mysql($config);
                 break;
             case 'NovaClient':
                 $factory = new NovaClient($config);

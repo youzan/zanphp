@@ -65,37 +65,24 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
-        if (null === $connection)
+        if (null === $connection) {
             return;
-        $isSwoole2x = \swoole2x();
+        }
+
         if  ('' !== $previousConnectionHash) {
             $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
             if ($this->type == 'Mysqli') {
 
                 $errno = 0;
-                if ($isSwoole2x && null !== $prevConn) {
+                if (null !== $prevConn) {
                     $sock = $prevConn->getSocket();
-                    if (_mysql2()) {
-                        $errno = $sock->connect_errno;
-                    } else {
-                        $errno = $sock->errno;
-                    }
-
-                } else if (!$isSwoole2x) {
-                    $errno = $connection->getSocket()->connect_errno;
+                    $errno = $sock->connect_errno;
                 }
 
-                if ($isSwoole2x && $errno) {
+                if ($errno) {
                     ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection),$previousKey);
                     $this->freeConnection->remove($prevConn);
                     $this->activeConnection->remove($prevConn);
-                } else if (!$isSwoole2x) {
-                    if ($errno) {
-                        ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection), $previousKey);
-                        $this->remove($connection);
-                    } else {
-                        $connection->heartbeat();
-                    }
                 }
 
                 $connection->setPool($this);
@@ -111,7 +98,7 @@ class Pool implements ConnectionPool
             $this->freeConnection->push($connection);
         }
         if ('' == $previousConnectionHash) {
-            if ($this->type !== 'Mysqli' || ($this->type === 'Mysqli' && !$isSwoole2x)) {
+            if ($this->type !== 'Mysqli') {
                 $connection->heartbeat();
             }
         }
