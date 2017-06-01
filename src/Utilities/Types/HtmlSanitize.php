@@ -19,7 +19,7 @@ class HtmlSanitize
 
     public  function xss($content,array $filters = []) {
         if (!trim($content)){
-            throw new InvalidArgumentException('二维码内容不能为空');
+            throw new InvalidArgumentException('富文本参数不能为空');
         }
 
         $params = [
@@ -32,7 +32,7 @@ class HtmlSanitize
             'iframe_url_protocol' => Arr::get($filters,'iframe_url_protocol',1),
             'iframe_url_domain' => Arr::get($filters,'iframe_url_domain',1),
         ];
-        $config = Config::get('sanitize');
+        $config = Config::get('zan_html_sanitize');
         $uri = '/sanitize' . '?' . http_build_query($params);
         $content = htmlspecialchars_decode($content);
         $response = (yield HttpClient::newInstance($config['host'],$config['port'])->post($uri,$content));
