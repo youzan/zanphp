@@ -19,7 +19,7 @@ class HtmlSanitize
 
     public  function xss($content,array $filters = []) {
         if (!trim($content)){
-            throw new InvalidArgumentException('xss 内容不能为空');
+            throw new InvalidArgumentException('富文本参数不能为空');
         }
 
         $params = [
