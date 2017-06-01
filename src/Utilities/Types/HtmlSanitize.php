@@ -33,7 +33,9 @@ class HtmlSanitize
             'iframe_url_domain' => Arr::get($filters,'iframe_url_domain',1),
         ];
         $config = Config::get('sanitize');
-        $response = (yield HttpClient::newInstance($config['host'],$config['port'])->post('/sanitize',$params));
+        $uri = '/sanitize' . '?' . http_build_query($params);
+        $content = htmlspecialchars_decode($content);
+        $response = (yield HttpClient::newInstance($config['host'],$config['port'])->post($uri,$content));
         $body = $response->getBody();
         yield $body;
     }
