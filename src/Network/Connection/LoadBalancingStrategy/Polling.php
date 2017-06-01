@@ -7,7 +7,6 @@
  */
 namespace Zan\Framework\Network\Connection\LoadBalancingStrategy;
 
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\NovaClientPool;
 
@@ -15,6 +14,7 @@ class Polling implements LoadBalancingStrategyInterface
 {
 
     const NAME = "polling";
+    const MAX_GET_RETRY = 5;
 
     /**
      * @var NovaClientPool
@@ -97,15 +97,30 @@ class Polling implements LoadBalancingStrategyInterface
         return $weight;
     }
 
-    public function get()
+    public function get($timeout = 100)
     {
-        // no server alive return null
-        if (!is_numeric($this->serverCount) && $this->serverCount < 1) {
+        $retryInterval = intval(min(100, max(10, ceil($timeout / static::MAX_GET_RETRY))));
+        yield $this->getWithRetry($retryInterval, static::MAX_GET_RETRY);
+    }
+
+    private function getWithRetry($retryInterval, $retry)
+    {
+        if ($retry > 0) {
+            $connection = null;
+
+            if (intval($this->serverCount) > 0) {
+                $connection = $this->algorithm();
+            }
+
+            if ($connection === null) {
+                yield taskSleep($retryInterval);
+                yield $this->getWithRetry($retryInterval, --$retry);
+            } else {
+                yield $connection;
+            }
+        } else {
             yield null;
-            return;
         }
-        
-        yield $this->algorithm();
     }
 
     /**

@@ -13,15 +13,19 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\Types\ObjectArray;
 use Zan\Framework\Utilities\Types\Time;
-use Zan\Framework\Foundation\Coroutine\Task;
 
 class Pool implements ConnectionPool
 {
+    /**
+     * @var ObjectArray
+     */
     private $freeConnection = null;
 
+    /**
+     * @var ObjectArray
+     */
     private $activeConnection = null;
 
     private $poolConfig = null;
@@ -51,7 +55,6 @@ class Pool implements ConnectionPool
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
         for ($i = 0; $i < $initConnection; $i++) {
-            //todo 创建链接,存入数组
             $this->createConnect();
         }
     }
@@ -65,37 +68,24 @@ class Pool implements ConnectionPool
             return null;
         }
         $connection = $this->factory->create();
-        if (null === $connection)
+        if (null === $connection) {
             return;
-        $isSwoole2x = \swoole2x();
+        }
+
         if  ('' !== $previousConnectionHash) {
             $previousKey = ReconnectionPloy::getInstance()->getReconnectTime($previousConnectionHash);
             if ($this->type == 'Mysqli') {
 
                 $errno = 0;
-                if ($isSwoole2x && null !== $prevConn) {
+                if (null !== $prevConn) {
                     $sock = $prevConn->getSocket();
-                    if (_mysql2()) {
-                        $errno = $sock->connect_errno;
-                    } else {
-                        $errno = $sock->errno;
-                    }
-
-                } else if (!$isSwoole2x) {
-                    $errno = $connection->getSocket()->connect_errno;
+                    $errno = $sock->connect_errno;
                 }
 
-                if ($isSwoole2x && $errno) {
+                if ($errno) {
                     ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection),$previousKey);
                     $this->freeConnection->remove($prevConn);
                     $this->activeConnection->remove($prevConn);
-                } else if (!$isSwoole2x) {
-                    if ($errno) {
-                        ReconnectionPloy::getInstance()->setReconnectTime(spl_object_hash($connection), $previousKey);
-                        $this->remove($connection);
-                    } else {
-                        $connection->heartbeat();
-                    }
                 }
 
                 $connection->setPool($this);
@@ -111,7 +101,7 @@ class Pool implements ConnectionPool
             $this->freeConnection->push($connection);
         }
         if ('' == $previousConnectionHash) {
-            if ($this->type !== 'Mysqli' || ($this->type === 'Mysqli' && !$isSwoole2x)) {
+            if ($this->type !== 'Mysqli') {
                 $connection->heartbeat();
             }
         }
@@ -119,11 +109,17 @@ class Pool implements ConnectionPool
         $connection->setEngine($this->type);
     }
 
+    /**
+     * @return ObjectArray
+     */
     public function getFreeConnection()
     {
         return $this->freeConnection;
     }
 
+    /**
+     * @return ObjectArray
+     */
     public function getActiveConnection()
     {
         return $this->activeConnection;
@@ -165,10 +161,8 @@ class Pool implements ConnectionPool
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
 
-        if (count($this->freeConnection) == 1) {
-            $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
-            Event::fire($evtName, [], false);
-        }
+        $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
+        Event::fire($evtName, [], false);
     }
 
     public function remove(Connection $conn)

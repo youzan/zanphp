@@ -1,5 +1,15 @@
 ## Change Log
 
+### 20170501 
+
+1. 加入swoole内部连接池兼容代码
+2. 加入websocket支持
+3. 移除对旧版本swoole两个旧版驱动的支持
+4. 移除所有aerospike相关代码
+5. FIX worker重启时候获取nova连接失败问题，加入重试逻辑
+6. FIX 连接池在dns解析回调初始化导致worker启动时获取不懂连接的问题，加入重试逻辑
+
+
 ### 20170511 修复请求filter流程定时器没有清除BUG
 
 ### 20170425 加入ChromeTrace 

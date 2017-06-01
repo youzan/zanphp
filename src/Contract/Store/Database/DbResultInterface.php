@@ -7,7 +7,7 @@
  */
 
 namespace Zan\Framework\Contract\Store\Database;
-use Zan\Framework\Contract\Store\Database\DriverInterface;
+
 interface DbResultInterface
 {
     /**

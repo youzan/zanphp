@@ -78,7 +78,6 @@ class Scheduler
         }
     }
 
-    //TODO: 规范化response
     public function asyncCallback($response, $exception = null)
     {
         if ($exception !== null
@@ -97,7 +96,6 @@ class Scheduler
         }
     }
 
-    //TODO:  move handlers out of this class
     private function handleSysCall($value)
     {
         if (!($value instanceof SysCall)
@@ -133,6 +131,7 @@ class Scheduler
             return null;
         }
 
+        /** @var $value Async */
         $value->execute([$this, 'asyncCallback'], $this->task);
 
         return Signal::TASK_WAIT;

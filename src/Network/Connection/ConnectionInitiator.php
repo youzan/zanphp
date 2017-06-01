@@ -19,8 +19,8 @@ use Zan\Framework\Network\Connection\Factory\Tcp;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Network\Connection\Factory\Http;
-use Zan\Framework\Network\Connection\Factory\Mysqli;
 use Zan\Framework\Network\Connection\Factory\Mysql;
+use Zan\Framework\Utilities\Types\Arr;
 
 
 class ConnectionInitiator
@@ -29,6 +29,9 @@ class ConnectionInitiator
 
     const CONNECT_TIMEOUT = 1000;
     const CONCURRENCY_CONNECTION_LIMIT = 50;
+
+    const HEARTBEAT_INTERVAL = 15 * 1000;
+    const HEARTBEAT_TIMEOUT = 1000;
 
     private $engineMap = [
         'mysqli', 
@@ -44,10 +47,6 @@ class ConnectionInitiator
     public $directory = '';
 
     public $poolName='';
-
-    public function __construct()
-    {
-    }
 
     /**
      * @param $directory
@@ -84,7 +83,7 @@ class ConnectionInitiator
                 continue;
             }
 
-            $this->fixConfig($cf);
+            $cf = $this->fixConfig($cf);
 
             //创建连接池
             $dir = $this->poolName;
@@ -128,18 +127,28 @@ class ConnectionInitiator
         });
     }
 
-    private function fixConfig(array &$config)
+    private function fixConfig(array $config)
     {
-        if (!isset($config['connect_timeout'])) {
-            $config['connect_timeout'] = self::CONNECT_TIMEOUT;
-        } else {
-            $config['connect_timeout'] = intval($config['connect_timeout']);
-        }
-        if (!isset($config['pool']['maximum-wait-connection'])) {
-            $config['pool']['maximum-wait-connection'] = self::CONCURRENCY_CONNECTION_LIMIT;
-        } else {
-            $config['pool']['maximum-wait-connection'] = intval($config['pool']['maximum-wait-connection']);
-        }
+        $config = Arr::merge([
+            "connect_timeout" => static::CONNECT_TIMEOUT,
+            "pool" => [
+                "minimum-connection-count" => 10,
+                "maximum-connection-count" => 50,
+                "maximum-wait-connection" => static::CONCURRENCY_CONNECTION_LIMIT,
+                // heartbeat interval 兼容旧配置
+                "heartbeat-time" => static::HEARTBEAT_INTERVAL,
+                "heartbeat-timeout" => static::HEARTBEAT_TIMEOUT,
+                "get-timeout" => static::CONNECT_TIMEOUT * 2,
+            ],
+        ], $config);
+
+        // for timer
+        $config["connect_timeout"] = intval($config["connect_timeout"]);
+        $config["pool"]["heartbeat-time"] = intval($config["pool"]["heartbeat-time"]);
+        $config["pool"]["heartbeat-timeout"] = intval($config["pool"]["heartbeat-timeout"]);
+        $config["pool"]["get-timeout"] = intval($config["pool"]["get-timeout"]);
+
+        return $config;
     }
 
     /**
@@ -148,36 +157,63 @@ class ConnectionInitiator
      */
     private function initPool($factoryType, $config)
     {
-        switch ($factoryType) {
-            case 'Redis':
-                $factory = new Redis($config);
-                break;
-            case 'Syslog':
-                $factory = new Syslog($config);
-                break;
-            case 'Http':
-                $factory = new Http($config);
-                break;
-            case 'Mysqli':
-                if (swoole2x()) {
+        if (PoolEx::support($factoryType)) {
+            switch ($factoryType) {
+                case 'Redis':
+                case 'KVStore':
+                    $config = Arr::merge([
+                        "pool" => [
+                            "heartbeat-construct" => function() { return [ "method" => "ping",  "args" => null, ]; },
+                            "heartbeat-check" => function() { return true; },
+                        ]
+                    ], $config);
+                    break;
+
+                case 'Mysqli':
+                    $config = Arr::merge([
+                        "pool" => [
+                            "heartbeat-construct" => function() { return [ "method" => "query",  "args" => "select 1", ]; },
+                            "heartbeat-check" => function($_, $r) { return $r !== false; },
+                        ]
+                    ], $config);
+                    break;
+
+                // hb?
+                case 'Syslog':
+                    break;
+                case 'Tcp':
+                    break;
+            }
+            $connectionPool = new PoolEx($factoryType, $config);
+        } else {
+            switch ($factoryType) {
+                case 'Redis':
+                    $factory = new Redis($config);
+                    break;
+                case 'Syslog':
+                    $factory = new Syslog($config);
+                    break;
+                case 'Http':
+                    $factory = new Http($config);
+                    break;
+                case 'Mysqli':
                     $factory = new Mysql($config);
-                } else {
-                    $factory = new Mysqli($config);
-                }
-                break;
-            case 'NovaClient':
-                $factory = new NovaClient($config);
-                break;
-            case 'KVStore':
-                $factory = new KVStore($config);
-                break;
-            case 'Tcp':
-                $factory = new Tcp($config);
-                break;
-            default:
-                throw new \RuntimeException("not support connection type: $factoryType");
+                    break;
+                case 'NovaClient':
+                    $factory = new NovaClient($config);
+                    break;
+                case 'KVStore':
+                    $factory = new KVStore($config);
+                    break;
+                case 'Tcp':
+                    $factory = new Tcp($config);
+                    break;
+                default:
+                    throw new \RuntimeException("not support connection type: $factoryType");
+            }
+            $connectionPool = new Pool($factory, $config, $factoryType);
         }
-        $connectionPool = new Pool($factory, $config, $factoryType);
+
         ConnectionManager::getInstance()->addPool($config['pool']['pool_name'], $connectionPool);
     }
 }

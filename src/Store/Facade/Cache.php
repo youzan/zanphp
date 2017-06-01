@@ -20,7 +20,8 @@ use Zan\Framework\Utilities\Types\ObjectArray;
  *
  * @method static bool del($configKey, $keys)
  */
-class Cache {
+class Cache
+{
 
     const POOL_PREFIX = 'connection.';
 
@@ -29,6 +30,10 @@ class Cache {
     private static $_instance = null;
     private static $_configMap = null;
 
+    /**
+     * @param $connection
+     * @return static
+     */
     private static function init($connection)
     {
         if (!isset(self::$_instance[$connection]) || null === self::$_instance[$connection]) {

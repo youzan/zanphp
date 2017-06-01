@@ -16,5 +16,6 @@ interface Connection
     public function close();
     
     public function getEngine();
+    public function getConfig();
     public function heartbeat();
 }
