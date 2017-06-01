@@ -100,4 +100,15 @@ class PoolEx
             return $this->poolEx->release($conn, \swoole_connpool::SWOOLE_CONNNECT_OK);
         }
     }
+
+    public function getStatInfo()
+    {
+        $info = $this->poolEx->getStatInfo();
+
+        return [
+            "all" => $info["all_conn_obj"],
+            "active" => $info["all_conn_obj"] - $info["idle_conn_obj"],
+            "free" => $info["idle_conn_obj"],
+        ];
+    }
 }

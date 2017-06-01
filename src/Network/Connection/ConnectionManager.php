@@ -129,12 +129,7 @@ class ConnectionManager
         }
 
         foreach (self::$poolExMap as $poolKey => $pool) {
-            $info = $pool->getStatInfo();
-            $hawk->add(Constant::BIZ_CONNECTION_POOL,
-                [
-                    'free'  => $info["idle_conn_obj"],
-                    'active' => $info["all_conn_obj"] - $info["idle_conn_obj"],
-                ], [
+            $hawk->add(Constant::BIZ_CONNECTION_POOL, $pool->getStatInfo(), [
                     'pool_name' => $poolKey,
                 ]
             );

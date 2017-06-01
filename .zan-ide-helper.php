@@ -139,6 +139,15 @@ class swoole_connpool
      * destroy 释放连接池对象，调用此接口前，需要将连接对象全部释放
      */
     public function destroy() { }
+
+    /**
+     * @return  array
+     * [
+     *  "all_conn_obj" => 0,
+     *  "idle_conn_obj" => 0,
+     * ]
+     */
+    public function getStatInfo() { }
 }
 
 /**
