@@ -12,6 +12,8 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\HttpClient;
 
+//基于语法树的 HTML5 过滤服务
+//@see http://doc.qima-inc.com/pages/viewpage.action?pageId=14333333
 class HtmlSanitize
 {
 
