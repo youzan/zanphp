@@ -130,16 +130,24 @@ class ConnectionInitiator
 
     private function fixConfig(array $config)
     {
-        return Arr::merge([
+        $config = Arr::merge([
             "connect_timeout" => static::CONNECT_TIMEOUT,
             "pool" => [
                 "minimum-connection-count" => 10,
                 "maximum-connection-count" => 50,
                 "maximum-wait-connection" => static::CONCURRENCY_CONNECTION_LIMIT,
+                // heartbeat interval 兼容旧配置
                 "heartbeat-time" => static::HEARTBEAT_INTERVAL,
                 "heartbeat-timeout" => static::HEARTBEAT_TIMEOUT,
             ],
         ], $config);
+
+        // for timer
+        $config["connect_timeout"] = intval($config["connect_timeout"]);
+        $config["pool"]["heartbeat-time"] = intval($config["pool"]["heartbeat-time"]);
+        $config["pool"]["heartbeat-timeout"] = intval($config["pool"]["heartbeat-timeout"]);
+
+        return $config;
     }
 
     /**
