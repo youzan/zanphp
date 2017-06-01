@@ -19,11 +19,6 @@ use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 class AsyncConnection implements Async
 {
     /**
-     * @var bool
-     */
-    public $isReleased;
-
-    /**
      * @var callable
      */
     private $callback;
@@ -36,7 +31,6 @@ class AsyncConnection implements Async
     public function __construct(PoolEx $poolEx)
     {
         $this->poolEx = $poolEx;
-        $this->isReleased = false;
     }
 
     public function __invoke(\swoole_connpool $pool, $connEx)
