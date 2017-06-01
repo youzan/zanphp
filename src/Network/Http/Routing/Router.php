@@ -52,8 +52,19 @@ class Router {
             return false;
         }
 
-        $this->prepare($requestUri);
-        $this->parseRequestFormat($requestUri);
+        $this->route = $this->handleUri($requestUri);
+        $request->setRoute($this->route);
+        $request->setRequestFormat($this->format);
+        $this->setParameters($request, $this->parameters);
+        $route = $this->parseRoute();
+        $this->clear();
+        return $route;
+    }
+
+    public function handleUri($uri)
+    {
+        $this->prepare($uri);
+        $this->parseRequestFormat($uri);
         empty($this->url) ? $this->setDefaultRoute() : $this->parseRegexRoute();
         $this->repairRoute();
 
@@ -68,12 +79,7 @@ class Router {
                 }
             }
         }
-        $request->setRoute($this->route);
-        $request->setRequestFormat($this->format);
-        $this->setParameters($request, $this->parameters);
-        $route = $this->parseRoute();
-        $this->clear();
-        return $route;
+        return $this->route;
     }
 
     private function parseRoute()

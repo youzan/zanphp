@@ -288,6 +288,22 @@ class Application
     }
 
     /**
+     * get websocket server.
+     *
+     * @return \Zan\Framework\Network\WebSocket\Server
+     */
+    public function createWebSocketServer()
+    {
+        $server = $this->getContainer()
+            ->make(ServerFactory::class, ['server'])
+            ->createWebSocketServer();
+
+        $this->server = $server;
+
+        return $server;
+    }
+
+    /**
      * @return \Zan\Framework\Network\Server\ServerBase
      */
     public function getServer()
