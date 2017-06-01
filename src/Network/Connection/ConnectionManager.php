@@ -44,6 +44,13 @@ class ConnectionManager
      */
     public function get($connKey)
     {
+        for ($i = 0; $i < 7; $i++) {
+            if (isset(self::$poolMap[$connKey]) || isset(self::$poolExMap[$connKey])) {
+                break;
+            }
+            yield taskSleep(50);
+        }
+
         if (isset(self::$poolExMap[$connKey])) {
             yield $this->getFromPoolEx($connKey);
         } else if(isset(self::$poolMap[$connKey])){
