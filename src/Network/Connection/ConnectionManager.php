@@ -39,6 +39,11 @@ class ConnectionManager
      */
     public function get($connKey, $timeout=0)
     {
+        for ($i = 0; $i < 7; $i++) {
+            if (isset(self::$poolMap[$connKey]))
+                break;
+            yield taskSleep(50);
+        }
         if(!isset(self::$poolMap[$connKey])){
             throw new InvalidArgumentException('No such ConnectionPool:'. $connKey);
         }
