@@ -99,7 +99,7 @@ class Polling implements LoadBalancingStrategyInterface
 
     public function get($timeout = 100)
     {
-        $retryInterval = min(100, max(10, ceil($timeout / static::MAX_GET_RETRY)));
+        $retryInterval = intval(min(100, max(10, ceil($timeout / static::MAX_GET_RETRY))));
         yield $this->getWithRetry($retryInterval, static::MAX_GET_RETRY);
     }
 
