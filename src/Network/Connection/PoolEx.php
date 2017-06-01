@@ -82,8 +82,7 @@ class PoolEx
     {
         $asyncConn = new AsyncConnection($this);
 
-        // 从连接池获取连接的超时时间与建立连接超时时间保持一致
-        $timeout = $this->config["connect_timeout"];
+        $timeout = $this->config["pool"]["get-timeout"];
         $r = $this->poolEx->get($timeout, $asyncConn);
         if ($r === false) {
             throw new ZanException("get connection fail [pool=$this->poolType]");

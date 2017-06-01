@@ -139,6 +139,7 @@ class ConnectionInitiator
                 // heartbeat interval 兼容旧配置
                 "heartbeat-time" => static::HEARTBEAT_INTERVAL,
                 "heartbeat-timeout" => static::HEARTBEAT_TIMEOUT,
+                "get-timeout" => static::CONNECT_TIMEOUT * 2,
             ],
         ], $config);
 
@@ -146,6 +147,7 @@ class ConnectionInitiator
         $config["connect_timeout"] = intval($config["connect_timeout"]);
         $config["pool"]["heartbeat-time"] = intval($config["pool"]["heartbeat-time"]);
         $config["pool"]["heartbeat-timeout"] = intval($config["pool"]["heartbeat-timeout"]);
+        $config["pool"]["get-timeout"] = intval($config["pool"]["get-timeout"]);
 
         return $config;
     }
