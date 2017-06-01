@@ -10,9 +10,7 @@ namespace Zan\Framework\Store\Database;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliTransactionException;
-use Zan\Framework\Store\Database\Mysql\Mysqli;
 use Zan\Framework\Store\Database\Mysql\Mysql;
-use Zan\Framework\Store\Database\Mysql\Mysql2;
 use Zan\Framework\Store\Database\Mysql\MysqliResult;
 use Zan\Framework\Store\Database\Sql\SqlMap;
 use Zan\Framework\Store\Database\Sql\Table;
@@ -53,19 +51,8 @@ class Flow
     const ACTIVE_CONNECTION_CONTEXT_KEY= 'mysql_active_connections';
 
     private $engineMap = [
-        'Mysqli' => Mysqli::class,
+        'Mysqli' => Mysql::class,
     ];
-
-    public function __construct()
-    {
-        if (swoole2x()) {
-            if (_mysql2()) {
-                $this->engineMap['Mysqli'] = Mysql2::class;
-            } else {
-                $this->engineMap['Mysqli'] = Mysql::class;
-            }
-        }
-    }
 
     public function query($sid, $data, $options)
     {
@@ -160,7 +147,7 @@ class Flow
 
     /**
      * @param Connection $connection
-     * @return Mysql2
+     * @return Mysql
      */
     private function getDriver(Connection $connection)
     {

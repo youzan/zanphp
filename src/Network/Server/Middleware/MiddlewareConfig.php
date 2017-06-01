@@ -126,7 +126,6 @@ class MiddlewareConfig
             WorkerTerminator::class,
             DbTerminator::class,
             CacheTerminator::class,
-            KVTerminator::class,
 
             DebuggerTraceTerminator::class,
             TraceTerminator::class,

@@ -8,7 +8,6 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Connection\ReconnectionPloy;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Store\Database\Mysql\Mysql as Engine;
-use Zan\Framework\Store\Database\Mysql\Mysql2 as Engine2;
 use Zan\Framework\Utilities\Types\Time;
 
 class Mysql extends Base implements Connection
@@ -29,8 +28,7 @@ class Mysql extends Base implements Connection
         $this->classHash = spl_object_hash($this);
     }
 
-    // mariodb connect 回调无result 参数
-    public function onConnect(\swoole_mysql $cli, $result = true) {
+    public function onConnect(\swoole_mysql $cli, $result) {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         if (property_exists($cli, "connect_errno")) {
             $so_errno = $cli->connect_errno;
@@ -60,11 +58,7 @@ class Mysql extends Base implements Connection
     public function onError(\swoole_mysql $cli){
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         $this->close();
-        if (\swoole2x()) {
-            sys_error("mysql client error {$cli->error}({$cli->errno}) " . $this->getConnString());
-        } else {
-            sys_error("mysql client error " . $this->getConnString());
-        }
+        sys_error("mysql client error {$cli->error}({$cli->errno}) " . $this->getConnString());
     }
 
     public function close()
@@ -104,12 +98,7 @@ class Mysql extends Base implements Connection
             return;
         }
         $this->setUnReleased();
-
-        if (_mysql2()) {
-            $engine = new Engine2($this);
-        } else {
-            $engine = new Engine($this);
-        }
+        $engine = new Engine($this);
 
         try{
             yield $engine->query('select 1');

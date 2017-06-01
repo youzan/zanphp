@@ -44,14 +44,7 @@ class Mysql implements ConnectionFactory
         $connection->init();
 
         $this->conn->on('close', [$connection, 'onClose']);
-
-        if (_mysql2()) {
-            $this->conn->connect($servInfo, [$connection, "onConnect"]);
-        } else {
-            $this->conn->on('connect', [$connection, 'onConnect']);
-            $this->conn->on('error', [$connection, 'onError']);
-            $this->conn->connect($servInfo);
-        }
+        $this->conn->connect($servInfo, [$connection, "onConnect"]);
 
         Timer::after($this->config['connect_timeout'], $this->getConnectTimeoutCallback($connection), $connection->getConnectTimeoutJobId());
 

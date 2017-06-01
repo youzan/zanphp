@@ -1,4 +1,10 @@
 <?php
+/**
+ * Created by IntelliJ IDEA.
+ * User: chuxiaofeng
+ * Date: 17/3/8
+ * Time: 上午11:02
+ */
 
 namespace Zan\Framework\Store\Database\Mysql;
 
@@ -17,10 +23,6 @@ use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryDuplicateEntryUnique
 
 class Mysql implements DriverInterface
 {
-    const QUERY_FAIL = 0;
-    const QUERY_ASYNC = 1;
-    const QUERY_SYNC = 2;
-
     /**
      * @var \Zan\Framework\Network\Connection\Driver\Mysql
      */
@@ -34,8 +36,6 @@ class Mysql implements DriverInterface
     private $callback;
 
     private $result;
-
-    private $exception;
 
     /**
      * @var Trace
@@ -85,34 +85,6 @@ class Mysql implements DriverInterface
         $this->callback = $callback;
     }
 
-    private function checkResult($queryReturn, $desc)
-    {
-        // 兼容 swoole2.x 旧版本bool返回值
-        // rpm 包 > 2.0.7 之后可以去掉
-        if (is_bool($queryReturn)) {
-            if ($queryReturn === false) {
-                $queryReturn = self::QUERY_FAIL;
-            } else if ($this->result === null && $this->exception === null) {
-                $queryReturn = self::QUERY_ASYNC;
-            } else {
-                $queryReturn = self::QUERY_SYNC;
-            }
-        }
-
-        if ($queryReturn === self::QUERY_FAIL) {
-            throw new MysqliQueryException("$desc fail");
-        } else if ($queryReturn === self::QUERY_ASYNC) {
-            $this->beginTimeoutTimer($desc);
-            yield $this;
-        } else if ($queryReturn === self::QUERY_SYNC) {
-            if ($this->exception) {
-                throw $this->exception;
-            } else {
-                yield new MysqliResult($this);
-            }
-        }
-    }
-
     /**
      * @param $sql
      * @return \Generator
@@ -127,6 +99,7 @@ class Mysql implements DriverInterface
 
         $debuggerTrace = (yield getContext("debugger_trace"));
         if ($debuggerTrace instanceof DebuggerTrace) {
+            $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
             $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
             $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
@@ -134,38 +107,34 @@ class Mysql implements DriverInterface
         }
 
         $this->sql = $sql;
-        /** @noinspection PhpMethodParametersCountMismatchInspection */
-        $r = $this->swooleMysql->query($this->sql, [], [$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        $r = $this->swooleMysql->query($this->sql, [$this, "onSqlReady"]);
+        if ($r === false) {
+            throw new MysqliQueryException("mysql query fail [sql=$this->sql]");
+        } else {
+            $this->beginTimeoutTimer("mysql query");
+            yield $this;
+        }
     }
 
     public function beginTransaction($flags = 0)
     {
-        $this->sql = "START TRANSACTION";
-        /** @noinspection PhpUndefinedMethodInspection */
-        $r = $this->swooleMysql->begin([$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        yield $this->query("START TRANSACTION");
     }
 
     public function commit($flags = 0)
     {
-        $this->sql = "COMMIT";
-        /** @noinspection PhpUndefinedMethodInspection */
-        $r = $this->swooleMysql->commit([$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        yield $this->query("COMMIT");
     }
 
     public function rollback($flags = 0)
     {
-        $this->sql = "ROLLBACK";
-        /** @noinspection PhpUndefinedMethodInspection */
-        $r = $this->swooleMysql->rollback([$this, "onSqlReady"]);
-        yield $this->checkResult($r, __FUNCTION__);
+        yield $this->query("ROLLBACK");
     }
 
     /**
      * @param \swoole_mysql $link
      * @param array|bool $result
+     * @return void|\Zan\Framework\Contract\Store\Database\DbResultInterface
      * @throws MysqliConnectionLostException
      * @throws MysqliQueryDuplicateEntryUniqueKeyException
      * @throws MysqliQueryException
@@ -177,7 +146,7 @@ class Mysql implements DriverInterface
 
         $exception = null;
 
-        if ($link->errno !== 0 || $result === false) {
+        if ($result === false) {
 
             $errno = $link->errno;
             $error = $link->error;
@@ -212,10 +181,10 @@ class Mysql implements DriverInterface
         }
 
         $this->result = $result;
-        $this->exception = $exception;
 
         if ($this->callback) {
-            call_user_func_array($this->callback, [new MysqliResult($this), $exception]);
+            $callback = $this->callback;
+            $callback(new MysqliResult($this), $exception);
             $this->callback = null;
         }
     }
@@ -249,7 +218,9 @@ class Mysql implements DriverInterface
                     "sql" => $sql,
                     "duration" => $duration,
                 ];
-                call_user_func_array($this->callback, [null, new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx)]);
+                $callback = $this->callback;
+                $ex = new MysqliQueryTimeoutException("Mysql $type timeout [sql=$sql, duration=$duration]", 0, null, $ctx);
+                $callback(null, $ex);
             }
         };
     }
