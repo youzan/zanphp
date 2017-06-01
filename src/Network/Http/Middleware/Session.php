@@ -12,7 +12,6 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Store\Facade\Cache;
-use Zan\Framework\Store\Facade\KV;
 use Zan\Framework\Utilities\Encrpt\Uuid;
 
 
@@ -80,7 +79,7 @@ class Session
         yield true;
     }
 
-    public function destory()
+    public function destroy()
     {
         $ret = (yield Cache::del($this->config['store_key'], [$this->session_id]));
         if (!$ret) {

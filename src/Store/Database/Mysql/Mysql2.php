@@ -99,7 +99,6 @@ class Mysql2 implements DriverInterface
 
         $debuggerTrace = (yield getContext("debugger_trace"));
         if ($debuggerTrace instanceof DebuggerTrace) {
-            $req = ["sql" => $sql];
             $conf = $this->connection->getConfig();
             $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
             $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);

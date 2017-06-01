@@ -13,15 +13,19 @@ use Zan\Framework\Contract\Network\ConnectionFactory;
 use Zan\Framework\Contract\Network\ConnectionPool;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Core\Event;
-use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\Types\ObjectArray;
 use Zan\Framework\Utilities\Types\Time;
-use Zan\Framework\Foundation\Coroutine\Task;
 
 class Pool implements ConnectionPool
 {
+    /**
+     * @var ObjectArray
+     */
     private $freeConnection = null;
 
+    /**
+     * @var ObjectArray
+     */
     private $activeConnection = null;
 
     private $poolConfig = null;
@@ -51,7 +55,6 @@ class Pool implements ConnectionPool
         $this->freeConnection = new ObjectArray();
         $this->activeConnection = new ObjectArray();
         for ($i = 0; $i < $initConnection; $i++) {
-            //todo 创建链接,存入数组
             $this->createConnect();
         }
     }
@@ -119,11 +122,17 @@ class Pool implements ConnectionPool
         $connection->setEngine($this->type);
     }
 
+    /**
+     * @return ObjectArray
+     */
     public function getFreeConnection()
     {
         return $this->freeConnection;
     }
 
+    /**
+     * @return ObjectArray
+     */
     public function getActiveConnection()
     {
         return $this->activeConnection;
@@ -165,10 +174,8 @@ class Pool implements ConnectionPool
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
 
-        if (count($this->freeConnection) == 1) {
-            $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
-            Event::fire($evtName, [], false);
-        }
+        $evtName = $this->poolConfig['pool']['pool_name'] . '_free';
+        Event::fire($evtName, [], false);
     }
 
     public function remove(Connection $conn)
