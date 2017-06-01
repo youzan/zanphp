@@ -9,11 +9,8 @@
 namespace Zan\Framework\Network\Connection;
 
 
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\ZanException;
-use Zan\Framework\Network\Connection\Exception\AsyncConnectionHasReleasedException;
-use Zan\Framework\Network\Connection\Exception\AsyncConnectionIsNotReadyException;
 use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 
 class AsyncConnection implements Async
