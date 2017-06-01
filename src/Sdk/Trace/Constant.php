@@ -18,6 +18,7 @@ class Constant
     const NOVA_CLIENT = 'Nova.Client';
     const NOVA_SERVER = 'Nova.Server';
     const HTTP = "Http";
+    const WEBSOCKET = "WebSocket";
     const REMOTE_CALL = "RemoteCall";
     const SQL = "SQL";
     const REDIS = "Redis";

@@ -14,6 +14,9 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Utilities\DesignPattern\Context;
+use Zan\Framework\Network\Tcp\Request as TcpRequest;
+use Zan\Framework\Network\Http\Request\Request as HttpRequest;
+use Zan\Framework\Network\WebSocket\Request as WebSocketRequest;
 
 class TraceFilter implements RequestFilter
 {
@@ -24,7 +27,7 @@ class TraceFilter implements RequestFilter
         $rootId = $parentId = 'null';
         $name = '';
         $eventId = null;
-        if ($request instanceof \Zan\Framework\Network\Tcp\Request) {
+        if ($request instanceof TcpRequest) {
             $attachArr = $request->getRpcContext()->get();
             if (isset($attachArr[Trace::TRACE_KEY]['rootId'])) {
                 $rootId = $attachArr[Trace::TRACE_KEY]['rootId'];
@@ -45,9 +48,14 @@ class TraceFilter implements RequestFilter
             }
             $name = $request->getServiceName() . '.' . $request->getMethodName();
             $type = Constant::NOVA_SERVER;
-        } else {
+        } else if ($request instanceof HttpRequest) {
             $type = Constant::HTTP;
             $name = $request->getUrl();
+        } else if ($request instanceof WebSocketRequest) {
+            $type = Constant::WEBSOCKET;
+            $name = $request->getRoute();
+        } else {
+            return;
         }
         $trace = new Trace($config, $rootId, $parentId);
         $trace->initHeader($eventId);
