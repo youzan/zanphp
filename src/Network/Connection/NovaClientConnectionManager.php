@@ -45,35 +45,36 @@ class NovaClientConnectionManager
     public function get($protocol, $domain, $service, $method, $retry = 5)
     {
         $serviceKey = $this->serviceKey($protocol, $domain, $service);
-        if (!isset($this->serviceMap[$serviceKey])) {
-            while ($retry > 0) {
+
+        if (isset($this->serviceMap[$serviceKey])) {
+            $service = $this->serviceMap[$serviceKey];
+            if (in_array($method, $service["methods"], true)) {
+                $pool = $this->getPool($service["app_name"]);
+                yield $pool->get();
+            } else {
+                throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");
+            }
+        } else {
+            if ($retry > 0) {
                 yield taskSleep(200);
                 yield $this->get($protocol, $domain, $service, $method, --$retry);
-                return;
+            } else {
+                throw new CanNotFindNovaClientPoolException("proto=$protocol, domain=$domain, service=$service, method=$method");
             }
-            throw new CanNotFindNovaClientPoolException("proto=$protocol, domain=$domain, service=$service, method=$method");
         }
-
-        $serviceMap = $this->serviceMap[$serviceKey];
-        if (!in_array($method, $serviceMap["methods"], true)) {
-            throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");
-        }
-
-        $pool = $this->getPool($serviceMap["app_name"]);
-        yield $pool->get();
     }
 
     private function getPool($appName, array $servers = [])
     {
-        if (!isset($this->poolMap[$appName])) {
-            if ($servers) {
-                $this->work($appName, $servers);
-            } else {
-                throw new CanNotFindNovaClientPoolException("app_name=$appName");
-            }
+        if (!isset($this->poolMap[$appName]) && $servers) {
+            $this->work($appName, $servers);
         }
 
-        return $this->poolMap[$appName];
+        if (isset($this->poolMap[$appName])) {
+            return $this->poolMap[$appName];
+        } else {
+            throw new CanNotFindNovaClientPoolException("app_name=$appName");
+        }
     }
 
     public function work($appName, array $servers)
