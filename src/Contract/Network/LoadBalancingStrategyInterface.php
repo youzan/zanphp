@@ -11,6 +11,6 @@ use Zan\Framework\Network\Connection\NovaClientPool;
 
 interface LoadBalancingStrategyInterface
 {
-    public function get($timeout = 50);
+    public function get($timeout = 100);
     public function initServers(NovaClientPool $pool);
 }

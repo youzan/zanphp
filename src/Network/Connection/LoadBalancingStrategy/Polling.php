@@ -7,7 +7,6 @@
  */
 namespace Zan\Framework\Network\Connection\LoadBalancingStrategy;
 
-use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\NovaClientPool;
 
@@ -98,9 +97,9 @@ class Polling implements LoadBalancingStrategyInterface
         return $weight;
     }
 
-    public function get($timeout = 50)
+    public function get($timeout = 100)
     {
-        $retryInterval = min(50, max(10, ceil($timeout / static::MAX_GET_RETRY)));
+        $retryInterval = min(100, max(10, ceil($timeout / static::MAX_GET_RETRY)));
         yield $this->getWithRetry($retryInterval, static::MAX_GET_RETRY);
     }
 
