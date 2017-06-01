@@ -106,11 +106,17 @@ class Polling implements LoadBalancingStrategyInterface
     private function getWithRetry($retryInterval, $retry)
     {
         if ($retry > 0) {
+            $connection = null;
+
             if (intval($this->serverCount) > 0) {
-                yield $this->algorithm();
-            } else {
+                $connection = $this->algorithm();
+            }
+
+            if ($connection === null) {
                 yield taskSleep($retryInterval);
                 yield $this->getWithRetry($retryInterval, --$retry);
+            } else {
+                yield $connection;
             }
         } else {
             yield null;
