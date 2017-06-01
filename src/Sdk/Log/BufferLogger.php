@@ -8,6 +8,8 @@
 
 namespace Zan\Framework\Sdk\Log;
 
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+
 class BufferLogger extends BaseLogger
 {
     private $logger;

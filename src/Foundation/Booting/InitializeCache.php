@@ -22,7 +22,7 @@ class InitializeCache implements Bootable
             $cacheMap = ConfigLoader::getInstance()->load(Path::getCachePath());
             Cache::initConfigMap($cacheMap);
         } catch (\Exception $e) {
-            //do nothing..
+            echo_exception($e);
         }
     }
 }

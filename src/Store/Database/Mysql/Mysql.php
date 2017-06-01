@@ -11,9 +11,6 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\Constant;
-use Zan\Framework\Sdk\Trace\DebuggerTrace;
-use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
@@ -36,16 +33,6 @@ class Mysql implements DriverInterface
     private $callback;
 
     private $result;
-
-    /**
-     * @var Trace
-     */
-    private $trace;
-
-    /**
-     * @var DebuggerTrace
-     */
-    private $debuggerTrace;
 
     private $countAlias;
 
@@ -92,20 +79,6 @@ class Mysql implements DriverInterface
      */
     public function query($sql)
     {
-        $this->trace = (yield getContext("trace"));
-        if ($this->trace) {
-            $this->trace->transactionBegin(Constant::SQL, $sql);
-        }
-
-        $debuggerTrace = (yield getContext("debugger_trace"));
-        if ($debuggerTrace instanceof DebuggerTrace) {
-            $req = ["sql" => $sql];
-            $conf = $this->connection->getConfig();
-            $dsn = "mysql:host={$conf["host"]};port={$conf["port"]};dbname={$conf["database"]}";
-            $debuggerTrace->beginTransaction(Constant::SQL, $sql, $dsn);
-            $this->debuggerTrace = $debuggerTrace;
-        }
-
         $this->sql = $sql;
         $r = $this->swooleMysql->query($this->sql, [$this, "onSqlReady"]);
         if ($r === false) {
@@ -164,20 +137,6 @@ class Mysql implements DriverInterface
                 ];
                 $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql", 0, null, $ctx);
             }
-
-            if ($this->trace) {
-                $this->trace->commit($exception->getTraceAsString());
-            }
-            if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit("error", $exception);
-            }
-        } else {
-            if ($this->trace) {
-                $this->trace->commit(Constant::SUCCESS);
-            }
-            if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit("info", $result);
-            }
         }
 
         $this->result = $result;
@@ -205,13 +164,6 @@ class Mysql implements DriverInterface
     {
         $start = microtime(true);
         return function() use($sql, $start, $type) {
-            if ($this->trace) {
-                $this->trace->commit("$type timeout");
-            }
-            if ($this->debuggerTrace) {
-                $this->debuggerTrace->commit("warn", "$type timeout");
-            }
-
             if ($this->callback) {
                 $duration = microtime(true) - $start;
                 $ctx = [

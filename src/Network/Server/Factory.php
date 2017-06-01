@@ -10,7 +10,6 @@ use swoole_server as SwooleTcpServer;
 use swoole_websocket_server as SwooleWebSocketServer;
 use Zan\Framework\Network\Http\Server as HttpServer;
 use Zan\Framework\Network\Tcp\Server as TcpServer;
-use Zan\Framework\Network\MqSubscribe\Server as MqServer;
 use Zan\Framework\Network\WebSocket\Server as WebSocketServer;
 
 class Factory
@@ -67,20 +66,6 @@ class Factory
         $swooleServer = Di::make(SwooleTcpServer::class, [$this->host, $this->port], true);
 
         $server = Di::make(TcpServer::class, [$swooleServer, $this->serverConfig]);
-
-        return $server;
-    }
-
-    /**
-     * @return \Zan\Framework\Network\MqSubscribe\Server
-     */
-    public function createMqServer()
-    {
-        $this->validConfig();
-
-        $swooleServer = Di::make(SwooleHttpServer::class, [$this->host, $this->port], true);
-
-        $server = Di::make(MqServer::class, [$swooleServer, $this->serverConfig]);
 
         return $server;
     }

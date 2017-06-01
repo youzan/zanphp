@@ -9,9 +9,6 @@ use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
-use Zan\Framework\Sdk\Trace\Constant;
-use Zan\Framework\Sdk\Trace\DebuggerTrace;
-use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
 {
@@ -38,12 +35,6 @@ class HttpClient implements Async
     private $body;
 
     private $callback;
-
-    /** @var Trace */
-    private $trace;
-
-    /** @var DebuggerTrace  */
-    private $debuggerTrace;
 
     private $useHttpProxy = false;
 
@@ -153,9 +144,6 @@ class HttpClient implements Async
 
     private function build()
     {
-        $this->trace = (yield getContext('trace'));
-        $this->debuggerTrace = (yield getContext('debugger_trace'));
-
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -212,29 +200,9 @@ class HttpClient implements Async
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         }
 
-        if ($this->trace) {
-            $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
-        }
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $scheme = $this->ssl ? "https://" : "http://";
-            $name = "{$this->method}-{$scheme}{$this->host}:{$this->port}{$this->uri}";
-            $this->debuggerTrace->beginTransaction(Constant::HTTP, $name, [
-                'params' => $this->params,
-                'body' => $this->body,
-                'header' => $this->header,
-                'use_http_proxy' => $this->useHttpProxy,
-            ]);
-        }
-
         if('GET' === $this->method){
-            if ($this->trace) {
-                $this->trace->logEvent(Constant::GET, Constant::SUCCESS);
-            }
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
-            if ($this->trace) {
-                $this->trace->logEvent(Constant::POST, Constant::SUCCESS, $this->body);
-            }
             $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
         }
     }
@@ -251,29 +219,12 @@ class HttpClient implements Async
             $this->header['Scheme'] = 'https';
         }
 
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $this->header[DebuggerTrace::KEY] = $this->debuggerTrace->getKey();
-        }
-
         $this->client->setHeaders($this->header);
     }
 
     public function onReceive($cli)
     {
         Timer::clearAfterJob(spl_object_hash($this));
-        if ($this->trace) {
-            $this->trace->commit(Constant::SUCCESS);
-        }
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $res = [
-                "code" => $cli->statusCode,
-                "header" => $cli->headers,
-                "body" => mb_convert_encoding($cli->body, 'UTF-8', 'UTF-8'),
-            ];
-
-            $this->debuggerTrace->commit("info", $res);
-        }
-
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
         $this->client->close();
@@ -318,13 +269,6 @@ class HttpClient implements Async
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
 
-        if ($this->trace) {
-            $this->trace->commit($exception);
-        }
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $this->debuggerTrace->commit("warn", $exception);
-        }
-
         call_user_func($this->callback, null, $exception);
     }
 
@@ -351,13 +295,6 @@ class HttpClient implements Async
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
-
-        if ($this->trace) {
-            $this->trace->commit($exception);
-        }
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $this->debuggerTrace->commit("warn", $exception);
-        }
 
         call_user_func($this->callback, null, $exception);
     }

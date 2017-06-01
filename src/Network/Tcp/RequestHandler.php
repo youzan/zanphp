@@ -3,7 +3,6 @@
 namespace Zan\Framework\Network\Tcp;
 
 use \swoole_server as SwooleServer;
-use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Coroutine\Signal;
@@ -13,30 +12,34 @@ use Zan\Framework\Network\Exception\ServerTimeoutException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Log\Log;
-use Zan\Framework\Sdk\Monitor\Hawk;
-use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
-class RequestHandler {
+class RequestHandler
+{
     /* @var $swooleServer SwooleServer */
     private $swooleServer;
+
     /* @var $context Context */
     private $context;
+
     /* @var $request Request */
     private $request;
+
     /* @var $response Response */
     private $response;
+
     private $fd = null;
+
     private $fromId = null;
+
     /* @var $task Task */
     private $task;
+
     /* @var $middleWareManager MiddlewareManager*/
     private $middleWareManager;
 
     const DEFAULT_TIMEOUT = 30 * 1000;
-
 
     public function __construct()
     {
@@ -97,16 +100,10 @@ class RequestHandler {
                 echo_exception($e);
             }
 
-            if ($this->request && $this->request->getServiceName()) {
-                $this->reportHawk();
-                $this->logErr($e);
-            }
-
             $coroutine = static::handleException($this->middleWareManager, $response, $e);
             Task::execute($coroutine, $this->context);
 
             $this->event->fire($this->getRequestFinishJobId());
-            return;
         }
     }
 
@@ -133,23 +130,10 @@ class RequestHandler {
     public function handleTimeout()
     {
         $this->task->setStatus(Signal::TASK_KILLED);
-        $this->reportHawk();
         $ex = $this->logTimeout();
         $coroutine = static::handleException($this->middleWareManager, $this->response, $ex);
         Task::execute($coroutine, $this->context);
         $this->event->fire($this->getRequestFinishJobId());
-    }
-
-    private function getTraceIdInfo()
-    {
-        $trace = $this->task->getContext()->get("trace");
-        if ($trace instanceof Trace) {
-            return [
-                "rootId" => $trace->getRootId(),
-                "parentId" => $trace->getParentId(),
-            ];
-        }
-        return null;
     }
 
     private function logTimeout()
@@ -176,12 +160,10 @@ class RequestHandler {
             "method"    => $methodName,
             "args"      => $request->getArgs(),
             "remote"    => "$remoteIp:$remotePort",
-            "trace"     => $this->getTraceIdInfo(),
         ];
 
         $ex = new ServerTimeoutException("SERVER TIMEOUT");
         $ex->setMetadata($metaData);
-        $this->logErr($ex);
 
         return $ex;
     }
@@ -194,37 +176,5 @@ class RequestHandler {
     private function getRequestTimeoutJobId()
     {
         return spl_object_hash($this) . '_handle_timeout';
-    }
-
-    private function reportHawk()
-    {
-        $hawk = Hawk::getInstance();
-        $hawk->addTotalFailureTime(Hawk::SERVER,
-            $this->request->getServiceName(),
-            $this->request->getMethodName(),
-            $this->request->getRemoteIp(),
-            microtime(true) - $this->request->getStartTime());
-        $hawk->addTotalFailureCount(Hawk::SERVER,
-            $this->request->getServiceName(),
-            $this->request->getMethodName(),
-            $this->request->getRemoteIp());
-    }
-
-    private function logErr(\Exception $e)
-    {
-        $trace = $this->context->get('trace');
-        $traceId = '';
-        if ($trace) {
-            $traceId = $trace->getRootId();
-        }
-        $coroutine =  (yield Log::make('zan_framework')->error($e->getMessage(), [
-            'exception' => $e,
-            'app' => Application::getInstance()->getName(),
-            'language'=>'php',
-            'side'=>'server',//server,client两个选项
-            'traceId'=> $traceId,
-            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
-        ]));
-        Task::execute($coroutine);
     }
 }

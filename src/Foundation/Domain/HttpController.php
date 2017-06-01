@@ -99,11 +99,4 @@ class HttpController extends Controller
     {
         return RedirectResponse::create($url, $code);
     }
-
-    protected function dispatch($action, $mode = 0)
-    {
-        switch ($mode) {
-        }
-    }
-
 }

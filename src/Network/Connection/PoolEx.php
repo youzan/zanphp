@@ -28,10 +28,9 @@ class PoolEx
         'Tcp'       => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
         'Syslog'    => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
         'Redis'     => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
-        'KVStore'   => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
     ];
 
-    public static $engineMapEx = ['Mysqli', 'Tcp', 'Syslog', 'Redis', 'KVStore'];
+    public static $engineMapEx = ['Mysqli', 'Tcp', 'Syslog', 'Redis'];
 
     public static function support($factoryType)
     {

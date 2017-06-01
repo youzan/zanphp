@@ -11,7 +11,6 @@ namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\DnsClient;
-use Zan\Framework\Network\Connection\Factory\KVStore;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
 use Zan\Framework\Network\Connection\Factory\Redis;
 use Zan\Framework\Network\Connection\Factory\Syslog;
@@ -60,7 +59,6 @@ class ConnectionInitiator
         }
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->setServer($server);
-        $connectionManager->monitor();
         ReconnectionPloy::getInstance()->init();
         $connectionManager->monitorConnectionNum();
     }
@@ -160,7 +158,6 @@ class ConnectionInitiator
         if (PoolEx::support($factoryType)) {
             switch ($factoryType) {
                 case 'Redis':
-                case 'KVStore':
                     $config = Arr::merge([
                         "pool" => [
                             "heartbeat-construct" => function() { return [ "method" => "ping",  "args" => null, ]; },
@@ -201,9 +198,6 @@ class ConnectionInitiator
                     break;
                 case 'NovaClient':
                     $factory = new NovaClient($config);
-                    break;
-                case 'KVStore':
-                    $factory = new KVStore($config);
                     break;
                 case 'Tcp':
                     $factory = new Tcp($config);

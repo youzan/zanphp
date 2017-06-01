@@ -11,13 +11,8 @@ namespace Zan\Framework\Store\NoSQL\Redis;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\Constant;
-use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
-use Zan\Framework\Utilities\DesignPattern\Context;
-
 
 /**
  * Class Redis
@@ -49,11 +44,6 @@ class Redis implements Async
     private $cmd;
     private $args;
 
-    /**
-     * @var DebuggerTrace
-     */
-    private $debuggerTrace;
-
     const DEFAULT_CALL_TIMEOUT = 2000;
 
     /**
@@ -79,36 +69,12 @@ class Redis implements Async
     public function recv(/** @noinspection PhpUnusedParameterInspection */
         $client, $ret)
     {
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $this->debuggerTrace->commit("info", $ret);
-        }
-
         $this->cancelTimeoutTimer();
         call_user_func($this->callback, $ret);
     }
 
     public function execute(callable $callback, $task)
     {
-        /** @var Task $task */
-        /** @var Context $ctx */
-        $ctx = $task->getContext();
-        $debuggerTrace = $ctx->get("debugger_trace", null);
-        if ($debuggerTrace instanceof DebuggerTrace) {
-            $conf = $this->conn->getConfig();
-            if (isset($conf["path"])) {
-                $dsn = $conf["path"];
-            } else if (isset($conf["host"]) && isset($conf["port"])) {
-                $dsn = "{$conf["host"]}:{$conf["port"]}";
-            } else {
-                $dsn = "";
-            }
-            $debuggerTrace->beginTransaction(Constant::REDIS, $this->cmd, [
-                "args" => $this->args,
-                "dsn" => $dsn,
-            ]);
-            $this->debuggerTrace = $debuggerTrace;
-        }
-
         $this->callback = $callback;
     }
 
@@ -135,10 +101,6 @@ class Redis implements Async
                     "args" => $this->args,
                     "duration" => $duration,
                 ];
-
-                if ($this->debuggerTrace instanceof DebuggerTrace) {
-                    $this->debuggerTrace->commit("warn", $ctx);
-                }
 
                 $callback = $this->callback;
                 $ex = new RedisCallTimeoutException("Redis call {$this->cmd} timeout", 0, null, $ctx);

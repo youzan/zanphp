@@ -3,11 +3,8 @@
 namespace Zan\Framework\Foundation;
 
 use RuntimeException;
-use Zan\Framework\Foundation\Booting\CheckIfBootable;
 use Zan\Framework\Foundation\Booting\InitializeCliInput;
 use Zan\Framework\Foundation\Booting\InitializeCache;
-use Zan\Framework\Foundation\Booting\InitializeKv;
-use Zan\Framework\Foundation\Booting\InitializeSyslog;
 use Zan\Framework\Foundation\Booting\LoadFiles;
 use Zan\Framework\Foundation\Container\Container;
 use Zan\Framework\Foundation\Booting\InitializeSharedObjects;
@@ -89,7 +86,6 @@ class Application
         $this->setContainer();
 
         $bootstrapItems = [
-            CheckIfBootable::class,
             InitializeEnv::class,
             InitializeCliInput::class,
             InitializeRunMode::class,
@@ -100,8 +96,6 @@ class Application
             RegisterClassAliases::class,
             LoadFiles::class,
             InitializeCache::class,
-            InitializeKv::class,
-            InitializeSyslog::class,
         ];
 
         foreach ($bootstrapItems as $bootstrap) {

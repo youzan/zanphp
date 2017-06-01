@@ -9,15 +9,9 @@
 
 namespace Zan\Framework\Network\Server\Monitor;
 
-use Zan\Framework\Foundation\Core\Config;
-use Zan\Framework\Foundation\Coroutine\Task;
-use Zan\Framework\Sdk\Monitor\Constant;
-use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use  Zan\Framework\Network\Http\Server;
-
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Utilities\Types\Time;
 
 
 class Worker
@@ -63,8 +57,6 @@ class Worker
 
         $this->restart();
         $this->checkStart();
-        //add by chiyou
-        $this->hawk();
     }
 
     public function restart()
@@ -140,22 +132,6 @@ class Worker
         sys_echo("close:workerId->".$this->workerId);
 
         $this->server->swooleServer->exit();
-    }
-
-    public function hawk(){
-        $run = Config::get('hawk.run');
-        if (!$run) {
-            return;
-        }
-        $time = Config::get('hawk.time');
-        Timer::tick($time, [$this,'callHawk']);
-    }
-
-    public function callHawk() {
-        $hawk = Hawk::getInstance();
-        $memory =  memory_get_usage();
-        $hawk->add(Constant::BIZ_WORKER_MEMORY,
-                    ['used' => $memory]);
     }
 
     public function reactionReceive(){
