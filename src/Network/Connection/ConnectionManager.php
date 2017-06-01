@@ -128,12 +128,12 @@ class ConnectionManager
             );
         }
 
-        // TODO add swoole conn_pool statistics
         foreach (self::$poolExMap as $poolKey => $pool) {
+            $info = $pool->getStatInfo();
             $hawk->add(Constant::BIZ_CONNECTION_POOL,
                 [
-                    'free'  => 0,
-                    'active' => 0,
+                    'free'  => $info["idle_conn_obj"],
+                    'active' => $info["all_conn_obj"] - $info["idle_conn_obj"],
                 ], [
                     'pool_name' => $poolKey,
                 ]
