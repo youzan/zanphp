@@ -36,3 +36,4 @@ composer.lock
 /vendor
 *.iml
 !test/bootstrap.php
+test
