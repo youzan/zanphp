@@ -87,7 +87,7 @@ class FutureConnection implements Async
         if (isset($this->pool->waitNum) && $this->pool->waitNum > 0) {
             $this->pool->waitNum--;
         }
-        
+
         call_user_func($this->taskCallback, null, new ConnectTimeoutException("future $this->connKey connection connected timeout"));
         unset($this->taskCallback);
     }

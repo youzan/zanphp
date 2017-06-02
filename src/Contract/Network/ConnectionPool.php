@@ -14,6 +14,7 @@ interface ConnectionPool
      * ConnectionPool constructor.
      * @param \Zan\Framework\Contract\Network\ConnectionFactory $connectionFactory
      * @param array $config
+     * @param $type
      */
     public function __construct(ConnectionFactory $connectionFactory, array $config, $type);
 
@@ -37,8 +38,8 @@ interface ConnectionPool
 
     /**
      * @param Connection $conn
-     * @return bool 
+     * @return bool
      */
     public function recycle(Connection $conn);
-    
+
 }

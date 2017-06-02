@@ -31,7 +31,7 @@ class TcpClient implements Async
         $this->_callback = $callback;
     }
 
-    public function recv($data) 
+    public function recv($data)
     {
         $this->_conn->release();
         if (false === $data or '' == $data) {
@@ -42,7 +42,7 @@ class TcpClient implements Async
         }
         call_user_func($this->_callback, $data);
     }
-    
+
     public function send($data)
     {
         $sent = $this->_sock->send($data);

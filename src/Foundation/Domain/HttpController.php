@@ -55,17 +55,8 @@ class HttpController extends Controller
         return new Response($content);
     }
 
-    private function setupQiniu()
-    {
-        $this->jsVar->setConfig('qn_public', Config::get('qiniu.scope.public', null));
-        $this->jsVar->setConfig('qn_private', Config::get('qiniu.scope.private', null));
-    }
-
     public function display($tpl)
     {
-        $this->setupQiniu();
-        $csrfToken = $this->context->get('csrf_token', '');
-        $this->jsVar->setCsrfToken($csrfToken);
         $this->viewData['_js_var'] = $this->getJsVars();
         $content = View::display($tpl, $this->viewData);
         return $this->output($content);
@@ -73,9 +64,6 @@ class HttpController extends Controller
 
     public function render($tpl)
     {
-        $this->setupQiniu();
-        $csrfToken = $this->context->get('csrf_token', '');
-        $this->jsVar->setCsrfToken($csrfToken);
         $this->viewData['_js_var'] = $this->getJsVars();
         return View::display($tpl, $this->viewData);
     }

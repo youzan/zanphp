@@ -76,7 +76,7 @@ class Mysql extends Base implements Connection
     {
         Timer::after($this->config['pool']['heartbeat-time'], [$this,'heartbeating'], $this->getHeartBeatingJobId());
     }
-    
+
     public function heartbeating()
     {
         $time = Time::current(true) - $this->lastUsedTime;
@@ -103,7 +103,7 @@ class Mysql extends Base implements Connection
         try{
             yield $engine->query('select 1');
         } catch (\Exception $e){
-            return; 
+            return;
         }
 
         $this->release();

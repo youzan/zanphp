@@ -65,13 +65,19 @@ class Config
         }
 
         $result = &self::$configMap;
+        $hasConfig = true;
         foreach ($routes as $route) {
             if (!isset($result[$route])) {
+                $hasConfig = false;
                 break;
             }
             $result = &$result[$route];
         }
-        return $result;
+        if ($hasConfig) {
+            return $result;
+        } else {
+            return $default;
+        }
     }
 
     public static function set($key, $value)

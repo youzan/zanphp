@@ -12,7 +12,7 @@ class LoadConfiguration implements Bootable
     /**
      * Bootstrap the given application.
      *
-     * @param  \Zan\Framework\Foundation\Application  $app
+     * @param  \Zan\Framework\Foundation\Application $app
      */
     public function bootstrap(Application $app)
     {

@@ -491,7 +491,7 @@ class Command extends SymfonyCommand
     /**
      * Set the Laravel application instance.
      *
-     * @param  \Zan\Framework\Foundation\Application  $app
+     * @param  \Zan\Framework\Foundation\Application $app
      */
     public function setZanApp($app)
     {

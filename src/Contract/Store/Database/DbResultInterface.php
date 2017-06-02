@@ -17,7 +17,7 @@ interface DbResultInterface
     public function __construct(DriverInterface $driver);
 
     /**
-     * @return int 
+     * @return int
      */
     public function getLastInsertId();
 

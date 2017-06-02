@@ -41,6 +41,8 @@ interface DriverInterface extends Async
     public function rollback($flags = 0);
 
     /**
+     * @param $link
+     * @param $result
      * @return DbResultInterface
      */
     public function onSqlReady($link, $result);

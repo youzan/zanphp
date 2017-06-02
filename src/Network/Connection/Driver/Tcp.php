@@ -18,7 +18,7 @@ class Tcp extends Base implements Connection
 {
     private $clientCb;
     protected $isAsync = true;
-    
+
     public function closeSocket()
     {
         try {
@@ -60,7 +60,7 @@ class Tcp extends Base implements Connection
         $this->close();
         sys_error("tcp client error " . $this->getConnString());
     }
-    
+
     public function setClientCb(callable $cb) {
         $this->clientCb = $cb;
     }

@@ -157,7 +157,7 @@ class Pool implements ConnectionPool
     public function recycle(Connection $conn)
     {
         $evtName = null;
-        
+
         $this->freeConnection->push($conn);
         $this->activeConnection->remove($conn);
 

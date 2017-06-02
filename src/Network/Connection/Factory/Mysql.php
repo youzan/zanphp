@@ -24,7 +24,7 @@ class Mysql implements ConnectionFactory
     {
         $this->config = $config;
     }
-    
+
     public function create()
     {
         $servInfo = [

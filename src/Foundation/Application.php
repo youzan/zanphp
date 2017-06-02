@@ -196,7 +196,7 @@ class Application
     /**
      * Set the shared instance of the container.
      *
-     * @param  \Zan\Framework\Foundation\Application  $app
+     * @param  \Zan\Framework\Foundation\Application $app
      * @return void
      */
     public static function setInstance($app)
@@ -259,22 +259,6 @@ class Application
         $server = $this->getContainer()
             ->make(ServerFactory::class, ['server'])
             ->createTcpServer();
-
-        $this->server = $server;
-
-        return $server;
-    }
-
-    /**
-     * get mq subscribe server.
-     *
-     * @return \Zan\Framework\Network\Http\Server
-     */
-    public function createMqServer()
-    {
-        $server = $this->getContainer()
-            ->make(ServerFactory::class, ['subscribeServer'])
-            ->createMqServer();
 
         $this->server = $server;
 
