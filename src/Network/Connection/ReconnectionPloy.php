@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: liuxinlong
- * Date: 16/7/21
- * Time: 15:49
- */
 
 namespace Zan\Framework\Network\Connection;
 

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/4/6
- * Time: 10:39
- */
 
 namespace Zan\Framework\Contract\Store\Database;
 

@@ -1,7 +1,5 @@
 <?php
-/**
- * @see zan/test/Foundation/Coroutine/TaskDemoTest.php
- */
+
 namespace Zan\Framework\Testing;
 
 use Zan\Framework\Foundation\Coroutine\Event;

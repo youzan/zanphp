@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: marsnowxiao
- * Date: 2017/5/26
- * Time: 下午8:23
- */
 namespace Zan\Framework\Network\WebSocket;
 
 use \swoole_websocket_server as SwooleWebSocketServer;

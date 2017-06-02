@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/3/24
- * Time: 10:59
- */
 
 namespace Zan\Framework\Nova\Service;
 

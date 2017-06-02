@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: marsnowxiao
- * Date: 2017/5/8
- * Time: 下午2:46
- */
 namespace Zan\Framework\Network\Http\ServerStart;
 
 use Zan\Framework\Foundation\Core\Config;

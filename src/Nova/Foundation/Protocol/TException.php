@@ -1,10 +1,4 @@
 <?php
-/**
- * Abs TException
- * User: moyo
- * Date: 11/4/15
- * Time: 4:45 PM
- */
 
 namespace Zan\Framework\Nova\Foundation\Protocol;
 

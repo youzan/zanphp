@@ -1,10 +1,4 @@
 <?php
-/**
- * Thrift IO container (bin-acc)
- * User: moyo
- * Date: 10/23/15
- * Time: 4:04 PM
- */
 
 namespace Zan\Framework\Nova\Protocol;
 

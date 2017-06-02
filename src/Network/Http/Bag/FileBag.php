@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xiaoniu
- * Date: 16/8/22
- * Time: 下午8:11
- */
 namespace Zan\Framework\Network\Http\Bag;
 
 class FileBag

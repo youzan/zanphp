@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/11/26
- * Time: 19:51
- */
 
 namespace Zan\Framework\Utilities\DesignPattern;
 

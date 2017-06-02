@@ -1,10 +1,4 @@
 <?php
-/**
- * Packer abstracts
- * User: moyo
- * Date: 10/22/15
- * Time: 3:25 PM
- */
 
 namespace Zan\Framework\Nova\Protocol\Packer;
 

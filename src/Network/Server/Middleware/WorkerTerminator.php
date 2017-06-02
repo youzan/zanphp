@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: chenfan
- * Date: 16/5/8
- * Time: 下午10:14
- */
 
 namespace Zan\Framework\Network\Server\Middleware;
 

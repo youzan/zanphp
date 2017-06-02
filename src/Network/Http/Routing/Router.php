@@ -1,8 +1,4 @@
 <?php
-/**
- * @author hupp
- * create date: 16/01/15
- */
 namespace Zan\Framework\Network\Http\Routing;
 
 use Zan\Framework\Foundation\Core\Config;

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: suqian
- * Date: 16/3/22
- * Time: 下午2:36
- */
 
 namespace Zan\Framework\Utilities\Types;
 

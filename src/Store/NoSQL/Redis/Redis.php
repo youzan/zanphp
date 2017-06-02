@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Demon
- * Date: 16/6/14
- * Time: 下午2:48
- */
 
 namespace Zan\Framework\Store\NoSQL\Redis;
 

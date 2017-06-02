@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: marsnowxiao
- * Date: 2017/5/26
- * Time: 下午7:52
- */
 namespace Zan\Framework\Network\WebSocket;
 
 use Zan\Framework\Contract\Network\Request as BaseRequest;

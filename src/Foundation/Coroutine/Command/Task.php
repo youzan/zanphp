@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/11/9
- * Time: 14:24
- */
 use Zan\Framework\Foundation\Contract\Resource;
 use Zan\Framework\Foundation\Coroutine\Parallel;
 use Zan\Framework\Foundation\Coroutine\Signal;

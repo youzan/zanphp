@@ -1,10 +1,4 @@
 <?php
-/**
- * Pack Thrift-bin with php code
- * User: moyo
- * Date: 10/22/15
- * Time: 3:22 PM
- */
 
 namespace Zan\Framework\Nova\Protocol\Packer;
 

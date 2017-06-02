@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: suqian
- * Date: 16/7/28
- * Time: 下午3:04
- */
 
 namespace Zan\Framework\Utilities\File;
 use Zan\Framework\Foundation\Contract\Async;

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: chuxiaofeng
- * Date: 17/3/8
- * Time: 上午11:02
- */
 
 namespace Zan\Framework\Store\Database\Mysql;
 

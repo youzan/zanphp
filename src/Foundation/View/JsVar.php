@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: chenfan
- * Date: 16/3/22
- * Time: 下午2:57
- */
 
 namespace Zan\Framework\Foundation\View;
 

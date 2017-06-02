@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xanaduv
- * Date: 2016/12/8
- * Time: 15:35
- */
 
 namespace Zan\Framework\Nova\Utils;
 

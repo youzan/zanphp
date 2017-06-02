@@ -3,12 +3,6 @@
 namespace Zan\Framework\Utilities\Encode;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Demon
- * Date: 16/5/6
- * Time: 上午10:14
- */
 class LZ4
 {
     const LZ4_DELIMITER = ':';

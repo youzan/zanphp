@@ -1,10 +1,4 @@
 <?php
-/**
- * Abs TService
- * User: moyo
- * Date: 9/14/15
- * Time: 8:55 PM
- */
 
 namespace Zan\Framework\Nova\Foundation;
 

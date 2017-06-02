@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/12/12
- * Time: 22:23
- */
+
 namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Contract\Network\Connection;

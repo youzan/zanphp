@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Created by PhpStorm.
- * User: heize
- * Date: 16/4/26
- * Time: 下午4:57
- */
 
 namespace Zan\Framework\Network\Server\Monitor;
 
@@ -106,7 +100,7 @@ class Worker
         Timer::clearTickJob($this->classHash.'_check');
 
         /* @var $this->server Server */
-        $this->server->swooleServer->deny_request($this->workerId);
+        $this->server->swooleServer->denyRequest($this->workerId);
         $this->isDenyRequest = true;
 
         if (is_callable($this->mqReadyClosePre)) {

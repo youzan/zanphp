@@ -1,10 +1,4 @@
 <?php
-/**
- * Spec mgr (for service)
- * User: moyo
- * Date: 9/17/15
- * Time: 8:03 PM
- */
 
 namespace Zan\Framework\Nova\Foundation\Traits;
 

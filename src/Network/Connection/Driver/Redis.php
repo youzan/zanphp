@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/4/5
- * Time: 11:13
- */
 
 namespace Zan\Framework\Network\Connection\Driver;
 

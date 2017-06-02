@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xiaoniu
- * Date: 16/7/28
- * Time: 下午4:45
- */
 namespace Zan\Framework\Network\Server\Middleware;
 
 use Zan\Framework\Contract\Network\Request;

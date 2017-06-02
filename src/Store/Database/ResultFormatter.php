@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xiaoniu
- * Date: 16/4/12
- * Time: 下午5:05
- */
 namespace Zan\Framework\Store\Database;
 
 use Zan\Framework\Contract\Store\Database\ResultFormatterInterface;

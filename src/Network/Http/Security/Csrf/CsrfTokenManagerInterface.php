@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: mac
- * Date: 7/23/16
- * Time: 05:16
- */
 
 namespace Zan\Framework\Network\Http\Security\Csrf;
 

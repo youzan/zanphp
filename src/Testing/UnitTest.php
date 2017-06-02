@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/2/25
- * Time: 15:45
- */
 
 namespace Zan\Framework\Testing;
 

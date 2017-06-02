@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/3/14
- * Time: 00:02
- */
 
 namespace Zan\Framework\Network\Http;
 

@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: marsnowxiao
- * Date: 2017/5/27
- * Time: 下午2:17
- */
 namespace Zan\Framework\Network\WebSocket;
 
 use Zan\Framework\Foundation\Container\Di;

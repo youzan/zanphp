@@ -1,10 +1,4 @@
 <?php
-/**
- * Instance mgr
- * User: moyo
- * Date: 9/21/15
- * Time: 5:12 PM
- */
 
 namespace Zan\Framework\Nova\Foundation\Traits;
 

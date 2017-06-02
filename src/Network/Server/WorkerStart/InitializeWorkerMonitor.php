@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: heize
- * Date: 16/4/26
- * Time: 下午2:08
- */
 
 namespace Zan\Framework\Network\Server\WorkerStart;
 

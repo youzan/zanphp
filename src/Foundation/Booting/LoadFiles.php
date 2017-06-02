@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Demon
- * Date: 16/5/19
- * Time: 下午2:00
- */
 
 namespace Zan\Framework\Foundation\Booting;
 

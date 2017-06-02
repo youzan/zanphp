@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/12/16
- * Time: 14:46
- */
 
 namespace Zan\Framework\Store\Facade;
 

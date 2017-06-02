@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: nuomi
- * Date: 16/4/15
- * Time: 下午2:09
- */
 
 namespace Zan\Framework\Network\Http\ServerStart;
 

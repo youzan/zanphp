@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/3/18
- * Time: 14:47
- */
 namespace Zan\Framework\Nova;
 
 use Zan\Framework\Nova\Protocol\Packer;

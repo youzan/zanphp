@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/4/11
- * Time: 15:01
- */
 
 namespace Zan\Framework\Foundation\Exception\Handler;
 

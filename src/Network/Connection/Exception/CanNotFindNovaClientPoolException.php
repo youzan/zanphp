@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xiaoniu
- * Date: 16/6/3
- * Time: 下午3:58
- */
 namespace Zan\Framework\Network\Connection\Exception;
 
 

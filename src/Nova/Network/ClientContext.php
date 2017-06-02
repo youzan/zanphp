@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Demon
- * Date: 16/5/23
- * Time: 下午3:11
- */
 
 namespace Zan\Framework\Nova\Network;
 

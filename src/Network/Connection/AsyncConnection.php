@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: chuxiaofeng
- * Date: 17/5/27
- * Time: 上午10:12
- */
 
 namespace Zan\Framework\Network\Connection;
 

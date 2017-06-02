@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: nuomi
- * Date: 16/5/27
- * Time: 下午3:36
- */
 
 namespace Zan\Framework\Sdk\Log;
 

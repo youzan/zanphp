@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xiaoniu
- * Date: 16/3/25
- * Time: 下午5:47
- */
 namespace Zan\Framework\Store\Database\Sql;
 
 use Zan\Framework\Foundation\Core\Path;

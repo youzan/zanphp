@@ -1,10 +1,4 @@
 <?php
-/**
- * Abs TSpecification
- * User: moyo
- * Date: 9/15/15
- * Time: 3:23 PM
- */
 
 namespace Zan\Framework\Nova\Foundation;
 

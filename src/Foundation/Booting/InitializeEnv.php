@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: chenfan
- * Date: 16/4/19
- * Time: 上午10:19
- */
 
 namespace Zan\Framework\Foundation\Booting;
 

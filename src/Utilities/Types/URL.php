@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: heize
- * Date: 16/3/8
- * Time: 上午11:11
- */
 namespace Zan\Framework\Utilities\Types;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;

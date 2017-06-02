@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: chenfan
- * Date: 16/5/9
- * Time: 下午5:29
- */
 
 namespace Zan\Framework\Network\Http\Routing;
 

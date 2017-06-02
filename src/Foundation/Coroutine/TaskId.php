@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 15/11/26
- * Time: 19:45
- */
 
 namespace Zan\Framework\Foundation\Coroutine;
 

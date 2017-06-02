@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: winglechen
- * Date: 16/3/2
- * Time: 17:18
- */
 
 namespace Zan\Framework\Foundation\Core;
 
@@ -23,10 +17,8 @@ class Path
     const DEFAULT_ROUTING_PATH  = 'resource/routing/';
     const DEFAULT_MIDDLEWARE_PATH   = 'resource/middleware';
     const DEFAULT_CRON_PATH         = 'resource/config/share/cron/';
-    const DEFAULT_MQWORKER_PATH     = 'resource/config/share/mqworker/';
     const DEFAULT_MODULE_CONFIG_PATH_PREFIX = 'resource/config_';
     const DEFAULT_ZAN_PATH       = 'vendor/zan-config/zan/src/';
-    const DEFAULT_IRON_PATH      = 'vendor/zan-config/iron/files/';
     const DEFAULT_APP_PATH       = 'vendor/zan-config/app/';
 
     const ROOT_PATH_CONFIG_KEY    = 'path.root';
@@ -34,16 +26,13 @@ class Path
     const SQL_PATH_CONFIG_KEY     = 'path.sql';
     const LOG_PATH_CONFIG_KEY     = 'path.log';
     const CACHE_PATH_CONFIG_KEY   = 'path.cache';
-    const KV_PATH_CONFIG_KEY   = 'path.kvstore';
+    const KV_PATH_CONFIG_KEY      = 'path.kvstore';
     const MODEL_PATH_CONFIG_KEY   = 'path.model';
     const TABLE_PATH_CONFIG_KEY   = 'path.table';
     const ROUTING_PATH_CONFIG_KEY = 'path.routing';
     const MIDDLEWARE_PATH_CONFIG_KEY = 'path.middleware';
-    const IRON_PATH_CONFIG_KEY    = 'path.iron';
     const APP_PATH_CONFIG_KEY     = 'path.app';
     const ZAN_PATH_CONFIG_KEY     = 'path.zan';
-    const CRON_PATH_CONFIG_KEY          = 'path.cron';
-    const MQ_WORKER_PATH_CONFIG_KEY     = 'path.mqworker';
     const MODULE_CONFIG_PATH_CONFIG_KEY = 'path.module_config';
 
     private static $rootPath    = null;
@@ -55,12 +44,9 @@ class Path
     private static $modelPath   = null;
     private static $tablePath   = null;
     private static $routingPath = null;
-    private static $middlewarePath = null;
-    private static $zanConfigPath = null;
-    private static $ironConfigPath = null;
-    private static $appConfigPath = null;
-    private static $cronConfigPath = null;
-    private static $mqWorkerConfigPath = null;
+    private static $middlewarePath  = null;
+    private static $zanConfigPath   = null;
+    private static $appConfigPath   = null;
     private static $moduleConfigPath = null;
 
     public static function init($rootPath)
@@ -80,11 +66,13 @@ class Path
         return self::$configPath;
     }
 
-    public static function setConfigPath($configPath){
+    public static function setConfigPath($configPath)
+    {
         self::$configPath = $configPath;
     }
 
-    public static function setLogPath($logPath){
+    public static function setLogPath($logPath)
+    {
         self::$logPath = $logPath;
     }
 
@@ -133,22 +121,9 @@ class Path
         return self::$zanConfigPath;
     }
 
-    public static function getIronPath(){
-        return self::$ironConfigPath;
-    }
-
-    public static function getAppPath(){
+    public static function getAppPath()
+    {
         return self::$appConfigPath;
-    }
-
-    public static function getCronPath()
-    {
-        return self::$cronConfigPath;
-    }
-
-    public static function getMqWorkerPath()
-    {
-        return self::$mqWorkerConfigPath;
     }
 
     public static function getModuleConfigPath()
@@ -173,10 +148,7 @@ class Path
         self::$routingPath = self::$rootPath . self::DEFAULT_ROUTING_PATH;
         self::$middlewarePath = self::$rootPath . self::DEFAULT_MIDDLEWARE_PATH;
         self::$zanConfigPath =  self::$rootPath . self::DEFAULT_ZAN_PATH;
-        self::$ironConfigPath = self::$rootPath .self::DEFAULT_IRON_PATH;
         self::$appConfigPath = self::$rootPath .self::DEFAULT_APP_PATH;
-        self::$cronConfigPath = self::$rootPath . self::DEFAULT_CRON_PATH;
-        self::$mqWorkerConfigPath = self::$rootPath . self::DEFAULT_MQWORKER_PATH;
 
         $appNamePostfix = str_replace('-', '_', Application::getInstance()->getName());
         self::$moduleConfigPath = self::$rootPath . self::DEFAULT_MODULE_CONFIG_PATH_PREFIX . "$appNamePostfix/";
@@ -195,10 +167,7 @@ class Path
         Config::set(self::TABLE_PATH_CONFIG_KEY, self::$tablePath);
         Config::set(self::ROUTING_PATH_CONFIG_KEY, self::$routingPath);
         Config::set(self::MIDDLEWARE_PATH_CONFIG_KEY, self::$middlewarePath);
-        Config::set(self::IRON_PATH_CONFIG_KEY, self::$ironConfigPath);
         Config::set(self::APP_PATH_CONFIG_KEY, self::$appConfigPath);
-        Config::set(self::CRON_PATH_CONFIG_KEY, self::$cronConfigPath);
-        Config::set(self::MQ_WORKER_PATH_CONFIG_KEY, self::$mqWorkerConfigPath);
         Config::set(self::MODULE_CONFIG_PATH_CONFIG_KEY, self::$moduleConfigPath);
     }
 }

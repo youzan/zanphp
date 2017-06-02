@@ -1,10 +1,4 @@
 <?php
-/**
- * Service scanner
- * User: moyo
- * Date: 12/3/15
- * Time: 6:16 PM
- */
 
 namespace Zan\Framework\Nova\Service;
 

@@ -2,12 +2,6 @@
 
 namespace Zan\Framework\Utilities\Encrpt;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Demon
- * Date: 16/5/9
- * Time: 上午10:13
- */
 class Uuid
 {
     //临时用
