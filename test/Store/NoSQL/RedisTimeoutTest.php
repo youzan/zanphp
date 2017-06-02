@@ -5,7 +5,6 @@ use Zan\Framework\Network\Connection\ConnectionInitiator;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
 use Zan\Framework\Store\NoSQL\Redis\Redis;
-use Zan\Framework\Network\Connection\Factory\Redis as RedisFactory;
 use Zan\Framework\Testing\TaskTest;
 
 /**
