@@ -2,8 +2,10 @@
 namespace Zan\Framework\Utilities\Types;
 
 
-class Money {
+class Money
+{
     private $num = 0;
+    
     public function __construct($num)
     {
         $this->num = $num;
@@ -38,5 +40,4 @@ class Money {
     {
         return number_format(intval(round($this->num / 100, 2, PHP_ROUND_HALF_EVEN)), 2, '.', '');
     }
-
 }

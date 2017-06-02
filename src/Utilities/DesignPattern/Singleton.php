@@ -1,7 +1,8 @@
 <?php
 namespace Zan\Framework\Utilities\DesignPattern;
 
-trait Singleton {
+trait Singleton
+{
 
     /**
      * @var static
@@ -36,5 +37,4 @@ trait Singleton {
     {
         static::$_instance = $instance;
     }
-
 }

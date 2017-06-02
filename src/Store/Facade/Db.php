@@ -10,7 +10,8 @@ namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Store\Database\Flow;
 
-class Db {
+class Db
+{
     const RETURN_AFFECTED_ROWS  = true;
     const USE_MASTER            = true;
     const RETURN_INSERT_ID      = false;

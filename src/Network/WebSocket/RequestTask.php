@@ -13,7 +13,6 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Dispatcher;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Network\WebSocket\RequestHandler;
 
 class RequestTask
 {

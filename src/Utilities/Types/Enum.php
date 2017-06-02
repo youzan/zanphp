@@ -9,7 +9,8 @@
 namespace Zan\Framework\Utilities\Types;
 
 
-class Enum {
+class Enum
+{
 
     protected static $enum = null;
 

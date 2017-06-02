@@ -20,6 +20,4 @@ abstract class Stub
     {
         return $this->realClassName;
     }
-
-
 }

@@ -24,8 +24,6 @@ class RpcContext
 
     public function set($key, $value)
     {
-        $this->valid($key);
-
         $old = null;
 
         if (isset($this->ctx[$key])) {
@@ -39,18 +37,6 @@ class RpcContext
         }
 
         return $old;
-    }
-
-    private function valid($key)
-    {
-        return true;
-
-        /*
-        $whiteList = Config::get("rpccontext.white_list", GenericRequestCodec::$carmenInternalArgs);
-        if (!in_array($key, $whiteList, true)) {
-            throw new InvalidArgumentException("set invalid rpcContext key $key");
-        }
-        */
     }
 
     public function bindTaskCtx(Context $taskCtx)

@@ -12,8 +12,8 @@ use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Foundation\Coroutine\Task;
-use Kdt\Iron\Nova\Network\Client as NovaPingClient;
-use Kdt\Iron\Nova\Exception\NetworkException;
+use Zan\Framework\Nova\Network\Client as NovaPingClient;
+use Zan\Framework\Nova\Exception\NetworkException;
 use Zan\Framework\Utilities\Types\Time;
 
 class NovaClient extends Base implements Connection

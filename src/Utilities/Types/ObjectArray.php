@@ -9,7 +9,8 @@
 namespace Zan\Framework\Utilities\Types;
 
 
-class ObjectArray {
+class ObjectArray
+{
 
     private $map = [];
 
@@ -47,5 +48,4 @@ class ObjectArray {
     {
         return empty($this->map);
     }
-
 }

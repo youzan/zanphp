@@ -11,7 +11,8 @@ namespace Zan\Framework\Utilities\Types;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 
-class Number {
+class Number
+{
     public static function floatToString($float) /* string */
     {
         if(is_string($float)) {

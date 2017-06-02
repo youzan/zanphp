@@ -1,7 +1,8 @@
 <?php
 namespace Zan\Framework\Utilities\Types;
 
-class Map {
+class Map
+{
     private $data = null;
 
     public function __construct()
@@ -22,5 +23,4 @@ class Map {
     {
         $this->data[$key] = $value;
     }
-
 }

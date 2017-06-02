@@ -8,20 +8,22 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
-use Zan\Framework\Network\Exception\GenericInvokeException;
 
-class Response implements BaseResponse {
+class Response implements BaseResponse
+{
     /**
      * @var SwooleServer
      */
     private $swooleServer;
+
     /**
      * @var Request
      */
     private $request;
+
     private $exception;
 
     public function __construct(SwooleServer $swooleServer, Request $request)
@@ -114,6 +116,4 @@ class Response implements BaseResponse {
             );
         }
     }
-    
-
 }

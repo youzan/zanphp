@@ -111,7 +111,9 @@ class Timer
      */
     public static function clearTickMap($key)
     {
-        if(!$key) return false;
+        if(!$key) {
+            return false;
+        }
         
         unset(self::$tickMap[$key]);
     }
@@ -122,7 +124,9 @@ class Timer
      */
     public static function clearAfterMap($key)
     {
-        if(!$key) return false;
+        if(!$key) {
+            return false;
+        }
 
         unset(self::$afterMap[$key]);
     }

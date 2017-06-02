@@ -11,9 +11,10 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Nova\Nova;
 
-class Dispatcher {
+class Dispatcher
+{
     /**
      * @var Request
      */

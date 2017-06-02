@@ -11,7 +11,7 @@ namespace Zan\Framework\Network\Connection\Factory;
 
 use Zan\Framework\Contract\Network\ConnectionFactory;
 
-class Http  implements ConnectionFactory
+class Http implements ConnectionFactory
 {
     /**
      * @var array

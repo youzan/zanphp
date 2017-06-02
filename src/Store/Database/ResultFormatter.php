@@ -6,6 +6,7 @@
  * Time: 下午5:05
  */
 namespace Zan\Framework\Store\Database;
+
 use Zan\Framework\Contract\Store\Database\ResultFormatterInterface;
 use Zan\Framework\Contract\Store\Database\DbResultInterface;
 use Zan\Framework\Contract\Store\Database\ResultTypeInterface;

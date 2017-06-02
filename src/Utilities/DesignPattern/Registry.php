@@ -9,7 +9,8 @@
 namespace Zan\Framework\Utilities\DesignPattern;
 
 
-class Registry  {
+class Registry
+{
     private static $classMap = [];
 
     public static function get($key, $default=null)

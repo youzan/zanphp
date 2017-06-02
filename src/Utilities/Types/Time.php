@@ -1,9 +1,12 @@
 <?php
 namespace Zan\Framework\Utilities\Types;
+
 use DateTime;
+
 class Time
 {
     private $timeStamp = null;
+
     public function __construct($timeStamp=null)
     {
         if(null !== $timeStamp && is_int($timeStamp)) {

@@ -9,7 +9,6 @@ namespace Zan\Framework\Utilities\Types;
 
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Http\Response\RedirectResponse;
-use Zan\Framework\Sdk\Cdn\Qiniu;
 
 class URL
 {
@@ -17,10 +16,10 @@ class URL
     const SCHEME_HTTP = 'http';
     const SCHEME_HTTPS = 'https';
 
-    private static $schemes = array(
+    private static $schemes = [
         self::SCHEME_HTTP,
         self::SCHEME_HTTPS,
-    );
+    ];
 
     private static $config;
 
@@ -94,39 +93,7 @@ class URL
         return $url;
     }
 
-
-    /**
-     * This method returns cdn url.
-     *
-     * @param $url
-     * @param $imgExt
-     * @param $scheme
-     * @param $removeImgExt
-     * @return string
-     * @throws InvalidArgumentException
-     */
-    public static function cdnSite($url, $imgExt = null, $scheme = false, $removeImgExt = false)
-    {
-        if (false !== $scheme && !self::_checkScheme($scheme)) {
-            throw new InvalidArgumentException('Invalid scheme for URL::cdnSite');
-        }
-
-        if ($removeImgExt && ($pos = strrpos($url, '!'))) {
-            $url = substr($url, 0, $pos);
-        }
-
-        //todo imgqn 配置化
-        $url = self::site((strlen($url) ? $url . $imgExt : 'upload_files/no_pic.png!280x280.jpg'), 'imgqn', $scheme);
-
-        if (!preg_match('~^(https?://static\.|static\.|dn-kdt-static\.qbox\.me|https?://dn-kdt-static\.qbox\.me)~s', $url)) {
-            $url = Qiniu::site($url);
-        }
-
-        return self::_convertWebp($url);
-    }
-
-
-    public static function removeParams($ps=null,$url=null)
+    public static function removeParams($ps=null, $url=null)
     {
         if(!$ps || !$url){
             yield $url;
@@ -153,7 +120,8 @@ class URL
         yield $prefix . '?' . http_build_query($pMap);
     }
 
-    public static function redirect($url,$code=302){
+    public static function redirect($url,$code=302)
+    {
         return  new RedirectResponse($url,$code);
     }
 
@@ -166,29 +134,6 @@ class URL
     private static function _checkScheme($scheme)
     {
         return in_array($scheme, self::$schemes);
-    }
-
-    /**
-     * cdn url convert to webp
-     *
-     * @param $imgSrc
-     * @param $canWebp
-     * @return string
-     */
-    private static function _convertWebp($imgSrc, $canWebp = false)
-    {
-        $multiple = 1;
-        $pattern = '/\.([^.!]+)\!([0-9]{1,4})x([0-9]{1,4})(\+2x)?\.(.*)/';
-        preg_match($pattern, $imgSrc, $matches);
-        if ($matches && count($matches) >= 4) {
-            if ('+2x' == $matches[4]) {
-                $multiple = 2;
-            }
-            $extName = strtolower($matches[1]);
-            $imgSrc = preg_replace($pattern, '.', $imgSrc) . $matches[1] . '?imageView2/2/w/' . (int)$matches[2] * $multiple . '/h/' . (int)$matches[3] * $multiple . '/q/75/format/' . ($canWebp ? ($extName == 'gif' ? 'gif' : 'webp') : $extName);
-        }
-
-        return $imgSrc;
     }
 
     public static function parseUrl($url)

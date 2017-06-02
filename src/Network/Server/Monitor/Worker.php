@@ -67,13 +67,15 @@ class Worker
         Timer::after($time, [$this,'closePre'], $this->classHash.'_restart');
     }
 
-    public function checkStart(){
+    public function checkStart()
+    {
         $time = isset($this->config['check_interval'])?$this->config['check_interval']:5000;
 
         Timer::tick($time, [$this,'check'], $this->classHash.'_check');
     }
 
-    public function check(){
+    public function check()
+    {
         $this->output('check');
 
         $memory =  memory_get_usage();
@@ -114,7 +116,8 @@ class Worker
         $this->closeCheck();
     }
 
-    public function closeCheck(){
+    public function closeCheck()
+    {
         $this->output('CloseCheck');
 
         $ready = is_callable($this->checkMqReadyClose) ? call_user_func($this->checkMqReadyClose) : true;
@@ -126,7 +129,8 @@ class Worker
         }
     }
 
-    public function close(){
+    public function close()
+    {
         $this->output('Close');
 
         sys_echo("close:workerId->".$this->workerId);
@@ -134,7 +138,8 @@ class Worker
         $this->server->swooleServer->exit();
     }
 
-    public function reactionReceive(){
+    public function reactionReceive()
+    {
         //触发限流
         if ($this->reactionNum > $this->maxConcurrency) {
             return false;
@@ -144,7 +149,8 @@ class Worker
         return true;
     }
 
-    public function reactionRelease(){
+    public function reactionRelease()
+    {
         $this->reactionNum --;
     }
 
@@ -157,12 +163,14 @@ class Worker
     {
         $this->checkMqReadyClose = $callback;
     }
+
     public function setMqReadyClosePreCallback(callable $callback)
     {
         $this->mqReadyClosePre = $callback;
     }
 
-    public function output($str){
+    public function output($str)
+    {
         if(isset($this->config['debug']) && true == $this->config['debug']){
             $output = "###########################\n";
             $output .= $str.":workerId->".$this->workerId."\n";

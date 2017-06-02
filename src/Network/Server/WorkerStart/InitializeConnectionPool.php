@@ -8,9 +8,6 @@ use Zan\Framework\Contract\Network\Bootable;
 
 class InitializeConnectionPool implements Bootable
 {
-    /**
-     * @param
-     */
     public function bootstrap($server)
     {
         ConnectionInitiator::getInstance()->init('connection', $server);

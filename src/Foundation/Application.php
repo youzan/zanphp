@@ -24,7 +24,7 @@ class Application
      *
      * @var string
      */
-    const VERSION = '1.0';
+    const VERSION = '2.0';
 
     /**
      * The current globally available container (if any).

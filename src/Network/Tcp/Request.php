@@ -10,9 +10,10 @@ namespace Zan\Framework\Network\Tcp;
 
 use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Network\Request as BaseRequest;
-use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Nova\Nova;
 
-class Request implements BaseRequest {
+class Request implements BaseRequest
+{
     private $data;
     private $route;
     private $serviceName;

@@ -12,7 +12,9 @@ use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\Types\Json;
 use \swoole_websocket_server as SwooleWebSocketServer;
 
-class Response implements BaseResponse {
+class Response implements BaseResponse
+{
+
     const ERR_CODE_CONTINUE_UNSUPPORTED = 1;
     const ERR_CODE_ARGS_INVALID = 2;
     const ERR_CODE_INTERNAL_ERROR = 3;

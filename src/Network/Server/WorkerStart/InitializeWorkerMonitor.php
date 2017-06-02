@@ -19,5 +19,4 @@ class InitializeWorkerMonitor implements Bootable
         $config = Config::get('server.monitor');
         Worker::getInstance()->init($server,$config);
     }
-
 }

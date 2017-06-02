@@ -15,12 +15,14 @@ use Zan\Framework\Network\Http\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeMiddleware;
-use Zan\Framework\Network\WebSocket\RequestHandler;
 
-class Server extends HttpServer {
+class Server extends HttpServer
+{
     private $clientInfo = [];
+
     /** @var callable */
     private $openCallback = null;
+
     private $closeCallback = null;
 
     protected $serverStartItems = [
@@ -78,5 +80,4 @@ class Server extends HttpServer {
     {
         $this->closeCallback = $closeCallback;
     }
-
 }

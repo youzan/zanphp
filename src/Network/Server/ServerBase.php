@@ -7,6 +7,7 @@ use Zan\Framework\Foundation\Container\Di;
 
 abstract class ServerBase
 {
+
     protected $serverStartItems = [
     ];
 
@@ -101,8 +102,11 @@ abstract class ServerBase
 
     protected function writePid($pid)
     {
+        return;
+
         $pidFilePath = $this->getPidFilePath();
-//        if (false === file_put_contents($pidFilePath, $pid))
-//            sys_error("write pid into $pidFilePath failed");
+        if (false === file_put_contents($pidFilePath, $pid)) {
+            sys_error("write pid into $pidFilePath failed");
+        }
     }
 }

@@ -15,6 +15,6 @@ class Http extends Base implements Connection
 {
     public function closeSocket()
     {
-        // TODO: Implement closeSocket() method.
+
     }
 }

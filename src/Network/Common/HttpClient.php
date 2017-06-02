@@ -166,7 +166,7 @@ class HttpClient implements Async
     public function handle()
     {
         if ($this->useHttpProxy) {
-            $host = Config::get("zan_http_proxy.host", "proxy-static.s.qima-inc.com");
+            $host = Config::get("zan_http_proxy.host", "");
             $port = Config::get("zan_http_proxy.port", 80);
         } else {
             $host = $this->host;

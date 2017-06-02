@@ -4,13 +4,11 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
-use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
-use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use swoole_server as SwooleServer;
-use Kdt\Iron\Nova\Nova;
+use Zan\Framework\Nova\Nova;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 use Zan\Framework\Foundation\Core\Config;
@@ -19,11 +17,9 @@ use Zan\Framework\Network\Server\ServerBase;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeMiddleware;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
-use Zan\Framework\Network\Tcp\WorkerStart\InitializeServerRegister;
-use Zan\Framework\Foundation\Container\Di;
-use Zan\Framework\Network\ServerManager\ServiceUnregister;
 
-class Server extends ServerBase {
+class Server extends ServerBase
+{
 
     protected $serverStartItems = [
         InitializeSqlMap::class,
@@ -60,11 +56,6 @@ class Server extends ServerBase {
         }
 
         Nova::init($this->parserNovaConfig($config));
-
-        $config = Config::get('haunt');
-        if (isset($config['app_names']) && is_array($config['app_names']) && [] !== $config['app_names']) {
-            ServerStore::getInstance()->resetLockDiscovery();
-        }
     }
 
     public function onConnect()
@@ -80,14 +71,12 @@ class Server extends ServerBase {
     public function onStart($swooleServer)
     {
         $this->writePid($swooleServer->master_pid);
-        Di::make(InitializeServerRegister::class)->bootstrap($this);
         sys_echo("server starting ..... [$swooleServer->host:$swooleServer->port]");
     }
 
     public function onShutdown($swooleServer)
     {
         $this->removePidFile();
-        (new ServiceUnregister())->unRegister();
         sys_echo("server shutdown .....");
     }
 
@@ -100,8 +89,6 @@ class Server extends ServerBase {
 
     public function onWorkerStop($swooleServer, $workerId)
     {
-        // worker stop 在 worker 进程执行
-        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker *$workerId stopping ....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
@@ -110,7 +97,6 @@ class Server extends ServerBase {
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
-        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
