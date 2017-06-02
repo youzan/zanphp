@@ -1,21 +1,16 @@
 {
     "name": "zanphp/zan",
-    "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "http://packagist.qima-inc.com"
-        }
-    },
+    "repositories": {},
     "require": {
-        "packaged/thrift": "0.9.2.1"
-        "zan-config/zan": "dev-master",
+        "packaged/thrift": "0.9.2.1",
         "symfony/console": "3.1",
         "psr/log": "1.0.0",
-        "nova-service/generic": "1.0.2"
+        "zan-config/zan": "dev-master"
     },
     "autoload": {
         "psr-4": {
-            "Zan\\Framework\\": "src/"
+            "Zan\\Framework\\": "src/",
+            "Com\\Youzan\\Nova\\Framework\\Generic\\": "src/Nova/Generic/gen-php/Framework/Generic"
         },
         "classmap": [
         ],

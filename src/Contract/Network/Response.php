@@ -3,5 +3,6 @@
 namespace Zan\Framework\Contract\Network;
 
 
-interface Response {
+interface Response
+{
 }
