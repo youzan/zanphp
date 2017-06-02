@@ -36,8 +36,6 @@ class HttpClient implements Async
 
     private $callback;
 
-    private $useHttpProxy = false;
-
     public function __construct($host, $port = 80, $ssl = false)
     {
         $this->host = $host;
@@ -49,15 +47,6 @@ class HttpClient implements Async
     {
         return new static($host, $port, $ssl);
     }
-
-    public static function newInstanceUsingProxy($host, $port = 80, $ssl = false)
-    {
-        $instance = new static($host, $port, $ssl);
-        $instance->useHttpProxy = true;
-
-        return $instance;
-    }
-
 
     public function get($uri = '', $params = [], $timeout = 3000)
     {
@@ -165,13 +154,8 @@ class HttpClient implements Async
 
     public function handle()
     {
-        if ($this->useHttpProxy) {
-            $host = Config::get("zan_http_proxy.host", "");
-            $port = Config::get("zan_http_proxy.port", 80);
-        } else {
-            $host = $this->host;
-            $port = $this->port;
-        }
+        $host = $this->host;
+        $port = $this->port;
 
         $dnsCallbackFn = function($host, $ip) use ($port) {
             if ($ip) {
@@ -190,11 +174,7 @@ class HttpClient implements Async
 
     public function request($ip, $port)
     {
-        if ($this->useHttpProxy) {
-            $this->client = new \swoole_http_client($ip, $port);
-        } else {
-            $this->client = new \swoole_http_client($ip, $port, $this->ssl);
-        }
+        $this->client = new \swoole_http_client($ip, $port, $this->ssl);
         $this->buildHeader();
         if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
@@ -264,7 +244,6 @@ class HttpClient implements Async
             'body' => $this->body,
             'header' => $this->header,
             'timeout' => $this->timeout,
-            'use_http_proxy' => $this->useHttpProxy,
         ];
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
@@ -291,7 +270,6 @@ class HttpClient implements Async
             'body' => $this->body,
             'header' => $this->header,
             'timeout' => $this->timeout,
-            'use_http_proxy' => $this->useHttpProxy,
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
