@@ -6,11 +6,11 @@
  * Time: 下午2:04
  */
 return [
-    'base'          => 'http://koudaitong.com',
-    'domain'        => 'http://koudaitong.com',
-    'cp'            => 'http://cp.koudaitong.com',
-    'pay'           => 'http://pay.koudaitong.com',
-    'trade'         => 'http://trade.koudaitong.com',
-    'imgqn'         => 'https://img.yzcdn.cn',
-    'https_imgqn'         => 'https://img.yzcdn.cn'
+    'base'          => 'http://www.base.com',
+    'domain'        => 'http://www.domain.com',
+    'cp'            => 'http://www.cp.com',
+    'pay'           => 'http://www.pay.com',
+    'trade'         => 'http://www.trade.com',
+    'imgqn'         => 'https://www.imgqn.cn',
+    'https_imgqn'         => 'https://www.https_imgqn.cn'
 ];

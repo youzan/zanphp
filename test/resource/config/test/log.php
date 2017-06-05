@@ -6,6 +6,6 @@
  * Time: 下午2:05
  */
 return [
-    'default' => 'syslog://info/syslog_default?module=default',
+    'default' => 'log://info/log.txt?async=true',
     'log_log' => "log://info/log.txt?async=true"
 ];

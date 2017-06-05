@@ -14,10 +14,8 @@ class ConnectionPoolTest extends TaskTest {
     public function taskPoolWork()
     {
         try {
-            $conn = (yield ConnectionManager::getInstance()->get('mysql.default_write'));
-            //$pool->close();
-            $conn = (yield ConnectionManager::getInstance()->get('redis.default_write'));
-//        $pool->close();
+            yield ConnectionManager::getInstance()->get('mysql.default_write');
+            yield ConnectionManager::getInstance()->get('redis.default_write');
         } catch (\Exception $e) {
             var_dump($e->getMessage());
         }

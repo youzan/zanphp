@@ -10,7 +10,7 @@ return [
         'engine'=> 'mysqli',
         'host' => '127.0.0.1',
         'user' => 'root',
-        'password' => 'marsnow',
+        'password' => 'admin',
         'database' => 'zanTest',
         'port' => '3306',
         'pool'  => [
