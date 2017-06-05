@@ -54,8 +54,9 @@ class Flow
         $sqlLog = Config::get("monitor.sql");
         if (Debug::get() && is_array($sqlLog) && isset($sqlLog['path'])) {
             $dir = dirname($sqlLog['path']);
-            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path']))
-                file_put_contents($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", FILE_APPEND);
+            if ((!file_exists($sqlLog['path']) && is_writable($dir)) || is_writable($sqlLog['path'])) {
+                swoole_async_write($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", -1);
+            }
         }
 
         $database = Table::getInstance()->getDatabase($sqlMap['table']);
