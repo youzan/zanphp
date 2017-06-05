@@ -4,7 +4,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use Thrift\Exception\TApplicationException;
 use Zan\Framework\Contract\Network\Request as BaseRequest;
-use Zan\Framework\Nova\Nova;
+use Kdt\Iron\Nova\Nova;
 
 class Request implements BaseRequest
 {
