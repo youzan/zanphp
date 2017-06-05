@@ -11,7 +11,7 @@ class NovaConfig
 {
     use InstanceManager;
 
-    private static $genericInvokePath = "vendor/nova-service/generic/sdk/gen-php";
+    private static $genericInvokePath = "vendor/zanphp/zan/src/Nova/Generic/gen-php";
 
     private static $genericInvokeBaseNamespace = "Com\\Youzan\\Nova\\";
 
