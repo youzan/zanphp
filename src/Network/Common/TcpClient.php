@@ -3,8 +3,8 @@
 namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
-use Zan\Framework\Nova\Exception\NetworkException;
-use Zan\Framework\Nova\Exception\ProtocolException;
+use Kdt\Iron\Nova\Exception\NetworkException;
+use Kdt\Iron\Nova\Exception\ProtocolException;
 use Zan\Framework\Contract\Network\Connection;
 
 class TcpClient implements Async

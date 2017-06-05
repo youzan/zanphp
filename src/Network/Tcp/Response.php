@@ -2,7 +2,7 @@
 
 namespace Zan\Framework\Network\Tcp;
 
-use Zan\Framework\Nova\Nova;
+use Kdt\Iron\Nova\Nova;
 use swoole_server as SwooleServer;
 use Zan\Framework\Contract\Network\Response as BaseResponse;
 

@@ -5,7 +5,7 @@ namespace Zan\Framework\Network\Tcp;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Utilities\DesignPattern\Context;
-use Zan\Framework\Nova\Nova;
+use Kdt\Iron\Nova\Nova;
 
 class Dispatcher
 {
