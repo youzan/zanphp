@@ -1,9 +1,9 @@
 <?php
 
-namespace Zan\Framework\Nova\Foundation\Traits;
+namespace Kdt\Iron\Nova\Foundation\Traits;
 
-use Zan\Framework\Nova\NullResult\NovaEmptyListResult;
-use Zan\Framework\Nova\NullResult\NovaNullResult;
+use Kdt\Iron\Nova\NullResult\NovaEmptyListResult;
+use Kdt\Iron\Nova\NullResult\NovaNullResult;
 use Thrift\Type\TType;
 
 trait ServiceSpecManager

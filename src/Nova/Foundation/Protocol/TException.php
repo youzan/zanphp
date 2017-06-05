@@ -1,8 +1,8 @@
 <?php
 
-namespace Zan\Framework\Nova\Foundation\Protocol;
+namespace Kdt\Iron\Nova\Foundation\Protocol;
 
-use Zan\Framework\Nova\Foundation\Traits\StructSpecManager;
+use Kdt\Iron\Nova\Foundation\Traits\StructSpecManager;
 use Exception as SysException;
 
 abstract class TException extends SysException

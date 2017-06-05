@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Nova\Foundation\Traits;
+namespace Kdt\Iron\Nova\Foundation\Traits;
 
 trait InstanceManager
 {

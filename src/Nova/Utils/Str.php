@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Nova\Utils;
+namespace Kdt\Iron\Nova\Utils;
 
 use RuntimeException;
 

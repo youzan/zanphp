@@ -9,6 +9,7 @@
     "autoload": {
         "psr-4": {
             "Zan\\Framework\\": "src/",
+            "Kdt\\Iron\\Nova\\": "src/Nova",
             "Com\\Youzan\\Nova\\Framework\\Generic\\": "src/Nova/Generic/gen-php/Framework/Generic"
         },
         "classmap": [

@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Nova\NullResult;
+namespace Kdt\Iron\Nova\NullResult;
 
 
 class NovaEmptyListResult extends BaseNullResult

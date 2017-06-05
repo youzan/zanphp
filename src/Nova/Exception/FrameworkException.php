@@ -1,6 +1,6 @@
 <?php
 
-namespace Zan\Framework\Nova\Exception;
+namespace Kdt\Iron\Nova\Exception;
 
 use Exception as SysException;
 
