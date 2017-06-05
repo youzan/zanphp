@@ -1,9 +1,9 @@
 <?php
 
-namespace Zan\Framework\Nova\Utils;
+namespace Kdt\Iron\Nova\Utils;
 
 
-use Zan\Framework\Nova\Foundation\Protocol\TStruct;
+use Kdt\Iron\Nova\Foundation\Protocol\TStruct;
 
 class Entity
 {

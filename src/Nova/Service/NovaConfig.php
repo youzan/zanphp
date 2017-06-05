@@ -1,10 +1,10 @@
 <?php
 
-namespace Zan\Framework\Nova\Service;
+namespace Kdt\Iron\Nova\Service;
 
 
-use Zan\Framework\Nova\Exception\FrameworkException;
-use Zan\Framework\Nova\Foundation\Traits\InstanceManager;
+use Kdt\Iron\Nova\Exception\FrameworkException;
+use Kdt\Iron\Nova\Foundation\Traits\InstanceManager;
 use Zan\Framework\Foundation\Core\Path;
 
 class NovaConfig
