@@ -35,13 +35,13 @@ class RunMode
             return;
         }
 
-        $envInput = getenv('ZAN_RUN_MODE');
+        $envInput = getenv('ZANPHP_RUN_MODE');
         if ($envInput !== false) {
             self::$runMode = $envInput;
             return;
         }
 
-        $iniInput = get_cfg_var('zan.RUN_MODE');
+        $iniInput = get_cfg_var('zanphp.RUN_MODE');
         if ($iniInput !== false) {
             self::$runMode = $iniInput;
             return;

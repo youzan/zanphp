@@ -28,7 +28,7 @@ class Debug
             return;
         }
 
-        $iniInput = get_cfg_var('zan.DEBUG');
+        $iniInput = get_cfg_var('zanphp.DEBUG');
         if($iniInput){
             self::$debug = true;
             return;
