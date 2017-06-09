@@ -1,10 +1,7 @@
 {
     "name": "zanphp/zan",
     "repositories": {
-        "packagist": {
-            "type": "composer",
-            "url": "http://packagist.qima-inc.com"
-        }
+
     },
     "require": {
         "packaged/thrift": "0.9.2.1",
