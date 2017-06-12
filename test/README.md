@@ -15,12 +15,12 @@ cd zan/mockServer
 sh ./go.sh start  启动server
 
 
-##二、执行测试
+##三、执行测试
 cd zan
 
 phpunit
 
-##三、关闭server
+##四、关闭server
 cd zan/mockServer
 
 sh ./go.sh stop   关闭server
