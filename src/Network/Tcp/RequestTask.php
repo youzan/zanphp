@@ -36,12 +36,18 @@ class RequestTask
     {
         try {
             yield $this->doRun();
+        } catch (\Throwable $t) {
+            $this->handleRequestException(t2ex($t));
         } catch (\Exception $e) {
-            $coroutine = RequestHandler::handleException($this->middleWareManager, $this->response, $e);
-            Task::execute($coroutine, $this->context);
-
-            $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
+            $this->handleRequestException($e);
         }
+    }
+    private function handleRequestException($e)
+    {
+        $coroutine = RequestHandler::handleException($this->middleWareManager, $this->response, $e);
+        Task::execute($coroutine, $this->context);
+
+        $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
     }
     
     private function doRun()

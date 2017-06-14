@@ -4,6 +4,7 @@ namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Network\Connection\ConnectionEx;
 use Zan\Framework\Network\Connection\ConnectionManager;
 use Zan\Framework\Network\Connection\Factory\Syslog;
 
@@ -14,7 +15,7 @@ class SystemLogger extends BaseLogger
     private $hostname;
     private $server;
     private $pid;
-    private $conn = null;
+    private $conn;
     private $connectionConfig;
 
     public function __construct($config)
@@ -31,7 +32,12 @@ class SystemLogger extends BaseLogger
     public function init()
     {
         $this->conn = (yield ConnectionManager::getInstance()->get($this->connectionConfig));
-        $this->writer = new SystemWriter($this->conn);
+        if ($this->conn instanceof ConnectionEx) {
+            $this->conn->release();
+            $this->writer = new SystemWriterEx($this->connectionConfig);
+        } else {
+            $this->writer = new SystemWriter($this->conn);
+        }
     }
 
     public function format($level, $message, $context)
@@ -50,11 +56,13 @@ class SystemLogger extends BaseLogger
     protected function doWrite($log)
     {
         try {
-            if (!$this->writer || !$this->conn instanceof Syslog) {
+            if (!$this->writer) {
                 yield $this->init();
             }
 
             yield $this->getWriter()->write($log);
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $ex) {
             echo_exception($ex);
         }
@@ -80,13 +88,14 @@ class SystemLogger extends BaseLogger
     private function buildBody($level, $message, array $context = [])
     {
         $detail = [];
-        if (isset($context['exception'])
-            && $context['exception'] instanceof \Exception
-        ) {
+        if (isset($context['exception'])) {
             $e = $context['exception'];
-            $detail['error'] = $this->formatException($e);
-            $context['exception_metadata'] = $e instanceof ZanException ? $e->getMetadata() : [];
-            unset($context['exception']);
+            if ($e instanceof \Throwable || $e instanceof \Exception) {
+                $e = $context['exception'];
+                $detail['error'] = $this->formatException($e);
+                $context['exception_metadata'] = $e instanceof ZanException ? $e->getMetadata() : [];
+                unset($context['exception']);
+            }
         }
 
         $detail['extra'] = $context;

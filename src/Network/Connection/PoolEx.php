@@ -19,12 +19,12 @@ class PoolEx
 
     public $typeMap = [
         'Mysqli'    => \swoole_connpool::SWOOLE_CONNPOOL_MYSQL,
+        'Redis'     => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
         'Tcp'       => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
         'Syslog'    => \swoole_connpool::SWOOLE_CONNPOOL_TCP,
-        'Redis'     => \swoole_connpool::SWOOLE_CONNPOOL_REDIS,
     ];
 
-    public static $engineMapEx = ['Mysqli', 'Tcp', 'Syslog', 'Redis'];
+    public static $engineMapEx = ['Mysqli', 'Redis', 'Tcp', 'Syslog'];
 
     public static function support($factoryType)
     {

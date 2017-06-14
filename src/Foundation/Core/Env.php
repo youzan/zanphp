@@ -3,7 +3,8 @@
 namespace Zan\Framework\Foundation\Core;
 
 
-class Env {
+class Env
+{
 
     private static $data = [];
 

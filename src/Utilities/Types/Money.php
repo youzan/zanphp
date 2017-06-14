@@ -40,4 +40,5 @@ class Money
     {
         return number_format(intval(round($this->num / 100, 2, PHP_ROUND_HALF_EVEN)), 2, '.', '');
     }
+
 }

@@ -4,10 +4,14 @@ namespace Zan\Framework\Network\Connection;
 
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Foundation\Core\Condition;
+use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Exception\ConditionException;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\Exception\CanNotCreateConnectionException;
 use Zan\Framework\Network\Connection\Exception\ConnectTimeoutException;
 use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
+use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class ConnectionManager
@@ -27,6 +31,8 @@ class ConnectionManager
 
     private static $server;
 
+    public static $getPoolEvent = "getPoolEvent";
+
     /**
      * @param string $connKey
      * @return \Zan\Framework\Contract\Network\Connection
@@ -34,11 +40,12 @@ class ConnectionManager
      */
     public function get($connKey)
     {
-        for ($i = 0; $i < 7; $i++) {
-            if (isset(self::$poolMap[$connKey]) || isset(self::$poolExMap[$connKey])) {
-                break;
+        while (!isset(self::$poolMap[$connKey]) && !isset(self::$poolExMap[$connKey])) {
+            try {
+                yield new Condition(static::$getPoolEvent, 300);
+            } catch (ConditionException $e) {
+                sys_error($e->getMessage());
             }
-            yield taskSleep(50);
         }
 
         if (isset(self::$poolExMap[$connKey])) {
@@ -95,6 +102,18 @@ class ConnectionManager
         } else {
             throw new InvalidArgumentException("invalid pool type, poolKey=$poolKey");
         }
+    }
+
+    public function monitor()
+    {
+        Timer::tick(30 * 1000, function() {
+            foreach (self::$poolExMap as $poolKey => $pool) {
+                $info = $pool->getStatInfo();
+                $all = $info["all"];
+                $free = $info["free"];
+                sys_echo("pool_ex info [type=$poolKey, all=$all, free=$free]");
+            };
+        });
     }
 
     public function setServer($server)

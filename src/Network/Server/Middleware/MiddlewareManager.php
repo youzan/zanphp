@@ -16,7 +16,7 @@ class MiddlewareManager
     private $middlewareConfig;
     private $request;
     private $context;
-    private $middlewares = [];
+    private $middleware = [];
 
     public function __construct(Request $request, Context $context)
     {
@@ -24,18 +24,18 @@ class MiddlewareManager
         $this->request = $request;
         $this->context = $context;
 
-        $this->initMiddlewares();
+        $this->initMiddleware();
     }
 
     public function executeFilters()
     {
-        $middlewares = $this->middlewares;
-        foreach ($middlewares as $middleware) {
-            if (!$middleware instanceof RequestFilter) {
+        $middleware = $this->middleware;
+        foreach ($middleware as $filter) {
+            if (!$filter instanceof RequestFilter) {
                 continue;
             }
 
-            $response = (yield $middleware->doFilter($this->request, $this->context));
+            $response = (yield $filter->doFilter($this->request, $this->context));
             if (null !== $response) {
                 yield $response;
                 return;
@@ -45,7 +45,7 @@ class MiddlewareManager
 
     public function handleHttpException(\Exception $e)
     {
-        $handlerChain = array_filter($this->middlewares, function($v) {
+        $handlerChain = array_filter($this->middleware, function($v) {
             return $v instanceof ExceptionHandler;
         });
         yield RequestExceptionHandlerChain::getInstance()->handle($e, $handlerChain);
@@ -53,15 +53,18 @@ class MiddlewareManager
 
     public function handleException(\Exception $e)
     {
-        $middlewares = $this->middlewares;
+        $middleware = $this->middleware;
 
-        foreach ($middlewares as $middleware) {
-            if (!$middleware instanceof ExceptionHandler) {
+        foreach ($middleware as $filter) {
+            if (!$filter instanceof ExceptionHandler) {
                 continue;
             }
 
             try {
-                $e = (yield $middleware->handle($e));
+                $e = (yield $filter->handle($e));
+            } catch (\Throwable $t) {
+                yield t2ex($t);
+                return;
             } catch (\Exception $handlerException) {
                 yield $handlerException;
                 return;
@@ -72,29 +75,29 @@ class MiddlewareManager
 
     public function executePostFilters($response)
     {
-        $middlewares = $this->middlewares;
-        foreach ($middlewares as $middleware) {
-            if (!$middleware instanceof RequestPostFilter) {
+        $middleware = $this->middleware;
+        foreach ($middleware as $filter) {
+            if (!$filter instanceof RequestPostFilter) {
                 continue;
             }
-            yield $middleware->postFilter($this->request, $response, $this->context);
+            yield $filter->postFilter($this->request, $response, $this->context);
         }
     }
 
     public function executeTerminators($response)
     {
-        $middlewares = $this->middlewares;
-        foreach ($middlewares as $middleware) {
-            if (!$middleware instanceof RequestTerminator) {
+        $middleware = $this->middleware;
+        foreach ($middleware as $filter) {
+            if (!$filter instanceof RequestTerminator) {
                 continue;
             }
-            yield $middleware->terminate($this->request, $response, $this->context);
+            yield $filter->terminate($this->request, $response, $this->context);
         }
     }
 
-    private function initMiddlewares()
+    private function initMiddleware()
     {
-        $middlewares = [];
+        $middleware = [];
         $groupValues = $this->middlewareConfig->getRequestFilters($this->request);
         $groupValues = $this->middlewareConfig->addExceptionHandlers($this->request, $groupValues);
         $groupValues = $this->middlewareConfig->addBaseFilters($groupValues);
@@ -102,9 +105,9 @@ class MiddlewareManager
         foreach ($groupValues as $groupValue) {
             $objectName = $this->getObject($groupValue);
             $obj = new $objectName();
-            $middlewares[$objectName] = $obj;
+            $middleware[$objectName] = $obj;
         }
-        $this->middlewares = $middlewares;
+        $this->middleware = $middleware;
     }
 
     private function getObject($objectName)

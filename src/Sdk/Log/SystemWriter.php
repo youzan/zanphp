@@ -2,14 +2,12 @@
 
 namespace Zan\Framework\Sdk\Log;
 
-use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Connection\Driver\Syslog;
 
-class SystemWriter implements LogWriter, Async
+class SystemWriter implements LogWriter
 {
     private $conn;
-    private $callback;
 
     public function __construct($conn)
     {
@@ -23,10 +21,4 @@ class SystemWriter implements LogWriter, Async
     {
         yield $this->conn->send($log);
     }
-
-    public function execute(callable $callback, $task)
-    {
-        $this->callback = $callback;
-    }
-
 }

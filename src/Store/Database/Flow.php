@@ -64,6 +64,9 @@ class Flow
         $driver = $this->getDriver($connection);
         try {
             $dbResult = (yield $driver->query($sqlMap['sql']));
+        } catch (\Throwable $t) {
+            yield $this->queryException($t, $connection);
+            throw $t;
         } catch (\Exception $e) {
             yield $this->queryException($e, $connection);
             throw $e;
@@ -90,6 +93,9 @@ class Flow
         $driver = $this->getDriver($connection);
         try {
             $dbResult = (yield $driver->query($sql));
+        }  catch (\Throwable $t) {
+            yield $this->queryException($t, $connection);
+            throw $t;
         } catch (\Exception $e) {
             yield $this->queryException($e, $connection);
             throw $e;
@@ -111,8 +117,10 @@ class Flow
         try {
             /* @var MysqliResult $commit */
             $commit = (yield $driver->commit($flags));
+        } catch (\Throwable $t) {
+            throw new DbCommitFailException($t->getMessage(), $t->getCode());
         } catch (\Exception $e) {
-            throw new DbCommitFailException();
+            throw new DbCommitFailException($e->getMessage(), $e->getCode());
         }
         if ((yield $commit->fetchRows()) === true) {
             yield $this->finishTransaction();
@@ -128,9 +136,12 @@ class Flow
         try {
             /* @var MysqliResult $rollback */
             $rollback = (yield $driver->rollback($flags));
+        } catch (\Throwable $t) {
+            yield $this->dealRollbackError();
+            throw new DbRollbackFailException($t->getMessage(), $t->getCode());
         } catch (\Exception $e) {
             yield $this->dealRollbackError();
-            throw new DbRollbackFailException();
+            throw new DbRollbackFailException($e->getMessage(), $e->getCode());
         }
         if ((yield $rollback->fetchRows()) === true) {
             yield $this->finishTransaction();

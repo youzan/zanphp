@@ -65,6 +65,8 @@ class Task
                     default:
                         continue;
                 }
+            } catch (\Throwable $t) {
+                $this->scheduler->throwException($t);
             } catch (\Exception $e) {
                 $this->scheduler->throwException($e);
             }
@@ -81,6 +83,8 @@ class Task
         try {
             $this->sendValue = $value;
             return $this->coroutine->send($value);
+        } catch (\Throwable $t) {
+            $this->sendException($t);
         } catch (\Exception $e) {
             $this->sendException($e);
         }

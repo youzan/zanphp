@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 
 $dir = __DIR__ . "/src";

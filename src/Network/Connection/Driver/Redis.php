@@ -15,6 +15,8 @@ class Redis extends Base implements Connection
     {
         try {
             $this->getSocket()->close();
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $e) {
             echo_exception($e);
         }

@@ -42,14 +42,18 @@ class RequestTask
     {
         try {
             yield $this->doRun();
+            return;
+        } catch (\Throwable $t) {
+            $e = t2ex($t);
         } catch (\Exception $e) {
-            if (Debug::get()) {
-                echo_exception($e);
-            }
-            $coroutine = $this->middleWareManager->handleHttpException($e);
-            Task::execute($coroutine, $this->context);
-            $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
         }
+
+        if (Debug::get()) {
+            echo_exception($e);
+        }
+        $coroutine = $this->middleWareManager->handleHttpException($e);
+        Task::execute($coroutine, $this->context);
+        $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
     }
 
     public function doRun()

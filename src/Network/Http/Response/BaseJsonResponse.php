@@ -105,7 +105,13 @@ class BaseJsonResponse extends BaseResponse
                 // objects in a new exception that needs to be removed.
                 // Fortunately, PHP 5.5 and up do not trigger any warning anymore.
                 $data = json_encode($data, $this->encodingOptions);
+            } catch (\Throwable $t) {
+                $e =  t2ex($t);
             } catch (\Exception $e) {
+
+            }
+
+            if (isset($e)) {
                 if ('Exception' === get_class($e) && 0 === strpos($e->getMessage(), 'Failed calling ')) {
                     throw $e->getPrevious() ?: $e;
                 }

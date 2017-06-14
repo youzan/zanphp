@@ -46,6 +46,8 @@ class InternalErrorHandler implements ExceptionHandler
             $errorPagePath = Path::getRootPath() . '/vendor/zanphp/zan/src/Foundation/View/Pages/Error.php';
             $errorPage = require $errorPagePath;
             return new Response($errorPage);
+        } catch (\Throwable $t) {
+            return $this->handle(t2ex($t));
         } catch (\Exception $e) {
             return $this->handle($e);
         }

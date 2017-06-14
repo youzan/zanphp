@@ -41,9 +41,9 @@ class NovaClientConnectionManager
         $serviceKey = $this->serviceKey($protocol, $domain, $service);
 
         if (isset($this->serviceMap[$serviceKey])) {
-            $service = $this->serviceMap[$serviceKey];
-            if (in_array($method, $service["methods"], true)) {
-                $pool = $this->getPool($service["app_name"]);
+            $serviceMap = $this->serviceMap[$serviceKey];
+            if (in_array($method, $serviceMap["methods"], true)) {
+                $pool = $this->getPool($serviceMap["app_name"]);
                 yield $pool->get();
             } else {
                 throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");

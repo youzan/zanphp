@@ -67,18 +67,23 @@ class RequestHandler
             $coroutine = $requestTask->run();
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
+            return;
+        } catch (\Throwable $t) {
+            $e = t2ex($t);
         } catch (\Exception $e) {
-            if (Debug::get()) {
-                echo_exception($e);
-            }
-            if ($this->middleWareManager) {
-                $coroutine = $this->middleWareManager->handleHttpException($e);
-            } else {
-                $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
-            }
-            Task::execute($coroutine, $this->context);
-            $this->event->fire($this->getRequestFinishJobId());
+
         }
+
+        if (Debug::get()) {
+            echo_exception($e);
+        }
+        if ($this->middleWareManager) {
+            $coroutine = $this->middleWareManager->handleHttpException($e);
+        } else {
+            $coroutine = RequestExceptionHandlerChain::getInstance()->handle($e);
+        }
+        Task::execute($coroutine, $this->context);
+        $this->event->fire($this->getRequestFinishJobId());
     }
 
     private function initContext($request, SwooleHttpResponse $swooleResponse)
@@ -135,6 +140,8 @@ class RequestHandler
             $swooleResponse = $this->context->get('swoole_response');
             $response->sendBy($swooleResponse);
             $this->event->fire($this->getRequestFinishJobId());
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $ex) {
             echo_exception($ex);
         }

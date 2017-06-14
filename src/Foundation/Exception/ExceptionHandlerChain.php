@@ -51,7 +51,7 @@ class ExceptionHandlerChain
             }
         }
         
-        if (is_a($response, BaseResponse::class)) {
+        if ($response instanceof BaseResponse) {
             $swooleResponse = (yield getContext('swoole_response'));
             $response->exception = $e->getMessage();
             /** @var $response ResponseTrait */
@@ -63,6 +63,7 @@ class ExceptionHandlerChain
             echo_exception($e);
             return;
         }
+
         yield null;
     }
 
@@ -70,7 +71,7 @@ class ExceptionHandlerChain
     {
         $hash = spl_object_hash($handler);
         if (isset($this->handlerMap[$hash])) {
-            return false;
+            return;
         }
 
         $this->handlerMap[$hash] = true;
@@ -80,7 +81,7 @@ class ExceptionHandlerChain
     public function addHandlerByName($handlerName)
     {
         if (isset($this->handlerMap[$handlerName])) {
-            return false;
+            return;
         }
 
         $this->handlerMap[$handlerName] = true;
@@ -89,13 +90,8 @@ class ExceptionHandlerChain
 
     public function addHandlersByName(array $handlers)
     {
-        if (!$handlers) {
-            return false;
-        }
-
         foreach ($handlers as $handlerName) {
             $this->addHandlerByName($handlerName);
         }
     }
-
 }

@@ -60,7 +60,7 @@ if (! function_exists('data_set')) {
 if (! function_exists('sys_echo')) {
     function sys_echo($context) {
         $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : "";
-        $dataStr = date("Y-m-d H:i:s", time());
+        $dataStr = date("Y-m-d H:i:s");
         echo "[$dataStr #$workerId] $context\n";
     }
 }
@@ -68,25 +68,31 @@ if (! function_exists('sys_echo')) {
 if (! function_exists('sys_error')) {
     function sys_error($context) {
         $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : "";
-        $dataStr = date("Y-m-d H:i:s", time());
+        $dataStr = date("Y-m-d H:i:s");
+        $context = str_replace("%", "%%", $context);
         fprintf(STDERR, "[$dataStr #$workerId] $context\n");
     }
 }
 
 if (! function_exists('echo_exception')) {
-    function echo_exception(\Exception $e)
+    /**
+     * @param \Throwable $t
+     */
+    function echo_exception($t)
     {
-        $time = date('Y-m-d H:i:s', time());
-        $class = get_class($e);
-        $code = $e->getCode();
-        $msg = $e->getMessage();
-        $trace = $e->getTraceAsString();
-        $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
-        echo <<<EOF
+        // 兼容PHP7 & PHP5
+        if ($t instanceof \Throwable || $t instanceof \Exception) {
+            $time = date('Y-m-d H:i:s');
+            $class = get_class($t);
+            $code = $t->getCode();
+            $msg = $t->getMessage();
+            $trace = $t->getTraceAsString();
+            $workerId = isset($_SERVER["WORKER_ID"]) ? $_SERVER["WORKER_ID"] : -1;
+            echo <<<EOF
         
         
 ###################################################################################
-          \033[1;31mGot a exception\033[0m
+          \033[1;31mGot an exception\033[0m
           worker: #$workerId
           time: $time
           class: $class
@@ -98,6 +104,26 @@ $trace
 
 
 EOF;
+        }
+    }
+}
+
+if (! function_exists('t2ex')) {
+    if (interface_exists("Throwable")) {
+        /**
+         * @param Throwable $t
+         * @return Exception
+         */
+        function t2ex(\Throwable $t)
+        {
+            if ($t instanceof \Exception) {
+                return $t;
+            } else if ($t instanceof \Error) {
+                return new \Exception($t->getMessage(), $t->getCode(), $t);
+            } else {
+                assert(false);
+            }
+        }
     }
 }
 

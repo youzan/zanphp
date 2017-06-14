@@ -33,13 +33,19 @@ class RequestTask
     {
         try {
             yield $this->doRun();
+        } catch (\Throwable $t) {
+            $e = t2ex($t);
         } catch (\Exception $e) {
+        }
+
+        if (isset($e)) {
             if (Debug::get()) {
                 echo_exception($e);
             }
             $coroutine = RequestHandler::handleException($this->middleWareManager, $e);
             Task::execute($coroutine, $this->context);
         }
+
         $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
 
     }

@@ -33,7 +33,7 @@ final class GenericRequestCodec
      */
     public static function encode($serviceName, $methodName, $result)
     {
-        if ($result instanceof \Exception) {
+        if ($result instanceof \Throwable || $result instanceof \Exception) {
 
             return json_encode([
                 "error_response" => [

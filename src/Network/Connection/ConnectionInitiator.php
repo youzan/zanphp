@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Connection;
 
 
+use Zan\Framework\Foundation\Core\Condition;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Common\DnsClient;
 use Zan\Framework\Network\Connection\Factory\NovaClient;
@@ -53,6 +54,7 @@ class ConnectionInitiator
         }
         $connectionManager = ConnectionManager::getInstance();
         $connectionManager->setServer($server);
+        $connectionManager->monitor();
         ReconnectionPloy::getInstance()->init();
         $connectionManager->monitorConnectionNum();
     }
@@ -110,6 +112,8 @@ class ConnectionInitiator
                 $cf['host'] = $ip;
                 $cf['pool']['pool_name'] = $poolName;
                 $this->initPool($factoryType, $cf);
+
+                Condition::wakeUp(ConnectionManager::$getPoolEvent);
             }
         }, function () use ($cf, $poolName, $factoryType) {
             sys_error("dns look up failed: ".$cf['host']);

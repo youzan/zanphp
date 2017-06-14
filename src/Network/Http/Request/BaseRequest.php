@@ -1824,7 +1824,10 @@ class BaseRequest
             if (class_exists('Locale', false)) {
                 \Locale::setDefault($locale);
             }
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $e) {
+            echo_exception($e);
         }
     }
 

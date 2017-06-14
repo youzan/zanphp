@@ -95,29 +95,46 @@ class RequestHandler
 
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
+        } catch (\Throwable $t) {
+            $this->handleRequestException($response, t2ex($t));
         } catch(\Exception $e) {
+            $this->handleRequestException($response, $e);
+        }
+    }
+    private function handleRequestException($response, $e)
+    {
             if (Debug::get()) {
                 echo_exception($e);
             }
 
+        if ($this->request && $this->request->getServiceName()) {
+            $this->reportHawk();
+            $this->logErr($e);
+        }
             $coroutine = static::handleException($this->middleWareManager, $response, $e);
             Task::execute($coroutine, $this->context);
 
             $this->event->fire($this->getRequestFinishJobId());
         }
-    }
 
-    public static function handleException($middleware, $response, $e)
+    /**
+     * @param $middleware
+     * @param \Zan\Framework\Network\Tcp\Response $response
+     * @param $t
+     */
+    public static function handleException($middleware, $response, $t)
     {
         $result = null;
         if ($middleware) {
-            $result = (yield $middleware->handleException($e));
+            $result = (yield $middleware->handleException($t));
         }
 
-        if ($result instanceof \Exception)
+        // 兼容PHP5
+        if ($result && $result instanceof \Throwable || $result instanceof \Exception) {
             $response->sendException($result);
-        else
-            $response->sendException($e);
+        } else {
+            $response->sendException($t);
+        }
     }
 
     public function handleRequestFinish()

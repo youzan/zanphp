@@ -53,9 +53,12 @@ class FileLogger extends BaseLogger
         }
 
         $detail = [];
-        if (isset($context['exception']) && $context['exception'] instanceof \Exception) {
-            $detail['error'] = $this->formatException($context['exception']);
-            unset($context['exception']);
+        if (isset($context['exception'])) {
+            $e = $context['exception'];
+            if ($e instanceof \Throwable || $e instanceof \Exception) {
+                $detail['error'] = $this->formatException($e);
+                unset($context['exception']);
+            }
         }
         
         $detail['extra'] = $context;

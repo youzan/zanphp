@@ -3,7 +3,6 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Application;
-use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\Types\Dir;
 use Zan\Framework\Foundation\Coroutine\Event;
 use Zan\Framework\Foundation\Core\Config;

@@ -26,8 +26,10 @@ class NovaClient extends Base implements Connection
     {
         try {
             $this->getSocket()->close();
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $e) {
-            //todo log
+            echo_exception($e);
         }
     }
 
@@ -61,6 +63,8 @@ class NovaClient extends Base implements Connection
     public function onReceive(SwooleClient $cli, $data) {
         try {
             call_user_func($this->clientCb, $data);
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $e) {
             echo_exception($e);
         }

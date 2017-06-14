@@ -14,12 +14,12 @@ class Time
             return true;
         }
 
-        $this->timeStamp = \nova_get_time();;
+        $this->timeStamp = time();
     }
 
     public static function current($format=false)
     {
-        $timeStamp = \nova_get_time();
+        $timeStamp = time();
 
         if(true === $format){
             return $timeStamp;

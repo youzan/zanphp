@@ -214,7 +214,7 @@ abstract class BaseLogger implements LoggerInterface
     }
 
     /**
-     * @return null|FileWriter|SystemWriter|BufferWriter
+     * @return null|FileWriter|SystemWriter|SystemWriterEx|BufferWriter
      */
     public function getWriter()
     {

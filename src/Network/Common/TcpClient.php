@@ -8,52 +8,64 @@ use Zan\Framework\Contract\Network\Connection;
 
 class TcpClient implements Async
 {
-    private $_conn;
-    private $_sock;
-    private $_callback;
-    private $_hasRecv = true;
+    /**
+     * @var \Zan\Framework\Network\Connection\Driver\Tcp
+     */
+    private $conn;
+
+    /**
+     * @var \swoole_client
+     */
+    private $sock;
+
+    /**
+     * @var callable
+     */
+    private $callback;
+
+    private $hasRecv = true;
 
     public function __construct(Connection $conn)
     {
-        $this->_conn = $conn;
-        $this->_sock = $conn->getSocket();
+        $this->conn = $conn;
+        $this->sock = $conn->getSocket();
         $config = $conn->getConfig();
         if (isset($config['hasRecv']) && $config['hasRecv'] === false) {
-            $this->_hasRecv = false;
+            $this->hasRecv = false;
         } else {
-            $this->_conn->setClientCb([$this, 'recv']);
+            $this->conn->setClientCb([$this, 'recv']);
         }
     }
 
     public function execute(callable $callback, $task)
     {
-        $this->_callback = $callback;
+        $this->callback = $callback;
     }
 
     public function recv($data)
     {
-        $this->_conn->release();
+        $this->conn->release();
         if (false === $data or '' == $data) {
             throw new NetworkException(
-                socket_strerror($this->_sock->errCode),
-                $this->_sock->errCode
+                socket_strerror($this->sock->errCode),
+                $this->sock->errCode
             );
         }
-        call_user_func($this->_callback, $data);
+        call_user_func($this->callback, $data);
     }
 
     public function send($data)
     {
-        $sent = $this->_sock->send($data);
+        $sent = $this->sock->send($data);
         if (false === $sent) {
             throw new NetworkException("tcp send fail");
         }
 
-        if (!$this->_hasRecv) {
-            $this->_conn->release();
-            yield;
-        } else {
+        if ($this->hasRecv) {
             yield $this;
+        } else {
+            $this->conn->release();
+            yield;
         }
     }
 }

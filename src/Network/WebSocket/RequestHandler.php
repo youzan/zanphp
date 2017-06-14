@@ -109,17 +109,23 @@ class RequestHandler {
 
             $this->task = new Task($coroutine, $this->context);
             $this->task->run();
-        } catch(\Exception $e) {
-            if (Debug::get()) {
-                echo_exception($e);
-            }
-
-            $coroutine = static::handleException($this->middleWareManager, $e);
-            Task::execute($coroutine, $this->context);
-
-            $this->event->fire($this->getRequestFinishJobId());
-            return;
+        } catch (\Throwable $t) {
+            $this->handleRequestException(t2ex($t));
+        } catch (\Exception $e) {
+            $this->handleRequestException($e);
         }
+    }
+
+    private function handleRequestException($e)
+    {
+        if (Debug::get()) {
+            echo_exception($e);
+        }
+
+        $coroutine = static::handleException($this->middleWareManager, $e);
+        Task::execute($coroutine, $this->context);
+
+        $this->event->fire($this->getRequestFinishJobId());
     }
 
     public static function handleException(MiddlewareManager $middleware, \Exception $e)
@@ -132,11 +138,11 @@ class RequestHandler {
         /** @var Response $response */
         $response = (yield getContext("swoole_response"));
 
-        if ($result instanceof \Exception)
+        if ($result instanceof \Throwable || $result instanceof \Exception) {
             $response->fail($result->getCode(), $result->getMessage());
-        else
+        } else {
             $response->fail($e->getCode(), $e->getMessage());
-
+        }
     }
 
     public function handleRequestFinish()
@@ -156,6 +162,8 @@ class RequestHandler {
             $response = $this->context->get('swoole_response');
             $response->fail(Response::ERR_CODE_REQUEST_TIMEOUT, "请求超时");
             $this->event->fire($this->getRequestFinishJobId());
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $ex) {
             echo_exception($ex);
         }

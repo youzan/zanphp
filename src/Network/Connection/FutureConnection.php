@@ -65,6 +65,8 @@ class FutureConnection implements Async
             call_user_func($this->taskCallback, $conn);
             unset($this->taskCallback);
 
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $ex) {
             echo_exception($ex);
         }

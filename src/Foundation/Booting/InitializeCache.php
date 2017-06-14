@@ -15,6 +15,8 @@ class InitializeCache implements Bootable
         try {
             $cacheMap = ConfigLoader::getInstance()->load(Path::getCachePath());
             Cache::initConfigMap($cacheMap);
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $e) {
             echo_exception($e);
         }

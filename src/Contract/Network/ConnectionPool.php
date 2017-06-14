@@ -4,6 +4,7 @@ namespace Zan\Framework\Contract\Network;
 
 interface ConnectionPool
 {
+
     /**
      * ConnectionPool constructor.
      * @param \Zan\Framework\Contract\Network\ConnectionFactory $connectionFactory

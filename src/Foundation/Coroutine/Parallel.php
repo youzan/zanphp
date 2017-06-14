@@ -86,10 +86,13 @@ class Parallel
     {
         try {
             yield $coroutine;
-        } catch (\Exception $ex) {
+            return;
+        } catch (\Throwable $t) {
+            $ex = t2ex($t);
+        } catch (\Exception $ex) { }
+
             echo_exception($ex);
             $this->exceptions[$key] = $ex;
             yield $ex;
-        }
     }
 }

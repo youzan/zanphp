@@ -19,6 +19,8 @@ class Mysql extends Base implements Connection
     {
         try {
             $this->getSocket()->close();
+        } catch (\Throwable $t) {
+            echo_exception($t);
         } catch (\Exception $e) {
             echo_exception($e);
         }
@@ -102,7 +104,11 @@ class Mysql extends Base implements Connection
 
         try{
             yield $engine->query('select 1');
+        } catch (\Throwable $t) {
+            echo_exception($t);
+            return;
         } catch (\Exception $e){
+            echo_exception($e);
             return;
         }
 

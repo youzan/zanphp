@@ -73,15 +73,17 @@ class Scheduler
             if ($isAsync) {
                 $this->task->run();
             }
-        }catch (\Exception $e){
+        } catch (\Throwable $t){
+            $this->throwException($t, false, $isAsync);
+        } catch (\Exception $e){
             $this->throwException($e, false, $isAsync);
         }
     }
 
     public function asyncCallback($response, $exception = null)
     {
-        if ($exception !== null
-            && $exception instanceof \Exception) {
+        // 兼容PHP7 & PHP5
+        if ($exception instanceof \Throwable || $exception instanceof \Exception) {
             $this->throwException($exception, true, true);
 
             if (Signal::TASK_DONE == $this->task->getStatus()) {

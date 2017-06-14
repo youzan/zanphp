@@ -9,6 +9,7 @@ use Zan\Framework\Network\Http\ServerStart\InitializeSqlMap;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Tcp\ServerStart\InitializeMiddleware;
+use Zan\Framework\Network\WebSocket\RequestHandler;
 
 class Server extends HttpServer
 {
@@ -30,7 +31,13 @@ class Server extends HttpServer
 
     public function setSwooleEvent()
     {
-        parent::setSwooleEvent();
+        $this->swooleServer->on('start', [$this, 'onStart']);
+        $this->swooleServer->on('shutdown', [$this, 'onShutdown']);
+
+        $this->swooleServer->on('workerStart', [$this, 'onWorkerStart']);
+        $this->swooleServer->on('workerStop', [$this, 'onWorkerStop']);
+        $this->swooleServer->on('workerError', [$this, 'onWorkerError']);
+
         $this->swooleServer->on('open', [$this, "onOpen"]);
         $this->swooleServer->on('message', [$this, "OnMessage"]);
         $this->swooleServer->on('close', [$this, "OnClose"]);
@@ -42,7 +49,7 @@ class Server extends HttpServer
         $clientIp = $req->getClientIp();
         $this->clientInfo[$request->fd] = $clientIp;
         if ($this->openCallback)
-            call_user_func($this->openCallback, $req);
+            call_user_func($this->openCallback, $req, $request->fd);
     }
 
     public function OnMessage($ws, $frame)
@@ -74,4 +81,5 @@ class Server extends HttpServer
     {
         $this->closeCallback = $closeCallback;
     }
+
 }

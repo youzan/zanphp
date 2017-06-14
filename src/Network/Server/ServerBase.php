@@ -4,6 +4,8 @@ namespace Zan\Framework\Network\Server;
 
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Container\Di;
+use Zan\Framework\Foundation\Core\RunMode;
+use Zan\Framework\Network\Server\Timer\Timer;
 
 abstract class ServerBase
 {
@@ -46,6 +48,11 @@ abstract class ServerBase
 
         foreach ($workerStartItems as $bootstrap) {
             Di::make($bootstrap)->bootstrap($this, $workerId);
+        }
+
+        // 解决supervisor标准错误重定向文件zend输出无时间戳问题
+        if ($workerId === 0 && RunMode::get() === "online") {
+            Timer::tick(60 * 1000, function() { sys_error("tick"); });
         }
     }
 
