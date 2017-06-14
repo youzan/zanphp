@@ -4,8 +4,8 @@
 <p align="center">
     <img src="https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small@2x.png?raw=true" alt="zanphp logo" srcset="https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small.png?raw=true 1x, https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small@2x.png?raw=true 2x, https://github.com/youzan/zanphp.io/blob/master/src/img/zan-logo-small.png?raw=true" width="210" height="210">
 </p>
-<p align="center">基于 PHP 协程的网络服务框架，提供最简单的方式开发面向 C10K+ 的高并发SOA服务和RPC服务。每天为2,000+个服务提供300,000,000+次访问量支持，广泛应用于有赞各项业务。</p>
-
+<p align="center">基于 PHP 协程的网络服务框架，提供最简单的方式开发面向 C10K+ 的高并发SOA服务和RPC服务。</p>
+<p align="center">每天为2,000+个服务提供300,000,000+次访问量支持，广泛应用于有赞各项业务。</p>
 ## 核心特性
 1. 基于 `yield` 实现了独立堆栈的协程
 2. 类似于 Golang 的并发编程模型实现
@@ -16,7 +16,7 @@
 7. 基于模型驱动的 SQLMap，实现了 SQL 的快速定位及方便的 sharding、cache 支持
 8. 提供类似于 [Laravel](https://github.com/laravel/laravel) 的 middleware(Filters & Terminators) 机制
 9. Di及单元测试的良好支持
-10.完整的RPC远程服务调用方案
+10. 完整的RPC远程服务调用方案
 
 ## 框架定位
 ZanPHP 的定位是高并发 Web 服务或业务中间件。
