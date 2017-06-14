@@ -11,10 +11,14 @@ namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Kdt\Iron\Nova\Exception\NetworkException;
+use Zan\Framework\Network\Common\Exception\TcpSendErrorException;
+use Zan\Framework\Network\Common\Exception\TcpSendTimeoutException;
 use Zan\Framework\Network\Connection\ConnectionEx;
 
 class TcpClientEx implements Async
 {
+    const DEFAULT_SEND_TIMEOUT = 3000;
+
     /**
      * @var ConnectionEx
      */
@@ -52,14 +56,14 @@ class TcpClientEx implements Async
         $this->callback = $callback;
     }
 
-    // TODO 修改
     private function sendWithRecv($data)
     {
-        $sendTimeout = isset($this->config["timeout"]) ? $this->config["timeout"] : 3000;
+        $sendTimeout = isset($this->config["timeout"]) ? $this->config["timeout"] : static::DEFAULT_SEND_TIMEOUT;
 
-        $this->sock->on("timeout", ...);
         $this->sock->setSendTimeout($sendTimeout);
-        $sent = $this->sock->sendWithCallback($data, [$this, "recv"]);
+        $this->sock->on("timeout", [$this, "recv"]);
+        $this->sock->on("receive", [$this, "recv"]);
+        $sent = $this->sock->send($data, [$this, "recv"]);
 
         if ($sent === false) {
             $this->connEx->close();
@@ -69,11 +73,9 @@ class TcpClientEx implements Async
         yield $this;
     }
 
-    // TODO 修改
     private function sendWithoutRecv($data)
     {
-        // 如果对面是flume 不回复消息, 回调不会触发, 不能在回调里头release
-        $sent = $this->sock->sendWithCallback($data, function() { });
+        $sent = $this->sock->send($data);
 
         if ($sent === false) {
             $this->connEx->close();
@@ -81,8 +83,6 @@ class TcpClientEx implements Async
         } else {
             $this->connEx->release();
         }
-
-        yield;
     }
 
     public function send($data)
@@ -90,19 +90,23 @@ class TcpClientEx implements Async
         if ($this->hasRecv) {
             yield $this->sendWithRecv($data);
         } else {
-            yield $this->sendWithoutRecv($data);
+            $this->sendWithoutRecv($data);
         }
     }
 
-    public function recv($data)
+    public function recv(\swoole_client $client, $r)
     {
-        if (false === $data || '' == $data) {
+        if (is_int($r)) {
             $this->connEx->close();
-            $ex = new NetworkException(socket_strerror($this->sock->errCode), $this->sock->errCode);
-            call_user_func($this->callback, $data, $ex);
+            $ex = new TcpSendTimeoutException("tcp send timeout, type=$r");
+            call_user_func($this->callback, $r, $ex);
+        } else if ($r === false || $r === "") {
+            $this->connEx->close();
+            $ex = new TcpSendErrorException(socket_strerror($this->sock->errCode), $this->sock->errCode);
+            call_user_func($this->callback, $r, $ex);
         } else {
             $this->connEx->release();
-            call_user_func($this->callback, $data);
+            call_user_func($this->callback, $r);
         }
     }
 }
