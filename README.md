@@ -16,7 +16,7 @@
 7. 基于模型驱动的 SQLMap，实现了 SQL 的快速定位及方便的 sharding、cache 支持
 8. 提供类似于 [Laravel](https://github.com/laravel/laravel) 的 middleware(Filters & Terminators) 机制
 9. Di及单元测试的良好支持
-10. 良好的服务化对接支持
+10. 良好的服务化对接支持, 支持泛化调用, 配套调试工具
 
 ## 框架定位
 Zan 的定位是高并发 Web 服务或业务中间件。
@@ -41,9 +41,10 @@ Zan PHP 的文档仓库地址：[zan-doc](https://github.com/youzan/zan-doc/blob
 
 
 ## 常用链接
-- [zan-doc](https://github.com/youzan/zan-doc) - Zan PHP 开发者文档
+- [zan-doc](http://zanphpdoc.zanphp.io/index.html) - Zan PHP 开发者文档
 - [zan-installer](https://github.com/youzan/zan-installer) - Zan PHP 脚手架工具
-- [zanhttp](https://github.com/youzan/zanhttp) - Zan PHP HTTP demo
+- [zanhttp](https://github.com/youzan/zanhttpdemo) - Zan PHP HTTP demo
+- [zantcp](https://github.com/youzan/zantcpdemo) - Zan PHP TCP demo
 - [PHP异步编程: 手把手教你实现co与Koa](https://github.com/youzan/php-co-koa) 
 
 
