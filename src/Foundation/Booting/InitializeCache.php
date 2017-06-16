@@ -13,7 +13,12 @@ class InitializeCache implements Bootable
     public function bootstrap(Application $app)
     {
         try {
-            $cacheMap = ConfigLoader::getInstance()->load(Path::getCachePath());
+            $path = Path::getCachePath();
+            if (is_dir($path)) {
+                $cacheMap = ConfigLoader::getInstance()->load($path);
+            } else {
+                $cacheMap = [];
+            }
             Cache::initConfigMap($cacheMap);
         } catch (\Throwable $t) {
             echo_exception($t);

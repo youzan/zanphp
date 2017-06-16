@@ -63,7 +63,7 @@ class TcpClientEx implements Async
         $this->sock->setSendTimeout($sendTimeout);
         $this->sock->on("timeout", [$this, "recv"]);
         $this->sock->on("receive", [$this, "recv"]);
-        $sent = $this->sock->send($data, [$this, "recv"]);
+        $sent = $this->sock->send($data);
 
         if ($sent === false) {
             $this->connEx->close();
