@@ -6,7 +6,8 @@ use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-class Router {
+class Router
+{
 
     use Singleton;
 
@@ -17,6 +18,10 @@ class Router {
     private $rules = [];
     private $parameters = [];
     private $separator = '/';
+    /**
+     * @var IRouter
+     */
+    private $routerRule;
 
     private function prepare($url)
     {
@@ -36,9 +41,20 @@ class Router {
         $this->parameters = [];
     }
 
-    public function setConfig($config)
+    public function init($config)
     {
         $this->config = $config;
+        if (isset($config['router_class'])) {
+            $routerClass = $config['router_class'];
+            if (is_subclass_of($routerClass, IRouter::class)) {
+                $this->routerRule = new $routerClass();
+                return;
+            } else {
+                sys_error("$routerClass should be an implementation of IRouter");
+            }
+
+        }
+        $this->routerRule = new ZanRouter();
     }
 
     public function route(Request $request)
@@ -52,7 +68,7 @@ class Router {
         $request->setRoute($this->route);
         $request->setRequestFormat($this->format);
         $this->setParameters($request, $this->parameters);
-        $route = $this->parseRoute();
+        $route = $this->parseRoute($request);
         $this->clear();
         return $route;
     }
@@ -78,11 +94,15 @@ class Router {
         return $this->route;
     }
 
-    private function parseRoute()
+    private function parseRoute($request)
     {
-        $parts = array_filter(explode($this->separator, trim($this->route, $this->separator)));
-        $route['action_name'] = array_pop($parts);
-        $route['controller_name'] = join($this->separator, $parts);
+        $result = $this->routerRule->dispatch($request);
+        if (!is_array($result) || count($result) != 3) {
+            throw new \Exception("Route dispatch failed");
+        }
+        list($module, $controller, $action) = $result;
+        $route['action_name'] = $action;
+        $route['controller_name'] = $module.$this->separator.$controller;
         return $route;
     }
 

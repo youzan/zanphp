@@ -11,6 +11,6 @@ class RouteInitiator
 
     public function init(array $config)
     {
-        Router::getInstance()->setConfig($config);
+        Router::getInstance()->init($config);
     }
 } 
