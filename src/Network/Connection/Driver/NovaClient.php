@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Connection\Driver;
 
 use Zan\Framework\Contract\Network\Connection;
 use swoole_client as SwooleClient;
+use Zan\Framework\Network\Connection\NovaClientPool;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Kdt\Iron\Nova\Network\Client as NovaPingClient;

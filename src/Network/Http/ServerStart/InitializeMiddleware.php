@@ -21,8 +21,13 @@ class InitializeMiddleware
      */
     public function bootstrap($server)
     {
+        $middlewarePath = Config::get('path.middleware');
+        if (!is_dir($middlewarePath)) {
+            return;
+        }
+
         $middlewareInitiator = MiddlewareInitiator::getInstance();
-        $middlewareConfig = ConfigLoader::getInstance()->load(Config::get('path.middleware'));
+        $middlewareConfig = ConfigLoader::getInstance()->load($middlewarePath);
         $exceptionHandlerConfig = isset($middlewareConfig['exceptionHandler']) ? $middlewareConfig['exceptionHandler'] : [];
         $exceptionHandlerConfig = is_array($exceptionHandlerConfig) ? $exceptionHandlerConfig : [];
         $middlewareConfig = isset($middlewareConfig['middleware']) ? $middlewareConfig['middleware'] : [];

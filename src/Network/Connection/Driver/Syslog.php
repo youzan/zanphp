@@ -10,7 +10,6 @@ use Zan\Framework\Network\Server\Timer\Timer;
 class Syslog extends Base implements Connection
 {
     private $clientCb;
-    private $postData;
     protected $isAsync = true;
 
     public function init()
@@ -24,8 +23,12 @@ class Syslog extends Base implements Connection
 
     public function send($log)
     {
-        $this->postData = $log . "\n";
-        $this->getSocket()->send($this->postData);
+        /** @var \swoole_client $swClient */
+        $swClient = $this->getSocket();
+        $r = $swClient->send($log);
+        if ($r === false) {
+            sys_error("syslog send fail: $log");
+        }
         $this->release();
     }
 

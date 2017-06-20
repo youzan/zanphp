@@ -48,9 +48,7 @@ class SystemLogger extends BaseLogger
         $header = $this->buildHeader($level);
         $topic = $this->buildTopic();
         $body = $this->buildBody($level, $message, $context);
-        $result = $header . 'topic=' . $topic . ' ' . $body;
-
-        return $result;
+        return "{$header}topic=$topic $body\n";
     }
 
     protected function doWrite($log)
@@ -113,6 +111,7 @@ class SystemLogger extends BaseLogger
             $result['module'] = 'default';
         }
 
+        // json_encode这里会转义"\n", flume 日志 会按 "\n" 拆分
         return json_encode($result);
     }
 

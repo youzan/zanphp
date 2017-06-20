@@ -131,7 +131,7 @@ class HttpClient implements Async
         return $this;
     }
 
-    private function build()
+    public function build()
     {
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
@@ -184,6 +184,12 @@ class HttpClient implements Async
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
             $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
+        } else {
+            $this->client->setMethod($this->method);
+            if ($this->body) {
+                $this->client->setData($this->body);
+            }
+            $this->client->execute($this->uri, [$this,'onReceive']);
         }
     }
 

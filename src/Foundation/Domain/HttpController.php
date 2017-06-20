@@ -24,6 +24,10 @@ class HttpController extends Controller
 
     public function setJsVar($key, $value)
     {
+        // 剔除全局模版js变量值包含标签
+        if (is_string($value)) {
+            $value = strip_tags($value);
+        }
         $this->jsVar->setBusiness($key, $value);
     }
 

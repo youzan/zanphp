@@ -14,7 +14,7 @@ class MultiConfig
         }
 
         $currentUser =  get_current_user();
-        if (empty($config[$currentUser])){
+        if (empty($config[$currentUser])) {
             return;
         }
         $config = $config[$currentUser];

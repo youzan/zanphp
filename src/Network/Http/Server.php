@@ -18,6 +18,9 @@ use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Network\Server\ServerBase;
+use Zan\Framework\Network\ServerManager\ServerStore;
+use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Http\ServerStart\InitializeSqlMap;
 
 class Server extends ServerBase
@@ -55,6 +58,11 @@ class Server extends ServerBase
 
     protected function init()
     {
+        $config = Config::get('registry');
+        if (!isset($config['app_names']) || [] === $config['app_names']) {
+            return;
+        }
+        ServerStore::getInstance()->resetLockDiscovery();
     }
 
     public function onStart($swooleServer)
@@ -78,6 +86,7 @@ class Server extends ServerBase
 
     public function onWorkerStop($swooleServer, $workerId)
     {
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
         sys_echo("worker *$workerId stopping .....");
 
         $num = Worker::getInstance()->reactionNum ?: 0;
@@ -86,6 +95,8 @@ class Server extends ServerBase
 
     public function onWorkerError($swooleServer, $workerId, $workerPid, $exitCode, $sigNo)
     {
+        ServerDiscoveryInitiator::getInstance()->unlockDiscovery($workerId);
+
         sys_echo("worker error happening [workerId=$workerId, workerPid=$workerPid, exitCode=$exitCode, signalNo=$sigNo]...");
 
         $num = Worker::getInstance()->reactionNum ?: 0;

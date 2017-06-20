@@ -91,8 +91,8 @@ class Parallel
             $ex = t2ex($t);
         } catch (\Exception $ex) { }
 
-            echo_exception($ex);
-            $this->exceptions[$key] = $ex;
-            yield $ex;
+        echo_exception($ex);
+        $this->exceptions[$key] = $ex;
+        yield $ex;
     }
 }

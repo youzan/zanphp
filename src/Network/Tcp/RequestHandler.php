@@ -97,25 +97,27 @@ class RequestHandler
             $this->task->run();
         } catch (\Throwable $t) {
             $this->handleRequestException($response, t2ex($t));
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->handleRequestException($response, $e);
         }
     }
+
     private function handleRequestException($response, $e)
     {
-            if (Debug::get()) {
-                echo_exception($e);
-            }
+        if (Debug::get()) {
+            echo_exception($e);
+        }
 
         if ($this->request && $this->request->getServiceName()) {
             $this->reportHawk();
             $this->logErr($e);
         }
-            $coroutine = static::handleException($this->middleWareManager, $response, $e);
-            Task::execute($coroutine, $this->context);
 
-            $this->event->fire($this->getRequestFinishJobId());
-        }
+        $coroutine = static::handleException($this->middleWareManager, $response, $e);
+        Task::execute($coroutine, $this->context);
+
+        $this->event->fire($this->getRequestFinishJobId());
+    }
 
     /**
      * @param $middleware
