@@ -14,6 +14,8 @@ class ServerRegister
 {
     const DEFAULT_ETD_TTL = 25;
 
+    private $enableRefresh = true;
+
     public static function createEtcdV2KV($config, $status = ServerDiscovery::SRV_STATUS_OK)
     {
         // key := "/" + server.Protocol + ":" + server.Namespace + "/" + server.SrvName + "/" + server.IP + ":" + strconv.Itoa(server.Port)
@@ -129,8 +131,8 @@ class ServerRegister
 
         $httpClient = new HttpClient($node["host"], $node["port"]);
         $httpClient->setMethod("PUT");
-        // WARNING	php_swoole_add_timer: cannot use timer in master process.
-        // $httpClient->setTimeout(3000);
+        // 这里只有 worker 进程的refresh, 可以成功设置超时
+        $httpClient->setTimeout(3000);
         $httpClient->setUri("/v2/keys/$etcdV2Key");
         $httpClient->setBody(http_build_query($params));
         $httpClient->setHeader([
@@ -148,6 +150,7 @@ class ServerRegister
                 }
                 // WARNING	php_swoole_add_timer: cannot use timer in master process.
                 // $this->refreshingTTL($config);
+                $this->enableRefresh = true;
                 return;
             } else {
                 sys_error("status=$statusCode, body=$body");
@@ -156,20 +159,21 @@ class ServerRegister
         catch (\Throwable $e) { }
         catch (\Exception $e) { }
 
+        $this->enableRefresh = false;
+
+
         if (isset($e)) {
+            if ($isRefresh) {
+                sys_error("service refresh fail [$detail]");
+            } else {
+                sys_error("service register fail [$detail]");
+            }
             echo_exception($e);
         }
 
-        if ($isRefresh) {
-            $desc = "refresh etcd ttl";
-        } else {
-            $desc = "register";
-        }
-
-        sys_error("$desc failed: ".$node["host"].":".$node["port"]);
-
-        Timer::after(1000, function () use ($config, $isRefresh) {
-            $co = $this->registerToEtcdV2($config, $isRefresh);
+        Timer::after(2000, function () use ($config) {
+            // refresh 失败 可能是ttl过期 key不存在, 这里直接set而不是刷新
+            $co = $this->registerToEtcdV2($config);
             Task::execute($co);
         });
     }
@@ -180,8 +184,10 @@ class ServerRegister
         if ($type === "etcd") {
             $interval = (static::DEFAULT_ETD_TTL - 5) * 1000;
             Timer::tick($interval, function() use($config) {
-                $co = $this->registerToEtcdV2($config, true);
-                Task::execute($co);
+                if ($this->enableRefresh) {
+                    $co = $this->registerToEtcdV2($config, true);
+                    Task::execute($co);
+                }
             });
         }
     }
@@ -206,7 +212,7 @@ class ServerRegister
 
         echo_exception($e);
         sys_error("register failed: ".$haunt['register']['host'].":".$haunt['register']['port']);
-        Timer::after(1000, function () use ($config) {
+        Timer::after(2000, function () use ($config) {
             $co = $this->registerByHaunt($config);
             Task::execute($co);
         });

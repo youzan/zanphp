@@ -101,12 +101,17 @@ class ServerDiscovery
         try {
             $servers = (yield $this->getByEtcd());
             NovaClientConnectionManager::getInstance()->work($this->appName, $servers);
-        } catch (\Throwable $t) {
-            echo_exception($t);
-        } catch (\Exception $ex) {
-            // 这里必须捕获所有异常, 否则会导致进程fatal 退出, worker 不断重启
-            echo_exception($ex);
-        }
+            return;
+        } catch (\Throwable $ex) {
+        } catch (\Exception $ex) {}
+
+        sys_error("service discovery by etcd fail");
+        echo_exception($ex);
+
+        Timer::after(2000, function() {
+            $co = $this->discoveringByEtcd();
+            Task::execute($co);
+        });
     }
 
     private function getByStore()
@@ -238,7 +243,8 @@ class ServerDiscovery
         $httpClient = new HttpClient($node["host"], $node["port"]);
         $uri = $this->buildEtcdUri();
 
-        $response = (yield $httpClient->get($uri, $params, 30000));
+        $watchTimeout = isset($this->config['watch']['timeout']) ? $this->config['watch']['timeout'] : self::DEFAULT_WATCH_TIMEOUT;
+        $response = (yield $httpClient->get($uri, $params, $watchTimeout));
         $raw = $response->getBody();
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
