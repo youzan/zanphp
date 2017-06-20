@@ -1,10 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: xiaoniu
- * Date: 16/5/19
- * Time: 下午4:00
- */
+
 namespace Zan\Framework\Network\ServerManager;
 
 use Zan\Framework\Network\Common\HttpClient;
@@ -29,6 +24,9 @@ class ServerDiscovery
 
     const DEFAULT_PROTOCOL = "nova";
     const DEFAULT_NAMESPACE = "com.youzan.service";
+
+    const DEFAULT_LOOKUP_TIMEOUT = 30000;
+    const DEFAULT_WATCH_TIMEOUT = 30000;
 
     private $config;
 
@@ -118,8 +116,11 @@ class ServerDiscovery
 
     private function getByEtcd()
     {
-        $httpClient = new HttpClient($this->config['discovery']['host'], $this->config['discovery']['port']);
-        $uri = $this->buildEtcdUri($this->config['discovery']['uri']);
+        $node = ServerRegister::getRandEtcdNode();
+
+        $httpClient = new HttpClient($node["host"], $node["port"]);
+        $uri = $this->buildEtcdUri();
+
         $response = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
         $raw = $response->getBody();
         $jsonData = Json::decode($raw, true);
@@ -232,9 +233,12 @@ class ServerDiscovery
     {
         $waitIndex = $this->serverStore->getServiceWaitIndex($this->appName);
         $params = $waitIndex > 0 ? ['wait' => true, 'recursive' => true, 'waitIndex' => $waitIndex] : ['wait' => true, 'recursive' => true];
-        $httpClient = new HttpClient($this->config['watch']['host'], $this->config['watch']['port']);
-        $uri = $this->buildEtcdUri($this->config['watch']['uri']);
-        $response = (yield $httpClient->get($uri, $params, $this->config['watch']['timeout']));
+
+        $node = ServerRegister::getRandEtcdNode();
+        $httpClient = new HttpClient($node["host"], $node["port"]);
+        $uri = $this->buildEtcdUri();
+
+        $response = (yield $httpClient->get($uri, $params, 30000));
         $raw = $response->getBody();
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
@@ -474,9 +478,9 @@ class ServerDiscovery
         return spl_object_hash($this) . '_watch_' . $this->appName;
     }
 
-    private function buildEtcdUri($uri)
+    private function buildEtcdUri()
     {
-        return "$uri/$this->protocol:$this->namespace/$this->appName";
+        return "/v2/keys/$this->protocol:$this->namespace/$this->appName";
     }
 
     private function serverOnline($nowStore, $value)

@@ -1,31 +1,24 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: chuxiaofeng
- * Date: 17/6/12
- * Time: 下午3:16
- */
 
 namespace Zan\Framework\Sdk\Log;
 
 use Zan\Framework\Network\Common\TcpClientEx;
-use Zan\Framework\Network\Connection\ConnectionManager;
+use Zan\Framework\Network\Connection\ConnectionEx;
 
 
 class SystemWriterEx implements LogWriter
 {
-    private $connKey;
+    private $conn;
 
-    public function __construct($connKey)
+    public function __construct(ConnectionEx $conn)
     {
-        $this->connKey = $connKey;
+        $this->conn = $conn;
     }
 
     public function write($log)
     {
         try {
-            $conn = (yield ConnectionManager::getInstance()->get($this->connKey));
-            $tcpClient = new TcpClientEx($conn);
+            $tcpClient = new TcpClientEx($this->conn);
             yield $tcpClient->send($log);
         } catch (\Throwable $t) {
             echo_exception($t);

@@ -6,7 +6,7 @@ use Zan\Framework\Foundation\Core\Env;
 use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Connection\ConnectionEx;
 use Zan\Framework\Network\Connection\ConnectionManager;
-use Zan\Framework\Network\Connection\Factory\Syslog;
+
 
 class SystemLogger extends BaseLogger
 {
@@ -33,8 +33,7 @@ class SystemLogger extends BaseLogger
     {
         $this->conn = (yield ConnectionManager::getInstance()->get($this->connectionConfig));
         if ($this->conn instanceof ConnectionEx) {
-            $this->conn->release();
-            $this->writer = new SystemWriterEx($this->connectionConfig);
+            $this->writer = new SystemWriterEx($this->conn);
         } else {
             $this->writer = new SystemWriter($this->conn);
         }
@@ -54,10 +53,7 @@ class SystemLogger extends BaseLogger
     protected function doWrite($log)
     {
         try {
-            if (!$this->writer) {
-                yield $this->init();
-            }
-
+            yield $this->init();
             yield $this->getWriter()->write($log);
         } catch (\Throwable $t) {
             echo_exception($t);

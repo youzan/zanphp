@@ -53,9 +53,9 @@ class ServerRegister
 
     public static function getRandEtcdNode()
     {
-        $nodes = Config::get("zan_registry.etcd.nodes", []);
+        $nodes = Config::get("registry.etcd.nodes", []);
         if (empty($nodes)) {
-            throw new ServerConfigException("empty etcd nodes in zan_registry.etcd.nodes");
+            throw new ServerConfigException("empty etcd nodes in registry.etcd.nodes");
         }
         return $nodes[array_rand($nodes)];
     }
@@ -112,8 +112,19 @@ class ServerRegister
         list($etcdV2Key, $etcdV2Value) = static::createEtcdV2KV($config);
         $detail = $this->inspect($etcdV2Value);
 
-        if ($isRefresh === false) {
+        if ($isRefresh) {
+            sys_echo("refreshing [$detail]");
+            $params = [
+                "ttl" => static::DEFAULT_ETD_TTL,
+                "refresh" => true,
+                "prevExist" => true,
+            ];
+        } else {
             sys_echo("registering [$detail]");
+            $params = [
+                "value" => json_encode($etcdV2Value),
+                "ttl" => static::DEFAULT_ETD_TTL,
+            ];
         }
 
         $httpClient = new HttpClient($node["host"], $node["port"]);
@@ -121,10 +132,7 @@ class ServerRegister
         // WARNING	php_swoole_add_timer: cannot use timer in master process.
         // $httpClient->setTimeout(3000);
         $httpClient->setUri("/v2/keys/$etcdV2Key");
-        $httpClient->setBody(http_build_query([
-            "value" => json_encode($etcdV2Value),
-            "ttl" => static::DEFAULT_ETD_TTL,
-        ]));
+        $httpClient->setBody(http_build_query($params));
         $httpClient->setHeader([
             'Content-Type' => 'application/x-www-form-urlencoded'
         ]);
@@ -160,8 +168,8 @@ class ServerRegister
 
         sys_error("$desc failed: ".$node["host"].":".$node["port"]);
 
-        Timer::after(1000, function () use ($config) {
-            $co = $this->registerToEtcdV2($config);
+        Timer::after(1000, function () use ($config, $isRefresh) {
+            $co = $this->registerToEtcdV2($config, $isRefresh);
             Task::execute($co);
         });
     }

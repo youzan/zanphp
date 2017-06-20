@@ -18,7 +18,7 @@ class ServerRegisterInitiator
 
     public function __construct()
     {
-        $this->register = boolval(Config::get('registry.enable_register'));
+        $this->register = boolval(Config::get('registry.enable'));
     }
 
     public function enableRegister()
