@@ -13,6 +13,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 class ServerRegister
 {
     const DEFAULT_ETD_TTL = 25;
+    const DEFAULT_REGISTRY_TYPE = "etcd";
 
     private $enableRefresh = true;
 
@@ -99,7 +100,7 @@ class ServerRegister
 
     public function register($config)
     {
-        $type = Config::get("registry.type", "etcd");
+        $type = Config::get("registry.type", self::DEFAULT_REGISTRY_TYPE);
         if ($type === "etcd") {
             yield $this->registerToEtcdV2($config);
         } else if($type === "haunt") {
@@ -129,6 +130,8 @@ class ServerRegister
             ];
         }
 
+        // TODO: NOTICE
+        // 这里由于 master进程不能设置超时, 如果当前etcd节点挂了, 不会有回调, 协程会死在这里
         $httpClient = new HttpClient($node["host"], $node["port"]);
         $httpClient->setMethod("PUT");
         // 这里只有 worker 进程的refresh, 可以成功设置超时
@@ -180,7 +183,7 @@ class ServerRegister
 
     public function refreshingEtcdV2TTL($config)
     {
-        $type = Config::get("registry.type", "etcd");
+        $type = Config::get("registry.type", self::DEFAULT_REGISTRY_TYPE);
         if ($type === "etcd") {
             $interval = (static::DEFAULT_ETD_TTL - 5) * 1000;
             Timer::tick($interval, function() use($config) {

@@ -18,7 +18,7 @@ class ServerRegisterInitiator
 
     public function __construct()
     {
-        $this->register = boolval(Config::get('registry.enable'));
+        $this->register =  Config::get('registry.enable', self::ENABLE_REGISTER);
     }
 
     public function enableRegister()
@@ -38,7 +38,7 @@ class ServerRegisterInitiator
 
     public function init()
     {
-        if ($this->register == self::DISABLE_REGISTER) {
+        if (!$this->register) {
             return;
         }
 

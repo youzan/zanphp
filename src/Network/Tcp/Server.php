@@ -57,7 +57,7 @@ class Server extends ServerBase
 
     protected function init()
     {
-        $config = Config::get('nova.novaApi', null);
+        $config = Config::get('registry.novaApi', null);
         if(null === $config){
             return true;
         }

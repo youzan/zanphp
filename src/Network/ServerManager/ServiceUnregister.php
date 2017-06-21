@@ -10,13 +10,8 @@ class ServiceUnregister
 {
     public function unRegister()
     {
-        $config = Config::get('registry');
-        if (empty($config)) {
-            return;
-        }
-
         $isRegistered = ServerRegisterInitiator::getInstance()->getRegister();
-        if ($isRegistered == ServerRegisterInitiator::DISABLE_REGISTER) {
+        if (!$isRegistered) {
             return;
         }
 
@@ -34,7 +29,7 @@ class ServiceUnregister
         $config["appName"] = $appName;
         $config["protocol"] = $protocol;
 
-        $type = Config::get("haunt.type", "etcd");
+        $type = Config::get("registry.type", ServerRegister::DEFAULT_REGISTRY_TYPE);
         if ($type === "etcd") {
             $this->toUnRegisterToEtcdV2($config);
         } else if ($type === "haunt") {

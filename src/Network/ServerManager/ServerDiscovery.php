@@ -4,10 +4,8 @@ namespace Zan\Framework\Network\ServerManager;
 
 use Zan\Framework\Network\Common\HttpClient;
 use Zan\Framework\Network\Server\Timer\Timer;
-
 use Zan\Framework\Network\ServerManager\Exception\ServerDiscoveryEtcdException;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
-
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Utilities\Types\Json;
@@ -105,7 +103,7 @@ class ServerDiscovery
         } catch (\Throwable $ex) {
         } catch (\Exception $ex) {}
 
-        sys_error("service discovery by etcd fail");
+        sys_error("service discovery by etcd fail [app=$this->appName]");
         echo_exception($ex);
 
         Timer::after(2000, function() {
