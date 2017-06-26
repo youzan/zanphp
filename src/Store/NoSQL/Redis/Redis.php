@@ -6,6 +6,7 @@ namespace Zan\Framework\Store\NoSQL\Redis;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
 
 /**

@@ -2,7 +2,6 @@
 
 
 namespace Zan\Framework\Network\Tcp\ServerStart;
-
 use Zan\Framework\Contract\Network\Bootable;
 use Zan\Framework\Store\Database\Sql\SqlMapInitiator;
 

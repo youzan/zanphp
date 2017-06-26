@@ -9,6 +9,7 @@ use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
 {
@@ -36,6 +37,8 @@ class HttpClient implements Async
 
     private $callback;
 
+    /** @var Trace */
+    private $trace;
     public function __construct($host, $port = 80, $ssl = false)
     {
         $this->host = $host;
@@ -133,6 +136,7 @@ class HttpClient implements Async
 
     public function build()
     {
+        $this->trace = (yield getContext('trace'));
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -180,9 +184,18 @@ class HttpClient implements Async
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         }
 
+        if ($this->trace) {
+            $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
+        }
         if('GET' === $this->method){
+            if ($this->trace) {
+                $this->trace->logEvent(Constant::GET, Constant::SUCCESS);
+            }
             $this->client->get($this->uri, [$this,'onReceive']);
         }elseif('POST' === $this->method){
+            if ($this->trace) {
+                $this->trace->logEvent(Constant::POST, Constant::SUCCESS, $this->body);
+            }
             $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
         } else {
             $this->client->setMethod($this->method);
@@ -211,6 +224,9 @@ class HttpClient implements Async
     public function onReceive($cli)
     {
         Timer::clearAfterJob(spl_object_hash($this));
+        if ($this->trace) {
+            $this->trace->commit(Constant::SUCCESS);
+        }
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
         $this->client->close();
@@ -253,6 +269,9 @@ class HttpClient implements Async
         ];
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
+        if ($this->trace) {
+            $this->trace->commit($exception);
+        }
 
         call_user_func($this->callback, null, $exception);
     }
@@ -280,6 +299,9 @@ class HttpClient implements Async
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
 
+        if ($this->trace) {
+            $this->trace->commit($exception);
+        }
         call_user_func($this->callback, null, $exception);
     }
 }

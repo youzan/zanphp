@@ -104,7 +104,9 @@ class MiddlewareConfig
 
     public function addBaseFilters($filters)
     {
-        $baseFilters = [ ];
+        $baseFilters = [
+            TraceFilter::class,
+        ];
         return array_merge($baseFilters, $this->zanFilters, $filters);
     }
 
@@ -116,6 +118,7 @@ class MiddlewareConfig
             WorkerTerminator::class,
             DbTerminator::class,
             CacheTerminator::class,
+            TraceTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);
     }

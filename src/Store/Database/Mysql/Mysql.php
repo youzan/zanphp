@@ -5,6 +5,8 @@ namespace Zan\Framework\Store\Database\Mysql;
 use Zan\Framework\Contract\Store\Database\DriverInterface;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliConnectionLostException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryException;
 use Zan\Framework\Store\Database\Mysql\Exception\MysqliQueryTimeoutException;
@@ -27,6 +29,10 @@ class Mysql implements DriverInterface
     private $callback;
 
     private $result;
+    /**
+     * @var Trace
+     */
+    private $trace;
 
     private $countAlias;
 
@@ -73,6 +79,10 @@ class Mysql implements DriverInterface
      */
     public function query($sql)
     {
+        $this->trace = (yield getContext("trace"));
+        if ($this->trace) {
+            $this->trace->transactionBegin(Constant::SQL, $sql);
+        }
         $this->sql = $sql;
         $r = $this->swooleMysql->query($this->sql, [$this, "onSqlReady"]);
         if ($r === false) {
@@ -131,6 +141,13 @@ class Mysql implements DriverInterface
                 ];
                 $exception = new MysqliQueryException("errno=$errno&error=$error:$this->sql", 0, null, $ctx);
             }
+            if ($this->trace) {
+                $this->trace->commit($exception->getTraceAsString());
+            }
+        } else {
+            if ($this->trace) {
+                $this->trace->commit(Constant::SUCCESS);
+            }
         }
 
         $this->result = $result;
@@ -158,6 +175,9 @@ class Mysql implements DriverInterface
     {
         $start = microtime(true);
         return function() use($sql, $start, $type) {
+            if ($this->trace) {
+                $this->trace->commit("$type timeout");
+            }
             if ($this->callback) {
                 $duration = microtime(true) - $start;
                 $ctx = [

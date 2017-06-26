@@ -3,6 +3,7 @@
 namespace Zan\Framework\Network\Tcp;
 
 
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class RpcContext
@@ -53,6 +54,9 @@ class RpcContext
 
         $ctx = json_decode($novaAttach, true, 512, JSON_BIGINT_AS_STRING);
         if (is_array($ctx)) {
+            if (isset($ctx[Trace::TRACE_KEY])) {
+                $ctx[Trace::TRACE_KEY] = json_decode($ctx[Trace::TRACE_KEY], true, 512, JSON_BIGINT_AS_STRING);
+            }
             $self->ctx = $ctx;
         } else {
             $self->ctx = [];
@@ -64,6 +68,9 @@ class RpcContext
     public function pack()
     {
         $ctx = $this->ctx;
+        if (isset($ctx[Trace::TRACE_KEY])) {
+            $ctx[Trace::TRACE_KEY] = json_encode($ctx[Trace::TRACE_KEY], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
         if ($ctx === []) {
             $ctx = new \stdClass();
         }

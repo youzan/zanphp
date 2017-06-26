@@ -2,9 +2,11 @@
 
 namespace Zan\Framework\Network\Tcp;
 
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Exception\GenericInvokeException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
+use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class RequestTask
@@ -64,6 +66,8 @@ class RequestTask
         }
 
         $dispatcher = new Dispatcher();
+        $trace = $this->context->get('trace');
+        $trace->logEvent(Constant::NOVA_PROCCESS, Constant::SUCCESS, 'dispatch');
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
         $this->output($result);
 
@@ -73,5 +77,21 @@ class RequestTask
     private function output($execResult)
     {
         return $this->response->end($execResult);
+    }
+
+    private function logErr($e) {
+        $trace = $this->context->get('trace');
+        $traceId = '';
+        if ($trace) {
+            $traceId = $trace->getRootId();
+        }
+        yield Log::make('zan_framework')->error($e->getMessage(), [
+            'exception' => $e,
+            'app' => Application::getInstance()->getName(),
+            'language'=>'php',
+            'side'=>'server',//server,client两个选项
+            'traceId'=> $traceId,
+            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
+        ]);
     }
 }
