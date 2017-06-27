@@ -9,6 +9,8 @@ use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Sdk\Trace\Constant;
+use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Sdk\Trace\Trace;
 
 class HttpClient implements Async
@@ -39,6 +41,12 @@ class HttpClient implements Async
 
     /** @var Trace */
     private $trace;
+
+    /** @var DebuggerTrace  */
+    private $debuggerTrace;
+
+    private $useHttpProxy = false;
+
     public function __construct($host, $port = 80, $ssl = false)
     {
         $this->host = $host;
@@ -50,6 +58,15 @@ class HttpClient implements Async
     {
         return new static($host, $port, $ssl);
     }
+
+    public static function newInstanceUsingProxy($host, $port = 80, $ssl = false)
+    {
+        $instance = new static($host, $port, $ssl);
+        $instance->useHttpProxy = true;
+
+        return $instance;
+    }
+
 
     public function get($uri = '', $params = [], $timeout = 3000)
     {
@@ -137,6 +154,8 @@ class HttpClient implements Async
     public function build()
     {
         $this->trace = (yield getContext('trace'));
+        $this->debuggerTrace = (yield getContext('debugger_trace'));
+
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -158,8 +177,16 @@ class HttpClient implements Async
 
     public function handle()
     {
-        $host = $this->host;
-        $port = $this->port;
+        if ($this->useHttpProxy) {
+            $host = Config::get("zan_http_proxy.host");
+            $port = Config::get("zan_http_proxy.port", 80);
+            if (empty($host)) {
+                throw new \InvalidArgumentException("missing http proxy config");
+            }
+        } else {
+            $host = $this->host;
+            $port = $this->port;
+        }
 
         $dnsCallbackFn = function($host, $ip) use ($port) {
             if ($ip) {
@@ -178,7 +205,11 @@ class HttpClient implements Async
 
     public function request($ip, $port)
     {
-        $this->client = new \swoole_http_client($ip, $port, $this->ssl);
+        if ($this->useHttpProxy) {
+            $this->client = new \swoole_http_client($ip, $port);
+        } else {
+            $this->client = new \swoole_http_client($ip, $port, $this->ssl);
+        }
         $this->buildHeader();
         if (null !== $this->timeout) {
             Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
@@ -187,6 +218,17 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $scheme = $this->ssl ? "https://" : "http://";
+            $name = "{$this->method}-{$scheme}{$this->host}:{$this->port}{$this->uri}";
+            $this->debuggerTrace->beginTransaction(Constant::HTTP, $name, [
+                'params' => $this->params,
+                'body' => $this->body,
+                'header' => $this->header,
+                'use_http_proxy' => $this->useHttpProxy,
+            ]);
+        }
+
         if('GET' === $this->method){
             if ($this->trace) {
                 $this->trace->logEvent(Constant::GET, Constant::SUCCESS);
@@ -198,6 +240,10 @@ class HttpClient implements Async
             }
             $this->client->post($this->uri,$this->body, [$this, 'onReceive']);
         } else {
+            if ($this->trace) {
+                $this->trace->logEvent($this->method, Constant::SUCCESS, $this->body);
+            }
+
             $this->client->setMethod($this->method);
             if ($this->body) {
                 $this->client->setData($this->body);
@@ -218,6 +264,10 @@ class HttpClient implements Async
             $this->header['Scheme'] = 'https';
         }
 
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->header[DebuggerTrace::KEY] = $this->debuggerTrace->getKey();
+        }
+
         $this->client->setHeaders($this->header);
     }
 
@@ -227,6 +277,16 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit(Constant::SUCCESS);
         }
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $res = [
+                "code" => $cli->statusCode,
+                "header" => $cli->headers,
+                "body" => mb_convert_encoding($cli->body, 'UTF-8', 'UTF-8'),
+            ];
+
+            $this->debuggerTrace->commit("info", $res);
+        }
+
         $response = new Response($cli->statusCode, $cli->headers, $cli->body);
         call_user_func($this->callback, $response);
         $this->client->close();
@@ -266,11 +326,16 @@ class HttpClient implements Async
             'body' => $this->body,
             'header' => $this->header,
             'timeout' => $this->timeout,
+            'use_http_proxy' => $this->useHttpProxy,
         ];
 
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
+
         if ($this->trace) {
             $this->trace->commit($exception);
+        }
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->debuggerTrace->commit("warn", $exception);
         }
 
         call_user_func($this->callback, null, $exception);
@@ -295,6 +360,7 @@ class HttpClient implements Async
             'body' => $this->body,
             'header' => $this->header,
             'timeout' => $this->timeout,
+            'use_http_proxy' => $this->useHttpProxy,
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
@@ -302,6 +368,10 @@ class HttpClient implements Async
         if ($this->trace) {
             $this->trace->commit($exception);
         }
+        if ($this->debuggerTrace instanceof DebuggerTrace) {
+            $this->debuggerTrace->commit("warn", $exception);
+        }
+
         call_user_func($this->callback, null, $exception);
     }
 }

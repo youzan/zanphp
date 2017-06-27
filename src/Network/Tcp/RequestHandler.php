@@ -13,7 +13,7 @@ use Zan\Framework\Network\Exception\ServerTimeoutException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
-use Zan\Framework\Sdk\Trace\Trace;
+use Zan\Framework\Sdk\Trace\Tracer;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -160,7 +160,7 @@ class RequestHandler
     private function getTraceIdInfo()
     {
         $trace = $this->task->getContext()->get("trace");
-        if ($trace instanceof Trace) {
+        if ($trace instanceof Tracer) {
             return [
                 "rootId" => $trace->getRootId(),
                 "parentId" => $trace->getParentId(),
@@ -214,19 +214,39 @@ class RequestHandler
     }
     private function logErr(\Exception $e)
     {
-        $trace = $this->context->get('trace');
-        $traceId = '';
-        if ($trace) {
-            $traceId = $trace->getRootId();
+        $key = Config::get('log.zan_framework');
+        if ($key) {
+            $coroutine = $this->doErrLog($e);
+            Task::execute($coroutine);
+        } else {
+            echo_exception($e);
         }
-        $coroutine =  (yield Log::make('zan_framework')->error($e->getMessage(), [
-            'exception' => $e,
-            'app' => Application::getInstance()->getName(),
-            'language'=>'php',
-            'side'=>'server',//server,client两个选项
-            'traceId'=> $traceId,
-            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
-        ]));
-        Task::execute($coroutine);
+    }
+
+    private function doErrLog($e)
+    {
+        /** @var $e \Throwable|\Exception 兼容5&7 */
+        try {
+            $trace = $this->context->get('trace');
+
+            if ($trace instanceof Tracer) {
+                $traceId = $trace->getRootId();
+            } else {
+                $traceId = '';
+            }
+
+            yield Log::make('zan_framework')->error($e->getMessage(), [
+                'exception' => $e,
+                'app' => Application::getInstance()->getName(),
+                'language'=>'php',
+                'side'=>'server',//server,client两个选项
+                'traceId'=> $traceId,
+                'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
+            ]);
+        } catch (\Throwable $t) {
+            echo_exception($t);
+        } catch (\Exception $e) {
+            echo_exception($e);
+        }
     }
 }

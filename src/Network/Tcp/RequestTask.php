@@ -79,19 +79,41 @@ class RequestTask
         return $this->response->end($execResult);
     }
 
-    private function logErr($e) {
-        $trace = $this->context->get('trace');
-        $traceId = '';
-        if ($trace) {
-            $traceId = $trace->getRootId();
+    private function logErr($e)
+    {
+        $key = Config::get('log.zan_framework');
+        if ($key) {
+            $coroutine = $this->doErrLog($e);
+            Task::execute($coroutine);
+        } else {
+            echo_exception($e);
         }
-        yield Log::make('zan_framework')->error($e->getMessage(), [
-            'exception' => $e,
-            'app' => Application::getInstance()->getName(),
-            'language'=>'php',
-            'side'=>'server',//server,client两个选项
-            'traceId'=> $traceId,
-            'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
-        ]);
+    }
+
+    private function doErrLog($e)
+    {
+        /** @var $e \Throwable|\Exception 兼容5&7 */
+        try {
+            $trace = $this->context->get('trace');
+
+            if ($trace instanceof Tracer) {
+                $traceId = $trace->getRootId();
+            } else {
+                $traceId = '';
+            }
+
+            yield Log::make('zan_framework')->error($e->getMessage(), [
+                'exception' => $e,
+                'app' => Application::getInstance()->getName(),
+                'language'=>'php',
+                'side'=>'server',//server,client两个选项
+                'traceId'=> $traceId,
+                'method'=>$this->request->getServiceName() .'.'. $this->request->getMethodName(),
+            ]);
+        } catch (\Throwable $t) {
+            echo_exception($t);
+        } catch (\Exception $e) {
+            echo_exception($e);
+        }
     }
 }
