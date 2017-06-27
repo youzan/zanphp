@@ -8,7 +8,7 @@ function analyze()
 {
     $nsDeps = [];
 
-    $iter = scanPHPFiles(__DIR__ . "/src");
+    $iter = scanPHPFiles(__DIR__ . "/../src");
     foreach ($iter as $path) {
         // TODO lint
         $code = file_get_contents($path);

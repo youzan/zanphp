@@ -106,6 +106,7 @@ class MiddlewareConfig
     {
         $baseFilters = [
             TraceFilter::class,
+            DebuggerTraceFilter::class,
         ];
         return array_merge($baseFilters, $this->zanFilters, $filters);
     }
@@ -118,6 +119,7 @@ class MiddlewareConfig
             WorkerTerminator::class,
             DbTerminator::class,
             CacheTerminator::class,
+            DebuggerTraceTerminator::class,
             TraceTerminator::class,
         ];
         return array_merge($terminators, $this->zanTerminators, $baseTerminators);

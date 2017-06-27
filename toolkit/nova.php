@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-namespace Zan\Toolkit;
+namespace ZanPHP\Toolkit;
 
 /**
  * Nova 命令行工具

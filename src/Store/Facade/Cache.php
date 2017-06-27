@@ -4,8 +4,8 @@ namespace Zan\Framework\Store\Facade;
 
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
-use Zan\Framework\Foundation\Exception\ZanException;
 use Zan\Framework\Network\Connection\ConnectionManager;
+use Zan\Framework\Store\NoSQL\Exception;
 use Zan\Framework\Store\NoSQL\Redis\Redis;
 use Zan\Framework\Utilities\Types\ObjectArray;
 
@@ -450,13 +450,14 @@ class Cache
     /**
      * @param $connection
      * @return \Generator
-     * @throws ZanException
+     * @throws Exception
+     * @throws \Zan\Framework\Foundation\Exception\System\InvalidArgumentException
      */
     public function getConnection($connection)
     {
         $conn = (yield ConnectionManager::getInstance()->get($connection));
         if (!$conn instanceof Connection) {
-            throw new ZanException('Redis get connection error');
+            throw new Exception('Redis get connection error');
         }
         yield $this->insertActiveConnectionIntoContext($conn);
         yield $conn;
@@ -550,6 +551,7 @@ class Cache
     }
 
     /**
+     * !!!这是一个为了兼容Iron的过渡方案, Iron废弃后需要移除!!!
      * @param $value
      * @return mixed
      */
