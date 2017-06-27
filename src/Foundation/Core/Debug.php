@@ -28,6 +28,12 @@ class Debug
             return;
         }
 
+        $iniInput = get_cfg_var('kdt.DEBUG');
+        if($iniInput){
+            self::$debug = true;
+            return;
+        }
+
         $iniInput = get_cfg_var('zanphp.DEBUG');
         if($iniInput){
             self::$debug = true;

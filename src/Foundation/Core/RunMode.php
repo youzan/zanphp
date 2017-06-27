@@ -35,6 +35,18 @@ class RunMode
             return;
         }
 
+        $envInput = getenv('KDT_RUN_MODE');
+        if ($envInput !== false) {
+            self::$runMode = $envInput;
+            return;
+        }
+
+        $iniInput = get_cfg_var('kdt.RUN_MODE');
+        if ($iniInput !== false) {
+            self::$runMode = $iniInput;
+            return;
+        }
+
         $envInput = getenv('ZANPHP_RUN_MODE');
         if ($envInput !== false) {
             self::$runMode = $envInput;

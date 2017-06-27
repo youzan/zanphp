@@ -99,8 +99,14 @@ class Worker
 
         Timer::clearTickJob($this->classHash.'_check');
 
+        // TODO: 兼容zan接口修改, 全部迁移到连接池版本swoole后移除
         /* @var $this->server Server */
-        $this->server->swooleServer->denyRequest($this->workerId);
+        if (method_exists($this->server->swooleServer, "denyRequest")) {
+            $this->server->swooleServer->denyRequest($this->workerId);
+        } else {
+            $this->server->swooleServer->deny_request($this->workerId);
+        }
+
         $this->isDenyRequest = true;
 
         if (is_callable($this->mqReadyClosePre)) {

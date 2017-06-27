@@ -6,6 +6,7 @@ use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\AppConfig;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Core\IronConfig;
 use Zan\Framework\Foundation\Core\MultiConfig;
 use Zan\Framework\Utilities\Types\Arr;
 
@@ -22,6 +23,7 @@ class LoadConfiguration implements Bootable
         mb_internal_encoding('UTF-8');
 
         Config::init();
+        IronConfig::init();
         AppConfig::init();
         MultiConfig::init();
 

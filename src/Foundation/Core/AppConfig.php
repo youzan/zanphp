@@ -1,4 +1,5 @@
 <?php
+
 namespace Zan\Framework\Foundation\Core;
 
 use Zan\Framework\Utilities\Types\Arr;
@@ -22,6 +23,7 @@ class AppConfig
 
     public static function get($key, $default = null)
     {
+        $preKey = $key;
         $routes = explode('.', $key);
         if (empty($routes)) {
             return $default;
@@ -36,11 +38,10 @@ class AppConfig
             }
             $result = &$result[$route];
         }
-        if ($hasConfig) {
-            return $result;
-        } else {
-            return $default;
+        if (!$hasConfig) {
+            return IronConfig::get($preKey, $default);
         }
+        return $result;
     }
 
     public static function set($key, $value)
