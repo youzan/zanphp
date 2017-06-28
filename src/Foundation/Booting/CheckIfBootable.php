@@ -9,7 +9,7 @@ class CheckIfBootable implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        $requiredExtensions = ["apcu", "lz4", "swoole"];
+        $requiredExtensions = ["apcu", "lz4", "zan"];
         foreach ($requiredExtensions as $extension) {
             if (!extension_loaded($extension)) {
                 sys_error("\033[1;31m$extension is not loaded, use php -m to check php modules\033[0m");
@@ -18,16 +18,16 @@ class CheckIfBootable implements Bootable
 
         if (getenv('KDT_RUN_MODE') || get_cfg_var('kdt.RUN_MODE')) {
             $this->phpVerCheck();
-            $this->swooleVerCheck();
+            $this->zanVerCheck();
         }
     }
 
-    private function swooleVerCheck()
+    private function zanVerCheck()
     {
         $targetVersion = "3.0.4";
         $currentVersion = swoole_version();
         if (version_compare($currentVersion, $targetVersion) < 0) {
-            sys_error("\033[1;31mYour swoole version($currentVersion) is lower than $targetVersion, ".
+            sys_error("\033[1;31mYour zan version($currentVersion) is lower than $targetVersion, ".
                 "suggest upgrade your swoole extension\033[0m");
         }
     }
