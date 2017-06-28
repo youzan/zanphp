@@ -108,6 +108,9 @@ class StructValidator
                 break;
 
             case TType::MAP:
+                if (!is_array($argVal)) {
+                    static::validateFail("$path need MAP", $side, $type);
+                }
                 foreach ($argVal as $key => $arg) {
                     static::validateHelper($key, $spec["key"], "{$path}.<$key>", $side, $type);
                     static::validateHelper($arg, $spec["val"], "{$path}.$key", $side, $type);
@@ -115,12 +118,18 @@ class StructValidator
                 break;
 
             case TType::SET:
+                if (!is_array($argVal)) {
+                    static::validateFail("$path need SET", $side, $type);
+                }
                 foreach ($argVal as $i => $arg) {
                     static::validateHelper($arg, $spec["elem"], "{$path}[$i]", $side, $type);
                 }
                 break;
 
             case TType::LST:
+                if (!is_array($argVal)) {
+                    static::validateFail("$path need LIST", $side, $type);
+                }
                 foreach ($argVal as $i => $arg) {
                     static::validateHelper($arg, $spec["elem"], "{$path}[$i]", $side, $type);
                 }

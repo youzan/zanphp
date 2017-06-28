@@ -3,7 +3,9 @@
 namespace Kdt\Iron\Nova\Protocol;
 
 use Kdt\Iron\Nova\Foundation\Traits\InstanceManager;
+use Kdt\Iron\Nova\Protocol\Packer\Extension;
 use Kdt\Iron\Nova\Protocol\Packer\Native;
+use Exception as SysException;
 
 class Packer
 {
@@ -30,7 +32,14 @@ class Packer
      */
     public function __construct()
     {
-        $this->packer = new Native();
+        if (function_exists('thrift_protocol_read_binary') && function_exists('thrift_protocol_write_binary'))
+        {
+            $this->packer = new Extension();
+        }
+        else
+        {
+            $this->packer = new Native();
+        }
     }
 
     /**

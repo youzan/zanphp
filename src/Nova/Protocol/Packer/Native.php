@@ -8,6 +8,7 @@ use Thrift\Exception\TApplicationException;
 use Thrift\Exception\TProtocolException;
 use Thrift\Type\TMessageType;
 use Thrift\Type\TType;
+use Exception as SysException;
 
 class Native extends Abstracts
 {
@@ -195,7 +196,6 @@ class Native extends Abstracts
             else
             {
                 $xfer += $this->inputBin->skip($fType);
-                break;
             }
 
             $xfer += $this->inputBin->readFieldEnd();
