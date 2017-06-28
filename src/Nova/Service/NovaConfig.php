@@ -5,13 +5,14 @@ namespace Kdt\Iron\Nova\Service;
 
 use Kdt\Iron\Nova\Exception\FrameworkException;
 use Kdt\Iron\Nova\Foundation\Traits\InstanceManager;
+use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Path;
 
 class NovaConfig
 {
     use InstanceManager;
 
-    private static $genericInvokePath = "vendor/zanphp/zan/src/Nova/Generic/gen-php";
+    private $genericInvokePath;
 
     private static $genericInvokeBaseNamespace = "Com\\Youzan\\Nova\\";
 
@@ -20,6 +21,23 @@ class NovaConfig
     private $config = [];
 
     private $etcdNamespaces = [];
+
+    public function __construct()
+    {
+        $app = Application::getInstance();
+        $base = $app->getBasePath();
+
+        $f1 = "vendor/nova-service/generic/sdk/gen-php";
+        $f2 = "vendor/zanphp/zan/src/Nova/Generic/gen-php";
+
+        if (is_dir("$base/$f1")) {
+            $this->genericInvokePath = $f1;
+        } else if (is_dir("$base/$f2")) {
+            $this->genericInvokePath = $f2;
+        } else {
+            throw new \InvalidArgumentException("missing nova generic invoke package");
+        }
+    }
 
     public function setConfig(array $config)
     {
@@ -53,7 +71,7 @@ class NovaConfig
                 $config[] = [
                     "appName" => $app,
                     "domain" => $domain,
-                    "path"  => Path::getRootPath() . self::$genericInvokePath . "/",
+                    "path"  => Path::getRootPath() . $this->genericInvokePath . "/",
                     "namespace" => self::$genericInvokeBaseNamespace,
                     "protocol" => Registry::PROTO_NOVA,
                 ];

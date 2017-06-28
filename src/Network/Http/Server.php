@@ -12,6 +12,7 @@ use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
+use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
@@ -42,6 +43,7 @@ class Server extends ServerBase
     protected $workerStartItems = [
         InitializeErrorHandler::class,
         InitializeWorkerMonitor::class,
+        InitializeHawkMonitor::class,
         InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
     ];

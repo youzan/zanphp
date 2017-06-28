@@ -12,6 +12,8 @@ use Zan\Framework\Network\Connection\Exception\CanNotCreateConnectionException;
 use Zan\Framework\Network\Connection\Exception\ConnectTimeoutException;
 use Zan\Framework\Network\Connection\Exception\GetConnectionTimeoutFromPool;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Monitor\Constant;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 
 class ConnectionManager
@@ -114,6 +116,39 @@ class ConnectionManager
                 sys_echo("pool_ex info [type=$poolKey, all=$all, free=$free]");
             };
         });
+
+        $config = Config::get('hawk');
+        if (!$config['run']) {
+            return;
+        }
+        $time = $config['time'];
+        Timer::tick($time, [$this, 'monitorTick']);
+    }
+
+    public function monitorTick()
+    {
+        $hawk = Hawk::getInstance();
+
+        foreach (self::$poolMap as $poolKey => $pool) {
+            $activeNums = $pool->getActiveConnection()->length();
+            $freeNums = $pool->getFreeConnection()->length();
+
+            $hawk->add(Constant::BIZ_CONNECTION_POOL,
+                [
+                    'free'  => $freeNums,
+                    'active' => $activeNums,
+                ], [
+                    'pool_name' => $poolKey,
+                ]
+            );
+        }
+
+        foreach (self::$poolExMap as $poolKey => $pool) {
+            $hawk->add(Constant::BIZ_CONNECTION_POOL, $pool->getStatInfo(), [
+                    'pool_name' => $poolKey,
+                ]
+            );
+        }
     }
 
     public function setServer($server)

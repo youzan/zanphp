@@ -5,6 +5,7 @@ namespace Zan\Framework\Network\Tcp;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeEtcdTTLRefreshing;
+use Zan\Framework\Network\Server\WorkerStart\InitializeHawkMonitor;
 use Zan\Framework\Network\ServerManager\ServerDiscoveryInitiator;
 use Zan\Framework\Network\ServerManager\ServerStore;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
@@ -39,6 +40,7 @@ class Server extends ServerBase
         InitializeEtcdTTLRefreshing::class,
         InitializeConnectionPool::class,
         InitializeServerDiscovery::class,
+        InitializeHawkMonitor::class,
     ];
 
     public function setSwooleEvent()

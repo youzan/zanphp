@@ -13,6 +13,8 @@ use Zan\Framework\Network\Exception\ServerTimeoutException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Network\Server\Monitor\Worker;
 use Zan\Framework\Network\Server\Timer\Timer;
+use Zan\Framework\Sdk\Log\Log;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Sdk\Trace\Tracer;
 use Zan\Framework\Utilities\DesignPattern\Context;
 use Zan\Framework\Utilities\Types\Time;
@@ -151,6 +153,7 @@ class RequestHandler
     public function handleTimeout()
     {
         $this->task->setStatus(Signal::TASK_KILLED);
+        $this->reportHawk();
         $ex = $this->logTimeout();
         $coroutine = static::handleException($this->middleWareManager, $this->response, $ex);
         Task::execute($coroutine, $this->context);
@@ -212,6 +215,21 @@ class RequestHandler
     {
         return spl_object_hash($this) . '_handle_timeout';
     }
+
+    private function reportHawk()
+    {
+        $hawk = Hawk::getInstance();
+        $hawk->addTotalFailureTime(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp(),
+            microtime(true) - $this->request->getStartTime());
+        $hawk->addTotalFailureCount(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp());
+    }
+
     private function logErr(\Exception $e)
     {
         $key = Config::get('log.zan_framework');

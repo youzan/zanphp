@@ -9,6 +9,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Exception\GenericInvokeException;
 use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Sdk\Log\Log;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\Tracer;
 use Zan\Framework\Utilities\DesignPattern\Context;
@@ -48,8 +49,33 @@ class RequestTask
             $this->handleRequestException($e);
         }
     }
+
     private function handleRequestException($e)
     {
+        $hawk = Hawk::getInstance();
+        if ($e instanceof TApplicationException) {
+            $hawk->addTotalFailureTime(Hawk::SERVER,
+                $this->request->getServiceName(),
+                $this->request->getMethodName(),
+                $this->request->getRemoteIp(),
+                microtime(true) - $this->request->getStartTime());
+            $hawk->addTotalFailureCount(Hawk::SERVER,
+                $this->request->getServiceName(),
+                $this->request->getMethodName(),
+                $this->request->getRemoteIp());
+            $this->logErr($e);
+        } else {
+            $hawk->addTotalSuccessTime(Hawk::SERVER,
+                $this->request->getServiceName(),
+                $this->request->getMethodName(),
+                $this->request->getRemoteIp(),
+                microtime(true) - $this->request->getStartTime());
+            $hawk->addTotalSuccessCount(Hawk::SERVER,
+                $this->request->getServiceName(),
+                $this->request->getMethodName(),
+                $this->request->getRemoteIp());
+        }
+
         $coroutine = RequestHandler::handleException($this->middleWareManager, $this->response, $e);
         Task::execute($coroutine, $this->context);
 
@@ -74,6 +100,17 @@ class RequestTask
         $trace->logEvent(Constant::NOVA_PROCCESS, Constant::SUCCESS, 'dispatch');
         $result = (yield $dispatcher->dispatch($this->request, $this->context));
         $this->output($result);
+
+        $hawk = Hawk::getInstance();
+        $hawk->addTotalSuccessTime(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp(),
+            microtime(true) - $this->request->getStartTime());
+        $hawk->addTotalSuccessCount(Hawk::SERVER,
+            $this->request->getServiceName(),
+            $this->request->getMethodName(),
+            $this->request->getRemoteIp());
 
         $this->context->getEvent()->fire($this->context->get('request_end_event_name'));
     }

@@ -1,14 +1,10 @@
 <?php
-/**
- * Created by IntelliJ IDEA.
- * User: Demon
- * Date: 16/5/31
- * Time: 下午4:54
- */
 
 namespace Zan\Framework\Sdk\Trace;
 
+use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Foundation\Exception\ZanException;
+use Zan\Framework\Utilities\Types\Arr;
 
 class Trace
 {
@@ -34,6 +30,11 @@ class Trace
 
         if (!$config || !isset($config['run']) || $config['run'] == false) {
             return;
+        }
+
+        $zanTraceConfig = Config::get('monitor.zan_trace', []);
+        if (!empty($zanTraceConfig)) {
+            $config = Arr::merge($zanTraceConfig, $config);
         }
 
         if (isset($config['trace_class'])) {

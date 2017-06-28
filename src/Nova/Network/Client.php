@@ -14,6 +14,7 @@ use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Driver\NovaClient;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Log\Log;
+use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\DebuggerTrace;
@@ -123,6 +124,7 @@ class Client implements Async
             }
             /* @var $packer Packer */
             $packer = $context->getPacker();
+            $hawk = Hawk::getInstance();
             $serverIp = long2ip($remoteIP) . ':' . $remotePort;
 
             if ($serviceName == $context->getReqServiceName()
@@ -140,28 +142,35 @@ class Client implements Async
                     if (null !== $trace) {
                         if ($e instanceof TApplicationException) {
                             //只有系统异常上报异常信息
+                            $hawk->addTotalFailureTime(Hawk::CLIENT, $serviceName, $methodName, $serverIp, microtime(true) - $context->getStartTime());
+                            $hawk->addTotalFailureCount(Hawk::CLIENT, $serviceName, $methodName, $serverIp);
                             $trace->commit($e->getTraceAsString());
                         } else {
+                            $hawk->addTotalSuccessTime(Hawk::CLIENT, $serviceName, $methodName, $serverIp, microtime(true) - $context->getStartTime());
+                            $hawk->addTotalSuccessCount(Hawk::CLIENT, $serviceName, $methodName, $serverIp);
                             $trace->commit(Constant::SUCCESS);
                         }
                     }
                     if ($debuggerTrace instanceof DebuggerTrace) {
                         $debuggerTrace->commit("error", $e);
                     }
+
                     call_user_func($cb, null, $e);
                     return;
                 } else {
+                    $hawk->addTotalSuccessTime(Hawk::CLIENT, $serviceName, $methodName, $serverIp, microtime(true) - $context->getStartTime());
+                    $hawk->addTotalSuccessCount(Hawk::CLIENT, $serviceName, $methodName, $serverIp);
                     $ret = isset($response[$packer->successKey])
                         ? $response[$packer->successKey]
                         : null;
                     if (null !== $trace) {
                         $trace->commit(Constant::SUCCESS);
-                }
+                    }
                     if ($debuggerTrace instanceof DebuggerTrace) {
                         $debuggerTrace->commit("info", $ret);
                     }
-                call_user_func($cb, $ret);
-                return;
+                    call_user_func($cb, $ret);
+                    return;
                 }
             } 
         } else {
@@ -213,6 +222,7 @@ handle_exception:
         $localIp = ip2long($sockInfo['host']);
         $localPort = $sockInfo['port'];
         $sendBuffer = null;
+        $hawk = Hawk::getInstance();
         $serverIp = $localIp . ':' . $localPort;
 
         /** @var Trace $trace */
@@ -261,6 +271,8 @@ handle_exception:
             $this->_conn->setLastUsedTime();
             $sent = $this->_sock->send($sendBuffer);
             if (false === $sent) {
+                $hawk->addTotalFailureTime(Hawk::CLIENT, $this->_serviceName, $method, $serverIp, microtime(true) - $context->getStartTime());
+                $hawk->addTotalFailureCount(Hawk::CLIENT, $this->_serviceName, $method, $serverIp);
                 $exception = new NetworkException(socket_strerror($this->_sock->errCode), $this->_sock->errCode);
                 goto handle_exception;
             }
@@ -277,6 +289,8 @@ handle_exception:
             yield $this;
             return;
         } else {
+            $hawk->addTotalFailureTime(Hawk::CLIENT, $this->_serviceName, $method, $serverIp, microtime(true) - $context->getStartTime());
+            $hawk->addTotalFailureCount(Hawk::CLIENT, $this->_serviceName, $method, $serverIp);
             $exception = new ProtocolException('nova.encoding.failed');
             goto handle_exception;
         }
