@@ -15,6 +15,7 @@ use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use Zan\Framework\Network\Http\ServerStart\InitializeUrlConfig;
+use Zan\Framework\Network\Http\ServerStart\InitializeQiniuConfig;
 use swoole_http_request as SwooleHttpRequest;
 use swoole_http_response as SwooleHttpResponse;
 use Zan\Framework\Network\Server\ServerBase;
@@ -29,6 +30,7 @@ class Server extends ServerBase
         InitializeRouter::class,
         InitializeUrlRule::class,
         InitializeUrlConfig::class,
+        InitializeQiniuConfig::class,
         InitializeRouterSelfCheck::class,
         InitializeMiddleware::class,
         InitializeExceptionHandlerChain::class,
