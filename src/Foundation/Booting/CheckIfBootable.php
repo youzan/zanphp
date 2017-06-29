@@ -9,10 +9,25 @@ class CheckIfBootable implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        $requiredExtensions = ["apcu", "lz4", "zan"];
-        foreach ($requiredExtensions as $extension) {
-            if (!extension_loaded($extension)) {
-                sys_error("\033[1;31m$extension is not loaded, use php -m to check php modules\033[0m");
+        if (!extension_loaded("apcu")) {
+            sys_error("\033[1;31mapcu is not loaded, use php -m to check php modules\033[0m");
+        }
+
+        if (!extension_loaded("lz4")) {
+            sys_error("\033[1;31mlz4 is not loaded, use php -m to check php modules\033[0m");
+        }
+
+        if (!extension_loaded("zan") && !extension_loaded("swoole")) {
+            sys_error("\033[1;31mzan is not loaded, use php -m to check php modules\033[0m");
+        }
+
+        if (extension_loaded("zan") && extension_loaded("swoole")) {
+            sys_error("\033[1;31mzan is conflicted swoole, please remove swoole extension\033[0m");
+        }
+
+        if (extension_loaded("swoole")) {
+            if (!function_exists("nova_encode")) {
+                sys_error("\033[1;31mzan is not loaded, use php -m to check php modules\033[0m");
             }
         }
 
@@ -28,7 +43,7 @@ class CheckIfBootable implements Bootable
         $currentVersion = swoole_version();
         if (version_compare($currentVersion, $targetVersion) < 0) {
             sys_error("\033[1;31mYour zan version($currentVersion) is lower than $targetVersion, ".
-                "suggest upgrade your swoole extension\033[0m");
+                "suggest upgrading your zan extension\033[0m");
         }
     }
 
