@@ -43,6 +43,6 @@
         "preferred-install": "dist",
         "secure-http": false
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "prefer-stable": true
 }
