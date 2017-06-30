@@ -4,6 +4,7 @@ namespace Zan\Framework\Network\Common;
 
 use Zan\Framework\Foundation\Contract\Async;
 use Zan\Framework\Foundation\Core\Config;
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
@@ -11,7 +12,8 @@ use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\DebuggerTrace;
-use Zan\Framework\Sdk\Trace\Trace;
+use Zan\Framework\Sdk\Trace\Tracer;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class HttpClient implements Async
 {
@@ -39,7 +41,7 @@ class HttpClient implements Async
 
     private $callback;
 
-    /** @var Trace */
+    /** @var Tracer */
     private $trace;
 
     /** @var DebuggerTrace  */
@@ -104,7 +106,9 @@ class HttpClient implements Async
 
     public function execute(callable $callback, $task)
     {
-        $this->setCallback($this->getCallback($callback))->handle();
+        /** @var Task $task */
+        $ctx = $task->getContext();
+        $this->setCallback($this->getCallback($callback))->handle($ctx);
     }
 
     public function setMethod($method)
@@ -153,9 +157,6 @@ class HttpClient implements Async
 
     public function build()
     {
-        $this->trace = (yield getContext('trace'));
-        $this->debuggerTrace = (yield getContext('debugger_trace'));
-
         if ($this->method === 'GET') {
             if (!empty($this->params)) {
                 $this->uri = $this->uri . '?' . http_build_query($this->params);
@@ -175,8 +176,13 @@ class HttpClient implements Async
         return $this;
     }
 
-    public function handle()
+    public function handle(Context $ctx = null)
     {
+        if ($ctx) {
+            $this->trace = $ctx->get("trace");
+            $this->debuggerTrace = $ctx->get('debugger_trace');
+        }
+
         if ($this->useHttpProxy) {
             $host = Config::get("zan_http_proxy.host");
             $port = Config::get("zan_http_proxy.port", 80);
