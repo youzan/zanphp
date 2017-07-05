@@ -11,7 +11,7 @@ use Zan\Framework\Network\Server\Middleware\MiddlewareManager;
 use Zan\Framework\Sdk\Log\Log;
 use Zan\Framework\Sdk\Monitor\Hawk;
 use Zan\Framework\Sdk\Trace\Constant;
-use Zan\Framework\Sdk\Trace\Tracer;
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class RequestTask
@@ -137,7 +137,7 @@ class RequestTask
         try {
             $trace = $this->context->get('trace');
 
-            if ($trace instanceof Tracer) {
+            if ($trace instanceof Trace) {
                 $traceId = $trace->getRootId();
             } else {
                 $traceId = '';

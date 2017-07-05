@@ -12,7 +12,7 @@ use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\DebuggerTrace;
-use Zan\Framework\Sdk\Trace\Tracer;
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
 class HttpClient implements Async
@@ -41,7 +41,7 @@ class HttpClient implements Async
 
     private $callback;
 
-    /** @var Tracer */
+    /** @var Trace */
     private $trace;
 
     /** @var DebuggerTrace  */

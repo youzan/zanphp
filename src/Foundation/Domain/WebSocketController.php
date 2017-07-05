@@ -5,10 +5,21 @@ use Zan\Framework\Network\WebSocket\Request;
 use Zan\Framework\Network\WebSocket\Response;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
-class WebSocketController extends Controller {
+class WebSocketController {
+    /**
+     * @var Request
+     */
+    protected $request;
+
+    /**
+     * @var Context;
+     */
+    protected $context;
+
     public function __construct(Request $request, Context $context)
     {
-        parent::__construct($request, $context);
+        $this->request = $request;
+        $this->context = $context;
     }
 
     public function sendRaw($fd, $code, $msg)

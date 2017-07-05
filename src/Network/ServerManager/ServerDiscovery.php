@@ -8,6 +8,7 @@ use Zan\Framework\Network\ServerManager\Exception\ServerDiscoveryEtcdException;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
 use Zan\Framework\Foundation\Coroutine\Task;
+use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Utilities\Types\Json;
 use Zan\Framework\Utilities\Types\Time;
 
@@ -23,6 +24,7 @@ class ServerDiscovery
     const DEFAULT_PROTOCOL = "nova";
     const DEFAULT_NAMESPACE = "com.youzan.service";
 
+    const DEFAULT_DISCOVER_TIMEOUT = 3000;
     const DEFAULT_LOOKUP_TIMEOUT = 30000;
     const DEFAULT_WATCH_TIMEOUT = 30000;
 
@@ -85,7 +87,7 @@ class ServerDiscovery
     {
         $servers = $this->getByStore();
         if (null == $servers) {
-            $discoveryLoopTime = isset($this->config['discovery']['loop_time']) ? $this->config['discovery']['loop_time'] : self::DISCOVERY_LOOP_TIME;
+            $discoveryLoopTime = Arr::get($this->config, "discovery.loop_time", self::DISCOVERY_LOOP_TIME);
             Timer::after($discoveryLoopTime, [$this, 'discoverByStore'], $this->getGetServicesJobId());
         } else {
             NovaClientConnectionManager::getInstance()->work($this->appName, $servers);
@@ -124,7 +126,8 @@ class ServerDiscovery
         $httpClient = new HttpClient($node["host"], $node["port"]);
         $uri = $this->buildEtcdUri();
 
-        $response = (yield $httpClient->get($uri, [], $this->config['discovery']['timeout']));
+        $discoveryTimeout = Arr::get($this->config, "discovery.timeout", self::DEFAULT_DISCOVER_TIMEOUT);
+        $response = (yield $httpClient->get($uri, [], $discoveryTimeout));
         $raw = $response->getBody();
         $jsonData = Json::decode($raw, true);
         $result = $jsonData ? $jsonData : $raw;
@@ -241,7 +244,7 @@ class ServerDiscovery
         $httpClient = new HttpClient($node["host"], $node["port"]);
         $uri = $this->buildEtcdUri();
 
-        $watchTimeout = isset($this->config['watch']['timeout']) ? $this->config['watch']['timeout'] : self::DEFAULT_WATCH_TIMEOUT;
+        $watchTimeout = Arr::get($this->config, "watch.timeout", self::DEFAULT_WATCH_TIMEOUT);
         $response = (yield $httpClient->get($uri, $params, $watchTimeout));
         $raw = $response->getBody();
         $jsonData = Json::decode($raw, true);
@@ -404,7 +407,7 @@ class ServerDiscovery
             $this->watchByEtcdTask();
             return;
         }
-        $watchLoopTime = isset($this->config['watch']['loop_time']) ? $this->config['watch']['loop_time'] : self::WATCH_LOOP_TIME;
+        $watchLoopTime = Arr::get($this->config, "watch.loop_time", self::WATCH_LOOP_TIME);
         Timer::after($watchLoopTime, [$this, 'checkWatchingByEtcd'], $this->getWatchServicesJobId());
     }
 
@@ -414,7 +417,8 @@ class ServerDiscovery
         if (null === $watchTime) {
             return true;
         }
-        if ((Time::current(true) - $watchTime) > ($this->config['watch']['timeout'] + 10)) {
+        $watchTimeout = Arr::get($this->config, "watch.timeout", self::DEFAULT_WATCH_TIMEOUT);
+        if ((Time::current(true) - $watchTime) > ($watchTimeout + 10)) {
             return false;
         }
         return true;
@@ -422,7 +426,7 @@ class ServerDiscovery
 
     public function watchByStore()
     {
-        $watchStoreLoopTime = isset($this->config['watch_store']['loop_time']) ? $this->config['watch_store']['loop_time'] : self::WATCH_STORE_LOOP_TIME;
+        $watchStoreLoopTime = Arr::get($this->config, "watch_store.loop_time", self::WATCH_STORE_LOOP_TIME);
         Timer::after($watchStoreLoopTime, [$this, 'watchByStoreTask']);
     }
 

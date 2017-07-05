@@ -98,7 +98,7 @@ class Server extends ServerBase
 
     public function onWorkerStart($swooleServer, $workerId)
     {
-        $_SERVER["WORKER_ID"] = $workerId;
+        $_SERVER["WORKER_ID"] = intval($workerId);
         $this->bootWorkerStartItem($workerId);
         sys_echo("worker *$workerId starting .....");
     }
