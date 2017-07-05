@@ -2,9 +2,11 @@
 
 namespace Zan\Framework\Network\Common;
 
+use Zan\Framework\Foundation\Contract\Async;
+use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Server\Timer\Timer;
 
-class DnsClient
+class DnsClient implements Async
 {
     const maxRetryCount = 3;
 
@@ -13,8 +15,6 @@ class DnsClient
     private $count;
     private $timeoutFn;
     private $timeout;
-
-    private function __construct() { }
 
     public static function lookup($host, $callback = null, $timeoutFn = null, $timeout = 100)
     {
@@ -65,5 +65,34 @@ class DnsClient
     private function timerId()
     {
         return spl_object_hash($this) . "_dns_lookup";
+    }
+
+    public function execute(callable $callback, $task)
+    {
+        $this->callback = function ($host, $ip) use ($callback) {
+            if (empty($ip)) {
+                call_user_func($callback, null, new DnsLookupTimeoutException("dns lookup $host failed"));
+            } else {
+                call_user_func($callback, $ip);
+            }
+        };
+
+        $this->timeoutFn = function () use ($callback) {
+            call_user_func($callback, null, new DnsLookupTimeoutException("dns lookup {$this->host} timeout"));
+        };
+
+        $this->resolve();
+    }
+
+    /*
+     * 协程调度专用接口
+     */
+    public function query($host, $timeout = 100)
+    {
+        $this->host = $host;
+        if ($timeout <= 0)
+            $timeout = 100;
+        $this->timeout = $timeout;
+        yield $this;
     }
 }
