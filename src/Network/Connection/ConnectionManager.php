@@ -46,7 +46,7 @@ class ConnectionManager
             try {
                 yield new Condition(static::$getPoolEvent, 300);
             } catch (ConditionException $e) {
-                sys_error($e->getMessage());
+                sys_error("poolName: $connKey condition wait timeout");
             }
         }
 
