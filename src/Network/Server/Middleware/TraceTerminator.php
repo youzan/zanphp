@@ -22,15 +22,16 @@ class TraceTerminator implements RequestTerminator
     {
         /** @var Trace $trace */
         $trace = $context->get('trace');
+        $traceHandle = $context->get('traceHandle');
         if (method_exists($response, 'getException')) {
             $exception = $response->getException();
             if ($exception) {
-                $trace->commit($exception);
+                $trace->commit($traceHandle, $exception);
             } else {
-                $trace->commit(Constant::SUCCESS);
+                $trace->commit($traceHandle, Constant::SUCCESS);
             }
         } else {
-            $trace->commit(Constant::SUCCESS);
+            $trace->commit($traceHandle, Constant::SUCCESS);
         }
 
         //send数据

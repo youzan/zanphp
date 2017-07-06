@@ -15,7 +15,11 @@ class ZanTracer extends Tracer {
     private $ip;
     private $pid;
     private $builder;
-    private $_stack = [];
+
+    /*
+     * 存放traceBegin数据,key为begin的位置,value为trace数据
+     */
+    private $data = [];
 
     public function __construct($rootId = null, $parentId = null)
     {
@@ -84,15 +88,22 @@ class ZanTracer extends Tracer {
         $this->builder->buildTransaction($trace);
 
         $trace[0] = $sec + $usec;
-        array_push($this->_stack, $trace);
+        $this->data[] = $trace;
+
+        return count($this->data) - 1;
     }
 
-    public function transactionEnd($status, $sendData = '')
+    public function transactionEnd($handle, $status, $sendData = '')
     {
         list($usec, $sec) = explode(' ', microtime());
         $time = date("Y-m-d H:i:s", $sec) . substr($usec, 1, 4);
 
-        $data = array_pop($this->_stack);
+        //$handle为0代表整个请求结束,需要fixTrace
+        if ($handle === 0) {
+            $this->fixTrace($sec, $usec, $time);
+        }
+        $data = $this->data[$handle];
+        $this->data[$handle] = null;
         $utime = floor(($sec + $usec - $data[0]) * 1000000);
         $trace = [
             "T$time",
@@ -103,6 +114,30 @@ class ZanTracer extends Tracer {
             addslashes($sendData)
         ];
         $this->builder->commitTransaction($trace);
+    }
+
+    /*
+     * 补全Trace中调用了transactionBegin但还没有调用transactionEnd的信息
+     */
+    private function fixTrace($sec, $usec, $time)
+    {
+        $cnt = count($this->data);
+        for ($i = 1; $i < $cnt; $i++) {
+            if ($this->data[$i] !== null) {
+                $data = $this->data[$i];
+                $this->data[$i] = null;
+                $utime = floor(($sec + $usec - $data[0]) * 1000000);
+                $trace = [
+                    "T$time",
+                    $data[1],
+                    $data[2],
+                    addslashes('fix timeout trace'),
+                    $utime . "us",
+                    addslashes('')
+                ];
+                $this->builder->commitTransaction($trace);
+            }
+        }
     }
 
     public function logEvent($type, $status, $name = "", $context = "")

@@ -43,6 +43,7 @@ class HttpClient implements Async
 
     /** @var Trace */
     private $trace;
+    private $traceHandle;
 
     /** @var DebuggerTrace  */
     private $debuggerTrace;
@@ -222,7 +223,7 @@ class HttpClient implements Async
         }
 
         if ($this->trace) {
-            $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
+            $this->traceHandle = $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
         }
         if ($this->debuggerTrace instanceof DebuggerTrace) {
             $scheme = $this->ssl ? "https://" : "http://";
@@ -240,7 +241,7 @@ class HttpClient implements Async
                 $this->trace->logEvent(Constant::GET, Constant::SUCCESS);
             }
             $this->client->get($this->uri, [$this,'onReceive']);
-        }elseif('POST' === $this->method){
+        } elseif ('POST' === $this->method){
             if ($this->trace) {
                 $this->trace->logEvent(Constant::POST, Constant::SUCCESS, $this->body);
             }
@@ -281,7 +282,7 @@ class HttpClient implements Async
     {
         Timer::clearAfterJob(spl_object_hash($this));
         if ($this->trace) {
-            $this->trace->commit(Constant::SUCCESS);
+            $this->trace->commit($this->traceHandle, Constant::SUCCESS);
         }
         if ($this->debuggerTrace instanceof DebuggerTrace) {
             $res = [
@@ -338,12 +339,11 @@ class HttpClient implements Async
         $exception = new HttpClientTimeoutException($message, 408, null, $metaData);
 
         if ($this->trace) {
-            $this->trace->commit($exception);
+            $this->trace->commit($this->traceHandle, $exception);
         }
         if ($this->debuggerTrace instanceof DebuggerTrace) {
             $this->debuggerTrace->commit("warn", $exception);
         }
-
         call_user_func($this->callback, null, $exception);
     }
 
@@ -370,13 +370,6 @@ class HttpClient implements Async
         ];
 
         $exception = new DnsLookupTimeoutException($message, 408, null, $metaData);
-
-        if ($this->trace) {
-            $this->trace->commit($exception);
-        }
-        if ($this->debuggerTrace instanceof DebuggerTrace) {
-            $this->debuggerTrace->commit("warn", $exception);
-        }
 
         call_user_func($this->callback, null, $exception);
     }

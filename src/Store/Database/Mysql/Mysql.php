@@ -35,6 +35,7 @@ class Mysql implements DriverInterface
      * @var Trace
      */
     private $trace;
+    private $traceHandle;
 
     /**
      * @var DebuggerTrace
@@ -88,7 +89,7 @@ class Mysql implements DriverInterface
     {
         $this->trace = (yield getContext("trace"));
         if ($this->trace) {
-            $this->trace->transactionBegin(Constant::SQL, $sql);
+            $this->traceHandle = $this->trace->transactionBegin(Constant::SQL, $sql);
         }
 
         $debuggerTrace = (yield getContext("debugger_trace"));
@@ -160,14 +161,14 @@ class Mysql implements DriverInterface
             }
 
             if ($this->trace) {
-                $this->trace->commit($exception->getTraceAsString());
+                $this->trace->commit($this->traceHandle, $exception->getTraceAsString());
             }
             if ($this->debuggerTrace) {
                 $this->debuggerTrace->commit("error", $exception);
             }
         } else {
             if ($this->trace) {
-                $this->trace->commit(Constant::SUCCESS);
+                $this->trace->commit($this->traceHandle, Constant::SUCCESS);
             }
             if ($this->debuggerTrace) {
                 $this->debuggerTrace->commit("info", $result);
@@ -200,7 +201,7 @@ class Mysql implements DriverInterface
         $start = microtime(true);
         return function() use($sql, $start, $type) {
             if ($this->trace) {
-                $this->trace->commit("$type timeout");
+                $this->trace->commit($this->traceHandle, "$type timeout");
             }
             if ($this->debuggerTrace) {
                 $this->debuggerTrace->commit("warn", "$type timeout");

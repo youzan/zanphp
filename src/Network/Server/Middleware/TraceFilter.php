@@ -59,8 +59,9 @@ class TraceFilter implements RequestFilter
         }
         $trace = new Trace($config, $rootId, $parentId);
         $trace->initHeader($eventId);
-        $trace->transactionBegin($type, $name);
+        $traceHandle = $trace->transactionBegin($type, $name);
         
         $context->set('trace', $trace);
+        $context->set('traceHandle', $traceHandle);
     }
 }

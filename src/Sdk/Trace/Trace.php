@@ -64,7 +64,7 @@ class Trace
             return false;
         }
 
-        $this->traceImp->transactionBegin($type, $name);
+        return $this->traceImp->transactionBegin($type, $name);
     }
 
     public function getRootId()
@@ -85,13 +85,13 @@ class Trace
         return $this->traceImp->getParentId();
     }
 
-    public function commit($status, $sendData = '')
+    public function commit($handle, $status, $sendData = '')
     {
         if (!$this->run) {
             return false;
         }
 
-        $this->traceImp->transactionEnd($status, $sendData);
+        $this->traceImp->transactionEnd($handle, $status, $sendData);
     }
 
     public function logEvent($type, $status, $name = "", $context = "")
