@@ -38,6 +38,9 @@ class Redis implements ConnectionFactory
             $result = $socket->connect($this->config['host'], $this->config['port'], [$connection, 'onConnect']);
             $dst = $this->config['host'].":".$this->config['port'];
         }
+        if (isset($this->config['auth'])&&$this->config['auth']!=""){
+                $socket->auth($this->config['auth']);
+        }
         if (false === $result) {
             sys_error("Redis connect $dst failed");
             return null;
