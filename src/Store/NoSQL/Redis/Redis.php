@@ -9,6 +9,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\DebuggerTrace;
+use Zan\Framework\Sdk\Trace\Trace;
 use Zan\Framework\Store\NoSQL\Exception\RedisCallTimeoutException;
 use Zan\Framework\Utilities\DesignPattern\Context;
 
@@ -43,6 +44,10 @@ class Redis implements Async
     private $cmd;
     private $args;
 
+    /** @var  Trace */
+    private $trace;
+    private $traceHandle;
+
     /**
      * @var DebuggerTrace
      */
@@ -73,6 +78,10 @@ class Redis implements Async
     public function recv(/** @noinspection PhpUnusedParameterInspection */
         $client, $ret)
     {
+        if ($this->trace instanceof Trace) {
+            $this->trace->commit($this->traceHandle, Constant::SUCCESS);
+        }
+
         if ($this->debuggerTrace instanceof DebuggerTrace) {
             $this->debuggerTrace->commit("info", $ret);
         }
@@ -83,19 +92,30 @@ class Redis implements Async
 
     public function execute(callable $callback, $task)
     {
+        $conf = $this->conn->getConfig();
+        if (isset($conf["path"])) {
+            $dsn = $conf["path"];
+        } else if (isset($conf["host"]) && isset($conf["port"])) {
+            $dsn = "{$conf["host"]}:{$conf["port"]}";
+        } else {
+            $dsn = "";
+        }
+
         /** @var Task $task */
         /** @var Context $ctx */
         $ctx = $task->getContext();
+        $trace = $ctx->get("trace", null);
+
+        if ($trace instanceof Trace) {
+            $info = json_encode([
+                "args" => $this->args,
+                "dsn" => $dsn,
+            ]);
+            $this->trace = $trace;
+            $this->traceHandle = $trace->transactionBegin(Constant::REDIS, $this->cmd." ".$info);
+        }
         $debuggerTrace = $ctx->get("debugger_trace", null);
         if ($debuggerTrace instanceof DebuggerTrace) {
-            $conf = $this->conn->getConfig();
-            if (isset($conf["path"])) {
-                $dsn = $conf["path"];
-            } else if (isset($conf["host"]) && isset($conf["port"])) {
-                $dsn = "{$conf["host"]}:{$conf["port"]}";
-            } else {
-                $dsn = "";
-            }
             $debuggerTrace->beginTransaction(Constant::REDIS, $this->cmd, [
                 "args" => $this->args,
                 "dsn" => $dsn,
@@ -136,6 +156,9 @@ class Redis implements Async
 
                 $callback = $this->callback;
                 $ex = new RedisCallTimeoutException("Redis call {$this->cmd} timeout", 0, null, $ctx);
+                if ($this->trace instanceof Trace) {
+                    $this->trace->commit($this->traceHandle, $ex);
+                }
                 $callback(null, $ex);
             }
         };
