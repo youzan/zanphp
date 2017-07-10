@@ -16,7 +16,7 @@
 3. 基于 [zan](https://github.com/youzan/zan) 提供异步非阻塞I/O服务
 4. 连接池支持（内置 MySQL、Redis、syslog 等多种组件）
 5. 类似 Golang 的 defer 机制解决由于异常导致的资源未释放、锁未释放的问题
-6. 可继承的View布局及组件化支持，方便完成 bigPipe/bigRender/ 首屏加载优化等不同的渲染方式
+6. 可继承的View布局及组件化支持，方便完成 bigPipe/bigRender/首屏加载优化等不同的渲染方式
 7. 基于模型驱动的 SQLMap，实现了 SQL 的快速定位及方便的 sharding、cache 支持
 8. 提供类似于 [Laravel](https://github.com/laravel/laravel) 的 middleware(Filters & Terminators) 机制
 9. Di及单元测试的良好支持
@@ -24,6 +24,8 @@
 
 ## 框架定位
 ZanPHP 的定位是高并发 Web 服务或业务中间件。
+
+ZanPHP既可以满足创业公司或者个人建站的需求，也可以满足服务化架构下的框架需求。
 
 ZanPHP 参考了很多 Golang 特性，不过目的绝不是为了替换掉 Golang。
 
@@ -55,11 +57,11 @@ Zan PHP 的文档仓库地址：[zanphp-doc](https://github.com/youzan/zanphp-do
 
 
 ## 官方交流渠道
-官网：[点我进入](http://zanphp.io)
-QQ群：115728122
+- 官网：[点我进入](http://zanphp.io)
+- 官方交流QQ群：115728122
 
 ## 捐赠我们
-[捐赠通道](http://zanphp.io/donate)
+请点击 -> [捐赠通道](http://zanphp.io/donate)
 
 ## License
 
