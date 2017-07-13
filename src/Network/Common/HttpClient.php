@@ -285,7 +285,9 @@ class HttpClient implements Async
         if ($this->rpcContext instanceof RpcContext) {
             $pairs = $this->rpcContext->get();
             foreach ($pairs as $key => $value) {
-                $this->header[$key] = $value;
+                if (is_scalar($value)) {
+                    $this->header[$key] = strval($value);
+                }
             }
         }
 

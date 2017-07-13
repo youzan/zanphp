@@ -71,7 +71,6 @@ class PoolEx
                 throw new ZanException("create conn pool fail [pool=$this->poolType]");
             }
         }
-        return;
     }
 
     public function get()
