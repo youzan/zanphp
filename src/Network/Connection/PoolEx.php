@@ -65,10 +65,13 @@ class PoolEx
 
         $min = $poolConf["minimum-connection-count"];
         $max = $poolConf["maximum-connection-count"];
-        $r = $this->poolEx->createConnPool($min, $max);
-        if ($r === false) {
-            throw new ZanException("create conn pool fail [pool=$this->poolType]");
+        if($min >= 0 && $max > 0 && $min < $max){
+            $r = $this->poolEx->createConnPool($min, $max);
+            if ($r === false) {
+                throw new ZanException("create conn pool fail [pool=$this->poolType]");
+            }
         }
+        return;
     }
 
     public function get()
