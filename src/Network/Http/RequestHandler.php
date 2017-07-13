@@ -46,7 +46,8 @@ class RequestHandler
     {
         try {
             $request = Request::createFromSwooleHttpRequest($swooleRequest);
-            if (false === $this->initContext($request, $swooleResponse)) {
+
+            if (false === $this->initContext($request, $swooleRequest, $swooleResponse)) {
                 //filter ico file access
                 return;
             }
@@ -86,9 +87,10 @@ class RequestHandler
         $this->event->fire($this->getRequestFinishJobId());
     }
 
-    private function initContext($request, SwooleHttpResponse $swooleResponse)
+    private function initContext(Request $request, SwooleHttpRequest $swooleRequest, SwooleHttpResponse $swooleResponse)
     {
         $this->request = $request;
+        $this->context->set('swoole_request', $swooleRequest);
         $this->context->set('request', $request);
         $this->context->set('swoole_response', $swooleResponse);
 

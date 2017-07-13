@@ -2,8 +2,11 @@
 
 namespace Zan\Framework\Sdk\Log;
 
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+
 class BufferLogger extends BaseLogger
 {
+    /** @var BaseLogger */
     private $logger;
     private $bufferSize;
     private $bufferData;
@@ -17,6 +20,7 @@ class BufferLogger extends BaseLogger
         $this->config = $config;
         $this->bufferSize = $this->config['bufferSize'];
         $this->writer = new BufferWriter($this->logger, $this->bufferSize);
+        parent::__construct($config);
     }
 
     public function format($level, $message, $context)

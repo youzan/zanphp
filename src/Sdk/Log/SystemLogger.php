@@ -11,12 +11,13 @@ use Zan\Framework\Network\Connection\ConnectionManager;
 class SystemLogger extends BaseLogger
 {
     const TOPIC_PREFIX = 'log';
-    private $priority;
-    private $hostname;
-    private $server;
-    private $pid;
-    private $conn;
-    private $connectionConfig;
+    protected $priority;
+    protected $hostname;
+    protected $ip;
+    protected $server;
+    protected $pid;
+    protected $conn;
+    protected $connectionConfig;
 
     public function __construct($config)
     {
@@ -25,7 +26,8 @@ class SystemLogger extends BaseLogger
         $this->connectionConfig = 'syslog.' . str_replace('/', '', $this->config['path']);
         $this->priority = LOG_LOCAL3 + LOG_INFO;
         $this->hostname = Env::get('hostname');
-        $this->server = $this->hostname . '/' . Env::get('ip');
+        $this->ip = Env::get('ip');
+        $this->server = $this->hostname . '/' . $this->ip;
         $this->pid = Env::get('pid');
     }
 

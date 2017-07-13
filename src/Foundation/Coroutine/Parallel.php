@@ -4,6 +4,7 @@ namespace Zan\Framework\Foundation\Coroutine;
 
 use Zan\Framework\Foundation\Exception\ParallelException;
 use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
+use Zan\Framework\Utilities\DesignPattern\Context;
 
 class Parallel
 {
@@ -11,16 +12,24 @@ class Parallel
     private $childTasks = [];
     private $sendValues = [];
     private $exceptions = [];
+    private $fetchCtx   = [];
+
+    /**
+     * @var Context
+     */
+    private $taskContext;
 
     public function __construct(Task $task)
     {
         $this->task = $task;
     }
 
-    public function call($coroutines)
+    public function call($coroutines, &$fetchCtx = [])
     {
+        $this->fetchCtx = &$fetchCtx;
+
         $parentTaskId = $this->task->getTaskId();
-        $taskContext = $this->task->getContext();
+        $this->taskContext = $this->task->getContext();
         
         $taskDoneEventName = 'parallel_task_done_' . $parentTaskId;
         $event = $this->task->getContext()->getEvent();
@@ -38,12 +47,14 @@ class Parallel
                 continue; 
             }
 
-            $childTask = new Task($this->catchException($key, $coroutine), $taskContext, 0, $this->task);
+            $childTask = new Task($this->catchException($key, $coroutine), $this->taskContext, 0, $this->task);
             $this->childTasks[$key] = $childTask;
 
             $newTaskId = $childTask->getTaskId();
             $evtName = 'task_event_' . $newTaskId;
             $eventChain->before($evtName, $taskDoneEventName);
+
+
         }
 
         if ($this->childTasks == []) {
@@ -85,14 +96,20 @@ class Parallel
     private function catchException($key, \Generator $coroutine)
     {
         try {
-            yield $coroutine;
-            return;
-        } catch (\Throwable $t) {
-            $ex = t2ex($t);
-        } catch (\Exception $ex) { }
+            $r = (yield $coroutine);
+        } catch (\Throwable $r) {
+            $r = t2ex($r);
+            $this->exceptions[$key] = $r;
+            echo_exception($r);
+        } catch (\Exception $r) {
+            $this->exceptions[$key] = $r;
+            echo_exception($r);
+        }
 
-        echo_exception($ex);
-        $this->exceptions[$key] = $ex;
-        yield $ex;
+        foreach ($this->fetchCtx as $ctxKey) {
+            $this->fetchCtx[$ctxKey] = $this->taskContext->get($ctxKey);
+        }
+
+        yield $r;
     }
 }

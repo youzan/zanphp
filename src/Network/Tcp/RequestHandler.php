@@ -81,7 +81,6 @@ class RequestHandler
             }
             $request->setStartTime();
 
-            $this->request->getRpcContext()->bindTaskCtx($this->context);
             $this->middleWareManager = new MiddlewareManager($request, $this->context);
 
             $isAccept = Worker::instance()->reactionReceive();

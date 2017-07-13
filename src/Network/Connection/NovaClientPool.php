@@ -1,18 +1,24 @@
 <?php
 namespace Zan\Framework\Network\Connection;
 
-use Zan\Framework\Contract\Network\LoadBalancingStrategyInterface;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Connection\Exception\CanNotFindLoadBalancingStrategeMapException;
 use Zan\Framework\Network\ServerManager\ServerStore;
-use Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling;
 use Zan\Framework\Foundation\Container\Di;
 use Zan\Framework\Foundation\Core\RunMode;
+use ZanPHP\Contracts\LoadBalance\LoadBalancer;
+use ZanPHP\Contracts\LoadBalance\Node;
+use ZanPHP\Contracts\ServiceChain\ServiceChainer;
+use ZanPHP\LoadBalance\LVSRoundRobinLoadBalance;
+use ZanPHP\LoadBalance\RandomLoadBalance;
 
 class NovaClientPool
 {
+    /**
+     * @var Connection[]
+     */
     private $connections = [];
 
     private $waitingConnections = [];
@@ -22,7 +28,13 @@ class NovaClientPool
     private $appName;
 
     private $loadBalancingStrategyMap = [
-        Polling::NAME => Polling::class,
+        "polling"       => LVSRoundRobinLoadBalance::class, // 兼容旧配置
+        "random"        => RandomLoadBalance::class,
+        "roundRobin"    => LVSRoundRobinLoadBalance::class,
+        /*
+        "leastActive"   => LeastActiveLoadBalance::class,
+        "consistentHash"=> ConsistentHashLoadBalance::class,
+        */
     ];
 
     const CONNECTION_RELOAD_STEP_TIME = 5000;
@@ -31,7 +43,7 @@ class NovaClientPool
     private $reloadTime = [];
 
     /**
-     * @var LoadBalancingStrategyInterface
+     * @var LoadBalancer
      */
     private $loadBalancingStrategy;
 
@@ -79,12 +91,15 @@ class NovaClientPool
             throw new CanNotFindLoadBalancingStrategeMapException();
         }
         $loadBalancingStrategy = $this->loadBalancingStrategyMap[$strategy];
-        $this->loadBalancingStrategy = Di::make($loadBalancingStrategy, [$this]);
+        $this->loadBalancingStrategy = new $loadBalancingStrategy;
     }
 
     public function updateLoadBalancingStrategy($pool)
     {
-        $this->loadBalancingStrategy->initServers($pool);
+        // TODO loadBalancer 接口是否添加一个onRefresh接口用来处理有状态的负载均衡实现, 感知外部结点变化
+        // $this->loadBalancingStrategy->initServers($pool);
+        /** @var Node $node */
+        // foreach ($this->connections as $node) { $node->reset()?! }
     }
 
     public function getConnections()
@@ -110,7 +125,82 @@ class NovaClientPool
 
     public function get()
     {
-        yield $this->loadBalancingStrategy->get();
+        $connections = $this->connections;
+
+        try {
+            $serviceChain = (yield getContext("service-chain"));
+            if ($serviceChain instanceof ServiceChainer) {
+                $value = (yield getContext("service-chain-value"));
+                if ($value === null) {
+                    $connections = (yield $this->getConnectionsWithoutServiceChain($serviceChain));
+                } else {
+                    $connections = (yield $this->getConnectionsWithServiceChain($serviceChain, $value));
+                }
+            }
+        } catch (\Throwable $t) {
+            sys_error("get connection by servcie chain error: " . $t->getMessage());
+        } catch (\Exception $e) {
+            sys_error( "get connection by servcie chain error: " . $e->getMessage());
+        }
+
+        yield $this->loadBalancingStrategy->select($connections);
+    }
+
+    /**
+     * 当前调用包含Service Chain标识，则路由到归属于该Service Chain的任意服务节点，
+     * 如果没有归属于该Service Chain的服务节点，则排除掉所有隶属于Service Chain的服务节点之后路由到任意服务节点
+     * @param ServiceChainer $serviceChainer
+     * @param $key
+     * @return \Generator|void
+     */
+    private function getConnectionsWithServiceChain(ServiceChainer $serviceChainer, $key)
+    {
+        $endpoints = (yield $serviceChainer->getEndpoints($this->appName, $key));
+
+        if ($endpoints) {
+            $connections = [];
+            foreach ($this->connections as $connection) {
+                $config = $connection->getConfig();
+                $host = $config["host"];
+                $port = $config["port"];
+                if (isset($endpoints["$host:$port"])) {
+                    $connections[] = $connection;
+                }
+            }
+
+            if ($connections) {
+                yield $connections;
+                return;
+            }
+        }
+
+        yield $this->getConnectionsWithoutServiceChain($serviceChainer);
+    }
+
+    /**
+     * 获取所有没有service chain标记的连接
+     * @param ServiceChainer $serviceChainer
+     * @return \Generator
+     */
+    private function getConnectionsWithoutServiceChain(ServiceChainer $serviceChainer)
+    {
+        $allEndpoints = (yield $serviceChainer->getEndpoints($this->appName));
+
+        if (empty($allEndpoints)) {
+            yield $this->connections;
+        } else {
+            $connections = [];
+            $endpoints = array_merge(...array_values($allEndpoints));
+            foreach ($this->connections as $connection) {
+                $config = $connection->getConfig();
+                $host = $config["host"];
+                $port = $config["port"];
+                if (!isset($endpoints["$host:$port"])) {
+                    $connections[] = $connection;
+                }
+            }
+            yield $connections;
+        }
     }
 
     public function reload(array $config)

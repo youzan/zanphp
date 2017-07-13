@@ -39,6 +39,7 @@ class Request implements BaseRequest
         $this->fd = $fd;
         $this->fromId = $fromId;
         $this->data = $data;
+        $this->rpcContext = new RpcContext();
     }
 
     public function getData()
@@ -79,7 +80,7 @@ class Request implements BaseRequest
 
     public function getAttachData()
     {
-        return $this->rpcContext->pack();
+        return $this->rpcContext->packNovaAttach();
     }
 
     public function getRoute()
@@ -213,7 +214,7 @@ class Request implements BaseRequest
             $this->remoteIp = $remoteIP;
             $this->remotePort = $remotePort;
             $this->seqNo = $seqNo;
-            $this->rpcContext = RpcContext::unpack($attachData);
+            $this->rpcContext->unpackNovaAttach($attachData);
 
             if('com.youzan.service.test' === $serviceName and 'ping' === $methodName) {
                 $this->isHeartBeat = true;

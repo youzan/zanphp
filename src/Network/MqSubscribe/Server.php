@@ -7,6 +7,7 @@ use Zan\Framework\Network\MqSubscribe\WorkerStart\InitializeMqSubscribe;
 use Zan\Framework\Network\Server\ServerStart\InitLogConfig;
 use Zan\Framework\Network\Server\WorkerStart\InitializeConnectionPool;
 use Zan\Framework\Network\Server\WorkerStart\InitializeErrorHandler;
+use Zan\Framework\Network\Server\WorkerStart\InitializeServiceChain;
 use Zan\Framework\Network\Server\WorkerStart\InitializeWorkerMonitor;
 use Zan\Framework\Network\Server\WorkerStart\InitializeServerDiscovery;
 use swoole_http_server as SwooleServer;
@@ -30,6 +31,7 @@ class Server extends ServerBase
         InitializeConnectionPool::class,
         InitializeWorkerMonitor::class,
         InitializeServerDiscovery::class,
+        InitializeServiceChain::class,
         InitializeMqSubscribe::class,
     ];
 
