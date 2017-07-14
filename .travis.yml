@@ -13,4 +13,3 @@ install:
 
 script:
     - sh toolkit/lint.sh
-    - exit $?

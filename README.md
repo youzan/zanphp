@@ -9,6 +9,8 @@
 <p align="center">基于 PHP 协程的网络服务框架，提供最简单的方式开发面向 C10K+ 的高并发SOA服务和RPC服务。</p>
 <p align="center">每天为2,000+个服务提供300,000,000+次访问量支持，广泛应用于有赞各项业务。</p>
 
+[![License](https://img.shields.io/badge/license-mit-blue.svg)](LICENSE)
+[![Build Status](https://travis-ci.org/youzan/zanphp.svg?branch=master)](https://travis-ci.org/youzan/zanphp)
 
 ## 核心特性
 1. 基于 `yield` 实现了独立堆栈的协程
