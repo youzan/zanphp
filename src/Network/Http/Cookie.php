@@ -25,7 +25,7 @@ class Cookie
     {
         $config = Config::get($this->configKey, null);
         if (!$config) {
-            throw new InvalidArgumentException('cookie config is required');
+            throw new InvalidArgumentException('Cookie config is required, see: http://zanphpdoc.zanphp.io/config/cookie.html');
         }
         $this->config = $config;
         $this->request = $request;

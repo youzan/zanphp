@@ -188,7 +188,7 @@ class HttpClient implements Async
             $host = Config::get("zan_http_proxy.host");
             $port = Config::get("zan_http_proxy.port", 80);
             if (empty($host)) {
-                throw new \InvalidArgumentException("missing http proxy config");
+                throw new \InvalidArgumentException("Missing http proxy config, see: http://zanphpdoc.zanphp.io/libs/network/http.html");
             }
         } else {
             $host = $this->host;

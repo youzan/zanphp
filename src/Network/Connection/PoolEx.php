@@ -34,7 +34,7 @@ class PoolEx
     public function __construct($factoryType, array $config)
     {
         if (!isset($this->typeMap[$factoryType])) {
-            throw new InvalidArgumentException("not pool type '$factoryType'");
+            throw new InvalidArgumentException("No pool type '$factoryType'");
         }
 
         $this->poolEx = new \swoole_connpool($this->typeMap[$factoryType]);
@@ -60,14 +60,14 @@ class PoolEx
 
         $r = $this->poolEx->setConfig($conf);
         if ($r === false) {
-            throw new InvalidArgumentException("invalid connection pool config, [pool=$this->poolType]");
+            throw new InvalidArgumentException("Invalid connection pool config, [pool=$this->poolType]");
         }
 
         $min = $poolConf["minimum-connection-count"];
         $max = $poolConf["maximum-connection-count"];
         $r = $this->poolEx->createConnPool($min, $max);
         if ($r === false) {
-            throw new ZanException("create conn pool fail [pool=$this->poolType]");
+            throw new ZanException("Create connection pool fail [pool=$this->poolType]");
         }
     }
 
@@ -78,7 +78,7 @@ class PoolEx
         $timeout = $this->config["pool"]["get-timeout"];
         $r = $this->poolEx->get($timeout, $asyncConn);
         if ($r === false) {
-            throw new ZanException("get connection fail [pool=$this->poolType]");
+            throw new ZanException("Get connection fail [pool=$this->poolType]");
         }
 
         yield $asyncConn;

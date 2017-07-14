@@ -17,7 +17,7 @@ class ServerDiscoveryInitiator
     {
         $config = Config::get('registry');
         if (empty($config)) {
-            throw new ServerConfigException("registry config is not found");
+            throw new ServerConfigException("registry config is not found, see: http://zanphpdoc.zanphp.io/config/registry.html");
         }
         $config = $this->noNeedDiscovery($config);
         if (!isset($config['app_names']) || [] === $config['app_names']) {

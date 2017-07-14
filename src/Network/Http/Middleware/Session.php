@@ -102,7 +102,7 @@ class Session
         $offset = 0;
         while ($offset < strlen($session)) {
             if (!strstr(substr($session, $offset), "|")) {
-                throw new InvalidArgumentException("invalid data, remaining: " . substr($session, $offset));
+                throw new InvalidArgumentException("Invalid data, remaining: " . substr($session, $offset));
             }
             $pos = strpos($session, "|", $offset);
             $num = $pos - $offset;

@@ -20,7 +20,7 @@ class FutureConnection implements Async
     public function __construct($connectionManager, $connKey, $timeout, $pool)
     {
         if(!is_int($timeout)){
-            throw new InvalidArgumentException('invalid timeout for Future[Connection]');
+            throw new InvalidArgumentException('Invalid timeout for Future[Connection]');
         }
         $this->connectionManager = $connectionManager;
         $this->connKey = $connKey;
@@ -84,7 +84,7 @@ class FutureConnection implements Async
             $this->pool->waitNum--;
         }
 
-        call_user_func($this->taskCallback, null, new ConnectTimeoutException("future $this->connKey connection connected timeout"));
+        call_user_func($this->taskCallback, null, new ConnectTimeoutException("Future $this->connKey connection connected timeout"));
         unset($this->taskCallback);
     }
 

@@ -32,7 +32,7 @@ abstract class BaseLogger implements LoggerInterface
     public function __construct(array $config)
     {
         if (!$config) {
-            throw new InvalidArgumentException('Config is required' . $config);
+            throw new InvalidArgumentException('Log config is required, see: http://zanphpdoc.zanphp.io/config/log.html#id3');
         }
         $this->config = $config;
         $this->levelNum = $this->getLevelNum($this->config['level']);
@@ -189,7 +189,7 @@ abstract class BaseLogger implements LoggerInterface
     public function log($level, $message, array $context = array())
     {
         if (!isset($this->logMap[$level])) {
-            throw new InvalidArgumentException('Log level[' . $level . '] is illegal');
+            throw new InvalidArgumentException('Log level[' . $level . '] is illegal, see: http://zanphpdoc.zanphp.io/config/log.html#id3');
         }
         yield $this[$level]($message, $context);
     }
