@@ -119,8 +119,11 @@ class SkynetLogger extends SystemLogger
             }
         }
 
+        if ($context == [])
+            $context = new \stdClass();
+
         $skynetHdr = $this->buildSkynetHeader($level, $exceptionClass);
-        $skynetBody = $this->buildSkynetbody($message, $stackTrace, $context);
+        $skynetBody = $this->buildSkynetbody($message, $stackTrace, [$context]);
 
         return "$skynetHdr|$skynetBody";
     }
