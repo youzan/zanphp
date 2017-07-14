@@ -1,0 +1,15 @@
+language: php
+
+php:
+  - '5.6'
+  - '7.0'
+  - '7.1'
+
+env:
+  - REPORT_EXIT_STATUS=1 NO_INTERACTION=1
+
+install:
+  - composer install
+
+script:
+    - sh toolkit/lint.sh
