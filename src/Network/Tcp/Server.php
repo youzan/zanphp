@@ -163,7 +163,7 @@ class Server extends ServerBase
     private function parserNovaConfig($config)
     {
         if (!is_array($config)) {
-            throw new ZanException("invalid nova config");
+            throw new ZanException("invalid nova config[novaApi], see: http://zanphpdoc.zanphp.io/config/registry.html#id3");
         }
         if (isset($config["path"])) {
             $appName = Application::getInstance()->getName();
@@ -178,13 +178,13 @@ class Server extends ServerBase
                 $item["appName"] = Application::getInstance()->getName();
             }
             if(!isset($item["path"])){
-                throw new ZanException("nova server path not defined");
+                throw new ZanException("nova server path not defined[novaApi.path], see: http://zanphpdoc.zanphp.io/config/registry.html#id3");
             }
 
             $item["path"] = Path::getRootPath() . $item["path"];
 
             if(!isset($item["namespace"])){
-                throw new ZanException("nova namespace path not defined");
+                throw new ZanException("nova namespace path not defined[novaApi.namespace], see: http://zanphpdoc.zanphp.io/config/registry.html#id3");
             }
 
             if(!isset($item["domain"])) {

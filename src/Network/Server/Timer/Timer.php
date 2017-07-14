@@ -26,7 +26,7 @@ class Timer
         $jobId = self::formatJobId($jobId);
 
         if (isset(self::$tickMap[$jobId])) {
-            throw new TimerExistException('job name is exist!');
+            throw new TimerExistException('job name is exist! >>> ' . $jobId);
         }
 
         $timerId = swoole_timer_tick($interval, self::formateTickCallback($jobId, $callback));
@@ -51,7 +51,7 @@ class Timer
         $jobId = self::formatJobId($jobId);
 
         if (isset(self::$afterMap[$jobId])) {
-            throw new TimerExistException('job name is exist!');
+            throw new TimerExistException('job name is exist! >>> ' . $jobId);
         }
 
         $timerId = swoole_timer_after($interval, self::formateAfterCallback($jobId, $callback));

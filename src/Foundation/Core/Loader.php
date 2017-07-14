@@ -14,7 +14,7 @@ class Loader
     public function load($path)
     {
         if(!is_dir($path)){
-            throw new InvalidArgumentException('Invalid path for Loader');
+            throw new InvalidArgumentException('Invalid path for Loader:' . $path);
         }
 
         $path = Dir::formatPath($path);

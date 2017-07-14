@@ -67,7 +67,7 @@ class TcpClientEx implements Async
 
         if ($sent === false) {
             $this->connEx->close();
-            throw new NetworkException("tcp send fail");
+            throw new NetworkException("TCP client send fail");
         }
 
         yield $this;
@@ -79,7 +79,7 @@ class TcpClientEx implements Async
 
         if ($sent === false) {
             $this->connEx->close();
-            throw new NetworkException("tcp send fail");
+            throw new NetworkException("TCP client send fail");
         } else {
             $this->connEx->release();
         }
@@ -98,7 +98,7 @@ class TcpClientEx implements Async
     {
         if (is_int($r)) {
             $this->connEx->close();
-            $ex = new TcpSendTimeoutException("tcp send timeout, type=$r");
+            $ex = new TcpSendTimeoutException("TCP client send timeout, type=$r");
             call_user_func($this->callback, $r, $ex);
         } else if ($r === false || $r === "") {
             $this->connEx->close();

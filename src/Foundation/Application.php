@@ -225,10 +225,8 @@ class Application
             return $this->namespace;
         }
 
-        $composer = json_decode(
-            file_get_contents($this->getBasePath().'/'.'composer.json'),
-            true
-        );
+        $composerFile = $this->getBasePath().'/composer.json';
+        $composer = json_decode(file_get_contents($composerFile), true);
 
         foreach ((array) Arr::get($composer, 'autoload.psr-4') as $namespace => $path) {
             foreach ((array) $path as $pathChoice) {
@@ -238,7 +236,7 @@ class Application
             }
         }
 
-        throw new RuntimeException('Unable to detect application namespace.');
+        throw new RuntimeException("Unable to detect application namespace. Please check autoload.psr-4 in {$composerFile}.");
     }
 
     /**

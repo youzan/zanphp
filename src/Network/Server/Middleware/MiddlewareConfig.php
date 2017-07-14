@@ -72,7 +72,7 @@ class MiddlewareConfig
             return [];
         }
         if (!isset($config['group'][$groupKey])) {
-            throw new InvalidArgumentException('Invalid Group name in MiddlewareManager');
+            throw new InvalidArgumentException('Invalid Group name in MiddlewareManager, see: http://zanphpdoc.zanphp.io/libs/middleware/filters.html#tcp');
         }
 
         return $config['group'][$groupKey];

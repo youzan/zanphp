@@ -58,7 +58,7 @@ class TcpClient implements Async
     {
         $sent = $this->sock->send($data);
         if (false === $sent) {
-            throw new NetworkException("tcp send fail");
+            throw new NetworkException("TCP client send fail");
         }
 
         if ($this->hasRecv) {

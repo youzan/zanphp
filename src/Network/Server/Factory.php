@@ -29,14 +29,14 @@ class Factory
     {
         $config = Config::get($this->configName);
         if (empty($config)) {
-            throw new RuntimeException('server config not found');
+            throw new RuntimeException('server config not found, see: http://zanphpdoc.zanphp.io/config/server.html');
         }
 
         $this->host = $config['host'];
         $this->port = $config['port'];
         $this->serverConfig = $config['config'];
         if (empty($this->host) || empty($this->port)) {
-            throw new RuntimeException('server config error: empty ip/port');
+            throw new RuntimeException('server config error: empty ip/port, see: http://zanphpdoc.zanphp.io/config/server.html');
         }
 
         // 强制关闭swoole worker自动重启(未考虑请求处理完), 使用zan框架重启机制

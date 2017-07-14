@@ -69,7 +69,8 @@ class Log
     {
         $logUrl = Config::get('log.' . $key, null);
         if (!$logUrl) {
-            throw new InvalidArgumentException('Can not find config for logKey: ' . $key);
+            throw new InvalidArgumentException('Can not find config for logKey: ' . $key
+                . ',see: http://zanphpdoc.zanphp.io/config/log.html?highlight=log#id3');
         }
 
         $config = parse_url($logUrl);

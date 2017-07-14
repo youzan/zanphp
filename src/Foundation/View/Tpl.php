@@ -3,6 +3,7 @@
 namespace Zan\Framework\Foundation\View;
 
 use Zan\Framework\Foundation\Application;
+use Zan\Framework\Foundation\Exception\System\InvalidArgumentException;
 use Zan\Framework\Utilities\Types\Dir;
 use Zan\Framework\Foundation\Coroutine\Event;
 use Zan\Framework\Foundation\Core\Config;
@@ -34,7 +35,7 @@ class Tpl
     public function setTplPath($dir)
     {
         if(!is_dir($dir)){
-            throw new InvalidArgumentException('Invalid tplPath for Layout');
+            throw new InvalidArgumentException('Invalid tplPath for Layout:' . $dir);
         }
         $dir = Dir::formatPath($dir);
         $this->_tplPath = $dir;

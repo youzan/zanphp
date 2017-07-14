@@ -12,7 +12,7 @@ class SystemWriter implements LogWriter
     public function __construct($conn)
     {
         if (!($conn instanceof Syslog) && !($conn instanceof \swoole_client)) {
-            throw new InvalidArgumentException('$conn must be instanceof Syslog or \swoole_client.');
+            throw new InvalidArgumentException('log connection must be instanceof Syslog or \swoole_client.');
         }
         $this->conn = $conn;
     }
