@@ -11,10 +11,10 @@ namespace Zan\Framework\Test\Foundation\Coroutine\Task;
 
 class WaitJob {
     public function run() {
-        $data = yield parallel([
+        $data = (yield parallel([
             'a' => $this->asyncSeviceCall1(),
             'b' => $this->asyncSeviceCall2(),
-        ]);
+        ]));
 
         $a = $data['a'];
         $b = $data['b'];
