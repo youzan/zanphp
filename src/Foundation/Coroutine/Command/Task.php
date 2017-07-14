@@ -71,7 +71,7 @@ function getRpcContext($key = null, $default = null)
 {
     return new SysCall(function (Task $task) use($key, $default) {
         $context = $task->getContext();
-        $rpcCtx = $context->get(RpcContext::KEY, null, RpcContext::class);
+        $rpcCtx = $context->get("rpc-context", null, RpcContext::class);
         if ($rpcCtx) {
             $task->send($rpcCtx->get($key, $default));
         } else {
@@ -86,10 +86,10 @@ function setRpcContext($key, $value)
 {
     return new SysCall(function (Task $task) use ($key, $value) {
         $context = $task->getContext();
-        $rpcCtx = $context->get(RpcContext::KEY, null, RpcContext::class);
+        $rpcCtx = $context->get("rpc-context", null, RpcContext::class);
         if ($rpcCtx === null) {
             $rpcCtx = new RpcContext;
-            $context->set(RpcContext::KEY, $rpcCtx);
+            $context->set("rpc-context", $rpcCtx);
         }
         $task->send($rpcCtx->set($key, $value));
         return Signal::TASK_CONTINUE;
@@ -155,10 +155,10 @@ function wait()
     });
 }
 
-function parallel($coroutines)
+function parallel($coroutines, &$fetchCtx = [])
 {
-    return new SysCall(function (Task $task) use ($coroutines) {
-        (new Parallel($task))->call($coroutines);
+    return new SysCall(function (Task $task) use ($coroutines, &$fetchCtx) {
+        (new Parallel($task))->call($coroutines, $fetchCtx);
 
         return Signal::TASK_WAIT;
     });

@@ -10,8 +10,9 @@ use Zan\Framework\Foundation\Coroutine\Task;
 use Kdt\Iron\Nova\Network\Client as NovaPingClient;
 use Kdt\Iron\Nova\Exception\NetworkException;
 use Zan\Framework\Utilities\Types\Time;
+use ZanPHP\Contracts\LoadBalance\Node;
 
-class NovaClient extends Base implements Connection
+class NovaClient extends Base implements Connection, Node
 {
     private $clientCb;
     protected $isAsync = true;
@@ -34,7 +35,8 @@ class NovaClient extends Base implements Connection
         }
     }
 
-    public function init() {
+    public function init()
+    {
         //set callback
         $this->getSocket()->on('connect', [$this, 'onConnect']);
         $this->getSocket()->on('receive', [$this, 'onReceive']);
@@ -42,7 +44,8 @@ class NovaClient extends Base implements Connection
         $this->getSocket()->on('error', [$this, 'onError']);
     }
 
-    public function onConnect(SwooleClient $cli) {
+    public function onConnect(SwooleClient $cli)
+    {
         //put conn to active_pool
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
@@ -54,14 +57,16 @@ class NovaClient extends Base implements Connection
         $this->inspect("connect to server", $cli);
     }
 
-    public function onClose(SwooleClient $cli){
+    public function onClose(SwooleClient $cli)
+    {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
         $this->inspect("close", $cli);
     }
 
-    public function onReceive(SwooleClient $cli, $data) {
+    public function onReceive(SwooleClient $cli, $data)
+    {
         try {
             call_user_func($this->clientCb, $data);
         } catch (\Throwable $t) {
@@ -71,7 +76,8 @@ class NovaClient extends Base implements Connection
         }
     }
 
-    public function onError(SwooleClient $cli){
+    public function onError(SwooleClient $cli)
+    {
         Timer::clearAfterJob($this->getConnectTimeoutJobId());
         Timer::clearAfterJob($this->getHeartbeatingJobId());
         $this->close();
@@ -79,9 +85,11 @@ class NovaClient extends Base implements Connection
         $this->inspect("error", $cli, true);
     }
 
-    public function setClientCb(callable $cb) {
+    public function setClientCb(callable $cb)
+    {
         $this->clientCb = $cb;
     }
+
     public function heartbeat()
     {
         Timer::after($this->config['heartbeat-time'], [$this, 'heartbeating'], $this->getHeartbeatingJobId());
@@ -152,5 +160,14 @@ class NovaClient extends Base implements Connection
         }
 
         sys_echo("nova client $desc [" . implode(", ", $buffer) . "]");
+    }
+
+    /**
+     * 0 ~ 100
+     * @return int|null
+     */
+    public function getWeight()
+    {
+        return isset($this->config["weight"]) ? $this->config["weight"] : 100;
     }
 }

@@ -10,6 +10,7 @@ use Zan\Framework\Network\Common\Exception\DnsLookupTimeoutException;
 use Zan\Framework\Network\Common\Exception\HostNotFoundException;
 use Zan\Framework\Network\Server\Timer\Timer;
 use Zan\Framework\Network\Common\Exception\HttpClientTimeoutException;
+use Zan\Framework\Network\Tcp\RpcContext;
 use Zan\Framework\Sdk\Trace\Constant;
 use Zan\Framework\Sdk\Trace\DebuggerTrace;
 use Zan\Framework\Sdk\Trace\Trace;
@@ -40,6 +41,9 @@ class HttpClient implements Async
     private $body;
 
     private $callback;
+
+    /** @var RpcContext */
+    private $rpcContext;
 
     /** @var Trace */
     private $trace;
@@ -182,6 +186,7 @@ class HttpClient implements Async
         if ($ctx) {
             $this->trace = $ctx->get("trace");
             $this->debuggerTrace = $ctx->get('debugger_trace');
+            $this->rpcContext = $ctx->get("rpc-context");
         }
 
         if ($this->useHttpProxy) {
@@ -217,10 +222,8 @@ class HttpClient implements Async
         } else {
             $this->client = new \swoole_http_client($ip, $port, $this->ssl);
         }
+
         $this->buildHeader();
-        if (null !== $this->timeout) {
-            Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
-        }
 
         if ($this->trace) {
             $this->traceHandle = $this->trace->transactionBegin(Constant::HTTP_CALL, $this->host . $this->uri);
@@ -234,6 +237,10 @@ class HttpClient implements Async
                 'header' => $this->header,
                 'use_http_proxy' => $this->useHttpProxy,
             ]);
+        }
+
+        if (null !== $this->timeout) {
+            Timer::after($this->timeout, [$this, 'checkTimeout'], spl_object_hash($this));
         }
 
         if('GET' === $this->method){
@@ -273,6 +280,15 @@ class HttpClient implements Async
 
         if ($this->debuggerTrace instanceof DebuggerTrace) {
             $this->header[DebuggerTrace::KEY] = $this->debuggerTrace->getKey();
+        }
+
+        if ($this->rpcContext instanceof RpcContext) {
+            $pairs = $this->rpcContext->get();
+            foreach ($pairs as $key => $value) {
+                if (is_scalar($value)) {
+                    $this->header[$key] = strval($value);
+                }
+            }
         }
 
         $this->client->setHeaders($this->header);

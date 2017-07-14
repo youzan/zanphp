@@ -9,6 +9,7 @@ use Zan\Framework\Utilities\Types\Arr;
 
 class Log
 {
+
     private static $instances = [];
 
     /**
@@ -133,6 +134,9 @@ class Log
                 break;
             case 'blackhole':
                 $logger = new BlackholeLogger($config);
+                break;
+            case 'skynet':
+                $logger = new SkynetLogger($config);
                 break;
             default:
                 throw new InvalidArgumentException('Cannot support this pattern');

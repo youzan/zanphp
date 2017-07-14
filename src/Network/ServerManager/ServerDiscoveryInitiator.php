@@ -4,10 +4,12 @@ namespace Zan\Framework\Network\ServerManager;
 use Kdt\Iron\Nova\Foundation\TService;
 use Kdt\Iron\Nova\Nova;
 use Zan\Framework\Foundation\Core\Path;
+use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\ServerManager\Exception\ServerConfigException;
 use Zan\Framework\Network\Connection\NovaClientConnectionManager;
+use ZanPHP\Contracts\ServiceChain\ServiceChainer;
 
 class ServerDiscoveryInitiator
 {
@@ -51,6 +53,11 @@ class ServerDiscoveryInitiator
                 $serverDiscovery = new ServerDiscovery($config, $appName, $appConf["protocol"], $appConf["namespace"]);
                 $serverDiscovery->workByStore();
             }
+        }
+
+        // make & initialize discovering serviceChain
+        if (RunMode::get() !== "online") {
+            make(ServiceChainer::class);
         }
     }
 

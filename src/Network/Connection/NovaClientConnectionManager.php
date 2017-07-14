@@ -2,7 +2,6 @@
 namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Contract\Network\Connection;
-use Zan\Framework\Network\Connection\LoadBalancingStrategy\Polling;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientPoolException;
@@ -32,7 +31,7 @@ class NovaClientConnectionManager
         $this->poolMap = [];
         $this->novaConfig = Config::get("connection.nova", []);
         if (!isset($this->novaConfig["load_balancing_strategy"])) {
-            $this->novaConfig["load_balancing_strategy"] = Polling::NAME;
+            $this->novaConfig["load_balancing_strategy"] = "roundRobin";
         }
     }
 
@@ -43,7 +42,8 @@ class NovaClientConnectionManager
         if (isset($this->serviceMap[$serviceKey])) {
             $serviceMap = $this->serviceMap[$serviceKey];
             if (in_array($method, $serviceMap["methods"], true)) {
-                $pool = $this->getPool($serviceMap["app_name"]);
+                $appName = $serviceMap["app_name"];
+                $pool = $this->getPool($appName);
                 yield $pool->get();
             } else {
                 throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");

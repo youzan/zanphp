@@ -6,6 +6,7 @@ use RuntimeException;
 use Zan\Framework\Foundation\Booting\CheckIfBootable;
 use Zan\Framework\Foundation\Booting\InitializeCliInput;
 use Zan\Framework\Foundation\Booting\InitializeCache;
+use Zan\Framework\Foundation\Booting\InitializeContainer;
 use Zan\Framework\Foundation\Booting\InitializeKv;
 use Zan\Framework\Foundation\Booting\InitializeSyslog;
 use Zan\Framework\Foundation\Booting\LoadFiles;
@@ -97,6 +98,7 @@ class Application
             InitializePathes::class,
             LoadConfiguration::class,
             InitializeSharedObjects::class,
+            InitializeContainer::class,
             RegisterClassAliases::class,
             LoadFiles::class,
             InitializeCache::class,

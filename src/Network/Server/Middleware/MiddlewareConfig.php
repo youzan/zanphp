@@ -105,8 +105,10 @@ class MiddlewareConfig
     public function addBaseFilters($filters)
     {
         $baseFilters = [
+            RpcContextFilter::class,
             TraceFilter::class,
             DebuggerTraceFilter::class,
+            ServiceChainFilter::class,
         ];
         return array_merge($baseFilters, $this->zanFilters, $filters);
     }

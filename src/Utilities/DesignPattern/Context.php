@@ -3,6 +3,7 @@
 namespace Zan\Framework\Utilities\DesignPattern;
 
 use Zan\Framework\Foundation\Coroutine\Event;
+use Zan\Framework\Utilities\Types\Arr;
 
 class Context
 {
@@ -37,6 +38,21 @@ class Context
     public function set($key, $value)
     {
         $this->map[$key] = $value;
+    }
+
+    public function merge($ctx, $override = true)
+    {
+        if ($ctx instanceof static) {
+            $ctx = $ctx->map;
+        }
+
+        if (is_array($ctx) && $ctx) {
+            if ($override) {
+                $this->map = Arr::merge($this->map, $ctx);
+            } else {
+                $this->map = Arr::merge($ctx, $this->map);
+            }
+        }
     }
 
     public function clear()
