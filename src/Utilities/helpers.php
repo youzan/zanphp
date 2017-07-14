@@ -104,6 +104,10 @@ $trace
 
 
 EOF;
+
+            if ($previous = $t->getPrevious()) {
+                echo_exception($previous);
+            }
         }
     }
 }

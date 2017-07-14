@@ -73,9 +73,14 @@ class RequestHandler
             $e = t2ex($t);
         } catch (\Exception $e) {
 
+        } finally {
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
         }
 
         if (Debug::get()) {
+            /** @noinspection PhpUndefinedVariableInspection */
             echo_exception($e);
         }
         if ($this->middleWareManager) {
