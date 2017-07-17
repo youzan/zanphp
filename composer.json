@@ -1,54 +1,52 @@
 {
     "name": "zanphp/zan",
-    "repositories": {
-        "0": {
+    "repositories": [
+        {
             "type": "git",
             "url": "https://git.oschina.net/zan-group/nova.git"
         },
-        "1": {
+        {
             "type": "git",
             "url": "https://git.oschina.net/zan-group/nova-generic.git"
         },
-        "2": {
+        {
             "type": "git",
             "url": "https://git.oschina.net/zan-group/nova-generic.git"
         },
-        "3": {
+        {
             "type": "git",
             "url": "https://github.com/zanphp/cache.git"
         },
-	"4": {
+	{
             "type": "git",
             "url": "https://github.com/zanphp/container.git"
         },
-	"5": {
+	{
             "type": "git",
             "url": "https://github.com/zanphp/contracts.git"
         },
-	"6": {
+	{
             "type": "git",
             "url": "https://github.com/zanphp/etcd-client.git"
         },
-	"7": {
+	{
             "type": "git",
             "url": "https://github.com/zanphp/loadbalance.git"
         },
-	"8": {
+	{
             "type": "git",
             "url": "https://github.com/zanphp/service-chain.git"
         },
-        "packagist": {
+        {
             "type": "composer",
             "url": "https://packagist.phpcomposer.com"
         }
-    },
+    ],
     "require": {
         "packaged/thrift": "0.9.2.1",
         "symfony/console": "3.1",
         "psr/log": "1.0.0",
         "nova-service/generic": "dev-master",
-
-
         "zanphp/cache": "dev-master",
         "zanphp/container": "dev-master",
         "zanphp/contracts": "dev-master",
