@@ -32,11 +32,6 @@ class Trace
             return;
         }
 
-        $zanTraceConfig = Config::get('monitor.zan_trace', []);
-        if (!empty($zanTraceConfig)) {
-            $config = Arr::merge($zanTraceConfig, $config);
-        }
-
         if (isset($config['trace_class'])) {
             $traceClass = $config['trace_class'];
             if (is_subclass_of($traceClass, Tracer::class)) {
