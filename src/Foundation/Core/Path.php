@@ -62,6 +62,7 @@ class Path
         self::setRootPath($rootPath);
         self::setOtherPathes();
         self::setInConfig();
+        self::setInEnv();
     }
 
     public static function getRootPath()
@@ -196,5 +197,25 @@ class Path
         Config::set(self::CRON_PATH_CONFIG_KEY, self::$cronConfigPath);
         Config::set(self::MQ_WORKER_PATH_CONFIG_KEY, self::$mqWorkerConfigPath);
         Config::set(self::MODULE_CONFIG_PATH_CONFIG_KEY, self::$moduleConfigPath);
+    }
+
+    private static function setInEnv()
+    {
+        putenv("path.root=".self::$rootPath);
+        putenv("path.config=".self::$configPath);
+        putenv("path.zan=".self::$zanConfigPath);
+        putenv("path.sql=".self::$sqlPath);
+        putenv("path.log=".self::$logPath);
+        putenv("path.cache=".self::$cachePath);
+        putenv("path.kv=".self::$kvPath);
+        putenv("path.model=".self::$modelPath);
+        putenv("path.table=".self::$tablePath);
+        putenv("path.routing=".self::$routingPath);
+        putenv("path.middleware=".self::$middlewarePath);
+        putenv("path.iron=".self::$ironConfigPath);
+        putenv("path.app=".self::$appConfigPath);
+        putenv("path.cron=".self::$cronConfigPath);
+        putenv("path.mqworker=".self::$mqWorkerConfigPath);
+        putenv("path.module=".self::$moduleConfigPath);
     }
 }
