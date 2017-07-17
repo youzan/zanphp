@@ -106,6 +106,7 @@ $trace
 EOF;
 
             if ($previous = $t->getPrevious()) {
+                echo "caused by:\n";
                 echo_exception($previous);
             }
         }
