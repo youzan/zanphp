@@ -1,6 +1,7 @@
 <?php
 namespace Zan\Framework\Network\WebSocket;
 
+use Zan\Framework\Foundation\Coroutine\Task;
 use Zan\Framework\Network\Http\Request\Request;
 use Zan\Framework\Network\Http\Server as HttpServer;
 use Zan\Framework\Network\Http\ServerStart\InitializeProxyIps;
@@ -48,21 +49,51 @@ class Server extends HttpServer
         $req = Request::createFromSwooleHttpRequest($request);
         $clientIp = $req->getClientIp();
         $this->clientInfo[$request->fd] = $clientIp;
-        if ($this->openCallback)
-            call_user_func($this->openCallback, $req, $request->fd);
+        if ($this->openCallback) {
+            $gen = function () use ($req, $request) {
+                $cb = $this->openCallback;
+                try {
+                    yield call_user_func($cb, $req, $request->fd);
+                } catch (\Throwable $t) {
+                    echo_exception($t);
+                } catch (\Exception $e) {
+                    echo_exception($e);
+                }
+            };
+
+            Task::execute($gen());
+        }
     }
 
     public function OnMessage($ws, $frame)
     {
-        $clientIp = $this->clientInfo[$frame->fd];
-        $frame->clientIp = $clientIp;
-        (new RequestHandler())->handle($ws, $frame);
+        try {
+            $clientIp = $this->clientInfo[$frame->fd];
+            $frame->clientIp = $clientIp;
+            (new RequestHandler())->handle($ws, $frame);
+        } catch (\Throwable $t) {
+            echo_exception($t);
+        } catch (\Exception $e) {
+            echo_exception($e);
+        }
     }
 
     public function OnClose($ws, $fd)
     {
-        if ($this->closeCallback)
-            call_user_func($this->closeCallback, $fd);
+        if ($this->closeCallback) {
+            $gen = function () use ($fd) {
+                $cb = $this->closeCallback;
+                try {
+                    yield call_user_func($cb, $fd);
+                } catch (\Throwable $t) {
+                    echo_exception($t);
+                } catch (\Exception $e) {
+                    echo_exception($e);
+                }
+            };
+
+            Task::execute($gen());
+        }
         unset($this->clientInfo[$fd]);
     }
 
