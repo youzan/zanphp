@@ -35,6 +35,4 @@ class Env
         self::$data[$key] = $value;
     }
 
-
-
 }
