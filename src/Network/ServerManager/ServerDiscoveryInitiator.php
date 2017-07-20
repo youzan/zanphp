@@ -54,11 +54,6 @@ class ServerDiscoveryInitiator
                 $serverDiscovery->workByStore();
             }
         }
-
-        // make & initialize discovering serviceChain
-        if (RunMode::get() !== "online") {
-            make(ServiceChainer::class);
-        }
     }
 
     public function unlockDiscovery($workerId)
