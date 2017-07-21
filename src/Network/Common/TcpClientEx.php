@@ -98,15 +98,42 @@ class TcpClientEx implements Async
     {
         if (is_int($r)) {
             $this->connEx->close();
-            $ex = new TcpSendTimeoutException("TCP client send timeout, type=$r");
-            call_user_func($this->callback, $r, $ex);
+            $desc = $this->parseErrorRecv($r);
+            $ex = new TcpSendTimeoutException("TCP client send timeout [type=$r, desc=$desc]");
+            if ($this->callback) {
+                call_user_func($this->callback, $r, $ex);
+                $this->callback = null;
+            }
         } else if ($r === false || $r === "") {
             $this->connEx->close();
-            $ex = new TcpSendErrorException(socket_strerror($this->sock->errCode), $this->sock->errCode);
-            call_user_func($this->callback, $r, $ex);
+            $desc = $this->parseErrorRecv($r);
+            $ex = new TcpSendErrorException($desc, $this->sock->errCode);
+            if ($this->callback) {
+                call_user_func($this->callback, $r, $ex);
+                $this->callback = null;
+            }
         } else {
             $this->connEx->release();
-            call_user_func($this->callback, $r);
+            if ($this->callback) {
+                call_user_func($this->callback, $r);
+                $this->callback = null;
+            }
+        }
+    }
+
+    private function parseErrorRecv($r)
+    {
+        if (is_int($r)) {
+            $desc = [
+                1 => "connect timeout",
+                2 => "recv timeout",
+            ];
+            return isset($desc[$r]) ? $desc[$r] : "invalid timeout";
+        } else if ($r === false || $r === "") {
+            $errMsg = socket_strerror($this->sock->errCode);
+            return "tcp send error: $errMsg";
+        } else {
+            return $r;
         }
     }
 }

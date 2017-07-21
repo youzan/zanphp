@@ -27,7 +27,7 @@ class RunMode
     public static function set($runMode)
     {
         self::$runMode = $runMode;
-        putenv("runMode = $runMode");
+        putenv("runMode=$runMode");
     }
 
     public static function detect()
