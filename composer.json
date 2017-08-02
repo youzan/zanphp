@@ -3,7 +3,7 @@
     "repositories": {
         "0": {
             "type": "git",
-            "url": "https://git.oschina.net/zan-group/nova.git"
+            "url": "https://github.com/sukui/nova.git"
         },
         "1": {
             "type": "git",
@@ -47,14 +47,12 @@
         "symfony/console": "3.1",
         "psr/log": "1.0.0",
         "nova-service/generic": "dev-master",
-
-
         "zanphp/cache": "dev-master",
         "zanphp/container": "dev-master",
         "zanphp/contracts": "dev-master",
         "zanphp/etcd-client": "dev-master",
         "zanphp/loadbalance": "dev-master",
-        "zanphp/nova": "dev-master",
+        "zanphp/nova": "dev-laogui",
         "zanphp/service-chain": "dev-master"
 
     },
