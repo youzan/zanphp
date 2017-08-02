@@ -14,6 +14,7 @@ class Dispatcher
     {
         $controllerName = $context->get('controller_name');
         $action = $context->get('action_name');
+        $args   = $context->get('action_args');
 
         $controller = $this->getControllerClass($controllerName);
         if(!class_exists($controller)) {
@@ -24,7 +25,7 @@ class Dispatcher
         if(!is_callable([$controller, $action])) {
             throw new PageNotFoundException("action:{$action} is not callable in controller:" . get_class($controller));
         }
-        yield $controller->$action();
+        yield call_user_func_array([$controller,$action],$args);
     }
 
     private function getControllerClass($controllerName)

@@ -52,7 +52,6 @@ class Router
             } else {
                 sys_error("$routerClass should be an implementation of IRouter");
             }
-
         }
         $this->routerRule = new ZanRouter();
     }
@@ -97,10 +96,11 @@ class Router
     private function parseRoute($request)
     {
         $result = $this->routerRule->dispatch($request);
-        if (!is_array($result) || count($result) != 3) {
+        if (!is_array($result) || count($result) != 4) {
             throw new \Exception("Route dispatch failed");
         }
-        list($module, $controller, $action) = $result;
+        list($module, $controller, $action, $args) = $result;
+        $route['action_args'] = $args;
         $route['action_name'] = $action;
         $route['controller_name'] = $module.$this->separator.$controller;
         return $route;
