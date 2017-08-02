@@ -105,6 +105,7 @@ class RequestHandler
             return false;
         $this->context->set('controller_name', $route['controller_name']);
         $this->context->set('action_name', $route['action_name']);
+        $this->context->set('action_args', $route['action_args']);
 
         $cookie = new Cookie($request, $swooleResponse);
         $this->context->set('cookie', $cookie);

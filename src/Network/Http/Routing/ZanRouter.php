@@ -12,6 +12,6 @@ class ZanRouter implements IRouter
         $actionName = array_pop($parts);
         $controllerName = array_pop($parts);
         $moduleName = join($separator, $parts);
-        return [$moduleName, $controllerName, $actionName];
+        return [$moduleName, $controllerName, $actionName,[]];
     }
 }
