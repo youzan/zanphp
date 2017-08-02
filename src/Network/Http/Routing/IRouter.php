@@ -6,7 +6,7 @@ use Zan\Framework\Network\Http\Request\Request;
 interface IRouter
 {
     /*
-     * @return array ['module', 'controller', 'action']
+     * @return array ['module', 'controller', 'action', 'params']
      */
     public function dispatch(Request $request);
 }
