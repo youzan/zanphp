@@ -31,10 +31,8 @@ class CheckIfBootable implements Bootable
             }
         }
 
-        if (getenv('KDT_RUN_MODE') || get_cfg_var('kdt.RUN_MODE')) {
-            $this->phpVerCheck();
-            $this->zanVerCheck();
-        }
+        $this->phpVerCheck();
+        $this->zanVerCheck();
     }
 
     private function zanVerCheck()

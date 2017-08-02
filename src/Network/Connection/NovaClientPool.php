@@ -1,6 +1,8 @@
 <?php
 namespace Zan\Framework\Network\Connection;
 
+use Zan\Framework\Foundation\Core\Condition;
+use Zan\Framework\Foundation\Exception\ConditionException;
 use Zan\Framework\Network\Connection\Factory\NovaClient as NovaClientFactory;
 use Zan\Framework\Contract\Network\Connection;
 use Zan\Framework\Network\Server\Timer\Timer;
@@ -83,6 +85,8 @@ class NovaClientPool
         $key = spl_object_hash($connection);
         $this->connections[$key] = $connection;
         unset($this->waitingConnections[$key]);
+
+        Condition::wakeUp(spl_object_hash($this));
     }
 
     private function initLoadBalancingStrategy($strategy)
@@ -125,16 +129,26 @@ class NovaClientPool
 
     public function get()
     {
+        while (empty($this->connections)) {
+            try {
+                yield new Condition(spl_object_hash($this), 1000);
+            } catch (ConditionException $e) {
+                sys_error("no nova connection found [app=$this->appName]");
+                yield null;
+                return;
+            }
+        }
+
         $connections = $this->connections;
 
         try {
             $serviceChain = (yield getContext("service-chain"));
             if ($serviceChain instanceof ServiceChainer) {
                 $value = (yield getContext("service-chain-value"));
-                if ($value === null) {
-                    $connections = (yield $this->getConnectionsWithoutServiceChain($serviceChain));
+                if (is_array($value) && isset($value["name"]) && is_scalar($value["name"])) {
+                    $connections = (yield $this->getConnectionsWithServiceChain($serviceChain, strval($value["name"])));
                 } else {
-                    $connections = (yield $this->getConnectionsWithServiceChain($serviceChain, $value));
+                    $connections = (yield $this->getConnectionsWithoutServiceChain($serviceChain));
                 }
             }
         } catch (\Throwable $t) {

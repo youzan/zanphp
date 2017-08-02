@@ -2,6 +2,8 @@
 namespace Zan\Framework\Network\Connection;
 
 use Zan\Framework\Contract\Network\Connection;
+use Zan\Framework\Foundation\Core\Condition;
+use Zan\Framework\Foundation\Exception\ConditionException;
 use Zan\Framework\Utilities\DesignPattern\Singleton;
 use Zan\Framework\Foundation\Core\Config;
 use Zan\Framework\Network\Connection\Exception\CanNotFindNovaClientPoolException;
@@ -35,26 +37,24 @@ class NovaClientConnectionManager
         }
     }
 
-    public function get($protocol, $domain, $service, $method, $retry = 5)
+    public function get($protocol, $domain, $service, $method)
     {
         $serviceKey = $this->serviceKey($protocol, $domain, $service);
-
-        if (isset($this->serviceMap[$serviceKey])) {
-            $serviceMap = $this->serviceMap[$serviceKey];
-            if (in_array($method, $serviceMap["methods"], true)) {
-                $appName = $serviceMap["app_name"];
-                $pool = $this->getPool($appName);
-                yield $pool->get();
-            } else {
-                throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");
-            }
-        } else {
-            if ($retry > 0) {
-                yield taskSleep(200);
-                yield $this->get($protocol, $domain, $service, $method, --$retry);
-            } else {
+        while (!isset($this->serviceMap[$serviceKey])) {
+            try {
+                yield new Condition($serviceKey, 1000);
+            } catch (ConditionException $ex) {
                 throw new CanNotFindNovaClientPoolException("proto=$protocol, domain=$domain, service=$service, method=$method");
             }
+        }
+
+        $serviceMap = $this->serviceMap[$serviceKey];
+        if (in_array($method, $serviceMap["methods"], true)) {
+            $appName = $serviceMap["app_name"];
+            $pool = $this->getPool($appName);
+            yield $pool->get();
+        } else {
+            throw new CanNotFindNovaServiceNameMethodException("service=$service, method=$method");
         }
     }
 
@@ -81,6 +81,7 @@ class NovaClientConnectionManager
             foreach ($server["services"] as $service) {
                 $serviceKey = $this->serviceKey($protocol, $domain, $service["service"]);
                 $this->serviceMap[$serviceKey] = $service + $server;
+                Condition::wakeUp($serviceKey);
             }
 
             list($key, $novaConfig) = $this->makeNovaConfig($server);

@@ -2,20 +2,20 @@
 
 namespace Zan\Framework\Foundation\Booting;
 
-
-use Symfony\Component\Console\Input\ArgvInput;
 use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Debug;
 use Zan\Framework\Foundation\Core\RunMode;
 use Zan\Framework\Network\ServerManager\ServerRegisterInitiator;
+use ZanPHP\Console\Bootstrap;
 
 class InitializeCliInput implements Bootable
 {
     public function bootstrap(Application $app)
     {
-        $input = new ArgvInput();
-        if ($input->hasParameterOption('--help')) {
+        $boot = new Bootstrap();
+
+        if ($boot->hasParameterOption('--help')) {
             $help = <<<EOF
 Options:
 --debug [true/false]              enable/disable debug mode
@@ -25,19 +25,20 @@ Options:
 EOF;
             exit($help);
         }
-        $debug = $input->getParameterOption('--debug');
+
+        $debug = $boot->getParameterOption('--debug');
         if ($debug === 'true') {
             Debug::enableDebug();
         } else if ($debug === 'false') {
             Debug::disableDebug();
         }
 
-        $env = $input->getParameterOption('--env');
+        $env = $boot->getParameterOption('--env');
         if (!empty($env)) {
             RunMode::set($env);
         }
 
-        $serviceRegister = $input->getParameterOption('--service-register');
+        $serviceRegister = $boot->getParameterOption('--service-register');
         if ($serviceRegister === 'true') {
             ServerRegisterInitiator::instance()->enableRegister();
         } else if ($serviceRegister === 'false') {

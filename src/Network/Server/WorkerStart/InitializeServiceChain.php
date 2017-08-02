@@ -14,6 +14,7 @@ class InitializeServiceChain
      */
     public function bootstrap($server, $workerId)
     {
+        // make & initialize discovering serviceChain
         if (RunMode::get() !== "online") {
             $container = Container::getInstance();
             if ($container->has(ServiceChainer::class)) {

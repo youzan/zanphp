@@ -14,6 +14,11 @@ class Env
         self::$data['ip'] = nova_get_ip();
         self::$data['pid'] = getmypid();
         self::$data['uid'] = getmyuid();
+
+        putenv("hostname=".self::$data['hostname']);
+        putenv("ip=".self::$data['ip']);
+        putenv("pid=".self::$data['pid']);
+        putenv("uid=".self::$data['uid']);
     }
 
     public static function get($key, $default=null)

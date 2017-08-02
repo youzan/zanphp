@@ -6,10 +6,10 @@ use Zan\Framework\Contract\Foundation\Bootable;
 use Zan\Framework\Foundation\Application;
 use Zan\Framework\Foundation\Core\Config;
 use ZanPHP\Container\Container;
+use ZanPHP\SPI\ServiceLoader;
 
 class InitializeContainer implements Bootable
 {
-
     /**
      * Bootstrap the given application.
      *
@@ -17,10 +17,14 @@ class InitializeContainer implements Bootable
      */
     public function bootstrap(Application $app)
     {
-        $binds = Config::get("zan_container", []);
         $container = Container::getInstance();
-        foreach ($binds as $abstract => $bindArgs) {
-            $container->bind($abstract, ...(array)$bindArgs);
+        $serviceLoader = ServiceLoader::getInstance();
+
+        $services = $serviceLoader->load();
+        foreach ($services as $interface => $serviceProviders) {
+            foreach ($serviceProviders as $serviceProvider) {
+                $container->bind($serviceProvider["id"], $serviceProvider["class"], $serviceProvider["shared"]);
+            }
         }
     }
 }
