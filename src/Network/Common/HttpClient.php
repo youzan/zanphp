@@ -287,6 +287,8 @@ class HttpClient implements Async
             foreach ($pairs as $key => $value) {
                 if (is_scalar($value)) {
                     $this->header[$key] = strval($value);
+                } else {
+                    $this->header[$key] = json_encode($value) ?: "";
                 }
             }
         }

@@ -12,7 +12,7 @@ use Zan\Framework\Foundation\Coroutine\Task;
 
 class ServerRegister
 {
-    const DEFAULT_ETD_TTL = 25;
+    const DEFAULT_ETD_TTL = 30;
     const DEFAULT_REGISTRY_TYPE = "etcd";
 
     private $enableRefresh = true;
@@ -185,8 +185,9 @@ class ServerRegister
     {
         $type = Config::get("registry.type", self::DEFAULT_REGISTRY_TYPE);
         if ($type === "etcd") {
-            $interval = (static::DEFAULT_ETD_TTL - 5) * 1000;
-            Timer::tick($interval, function() use($config) {
+            // !!! 刷新时间必须少于ttl的一半，应对worker重启的极端情况
+            $interval = (static::DEFAULT_ETD_TTL / 2 - 5) * 1000;
+            Timer::tick(intval($interval), function() use($config) {
                 if ($this->enableRefresh) {
                     $co = $this->registerToEtcdV2($config, true);
                     Task::execute($co);

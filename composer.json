@@ -17,25 +17,57 @@
             "type": "git",
             "url": "https://github.com/zanphp/cache.git"
         },
-	"4": {
+	    "4": {
             "type": "git",
             "url": "https://github.com/zanphp/container.git"
         },
-	"5": {
+	    "5": {
             "type": "git",
             "url": "https://github.com/zanphp/contracts.git"
         },
-	"6": {
+	    "6": {
             "type": "git",
             "url": "https://github.com/zanphp/etcd-client.git"
         },
-	"7": {
+	    "7": {
             "type": "git",
             "url": "https://github.com/zanphp/loadbalance.git"
         },
-	"8": {
+	    "8": {
             "type": "git",
             "url": "https://github.com/zanphp/service-chain.git"
+        },
+        "9": {
+            "type": "git",
+            "url": "https://github.com/zanphp/exception.git"
+        },
+        "10": {
+            "type": "git",
+            "url": "https://github.com/zanphp/coroutine.git"
+        },
+        "11": {
+            "type": "git",
+            "url": "https://github.com/zanphp/timer.git"
+        },
+        "12": {
+            "type": "git",
+            "url": "https://github.com/zanphp/spi.git"
+        },
+        "13": {
+            "type": "git",
+            "url": "https://github.com/zanphp/config.git"
+        },
+        "14": {
+            "type": "git",
+            "url": "https://github.com/zanphp/support.git"
+        },
+        "15": {
+            "type": "git",
+            "url": "https://github.com/zanphp/hawk.git"
+        },
+        "16": {
+            "type": "git",
+            "url": "https://github.com/zanphp/console.git"
         },
         "packagist": {
             "type": "composer",
@@ -44,17 +76,23 @@
     },
     "require": {
         "packaged/thrift": "0.9.2.1",
-        "symfony/console": "3.1",
         "psr/log": "1.0.0",
         "nova-service/generic": "dev-master",
         "zanphp/cache": "dev-master",
+        "zanphp/exception": "dev-master",
+        "zanphp/coroutine": "dev-master",
+        "zanphp/timer": "dev-master",
         "zanphp/container": "dev-master",
         "zanphp/contracts": "dev-master",
         "zanphp/etcd-client": "dev-master",
         "zanphp/loadbalance": "dev-master",
         "zanphp/nova": "dev-laogui",
-        "zanphp/service-chain": "dev-master"
-
+        "zanphp/service-chain": "dev-master",
+        "zanphp/spi": "dev-master",
+        "zanphp/config": "dev-master",
+        "zanphp/support": "dev-master",
+        "zanphp/hawk": "dev-master",
+        "zanphp/console": "dev-master"
     },
     "autoload": {
         "psr-4": {
@@ -63,8 +101,7 @@
         "classmap": [
 	],
         "files": [
-            "src/Foundation/Coroutine/Command/Task.php",
-            "src/Utilities/helpers.php"
+            "src/Foundation/Coroutine/Command/Task.php"
         ]
     },
     "autoload-dev": {
@@ -78,6 +115,11 @@
     "config": {
         "preferred-install": "dist",
         "secure-http": false
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

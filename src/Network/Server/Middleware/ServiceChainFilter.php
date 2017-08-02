@@ -34,18 +34,16 @@ class ServiceChainFilter implements RequestFilter
                 $chainValue = $serviceChain->getChainValue(ServiceChainer::TYPE_HTTP, $swooleRequest->header);
             }
 
-            if ($chainValue === null && getenv("ZAN_JOB_MODE")) {
+            if (empty($chainValue) && getenv("ZAN_JOB_MODE")) {
                 $chainValue = $serviceChain->getChainValue(ServiceChainer::TYPE_JOB);
             }
 
-            if ($chainValue !== null) {
-                $jsonValue = json_encode(["name" => $chainValue]);
-
+            if (!empty($chainValue)) {
                 $novaKey = $serviceChain->getChainKey(ServiceChainer::TYPE_TCP);
                 $httpKey = $serviceChain->getChainKey(ServiceChainer::TYPE_HTTP);
 
-                $rpcCtx->set($novaKey, $jsonValue);
-                $rpcCtx->set($httpKey, $jsonValue);
+                $rpcCtx->set($novaKey, $chainValue);
+                $rpcCtx->set($httpKey, $chainValue);
 
                 $context->set("service-chain", $serviceChain);
                 $context->set("service-chain-value", $chainValue);

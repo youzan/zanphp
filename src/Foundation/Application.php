@@ -8,6 +8,7 @@ use Zan\Framework\Foundation\Booting\InitializeCliInput;
 use Zan\Framework\Foundation\Booting\InitializeCache;
 use Zan\Framework\Foundation\Booting\InitializeContainer;
 use Zan\Framework\Foundation\Booting\InitializeKv;
+use Zan\Framework\Foundation\Booting\InitializeSPI;
 use Zan\Framework\Foundation\Booting\InitializeSyslog;
 use Zan\Framework\Foundation\Booting\LoadFiles;
 use Zan\Framework\Foundation\Container\Container;
@@ -20,6 +21,7 @@ use Zan\Framework\Foundation\Booting\LoadConfiguration;
 use Zan\Framework\Foundation\Booting\RegisterClassAliases;
 use Zan\Framework\Utilities\Types\Arr;
 use Zan\Framework\Network\Server\Factory as ServerFactory;
+use ZanPHP\Container\Container as ZanPHPContainer;
 
 class Application
 {
@@ -68,6 +70,24 @@ class Application
      */
     protected $server;
 
+    protected $bootstrapItems = [
+        CheckIfBootable::class,
+        InitializeSPI::class,
+        InitializeEnv::class,
+        InitializeCliInput::class,
+        InitializeRunMode::class,
+        InitializeDebug::class,
+        InitializePathes::class,
+        LoadConfiguration::class,
+        InitializeSharedObjects::class,
+        InitializeContainer::class,
+        RegisterClassAliases::class,
+        LoadFiles::class,
+        InitializeCache::class,
+        InitializeKv::class,
+        InitializeSyslog::class,
+    ];
+
     /**
      * Create a new Zan application instance.
      *
@@ -80,6 +100,8 @@ class Application
 
         static::setInstance($this);
 
+        ZanPHPContainer::getInstance()->instance("app", $this);
+
         $this->setBasePath($basePath);
 
         $this->bootstrap();
@@ -88,25 +110,7 @@ class Application
     protected function bootstrap()
     {
         $this->setContainer();
-
-        $bootstrapItems = [
-            CheckIfBootable::class,
-            InitializeEnv::class,
-            InitializeCliInput::class,
-            InitializeRunMode::class,
-            InitializeDebug::class,
-            InitializePathes::class,
-            LoadConfiguration::class,
-            InitializeSharedObjects::class,
-            InitializeContainer::class,
-            RegisterClassAliases::class,
-            LoadFiles::class,
-            InitializeCache::class,
-            InitializeKv::class,
-            InitializeSyslog::class,
-        ];
-
-        foreach ($bootstrapItems as $bootstrap) {
+        foreach ($this->bootstrapItems as $bootstrap) {
             $this->make($bootstrap)->bootstrap($this);
         }
     }
