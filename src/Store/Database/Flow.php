@@ -58,7 +58,7 @@ class Flow
                 swoole_async_write($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", -1);
             }
         }
-        if($sqlMap['database']){
+        if(isset($sqlMap['database'])){
             $database = $sqlMap['database'];
         }else{
             $database = Table::getInstance()->getDatabase($sqlMap['table']);
