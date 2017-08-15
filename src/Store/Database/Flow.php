@@ -58,8 +58,11 @@ class Flow
                 swoole_async_write($sqlLog['path'], date("Y-m-d H:i:s", time())."  ".$sqlMap['sql']."\n", -1);
             }
         }
-
-        $database = Table::getInstance()->getDatabase($sqlMap['table']);
+        if(isset($sqlMap['database'])){
+            $database = $sqlMap['database'];
+        }else{
+            $database = Table::getInstance()->getDatabase($sqlMap['table']);
+        }
         $connection = (yield $this->getConnection($database));
         $driver = $this->getDriver($connection);
         try {
