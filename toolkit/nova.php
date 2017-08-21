@@ -10,8 +10,21 @@ namespace ZanPHP\Toolkit;
  * 2017-01-25 V1
  * 2017-04-30 加入超时参数, 加入或优化 DNS查询超时, 连接超时, 数据收发超时
  * 2017-04-30 加入attach参数
+ * 2017-07-24 修复因包名类型大小写敏感导致调用java类加载失败,调用nova服务失败
  */
 
+// java 包名首字母小写, 类名首字母大写
+function service2javaClass($service) {
+    $pkg = explode(".", $service);
+    if (count($pkg) > 1) {
+        $class = ucfirst(end($pkg));
+        unset($pkg[count($pkg) - 1]);
+        $pkg = array_map(function($a) { return lcfirst($a); }, $pkg);
+        $pkg[] = $class;
+        return implode(".", $pkg);
+    }
+    return $service;
+}
 
 if (isset($argv[1]) && $argv[1] === "install") {
     $self = __FILE__;
@@ -45,12 +58,9 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit(1);
 }
 
-$attach = new \stdClass();
+$attach = [];
 if (isset($a['e'])) {
-    $attach = json_decode($a['e'], true);
-    if ($attach === null) {
-        $attach = new \stdClass();
-    }
+    $attach = json_decode($a['e'], true) ?: [];
     if (json_last_error() !== JSON_ERROR_NONE) {
         echo "\033[1;31m", "-e attachment参数有误: ", json_last_error_msg(), "\033[0m\n";
         exit(1);
@@ -66,6 +76,7 @@ if ($split === false) {
     exit(1);
 }
 $service = substr($service_method, 0, $split);
+$service = service2javaClass($service);
 $method = substr($service_method, $split + 1);
 
 
@@ -98,6 +109,10 @@ NovaClient::call($host, $port, $service, $method, $args, $attach, function(\swoo
 
 class NovaClient
 {
+    // 必须满足java 包名类名大小写
+    const GENERIC_SERVICE = "com.youzan.nova.framework.generic.service.GenericService";
+    const GENERIC_METHOD = "invoke";
+
     private static $ver_mask = 0xffff0000;
     private static $ver1 = 0x80010000;
 
@@ -130,6 +145,9 @@ class NovaClient
 
     public static function call($host, $port, $service, $method, array $args, array $attach, callable $callback)
     {
+        if (empty($attach)) {
+            $attach = new \stdClass();
+        }
         (new static($host, $port))->invoke($service, $method, $args, $attach, $callback);
     }
 
@@ -137,10 +155,10 @@ class NovaClient
      * @param string $service
      * @param string $method
      * @param array $args
-     * @param array $attach
+     * @param array|\stdClass $attach
      * @param callable $callback (receive, errorMsg)
      */
-    public function invoke($service, $method, array $args, array $attach, callable $callback)
+    public function invoke($service, $method, array $args, $attach, callable $callback)
     {
         $this->recvArgs = func_get_args();
         $this->callback = $callback;
@@ -260,6 +278,10 @@ class NovaClient
      */
     private static function unpackThrift($buf)
     {
+        if (getenv("NOVA_DEBUG")) {
+            echo "raw thrift buffer:\n";
+            echo $buf, "\n\n";
+        }
         $read = function($n) use(&$offset, $buf) {
             static $offset = 0;
             assert(strlen($buf) - $offset >= $n);
@@ -313,10 +335,10 @@ class NovaClient
      * @param string $service
      * @param string $method
      * @param array $args
-     * @param array $attach
+     * @param array|\stdClass $attach
      * @return string
      */
-    private function packNova($service, $method, array $args, array $attach)
+    private function packNova($service, $method, array $args, $attach)
     {
         $args = self::packArgs($args);
         $thriftBin = self::packThrift($service, $method, $args);
@@ -328,10 +350,8 @@ class NovaClient
 
         $return = "";
         $this->seq = nova_get_sequence();
-        $ok = nova_encode("Com.Youzan.Nova.Framework.Generic.Service.GenericService", "invoke",
-                $localIp, $localPort,
-                $this->seq,
-                $attach, $thriftBin, $return);
+
+        $ok = nova_encode(static::GENERIC_SERVICE, static::GENERIC_METHOD, $localIp, $localPort, $this->seq, $attach, $thriftBin, $return);
         assert($ok);
         return $return;
     }
@@ -348,6 +368,7 @@ class NovaClient
         // pack \Com\Youzan\Nova\Framework\Generic\Service\GenericService::invoke
         $payload = "";
 
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         $type = self::$t_call; // call
         $ver1 = self::$ver1 | $type;
 
@@ -356,12 +377,14 @@ class NovaClient
         $payload .= "invoke";
         $payload .= pack('N', $seq);
 
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // {{{ pack args
         $fieldId = 1;
         $fieldType = 12; // struct
         $payload .= pack('c', $fieldType); // byte
         $payload .= pack('n', $fieldId); //u16
 
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
         // {{{ pack struct \Com\Youzan\Nova\Framework\Generic\Service\GenericRequest
         $fieldId = 1;
         $fieldType = 11; // string
@@ -386,9 +409,11 @@ class NovaClient
 
         $payload .= pack('c', 0); // stop
         // pack struct end }}}
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
         $payload .= pack('c', 0); // stop
         // pack arg end }}}
+        // -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
         return $payload;
     }
